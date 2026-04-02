@@ -8,6 +8,7 @@ import valuationHandler from './api/valuation.ts';
 import sendConfirmationHandler from './api/send-confirmation.ts';
 import stripeWebhookHandler from './api/stripe-webhook.ts';
 import subscribeHandler from './api/subscribe.ts';
+import createCheckoutSessionHandler from './api/create-checkout-session.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,12 +24,14 @@ async function startServer() {
   app.use('/api/valuation', express.json());
   app.use('/api/send-confirmation', express.json());
   app.use('/api/subscribe', express.json());
+  app.use('/api/create-checkout-session', express.json());
 
   // Map API routes
   app.all('/api/valuation', (req, res) => valuationHandler(req as any, res as any));
   app.all('/api/send-confirmation', (req, res) => sendConfirmationHandler(req as any, res as any));
   app.all('/api/stripe-webhook', (req, res) => stripeWebhookHandler(req as any, res as any));
   app.all('/api/subscribe', (req, res) => subscribeHandler(req as any, res as any));
+  app.all('/api/create-checkout-session', (req, res) => createCheckoutSessionHandler(req as any, res as any));
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {

@@ -13,22 +13,28 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, type, auct
   const { plan } = useUser();
   if (!isOpen) return null;
 
-  const getStripeUrl = (targetType: 'analysis' | 'cargas') => {
-    const currentUrl = new URL(window.location.href);
-    currentUrl.searchParams.set('analysis', 'unlocked');
-    
-    if (targetType === 'cargas') {
-      return `https://buy.stripe.com/test_cargas?client_reference_id=${auctionId}&redirect_url=${encodeURIComponent(currentUrl.toString())}`;
-    }
+  const [isLoading, setIsLoading] = React.useState<string | null>(null);
 
-    // Dynamic pricing for analysis based on plan
-    switch (plan) {
-      case 'pro':
-        return `https://buy.stripe.com/test_analysis_pro?client_reference_id=${auctionId}&redirect_url=${encodeURIComponent(currentUrl.toString())}`;
-      case 'basic':
-        return `https://buy.stripe.com/test_analysis_basic?client_reference_id=${auctionId}&redirect_url=${encodeURIComponent(currentUrl.toString())}`;
-      default:
-        return `https://buy.stripe.com/test_analysis_free?client_reference_id=${auctionId}&redirect_url=${encodeURIComponent(currentUrl.toString())}`;
+  const handleCheckout = async (checkoutType: 'cargas' | 'completo') => {
+    try {
+      setIsLoading(checkoutType);
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: checkoutType,
+          auctionId,
+          returnUrl: window.location.href
+        })
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error al crear checkout:', error);
+    } finally {
+      setIsLoading(null);
     }
   };
 
@@ -88,10 +94,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, type, auct
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Pago único</span>
                 </div>
                 <button 
-                  onClick={() => window.location.href = getStripeUrl('cargas')}
-                  className="w-full py-3 px-6 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition-all"
+                  onClick={() => handleCheckout('cargas')}
+                  disabled={isLoading === 'cargas'}
+                  className="w-full py-3 px-6 rounded-xl border-2 border-slate-900 text-slate-900 font-bold hover:bg-slate-50 transition-all disabled:opacity-50"
                 >
-                  Seleccionar
+                  {isLoading === 'cargas' ? 'Procesando...' : 'Seleccionar'}
                 </button>
               </div>
             </div>
@@ -133,10 +140,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, type, auct
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Pago único</span>
                 </div>
                 <button 
-                  onClick={() => window.location.href = getStripeUrl('analysis')}
-                  className="w-full py-4 px-6 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition-all shadow-lg shadow-brand-200 flex items-center justify-center gap-2"
+                  onClick={() => handleCheckout('completo')}
+                  disabled={isLoading === 'completo'}
+                  className="w-full py-4 px-6 rounded-xl bg-brand-600 text-white font-bold hover:bg-brand-700 transition-all shadow-lg shadow-brand-200 flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  Elegir Informe Completo <TrendingUp size={18} />
+                  {isLoading === 'completo' ? 'Procesando...' : 'Elegir Informe Completo'} <TrendingUp size={18} />
                 </button>
               </div>
             </div>
