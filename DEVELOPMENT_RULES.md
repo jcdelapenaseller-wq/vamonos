@@ -13,3 +13,18 @@ No se permite el uso de hooks en las siguientes situaciones:
 - **Dentro de bloques JSX**.
 
 Esta regla es fundamental para evitar el error "Rendered more hooks than during the previous render" y asegurar que el orden de ejecución de los hooks sea consistente en cada renderizado.
+
+## Regla de Proyecto: Hooks de Contexto
+
+Nunca desestructurar directamente hooks de contexto (como `useUser()`).
+
+### Ejemplo incorrecto:
+```javascript
+const { user } = useUser()
+```
+
+### Ejemplo correcto:
+```javascript
+const ctx = useUser()
+const user = ctx?.user
+```

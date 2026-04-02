@@ -92,7 +92,10 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     return () => { document.body.style.overflow = 'unset'; };
   }, [showHowToModal]);
 
-  const { user, plan: currentPlan, incrementAnalysisCount } = useUser();
+  const userContext = useUser();
+  const user = userContext?.user;
+  const currentPlan = userContext?.plan;
+  const incrementAnalysisCount = userContext?.incrementAnalysisCount;
   const navigate = useNavigate();
 
   // Redirect to dedicated page when analysis is done in integrated mode
