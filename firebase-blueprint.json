@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account and subscription details.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Firebase Auth UID." },
+        "email": { "type": "string", "format": "email" },
+        "name": { "type": "string" },
+        "plan": { "type": "string", "enum": ["free", "basic", "pro"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "analysisUsed": { "type": "integer", "description": "Number of analyses used in the current period." },
+        "lastAnalysisReset": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "name", "plan", "createdAt"]
+    },
+    "ViewHistory": {
+      "title": "Auction View History",
+      "description": "Record of an auction viewed by a user.",
+      "type": "object",
+      "properties": {
+        "auctionId": { "type": "string" },
+        "title": { "type": "string" },
+        "viewedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["auctionId", "title", "viewedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document."
+    },
+    "/users/{userId}/viewHistory/{auctionId}": {
+      "schema": "ViewHistory",
+      "description": "Individual auction view record."
+    }
+  }
+}
