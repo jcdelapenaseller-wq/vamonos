@@ -136,6 +136,7 @@ const AuctionPage: React.FC = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentType, setPaymentType] = useState<'analysis' | 'cargas'>('analysis');
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [postPaymentState, setPostPaymentState] = useState<{ active: boolean, type: string }>({ active: false, type: '' });
 
   useEffect(() => {
     try {
@@ -219,6 +220,7 @@ const AuctionPage: React.FC = () => {
       
       if (data.ok) {
         toast.success("Pago confirmado. Generando informe...");
+        setPostPaymentState({ active: true, type: type });
       } else {
         setAnalysisResult(data);
         setIsGenerating(false);
@@ -1517,6 +1519,27 @@ const AuctionPage: React.FC = () => {
 
   if (!auction) {
     return <Navigate to={ROUTES.HOME} replace />;
+  }
+
+  if (postPaymentState.active) {
+    return (
+      <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
+        <Header />
+        <main className="max-w-4xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
+          <React.Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div></div>}>
+            <LoadAnalysisBlock 
+              boeId={auction.boeId} 
+              boeUrl={auction.boeUrl}
+              isIntegrated={false}
+              initialStep="upload"
+              isPaid={true}
+              noMargin={true}
+            />
+          </React.Suspense>
+        </main>
+        <Footer />
+      </div>
+    );
   }
 
   return (
