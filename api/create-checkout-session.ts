@@ -8,11 +8,15 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    console.log('🔔 [CHECKOUT] Body recibido:', req.body);
     const { type, auctionId, returnUrl } = req.body;
 
     const price = type === 'cargas' 
       ? process.env.STRIPE_PRICE_CARGAS 
       : process.env.STRIPE_PRICE_COMPLETO;
+
+    console.log('🔔 [CHECKOUT] Price seleccionado:', price);
+    console.log('🔔 [CHECKOUT] STRIPE_SECRET_KEY existe:', !!process.env.STRIPE_SECRET_KEY);
 
     if (!price) {
       return res.status(500).json({ error: 'Price ID not configured' });
@@ -39,7 +43,7 @@ export default async function handler(req: any, res: any) {
 
     return res.status(200).json({ url: session.url });
   } catch (error: any) {
-    console.error('Error creating checkout session:', error);
+    console.error('❌ [CHECKOUT ERROR] Error catch completo:', error);
     return res.status(500).json({ error: error.message });
   }
 }
