@@ -295,7 +295,7 @@ const AuctionPage: React.FC = () => {
 
   useEffect(() => {
     if (auction?.appraisalValue) {
-      setPurchasePriceSlider(auction.appraisalValue * 0.7);
+      setPurchasePriceSlider((auction?.appraisalValue ?? 0) * 0.7);
     } else if (valuationResult?.marketValue) {
       setPurchasePriceSlider(valuationResult.marketValue * 0.7);
     }
@@ -362,8 +362,8 @@ const AuctionPage: React.FC = () => {
   }, [valuationResult]);
 
   const calculatePotencial = () => {
-    if (!valuationResult || !auction || !auction.appraisalValue) return 0;
-    return ((valuationResult.marketValue - auction.appraisalValue) / auction.appraisalValue) * 100;
+    if (!valuationResult || !auction || !auction?.appraisalValue) return 0;
+    return ((valuationResult.marketValue - (auction?.appraisalValue ?? 0)) / (auction?.appraisalValue ?? 0)) * 100;
   };
 
   const getPotencialData = (potencial: number) => {
@@ -672,42 +672,40 @@ const AuctionPage: React.FC = () => {
     }
   };
 
-  if (!auction) return <Navigate to={ROUTES.HOME} replace />;
+  const isFinished = auction ? (auction.status === 'closed' || isAuctionFinished(auction.auctionDate)) : false;
+  const isSuspended = auction?.status === 'suspended';
+  const isUpcoming = auction?.status === 'upcoming';
+  const isActive = auction ? (auction.status === 'active' || (!isFinished && !isSuspended && !isUpcoming)) : false;
 
-  const isFinished = auction.status === 'closed' || isAuctionFinished(auction.auctionDate);
-  const isSuspended = auction.status === 'suspended';
-  const isUpcoming = auction.status === 'upcoming';
-  const isActive = auction.status === 'active' || (!isFinished && !isSuspended && !isUpcoming);
-
-  const cityName = normalizeCity(auction) || 'España';
-  const provinceName = normalizeProvince(auction.province || cityName);
-  const propertyType = normalizePropertyType(auction.propertyType) || 'Propiedad';
-  const locationLabel = normalizeLocationLabel(auction);
+  const cityName = auction ? (normalizeCity(auction) || 'España') : 'España';
+  const provinceName = auction ? normalizeProvince(auction.province || cityName) : '';
+  const propertyType = auction ? (normalizePropertyType(auction.propertyType) || 'Propiedad') : 'Propiedad';
+  const locationLabel = auction ? normalizeLocationLabel(auction) : '';
 
   const opportunityRatio = useMemo(() => {
-    if (auction.appraisalValue && auction.claimedDebt !== undefined && auction.claimedDebt !== null) {
-      const ratio = 1 - (auction.claimedDebt / auction.appraisalValue);
+    if (auction?.appraisalValue && auction?.claimedDebt !== undefined && auction?.claimedDebt !== null) {
+      const ratio = 1 - (auction.claimedDebt / (auction?.appraisalValue ?? 0));
       if (auction.claimedDebt === 0 || ratio > 0.85) {
         return null;
       }
       return ratio;
     }
     return null;
-  }, [auction]);
+  }, [auction?.appraisalValue, auction?.claimedDebt]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     if (auction) {
-      setValorMercado(auction.appraisalValue || '');
-      setDeudas(auction.claimedDebt || '');
+      setValorMercado(auction?.appraisalValue || '');
+      setDeudas(auction?.claimedDebt || '');
       
-      const propertyType = normalizePropertyType(auction.propertyType);
+      const propertyType = normalizePropertyType(auction?.propertyType);
       const cityName = normalizeCity(auction) || 'España';
-      const discount = auction.appraisalValue && auction.claimedDebt 
-        ? Math.round((1 - (auction.claimedDebt / auction.appraisalValue)) * 100) 
+      const discount = auction?.appraisalValue && auction?.claimedDebt 
+        ? Math.round((1 - (auction.claimedDebt / (auction?.appraisalValue ?? 0))) * 100) 
         : 0;
       
-      const addressPart = formatAddress(auction.address);
+      const addressPart = formatAddress(auction?.address);
       const streetPart = addressPart ? ` (${addressPart})` : '';
       
       let discountPart = '';
@@ -740,11 +738,11 @@ const AuctionPage: React.FC = () => {
       // Meta Description - Dynamic by Status
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
-        const isFinishedStatus = auction.status === 'closed' || isAuctionFinished(auction.auctionDate);
-        const isSuspendedStatus = auction.status === 'suspended';
+        const isFinishedStatus = auction?.status === 'closed' || isAuctionFinished(auction?.auctionDate);
+        const isSuspendedStatus = auction?.status === 'suspended';
         
         let desc = '';
-        const appraisalStr = auction.appraisalValue ? `${auction.appraisalValue.toLocaleString('es-ES')}€` : 'consultar';
+        const appraisalStr = auction?.appraisalValue ? `${(auction?.appraisalValue ?? 0).toLocaleString('es-ES')}€` : 'consultar';
 
         if (isFinishedStatus) {
           desc = `Subasta BOE finalizada en ${cityName}. ${propertyType} adjudicado. Consulta cargas, riesgos y resultado de esta subasta judicial.`;
@@ -769,8 +767,8 @@ const AuctionPage: React.FC = () => {
 
       // Social SEO - Open Graph
       const ogTitle = `${propertyType} en subasta en ${cityName} | Análisis y cargas`;
-      const ogDesc = `Análisis técnico de subasta en ${cityName}. Tasación ${auction.appraisalValue?.toLocaleString('es-ES')}€. Deuda ${auction.claimedDebt?.toLocaleString('es-ES')}€. Riesgos y estrategia.`;
-      const ogImage = auction.imageUrl || 'https://activosoffmarket.es/og-image-subastas.jpg';
+      const ogDesc = `Análisis técnico de subasta en ${cityName}. Tasación ${auction?.appraisalValue?.toLocaleString('es-ES')}€. Deuda ${auction?.claimedDebt?.toLocaleString('es-ES')}€. Riesgos y estrategia.`;
+      const ogImage = auction?.imageUrl || 'https://activosoffmarket.es/og-image-subastas.jpg';
       const ogUrl = `https://activosoffmarket.es/subasta/${cleanSlug}`;
 
       const setMetaTag = (property: string, content: string, attr: 'property' | 'name' = 'property') => {
@@ -801,20 +799,20 @@ const AuctionPage: React.FC = () => {
     if (!auction) return null;
 
     let discount = 0;
-    if (auction.appraisalValue && auction.claimedDebt !== undefined && auction.claimedDebt !== null) {
-      discount = Math.round((1 - (auction.claimedDebt / auction.appraisalValue)) * 100);
+    if (auction?.appraisalValue && auction?.claimedDebt !== undefined && auction?.claimedDebt !== null) {
+      discount = Math.round((1 - (auction.claimedDebt / (auction?.appraisalValue ?? 0))) * 100);
       if (auction.claimedDebt === 0 || discount > 85) {
         discount = 0;
       }
     }
-    const isJudicial = auction.boeId?.startsWith('SUB-JA');
+    const isJudicial = auction?.boeId?.startsWith('SUB-JA');
     
     // Interpretation Logic
     let interpretation = "";
-    const debtToAppraisalRatio = auction.appraisalValue && auction.claimedDebt ? (auction.claimedDebt / auction.appraisalValue) * 100 : 0;
-    const currentDiscount = auction.appraisalValue && auction.claimedDebt ? Math.round((1 - (auction.claimedDebt / auction.appraisalValue)) * 100) : 0;
+    const debtToAppraisalRatio = auction?.appraisalValue && auction?.claimedDebt ? (auction.claimedDebt / (auction?.appraisalValue ?? 0)) * 100 : 0;
+    const currentDiscount = auction?.appraisalValue && auction?.claimedDebt ? Math.round((1 - (auction.claimedDebt / (auction?.appraisalValue ?? 0))) * 100) : 0;
     
-    if (auction.appraisalValue && auction.claimedDebt) {
+    if (auction?.appraisalValue && auction?.claimedDebt) {
       if (currentDiscount > 50) {
         interpretation = `Este expediente destaca por un margen excepcional del ${currentDiscount}%, lo que lo posiciona como una oportunidad de alto impacto. La carga reclamada representa solo el ${debtToAppraisalRatio.toFixed(1)}% de la tasación oficial, generando un colchón de seguridad extraordinario para absorber cualquier contingencia procesal o de posesión.`;
       } else if (currentDiscount > 25) {
@@ -850,14 +848,14 @@ const AuctionPage: React.FC = () => {
       marketContext = `Detectamos un volumen bajo de subastas en ${cityName} (${auctionsInCity} activas), lo que convierte a este activo en una pieza de interés por su escasez en el canal de adjudicaciones públicas de la zona.`;
     }
 
-    if (auction.appraisalValue) {
-      marketContext += ` La tasación de ${auction.appraisalValue.toLocaleString()}€ se sitúa en rangos de mercado para ${propertyType.toLowerCase()}, validando la base de cálculo para el estudio de rentabilidad.`;
+    if (auction?.appraisalValue) {
+      marketContext += ` La tasación de ${(auction?.appraisalValue ?? 0).toLocaleString()}€ se sitúa en rangos de mercado para ${propertyType.toLowerCase()}, validando la base de cálculo para el estudio de rentabilidad.`;
     }
 
     // Procedural Context Logic (Rule-based)
     let proceduralContext = "";
     const typeLabel = propertyType.toLowerCase();
-    const isAEAT = auction.boeId?.startsWith('SUB-AT');
+    const isAEAT = auction?.boeId?.startsWith('SUB-AT');
 
     if (isJudicial) {
       proceduralContext = `Este procedimiento judicial en ${cityName} se rige por la LEC, garantizando un marco jurídico estable. El éxito depende de la correcta interpretación de la certificación de cargas y la gestión del decreto de adjudicación.`;
@@ -868,7 +866,7 @@ const AuctionPage: React.FC = () => {
     }
 
     // Appraisal warning logic integrated
-    if (!auction.appraisalValue) {
+    if (!auction?.appraisalValue) {
       proceduralContext += ` Dada la falta de tasación oficial en el anuncio de ${cityName}, se aconseja realizar una investigación de campo para evitar el riesgo de sobrepuja en este ${typeLabel}.`;
     }
 
@@ -881,7 +879,7 @@ const AuctionPage: React.FC = () => {
     };
 
     // Summary Labels for the Dark Block
-    const str = (auction.boeId || '') + cityName + propertyType + (auction.claimedDebt || 0);
+    const str = (auction?.boeId || '') + cityName + propertyType + (auction?.claimedDebt || 0);
     const seed = str.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
     
     // 1. Margen Estimado
@@ -901,8 +899,8 @@ const AuctionPage: React.FC = () => {
 
     // 2. Punto de Atención
     let atencionLabels: string[] = [];
-    const hasDebt = !!auction.claimedDebt;
-    const highDebt = auction.claimedDebt && auction.appraisalValue && (auction.claimedDebt > auction.appraisalValue * 0.4);
+    const hasDebt = !!auction?.claimedDebt;
+    const highDebt = auction?.claimedDebt && auction?.appraisalValue && (auction.claimedDebt > (auction?.appraisalValue ?? 0) * 0.4);
     
     // Logic for "Escenario limpio" vs "Cargas/Contexto"
     if (!isJudicial && hasDebt && !highDebt && opportunityRatio && opportunityRatio > 0.2) {
@@ -945,11 +943,11 @@ const AuctionPage: React.FC = () => {
       ],
       inversion: [
         { q: "¿Por qué el descuento es tan alto?", a: "El valor de subasta suele ser inferior al de mercado para incentivar la participación. Además, las cargas previas (si las hay) pueden influir en el precio final de adjudicación." },
-        { q: "¿Es buen momento para invertir en esta zona?", a: `La zona de ${cityName} y la provincia de ${auction.province} presentan una demanda estable. Comprar con el descuento que ofrece esta subasta permite un margen de seguridad importante.` },
+        { q: "¿Es buen momento para invertir en esta zona?", a: `La zona de ${cityName} y la provincia de ${auction?.province || ''} presentan una demanda estable. Comprar con el descuento que ofrece esta subasta permite un margen de seguridad importante.` },
         { q: "¿Qué rentabilidad puedo esperar?", a: `Dada la tipología de ${propertyType.toLowerCase()}, la rentabilidad bruta por alquiler en ${cityName} suele oscilar entre el 5% y el 8%, dependiendo del estado final del activo.` }
       ],
       procedimiento: [
-        { q: "¿Cuánto debo depositar?", a: `El depósito (consignación) es el 5% del valor de tasación. Para esta subasta en concreto, el importe es de ${((auction.appraisalValue || 0) * 0.05).toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}.` },
+        { q: "¿Cuánto debo depositar?", a: `El depósito (consignación) es el 5% del valor de tasación. Para esta subasta en concreto, el importe es de ${((auction?.appraisalValue || 0) * 0.05).toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}.` },
         { q: "¿Cómo se decide el ganador?", a: "Gana la puja más alta. Si supera el 70% del valor de tasación, la adjudicación es directa. Si es inferior, el ejecutado tiene 10 días para presentar a un tercero que mejore la postura." },
         { q: "¿Qué significa que no tenga cargas?", a: "Significa que, según el edicto, no constan deudas preferentes que el adjudicatario deba asumir. No obstante, siempre recomendamos verificar la Nota Simple actualizada." }
       ]
@@ -990,7 +988,7 @@ const AuctionPage: React.FC = () => {
     });
 
     return uniqueFaqs;
-  }, [propertyType, cityName, auction.appraisalValue, auction.claimedDebt, compDiscountVsMarket, auction.province, auction.boeId, auction.slug]);
+  }, [propertyType, cityName, auction?.appraisalValue, auction?.claimedDebt, compDiscountVsMarket, auction?.province, auction?.boeId, auction?.slug]);
 
   const marketAnalysis = useMemo(() => {
     const auctionId = auction?.boeId || auction?.slug || 'default';
@@ -1000,7 +998,7 @@ const AuctionPage: React.FC = () => {
     const phrases = [
       <>El mercado inmobiliario en <strong className="text-slate-900 font-bold">{cityName}</strong> muestra una dinámica sólida para este tipo de activos.</>,
       <>La zona de <strong className="text-slate-900 font-bold">{cityName}</strong> se ha consolidado como un punto de interés para inversores que buscan activos con alta liquidez.</>,
-      <>Analizando los datos de la provincia de <strong className="text-slate-900 font-bold">{auction.province}</strong>, este activo en <strong className="text-slate-900 font-bold">{cityName}</strong> destaca por su ubicación estratégica.</>
+      <>Analizando los datos de la provincia de <strong className="text-slate-900 font-bold">{auction?.province || ''}</strong>, este activo en <strong className="text-slate-900 font-bold">{cityName}</strong> destaca por su ubicación estratégica.</>
     ];
 
     const marketPhrases = [
@@ -1010,7 +1008,7 @@ const AuctionPage: React.FC = () => {
     ];
 
     return <>{phrases[idx1]}{marketPhrases[idx2]}</>;
-  }, [cityName, auction.province, compMarketValue, compDiscountVsMarket, auction.boeId, auction.slug]);
+  }, [cityName, auction?.province, compMarketValue, compDiscountVsMarket, auction?.boeId, auction?.slug]);
 
   const investmentStrategy = useMemo(() => {
     const auctionId = auction?.boeId || auction?.slug || 'default';
@@ -1026,11 +1024,11 @@ const AuctionPage: React.FC = () => {
     const strategyPhrases = [
       <> Dada la ubicación y las características del inmueble, se estima un potencial de revalorización inmediato tras la adjudicación y toma de posesión.</>,
       <> La demanda de alquiler en <strong className="text-slate-900 font-bold">{cityName}</strong> asegura una rentabilidad bruta atractiva para este tipo de {propertyType.toLowerCase()}.</>,
-      <> La escasez de oferta similar en la provincia de <strong className="text-slate-900 font-bold">{auction.province}</strong> convierte a este activo en una pieza codiciada para carteras patrimoniales.</>
+      <> La escasez de oferta similar en la provincia de <strong className="text-slate-900 font-bold">{auction?.province || ''}</strong> convierte a este activo en una pieza codiciada para carteras patrimoniales.</>
     ];
 
     return <>{phrases[idx1]}{strategyPhrases[idx2]}</>;
-  }, [propertyType, cityName, auction.province, auction.boeId, auction.slug]);
+  }, [propertyType, cityName, auction?.province, auction?.boeId, auction?.slug]);
 
   const opportunityLevel = useMemo(() => {
     if (compDiscountVsMarket >= 35) return "Alta";
@@ -1070,14 +1068,14 @@ const AuctionPage: React.FC = () => {
     return { text: "Cierre estándar", color: "bg-slate-200 text-slate-700 border-slate-300" };
   };
 
-  const urgencyBadge = getUrgencyBadge(auction.auctionDate);
+  const urgencyBadge = auction ? getUrgencyBadge(auction.auctionDate) : null;
 
   const statusMessage = useMemo(() => {
     const now = new Date();
-    const auctionDate = auction.auctionDate ? new Date(auction.auctionDate) : null;
+    const auctionDate = auction?.auctionDate ? new Date(auction.auctionDate) : null;
     const diffTime = auctionDate ? auctionDate.getTime() - now.getTime() : null;
     const diffDays = diffTime !== null ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : null;
-    const formattedDate = auction.auctionDate ? new Date(auction.auctionDate).toLocaleDateString('es-ES') : '---';
+    const formattedDate = auction?.auctionDate ? new Date(auction.auctionDate).toLocaleDateString('es-ES') : '---';
 
     if (isFinished) {
       return {
@@ -1187,19 +1185,44 @@ const AuctionPage: React.FC = () => {
     };
   }, [auction, isFinished, isSuspended, isUpcoming, opportunityRatio]);
 
+  const dynamicIntro = useMemo(() => {
+    const ratio = opportunityRatio || 0;
+    const phrases = [
+      `Esta subasta de ${propertyType.toLowerCase()} en ${cityName} representa una oportunidad estratégica con un margen del ${Math.round(ratio * 100)}% respecto a su valor de tasación.`,
+      `Oportunidad detectada en ${cityName}: ${propertyType} con un descuento del ${Math.round(ratio * 100)}% sobre el valor oficial. Ideal para inversores que buscan rentabilidad inmediata.`,
+      `Adquisición preferente de ${propertyType.toLowerCase()} en ${cityName}. El activo cuenta con un valor de mercado muy superior al precio de salida, lo que garantiza un colchón de seguridad para el adjudicatario.`
+    ];
+    const fomoPhrases = [
+      " Las subastas en esta zona suelen recibir un alto volumen de pujas en las últimas 48 horas.",
+      " Activos con este nivel de descuento en la provincia de " + (auction?.province || '') + " son escasos y de alta rotación.",
+      " La fecha de cierre se aproxima y el interés por este expediente ha crecido significativamente esta semana."
+    ];
+    const professionalPhrases = [
+      " Se recomienda encarecidamente la revisión del estado de cargas antes de formalizar la puja.",
+      " El análisis documental jurídico es el paso crítico para asegurar el éxito y la seguridad de la inversión.",
+      " Un estudio detallado del edicto y la certificación registral evitará sorpresas tras la adjudicación."
+    ];
+    
+    const base = phrases[Math.floor(Math.random() * phrases.length)] || phrases[0];
+    const fomo = fomoPhrases[Math.floor(Math.random() * fomoPhrases.length)] || fomoPhrases[0];
+    const prof = professionalPhrases[Math.floor(Math.random() * professionalPhrases.length)] || professionalPhrases[0];
+    
+    return `${base}${fomo}${prof}`;
+  }, [cityName, propertyType, opportunityRatio, auction?.province]);
+
   const jsonLd = useMemo(() => {
     if (!auction || !cleanSlug) return null;
 
-    const propertyType = normalizePropertyType(auction.propertyType);
-    const discount = auction.appraisalValue && auction.claimedDebt 
-      ? Math.round((1 - (auction.claimedDebt / auction.appraisalValue)) * 100) 
+    const propertyType = normalizePropertyType(auction?.propertyType);
+    const discount = auction?.appraisalValue && auction?.claimedDebt 
+      ? Math.round((1 - (auction.claimedDebt / (auction?.appraisalValue ?? 0))) * 100) 
       : 0;
     
-    const addressPart = formatAddress(auction.address);
+    const addressPart = formatAddress(auction?.address);
     const streetPart = addressPart ? ` (${addressPart})` : '';
     
     let discountPart = '';
-    if (auction.claimedDebt === 0) {
+    if (auction?.claimedDebt === 0) {
       discountPart = ' (Sin cargas declaradas)';
     } else if (discount > 85) {
       discountPart = ' (Oportunidad a analizar)';
@@ -1214,19 +1237,19 @@ const AuctionPage: React.FC = () => {
       ? `${analysisInsights.marketContext} ${analysisInsights.investorProfile}`.substring(0, 160) + '...'
       : `Subasta de ${propertyType.toLowerCase()} en ${cityName}, ${provinceName}.`;
 
-    const imageUrl = auction.imageUrl;
-    const price = auction.claimedDebt ?? auction.appraisalValue ?? auction.valorSubasta ?? 0;
+    const imageUrl = auction?.imageUrl;
+    const price = auction?.claimedDebt ?? auction?.appraisalValue ?? auction?.valorSubasta ?? 0;
     const url = window.location.href;
     
     const now = new Date();
-    let publishedDate = auction.publishedAt ? new Date(auction.publishedAt) : now;
+    let publishedDate = auction?.publishedAt ? new Date(auction.publishedAt) : now;
     if (publishedDate > now) publishedDate = now;
 
     // Calculate dateModified for SEO freshness
     const dateCandidates = [
-      auction.lastCheckedAt,
-      auction.resultCheckedAt,
-      auction.publishedAt
+      auction?.lastCheckedAt,
+      auction?.resultCheckedAt,
+      auction?.publishedAt
     ].filter(Boolean) as string[];
 
     const dateModified = dateCandidates.length > 0 
@@ -1235,9 +1258,9 @@ const AuctionPage: React.FC = () => {
 
     const availability = isFinished 
       ? "https://schema.org/SoldOut" 
-      : auction.status === 'suspended'
+      : auction?.status === 'suspended'
         ? "https://schema.org/LimitedAvailability"
-        : auction.status === 'upcoming'
+        : auction?.status === 'upcoming'
           ? "https://schema.org/PreOrder"
           : "https://schema.org/InStock";
 
@@ -1279,12 +1302,12 @@ const AuctionPage: React.FC = () => {
         {
           "@type": "PropertyValue",
           "name": "Valor Subasta",
-          "value": auction.valorSubasta || auction.appraisalValue
+          "value": auction?.valorSubasta || auction?.appraisalValue
         },
         {
           "@type": "PropertyValue",
           "name": "Valor Mercado",
-          "value": auction.appraisalValue
+          "value": auction?.appraisalValue
         },
         {
           "@type": "PropertyValue",
@@ -1294,12 +1317,12 @@ const AuctionPage: React.FC = () => {
         {
           "@type": "PropertyValue",
           "name": "Estado Subasta",
-          "value": auction.status
+          "value": auction?.status
         }
       ]
     };
 
-    if (auction.auctionDate) {
+    if (auction?.auctionDate) {
       product.offers["priceValidUntil"] = new Date(auction.auctionDate).toISOString().split('T')[0];
       product.additionalProperty.push({
         "@type": "PropertyValue",
@@ -1448,6 +1471,12 @@ const AuctionPage: React.FC = () => {
     return [product, faqPage, breadcrumbList];
   }, [auction, slug, cityName, provinceName, isFinished, analysisInsights]);
 
+  if (isLoading) return null;
+
+  if (!auction) {
+    return <Navigate to={ROUTES.HOME} replace />;
+  }
+
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
       {jsonLd && (
@@ -1515,30 +1544,7 @@ const AuctionPage: React.FC = () => {
 
           {/* Dynamic SEO Intro */}
           <p className="text-slate-600 text-xs md:text-base leading-relaxed mb-4 md:mb-6 text-justify">
-            {useMemo(() => {
-              const ratio = opportunityRatio || 0;
-              const phrases = [
-                `Esta subasta de ${propertyType.toLowerCase()} en ${cityName} representa una oportunidad estratégica con un margen del ${Math.round(ratio * 100)}% respecto a su valor de tasación.`,
-                `Oportunidad detectada en ${cityName}: ${propertyType} con un descuento del ${Math.round(ratio * 100)}% sobre el valor oficial. Ideal para inversores que buscan rentabilidad inmediata.`,
-                `Adquisición preferente de ${propertyType.toLowerCase()} en ${cityName}. El activo cuenta con un valor de mercado muy superior al precio de salida, lo que garantiza un colchón de seguridad para el adjudicatario.`
-              ];
-              const fomoPhrases = [
-                " Las subastas en esta zona suelen recibir un alto volumen de pujas en las últimas 48 horas.",
-                " Activos con este nivel de descuento en la provincia de " + auction.province + " son escasos y de alta rotación.",
-                " La fecha de cierre se aproxima y el interés por este expediente ha crecido significativamente esta semana."
-              ];
-              const professionalPhrases = [
-                " Se recomienda encarecidamente la revisión del estado de cargas antes de formalizar la puja.",
-                " El análisis documental jurídico es el paso crítico para asegurar el éxito y la seguridad de la inversión.",
-                " Un estudio detallado del edicto y la certificación registral evitará sorpresas tras la adjudicación."
-              ];
-              
-              const base = phrases[Math.floor(Math.random() * phrases.length)] || phrases[0];
-              const fomo = fomoPhrases[Math.floor(Math.random() * fomoPhrases.length)] || fomoPhrases[0];
-              const prof = professionalPhrases[Math.floor(Math.random() * professionalPhrases.length)] || professionalPhrases[0];
-              
-              return `${base}${fomo}${prof}`;
-            }, [cityName, propertyType, opportunityRatio, auction.province])}
+            {dynamicIntro}
           </p>
           
           {/* Address and Share Row */}
@@ -1549,7 +1555,7 @@ const AuctionPage: React.FC = () => {
                 <MapPin size={24} className="text-brand-600 hidden md:block group-hover:scale-110 transition-transform duration-300" />
               </div>
               <span className="group-hover:text-brand-700 transition-colors leading-tight">
-                {formatAddress(auction.address) || locationLabel}
+                {formatAddress(auction?.address) || locationLabel}
               </span>
             </div>
 
@@ -1699,10 +1705,10 @@ const AuctionPage: React.FC = () => {
               <div>
                 <p className="text-[7px] md:text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Expediente</p>
                 <div className="flex items-center gap-3">
-                  <p className="text-[10px] md:text-xs font-bold text-white/90">{auction.boeId}</p>
+                  <p className="text-[10px] md:text-xs font-bold text-white/90">{auction?.boeId}</p>
                   <div className="w-px h-3 bg-white/10" />
                   <a 
-                    href={!user ? '#' : (auction.boeUrl || `https://subastas.boe.es/detalle_subasta.php?idSub=${auction.boeId}`)} 
+                    href={!user ? '#' : (auction?.boeUrl || `https://subastas.boe.es/detalle_subasta.php?idSub=${auction?.boeId}`)} 
                     target={!user ? undefined : "_blank"} 
                     rel={!user ? undefined : "noopener noreferrer"}
                     onClick={(e) => {
@@ -1731,7 +1737,7 @@ const AuctionPage: React.FC = () => {
               </div>
               <div className="text-right border-l border-white/10 pl-4 md:pl-6">
                 <p className="text-[7px] md:text-[8px] font-bold text-white/30 uppercase tracking-widest mb-0.5">Tipo</p>
-                <p className="text-[10px] md:text-xs font-bold text-white/90">{getAuctionType(auction.boeId)}</p>
+                <p className="text-[10px] md:text-xs font-bold text-white/90">{getAuctionType(auction?.boeId)}</p>
               </div>
             </div>
           </div>
@@ -1766,13 +1772,13 @@ const AuctionPage: React.FC = () => {
                 <div className="space-y-0.5">
                   <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">Tasación</p>
                   <p className="text-xl md:text-3xl font-bold text-slate-900 tracking-tight">
-                    {auction.appraisalValue ? auction.appraisalValue.toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0}) : '---'}
+                    {auction?.appraisalValue ? (auction?.appraisalValue ?? 0).toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0}) : '---'}
                   </p>
                 </div>
                 <div className="space-y-0.5">
                   <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest">Deuda</p>
                   <p className="text-xl md:text-3xl font-bold text-slate-600 tracking-tight">
-                    {auction.claimedDebt ? auction.claimedDebt.toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0}) : '---'}
+                    {auction?.claimedDebt ? auction.claimedDebt.toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0}) : '---'}
                   </p>
                 </div>
               </div>
@@ -1796,7 +1802,7 @@ const AuctionPage: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-lg md:text-xl font-bold text-slate-900">
-                    {auction.auctionDate ? new Date(auction.auctionDate).toLocaleDateString('es-ES') : 'Pendiente'}
+                    {auction?.auctionDate ? new Date(auction.auctionDate).toLocaleDateString('es-ES') : 'Pendiente'}
                   </p>
                   <p className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest">Fecha límite BOE</p>
                 </div>
@@ -2667,7 +2673,7 @@ const AuctionPage: React.FC = () => {
                       <h4 className="font-bold text-emerald-900 text-sm">Seguridad de la Operación</h4>
                     </div>
                     <p className="text-emerald-800 text-xs md:text-sm leading-relaxed">
-                      Con un descuento del <span className="font-bold">{(auction.appraisalValue && auction.claimedDebt ? Math.round((1 - (auction.claimedDebt / auction.appraisalValue)) * 100) : 0).toFixed(0)}%</span>, el margen de seguridad protege la inversión incluso ante correcciones moderadas del mercado local en <span className="font-bold">{auction.province}</span>.
+                      Con un descuento del <span className="font-bold">{(auction?.appraisalValue && auction?.claimedDebt ? Math.round((1 - (auction.claimedDebt / (auction?.appraisalValue ?? 0))) * 100) : 0).toFixed(0)}%</span>, el margen de seguridad protege la inversión incluso ante correcciones moderadas del mercado local en <span className="font-bold">{auction?.province}</span>.
                     </p>
                   </div>
                 </div>
@@ -2677,25 +2683,25 @@ const AuctionPage: React.FC = () => {
                 <div className="md:col-span-2 text-slate-600 leading-relaxed text-base md:text-lg space-y-6">
                   <p>
                     Esta oportunidad en <strong className="text-slate-900 font-bold">{cityName}</strong> destaca por su equilibrio entre riesgo y rentabilidad. 
-                    La descripción oficial del BOE detalla un activo con características que encajan en la demanda actual de la provincia de <strong className="text-slate-900 font-bold">{auction.province}</strong>.
+                    La descripción oficial del BOE detalla un activo con características que encajan en la demanda actual de la provincia de <strong className="text-slate-900 font-bold">{auction?.province}</strong>.
                   </p>
                   <p>
-                    El expediente <strong className="text-slate-900 font-bold">{auction.boeId}</strong> corresponde a un procedimiento <strong className="text-slate-900 font-bold">{getAuctionType(auction.boeId)}</strong>. 
+                    El expediente <strong className="text-slate-900 font-bold">{auction?.boeId}</strong> corresponde a un procedimiento <strong className="text-slate-900 font-bold">{getAuctionType(auction?.boeId)}</strong>. 
                     Es fundamental entender que los plazos y requisitos de este tipo de subastas están estrictamente regulados, lo que garantiza transparencia pero exige una preparación técnica previa para evitar errores en la puja.
                   </p>
                 </div>
                 <div className="bg-slate-900 text-white p-8 rounded-[32px] flex flex-col justify-between">
                   <div>
                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mb-2">Expediente</p>
-                    <h4 className="text-xl font-bold mb-6">{auction.boeId}</h4>
+                    <h4 className="text-xl font-bold mb-6">{auction?.boeId}</h4>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-slate-400">Tipo</span>
-                        <span className="font-bold">{getAuctionType(auction.boeId)}</span>
+                        <span className="font-bold">{getAuctionType(auction?.boeId)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-slate-400">Provincia</span>
-                        <span className="font-bold">{auction.province}</span>
+                        <span className="font-bold">{auction?.province}</span>
                       </div>
                     </div>
                   </div>
@@ -2713,7 +2719,7 @@ const AuctionPage: React.FC = () => {
                   <div className="text-slate-600 leading-relaxed text-base md:text-lg space-y-6">
                     <p>
                       Para participar en la subasta de este {propertyType.toLowerCase()}, es necesario realizar un depósito (consignación) del 5% del valor de tasación. 
-                      En este caso, el depósito requerido es de <strong className="text-slate-900 font-bold">{auction.appraisalValue ? (auction.appraisalValue * 0.05).toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : '---'}</strong>.
+                      En este caso, el depósito requerido es de <strong className="text-slate-900 font-bold">{auction?.appraisalValue ? ((auction?.appraisalValue ?? 0) * 0.05).toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : '---'}</strong>.
                     </p>
                     <p className="text-sm italic text-slate-500">
                       * El depósito se devuelve íntegramente si no resultas ganador de la subasta.
@@ -2902,7 +2908,7 @@ const AuctionPage: React.FC = () => {
                     </div>
                     <div>
                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Street View</p>
-                      <p className="text-xs font-bold text-slate-900 leading-none">{auction.address}</p>
+                      <p className="text-xs font-bold text-slate-900 leading-none">{auction?.address}</p>
                     </div>
                   </div>
                 </div>
@@ -2914,7 +2920,7 @@ const AuctionPage: React.FC = () => {
                   src={`https://www.google.com/maps?q=${encodeURIComponent(
                     auction.lat && auction.lng 
                       ? `${auction.lat},${auction.lng}` 
-                      : (auction.address ? `${auction.address}, ${auction.city}` : (auction.city || 'España'))
+                      : (auction?.address ? `${auction.address}, ${auction.city}` : (auction?.city || 'España'))
                   )}&layer=c${auction.lat && auction.lng ? `&cbll=${auction.lat},${auction.lng}` : ''}&output=embed`}
                   allowFullScreen
                 ></iframe>
