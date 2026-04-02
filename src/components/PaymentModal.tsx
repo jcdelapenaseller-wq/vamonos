@@ -29,7 +29,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, type, auct
       });
       const data = await response.json();
       if (data.url) {
-        window.location.href = data.url;
+        window.top.location.href = data.url;
       }
     } catch (error) {
       console.error('Error al crear checkout:', error);

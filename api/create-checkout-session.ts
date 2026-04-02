@@ -17,6 +17,8 @@ export default async function handler(req: any, res: any) {
 
     console.log('🔔 [CHECKOUT] Price seleccionado:', price);
     console.log('🔔 [CHECKOUT] STRIPE_SECRET_KEY existe:', !!process.env.STRIPE_SECRET_KEY);
+    console.log("STRIPE KEY:", process.env.STRIPE_SECRET_KEY?.slice(0,10));
+    console.log("Stripe import OK");
 
     if (!price) {
       return res.status(500).json({ error: 'Price ID not configured' });
@@ -27,6 +29,7 @@ export default async function handler(req: any, res: any) {
     successUrlObj.searchParams.set('analysis', type);
     const success_url = successUrlObj.toString();
 
+    console.log('🔔 [CHECKOUT] Justo antes de crear sesión');
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [
