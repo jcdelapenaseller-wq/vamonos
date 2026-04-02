@@ -101,12 +101,23 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   // Redirect to dedicated page when analysis is done in integrated mode
   useEffect(() => {
     if (isIntegrated && step === 'result' && resultData) {
-      // Save to session storage to prevent data loss on reload
-      sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(resultData));
+      console.log('🔍 [DIAGNOSTIC] LoadAnalysisBlock boeId value:', boeId);
+      console.log('🔍 [DIAGNOSTIC] LoadAnalysisBlock boeId type:', typeof boeId);
       
-      navigate(`/analisis-cargas?id=${boeId}&report=ready`, { 
-        state: { analysisResult: resultData } 
-      });
+      // Save to session storage to prevent data loss on reload
+      try {
+        sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(resultData));
+      } catch (e) {
+        console.error('🔍 [DIAGNOSTIC] Crash at line 105 (sessionStorage):', e);
+      }
+      
+      try {
+        navigate(`/analisis-cargas?id=${boeId}&report=ready`, { 
+          state: { analysisResult: resultData } 
+        });
+      } catch (e) {
+        console.error('🔍 [DIAGNOSTIC] Crash at line 107 (navigate):', e);
+      }
     }
   }, [step, resultData, isIntegrated, navigate, boeId]);
   

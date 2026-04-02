@@ -1,10 +1,18 @@
 import { GoogleGenAI, Type } from "@google/genai";
 
-const ai = new GoogleGenAI({
-  apiKey: import.meta.env.VITE_GEMINI_API_KEY
-});
+let aiInstance: GoogleGenAI | null = null;
+
+const getAI = () => {
+  if (!aiInstance) {
+    aiInstance = new GoogleGenAI({
+      apiKey: import.meta.env.VITE_GEMINI_API_KEY
+    });
+  }
+  return aiInstance;
+};
 
 export const analyzeDocumentWithAI = async (files: File[]) => {
+  const ai = getAI();
   const currentDate = new Date().toISOString().split('T')[0];
   
   if (!files || files.length === 0) {
