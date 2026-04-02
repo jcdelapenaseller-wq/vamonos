@@ -83,43 +83,68 @@ const LockedFeatureBlock: React.FC<LockedFeatureBlockProps> = ({
 const AuctionPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
+  const [auction, setAuction] = useState<any>(null);
   const cleanSlug = slug ? decodeURIComponent(slug).replace(/\/$/, '').toLowerCase() : '';
-  const auction = cleanSlug ? AUCTIONS[cleanSlug] : null;
+
+  useEffect(() => {
+    // Simulate loading or handle data finding safely
+    const foundAuction = cleanSlug ? AUCTIONS[cleanSlug] : null;
+    setAuction(foundAuction || null);
+    setIsLoading(false);
+  }, [cleanSlug]);
+
   const { user, isLogged, requireLogin, plan, trackAuctionView } = useUser();
   const hasAccess = isLogged && (plan === 'basic' || plan === 'pro');
   const userContext = useContext(UserContext);
 
   // Payment State
   const auctionId = auction?.boeId || auction?.slug || '';
-  const [analysisPaid, setAnalysisPaid] = useState<boolean>(() => {
-    if (!auctionId) return false;
-    const paid = sessionStorage.getItem(`analysisPaid_${auctionId}`);
-    const timestamp = sessionStorage.getItem(`analysisPaid_${auctionId}_time`);
-    if (paid === 'true' && timestamp) {
-      const hours = (Date.now() - parseInt(timestamp)) / (1000 * 60 * 60);
-      if (hours < 24) return true;
-      // Expired
-      sessionStorage.removeItem(`analysisPaid_${auctionId}`);
-      sessionStorage.removeItem(`analysisPaid_${auctionId}_time`);
+  const [analysisPaid, setAnalysisPaid] = useState<boolean>(false);
+  const [cargasPaid, setCargasPaid] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!auctionId) return;
+    try {
+      const paidAnalysis = sessionStorage.getItem(`analysisPaid_${auctionId}`);
+      const timestampAnalysis = sessionStorage.getItem(`analysisPaid_${auctionId}_time`);
+      if (paidAnalysis === 'true' && timestampAnalysis) {
+        const hours = (Date.now() - parseInt(timestampAnalysis)) / (1000 * 60 * 60);
+        if (hours < 24) setAnalysisPaid(true);
+        else {
+          sessionStorage.removeItem(`analysisPaid_${auctionId}`);
+          sessionStorage.removeItem(`analysisPaid_${auctionId}_time`);
+        }
+      }
+
+      const paidCargas = sessionStorage.getItem(`cargasPaid_${auctionId}`);
+      const timestampCargas = sessionStorage.getItem(`cargasPaid_${auctionId}_time`);
+      if (paidCargas === 'true' && timestampCargas) {
+        const hours = (Date.now() - parseInt(timestampCargas)) / (1000 * 60 * 60);
+        if (hours < 24) setCargasPaid(true);
+        else {
+          sessionStorage.removeItem(`cargasPaid_${auctionId}`);
+          sessionStorage.removeItem(`cargasPaid_${auctionId}_time`);
+        }
+      }
+    } catch (e) {
+      console.warn("sessionStorage access failed:", e);
     }
-    return false;
-  });
-  const [cargasPaid, setCargasPaid] = useState<boolean>(() => {
-    if (!auctionId) return false;
-    const paid = sessionStorage.getItem(`cargasPaid_${auctionId}`);
-    const timestamp = sessionStorage.getItem(`cargasPaid_${auctionId}_time`);
-    if (paid === 'true' && timestamp) {
-      const hours = (Date.now() - parseInt(timestamp)) / (1000 * 60 * 60);
-      if (hours < 24) return true;
-      // Expired
-      sessionStorage.removeItem(`cargasPaid_${auctionId}`);
-      sessionStorage.removeItem(`cargasPaid_${auctionId}_time`);
-    }
-    return false;
-  });
+  }, [auctionId]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentType, setPaymentType] = useState<'analysis' | 'cargas'>('analysis');
-  const isUnlocked = (analysisPaid || cargasPaid) && !!auction;
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const isUnlockedParam = params.get('analysis') === 'unlocked';
+      setIsUnlocked(((analysisPaid || cargasPaid) && !!auction) || isUnlockedParam);
+    } catch (e) {
+      console.error("Error checking analysis param:", e);
+      setIsUnlocked((analysisPaid || cargasPaid) && !!auction);
+    }
+  }, [analysisPaid, cargasPaid, auction, window.location.search]);
 
   // Calculator State
   const [valorMercado, setValorMercado] = useState<number | ''>('');
@@ -145,58 +170,86 @@ const AuctionPage: React.FC = () => {
   const [isSavingNote, setIsSavingNote] = useState(false);
 
   useEffect(() => {
+    if (!cleanSlug) return;
+    try {
+      const savedNote = sessionStorage.getItem(`note_${cleanSlug}`);
+      if (savedNote) setNote(savedNote);
+    } catch (e) {
+      console.warn("sessionStorage not available:", e);
+    }
+  }, [cleanSlug]);
+
+  useEffect(() => {
+    if (!cleanSlug || !note) return;
+    const timer = setTimeout(() => {
+      setIsSavingNote(true);
+      try {
+        sessionStorage.setItem(`note_${cleanSlug}`, note);
+      } catch (e) {
+        console.warn("sessionStorage save failed:", e);
+      }
+      setTimeout(() => setIsSavingNote(false), 500);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [note, cleanSlug]);
+
+  useEffect(() => {
     if (!auctionId) return;
 
-    const params = new URLSearchParams(window.location.search);
-    const analysisParam = params.get('analysis');
-    const cargasParam = params.get('cargas');
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const analysisParam = params.get('analysis');
+      const cargasParam = params.get('cargas');
 
-    let shouldScrollToAnalysis = false;
-    let shouldScrollToCargas = false;
+      let shouldScrollToAnalysis = false;
+      let shouldScrollToCargas = false;
 
-    if (analysisParam === 'unlocked' || analysisParam === 'paid') {
-      sessionStorage.setItem(`analysisPaid_${auctionId}`, 'true');
-      sessionStorage.setItem(`analysisPaid_${auctionId}_time`, Date.now().toString());
-      setAnalysisPaid(true);
-      setCargasPaid(true);
-      shouldScrollToAnalysis = true;
-      setShowPaymentModal(false);
-      setShowPremiumModal(false);
-      
-      params.delete('analysis');
-      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
-      window.history.replaceState({}, document.title, newUrl);
-    }
+      if (analysisParam === 'unlocked' || analysisParam === 'paid') {
+        sessionStorage.setItem(`analysisPaid_${auctionId}`, 'true');
+        sessionStorage.setItem(`analysisPaid_${auctionId}_time`, Date.now().toString());
+        setAnalysisPaid(true);
+        setCargasPaid(true);
+        shouldScrollToAnalysis = true;
+        setShowPaymentModal(false);
+        setShowPremiumModal(false);
+        
+        params.delete('analysis');
+        const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+        window.history.replaceState({}, document.title, newUrl);
+      }
 
-    if (cargasParam === 'unlocked' || cargasParam === 'paid') {
-      sessionStorage.setItem(`cargasPaid_${auctionId}`, 'true');
-      sessionStorage.setItem(`cargasPaid_${auctionId}_time`, Date.now().toString());
-      setCargasPaid(true);
-      shouldScrollToCargas = true;
-      setShowPaymentModal(false);
-      setShowPremiumModal(false);
-      
-      params.delete('cargas');
-      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
-      window.history.replaceState({}, document.title, newUrl);
-    }
+      if (cargasParam === 'unlocked' || cargasParam === 'paid') {
+        sessionStorage.setItem(`cargasPaid_${auctionId}`, 'true');
+        sessionStorage.setItem(`cargasPaid_${auctionId}_time`, Date.now().toString());
+        setCargasPaid(true);
+        shouldScrollToCargas = true;
+        setShowPaymentModal(false);
+        setShowPremiumModal(false);
+        
+        params.delete('cargas');
+        const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+        window.history.replaceState({}, document.title, newUrl);
+      }
 
-    if (params.get('openBoe') === 'true' && user && auction) {
-      const boeUrl = auction.boeUrl || `https://subastas.boe.es/detalle_subasta.php?idSub=${auction.boeId}`;
-      window.open(boeUrl, '_blank');
-      
-      params.delete('openBoe');
-      const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
-      window.history.replaceState({}, document.title, newUrl);
-    }
+      if (params.get('openBoe') === 'true' && user && auction) {
+        const boeUrl = auction.boeUrl || `https://subastas.boe.es/detalle_subasta.php?idSub=${auction.boeId}`;
+        window.open(boeUrl, '_blank');
+        
+        params.delete('openBoe');
+        const newUrl = window.location.pathname + (params.toString() ? `?${params.toString()}` : '');
+        window.history.replaceState({}, document.title, newUrl);
+      }
 
-    if (shouldScrollToAnalysis || analysisPaid || shouldScrollToCargas || cargasPaid) {
-      setTimeout(() => {
-        const element = document.getElementById('analisis-tecnico');
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 500);
+      if (shouldScrollToAnalysis || analysisPaid || shouldScrollToCargas || cargasPaid) {
+        setTimeout(() => {
+          const element = document.getElementById('analisis-tecnico');
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 500);
+      }
+    } catch (e) {
+      console.error("Error handling analysis unlock logic:", e);
     }
   }, [auctionId, analysisPaid, cargasPaid, user, auction]);
 
@@ -205,7 +258,7 @@ const AuctionPage: React.FC = () => {
     if (plan !== 'free') return { lat: auction.lat, lng: auction.lng };
     
     // Fixed offset based on boeId to be stable
-    const seed = auction.boeId?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 0;
+    const seed = auction.boeId?.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0) || 0;
     const offsetLat = (Math.sin(seed) * 0.005);
     const offsetLng = (Math.cos(seed) * 0.005);
     
@@ -219,7 +272,7 @@ const AuctionPage: React.FC = () => {
     if (!auction?.boeId) return null;
     
     // Stable pseudo-random distances based on boeId
-    const seed = auction.boeId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const seed = auction.boeId.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
     const getDist = (offset: number) => {
       const val = ((seed * offset) % 15) + 2; // 2 to 17 mins
       return Math.floor(val);
@@ -829,7 +882,7 @@ const AuctionPage: React.FC = () => {
 
     // Summary Labels for the Dark Block
     const str = (auction.boeId || '') + cityName + propertyType + (auction.claimedDebt || 0);
-    const seed = str.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const seed = str.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
     
     // 1. Margen Estimado
     let margenLabels: string[] = [];
@@ -988,7 +1041,7 @@ const AuctionPage: React.FC = () => {
 
   const liquidityLevel = useMemo(() => {
     if (!auction?.boeId) return "Media";
-    const seed = auction.boeId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const seed = auction.boeId.split('').reduce((acc: number, char: string) => acc + char.charCodeAt(0), 0);
     const levels = ["Alta", "Media-Alta", "Media", "Moderada"];
     return levels[seed % levels.length];
   }, [auction?.boeId]);
@@ -2250,7 +2303,7 @@ const AuctionPage: React.FC = () => {
         </section>
 
         <div id="servicios-analisis" className="mb-8">
-          {isUnlocked && (
+          {isUnlocked && auction && (
             <div id="analisis-tecnico" className="w-full">
               <LoadAnalysisBlock 
                 boeId={auction.boeId || ''} 

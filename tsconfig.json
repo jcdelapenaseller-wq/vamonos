@@ -23,13 +23,21 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": [
     "node_modules",
+    "dist",
     "test_puppeteer*.ts",
-    "check_data.ts",
+    "check_*.ts",
+    "*.temp.ts",
+    "temp-replace.*",
     "test-normalizer.ts",
-    "scripts/**/*Test.ts",
-    "scripts/test*.ts",
-    "scripts/check*.ts",
-    "app/applet/scripts/test_boe.ts",
-    "app/applet/test_boe.ts"
+    "scripts/**/*.ts",
+    "app/applet/**/*.ts",
+    "catastro*.js",
+    "reverseGeocode.js",
+    "scrapeAuction.cjs",
+    "fix-links.cjs",
+    "truncate.js",
+    "*.txt",
+    "*.html",
+    "crawler.pid"
   ]
 }
