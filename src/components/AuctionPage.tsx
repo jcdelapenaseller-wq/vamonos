@@ -1521,7 +1521,7 @@ const AuctionPage: React.FC = () => {
     return <Navigate to={ROUTES.HOME} replace />;
   }
 
-  if (postPaymentState.active) {
+  if (postPaymentState.active && auction) {
     return (
       <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
         <Header />
