@@ -131,6 +131,8 @@ const AuctionPage: React.FC = () => {
       console.warn("sessionStorage access failed:", e);
     }
   }, [auctionId]);
+  const [isGenerating, setIsGenerating] = React.useState(false);
+  const [analysisResult, setAnalysisResult] = React.useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentType, setPaymentType] = useState<'analysis' | 'cargas'>('analysis');
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -193,6 +195,40 @@ const AuctionPage: React.FC = () => {
     return () => clearTimeout(timer);
   }, [note, cleanSlug]);
 
+  const generateAnalysis = async (type: string, sessionId: string) => {
+    setIsGenerating(true);
+    setShowPaymentModal(false);
+    setShowPremiumModal(false);
+    try {
+      const response = await fetch(`/api/generate-analysis?session_id=${sessionId}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          auctionId: auctionId,
+          type: type
+        })
+      });
+
+      if (response.status === 403) {
+        toast.error("El pago no pudo validarse. Contacta soporte.");
+        setIsGenerating(false);
+        return;
+      }
+
+      const data = await response.json();
+      
+      if (data.ok) {
+        toast.success("Pago confirmado. Generando informe...");
+      } else {
+        setAnalysisResult(data);
+        setIsGenerating(false);
+      }
+    } catch (error) {
+      console.error('Error generating analysis:', error);
+      setIsGenerating(false);
+    }
+  };
+
   useEffect(() => {
     if (!auctionId) return;
 
@@ -200,7 +236,13 @@ const AuctionPage: React.FC = () => {
       const params = new URLSearchParams(window.location.search);
       const analysisParam = params.get('analysis');
       const cargasParam = params.get('cargas');
+      const sessionIdParam = params.get('session_id');
 
+      if (analysisParam && sessionIdParam && !isGenerating && !analysisResult) {
+        generateAnalysis(analysisParam, sessionIdParam);
+      }
+      
+      // ... existing logic for cargasParam, openBoe, etc. ...
       let shouldScrollToAnalysis = false;
       let shouldScrollToCargas = false;
 

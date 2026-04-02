@@ -27,6 +27,7 @@ export default async function handler(req: any, res: any) {
     // Construir success_url de forma segura por si returnUrl ya tiene query params
     const successUrlObj = new URL(returnUrl);
     successUrlObj.searchParams.set('analysis', type);
+    successUrlObj.searchParams.set('session_id', '{CHECKOUT_SESSION_ID}');
     const success_url = successUrlObj.toString();
 
     console.log('🔔 [CHECKOUT] Justo antes de crear sesión');
@@ -42,6 +43,9 @@ export default async function handler(req: any, res: any) {
       success_url: success_url,
       cancel_url: returnUrl,
       client_reference_id: auctionId,
+      metadata: {
+        type: type
+      }
     });
 
     return res.status(200).json({ url: session.url });
