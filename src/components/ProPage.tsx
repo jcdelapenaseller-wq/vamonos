@@ -35,16 +35,31 @@ const ProPage: React.FC = () => {
     }
 
     try {
-      // Map local billing cycle to Stripe billing cycle
-      const stripeCycle: StripeBillingCycle = 
-        billingCycle === 'mensual' ? 'monthly' :
-        billingCycle === 'trimestral' ? 'quarterly' : 'yearly';
-      
-      const planKey = planToActivate.toUpperCase() as keyof typeof PRICING;
-      const priceId = PRICING[planKey][stripeCycle];
+      const PRICES = {
+        basic: {
+          monthly: 'price_1TGOT7REW0EzPhwIhbngXF2k',
+          quarterly: 'price_1TGObwREW0EzPhwIhEiJ3c11',
+          yearly: 'price_1TGOZmREW0EzPhwIa3xk5SXr',
+        },
+        pro: {
+          monthly: 'price_1TGOjpREW0EzPhwIqh0xNXer',
+          quarterly: 'price_1TGOfWREW0EzPhwIQxyxgMO3',
+          yearly: 'price_1TGOexREW0EzPhwINiCkV6zn',
+        }
+      };
+
+      const cycleMap: Record<BillingCycle, 'monthly' | 'quarterly' | 'yearly'> = {
+        'mensual': 'monthly',
+        'trimestral': 'quarterly',
+        'anual': 'yearly'
+      };
+
+      const stripeCycle = cycleMap[billingCycle];
+      const priceId = PRICES[planToActivate][stripeCycle];
         
       await startCheckout(planToActivate, stripeCycle, priceId, { id: user.id, email: user.email });
     } catch (error) {
+      console.error(error);
       toast.error('Error al iniciar el proceso de pago');
     }
   };
