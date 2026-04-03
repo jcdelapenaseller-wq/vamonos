@@ -71,6 +71,7 @@ interface LoadAnalysisBlockProps {
   appraisalValue?: number;
   city?: string;
   propertyType?: string;
+  isStandalone?: boolean;
 }
 
 const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({ 
@@ -88,9 +89,20 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   marketPriceM2,
   appraisalValue,
   city,
-  propertyType
+  propertyType,
+  isStandalone = false
 }) => {
   const [step, setStep] = useState<'locked' | 'upload' | 'loading' | 'result'>(initialData ? 'result' : initialStep);
+
+  // Update step if initialStep changes (e.g. user logs in or pays)
+  useEffect(() => {
+    if (step === 'locked' && initialStep === 'upload') {
+      setStep('upload');
+    } else if (step === 'upload' && initialStep === 'locked') {
+      setStep('locked');
+    }
+  }, [initialStep, step]);
+
   const [files, setFiles] = useState<File[]>([]);
   const [resultData, setResultData] = useState<AnalysisResult | null>(initialData);
   const [showHowToModal, setShowHowToModal] = useState(false);
@@ -158,6 +170,20 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     return remaining === 0 ? 'Sin análisis disponibles' : `${remaining} de ${planLimit} restantes`;
   };
 
+  const getResetDateText = () => {
+    if (!user?.lastAnalysisReset) return null;
+    
+    try {
+      const resetDate = user.lastAnalysisReset.toDate ? user.lastAnalysisReset.toDate() : new Date(user.lastAnalysisReset);
+      const nextReset = new Date(resetDate);
+      nextReset.setMonth(nextReset.getMonth() + 1);
+      
+      return `Se reinician el ${nextReset.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}`;
+    } catch (e) {
+      return null;
+    }
+  };
+
   const getCounterVisuals = (): {
     text: string;
     subtext?: string;
@@ -178,12 +204,14 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
       };
     }
 
+    const resetText = getResetDateText();
+
     if (currentPlan === 'pro') {
-      const remaining = Math.max(0, 10 - usage);
+      const remaining = Math.max(0, 5 - usage);
       if (remaining === 0) {
         return {
-          text: 'Sin análisis disponibles',
-          subtext: 'Has agotado tus 10 análisis de este mes',
+          text: 'Has alcanzado el límite mensual',
+          subtext: resetText || 'Has agotado tus 5 análisis de este mes',
           bgClass: 'bg-red-50',
           textClass: 'text-red-700',
           borderClass: 'border-red-200',
@@ -191,7 +219,8 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
         };
       }
       return {
-        text: `Plan PRO — ${remaining} análisis restantes`,
+        text: `Te quedan ${remaining} análisis este mes`,
+        subtext: resetText || undefined,
         bgClass: 'bg-slate-50',
         textClass: 'text-slate-700',
         borderClass: 'border-slate-200',
@@ -203,27 +232,18 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
       const remaining = Math.max(0, 3 - usage);
       if (remaining === 0) {
         return {
-          text: 'Sin análisis disponibles',
-          subtext: 'Upgrade para continuar',
-          action: { text: 'Ver planes', to: '/pro' },
+          text: 'Has alcanzado el límite mensual',
+          subtext: resetText || 'Upgrade para continuar',
+          action: resetText ? undefined : { text: 'Ver planes', to: '/pro' },
           bgClass: 'bg-red-50',
           textClass: 'text-red-700',
           borderClass: 'border-red-200',
           icon: <AlertTriangle size={14} className="text-red-600" />
         };
       }
-      if (remaining === 1) {
-        return {
-          text: 'Te queda 1 análisis este mes',
-          subtext: 'Ideal para esta subasta',
-          bgClass: 'bg-amber-50',
-          textClass: 'text-amber-700',
-          borderClass: 'border-amber-200',
-          icon: <AlertTriangle size={14} className="text-amber-600" />
-        };
-      }
       return {
-        text: `${usage} de 3 análisis usados este mes`,
+        text: `Te quedan ${remaining} análisis este mes`,
+        subtext: resetText || undefined,
         bgClass: 'bg-slate-50',
         textClass: 'text-slate-700',
         borderClass: 'border-slate-200',
@@ -234,9 +254,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     // FREE
     if (usage >= 1) {
       return {
-        text: 'Sin análisis disponibles',
-        subtext: 'Upgrade para continuar',
-        action: { text: 'Ver planes', to: '/pro' },
+        text: 'Has alcanzado el límite mensual',
+        subtext: resetText || 'Upgrade para continuar',
+        action: resetText ? undefined : { text: 'Ver planes', to: '/pro' },
         bgClass: 'bg-red-50',
         textClass: 'text-red-700',
         borderClass: 'border-red-200',
@@ -245,7 +265,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     }
     return {
       text: 'Te queda 1 análisis gratis',
-      subtext: 'Ideal para esta subasta',
+      subtext: resetText || 'Ideal para esta subasta',
       bgClass: 'bg-amber-50',
       textClass: 'text-amber-700',
       borderClass: 'border-amber-200',
@@ -285,6 +305,15 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   }, [step, showHowToModal]);
 
   const handleUnlock = () => {
+    if (!user || isBlocked) {
+      if (onShowSoftGate) {
+        onShowSoftGate();
+      } else {
+        navigate('/login');
+      }
+      return;
+    }
+
     setStep('upload');
     setTimeout(() => {
       blockRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -392,7 +421,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
         {step === 'locked' && (
           <div 
             className={`${isIntegrated ? '' : 'group/card cursor-pointer bg-white border border-slate-100 rounded-2xl p-4 md:p-6 transition-all duration-200 hover:shadow-md hover:-translate-y-[1px]'}`}
-            onClick={isBlocked ? undefined : handleUnlock}
+            onClick={handleUnlock}
           >
             <div className={`flex flex-col md:flex-row gap-4 md:gap-8 items-center py-1 ${isBlocked ? 'opacity-75 grayscale-[0.5]' : ''}`}>
               {/* Left Side (70%) */}
@@ -443,7 +472,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                           ? "Usarás tu análisis gratuito" 
                           : (planLimit - usage === 2) 
                             ? "Te queda 1 análisis después" 
-                            : "Consumirá 1 crédito"
+                            : (planLimit - usage === 1)
+                              ? "Último análisis este mes"
+                              : "Consumirá 1 crédito"
                         }
                       </p>
                     )}
@@ -465,37 +496,43 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             {isIntegrated ? (
               <div className="mb-6 space-y-4">
                 <div className="text-left">
-                  <p className="text-sm text-slate-900 font-bold">Sube la Nota Simple o la Certificación de Cargas del BOE para detectar cargas y riesgos</p>
+                  <p className="text-sm text-slate-900 font-bold">
+                    {isStandalone ? 'Sube tu Nota Simple para analizarla' : 'Sube la Nota Simple o la Certificación de Cargas del BOE para detectar cargas y riesgos'}
+                  </p>
                 </div>
                 
-                <button 
-                  onClick={() => {
-                    setBoeClicked(true);
-                    window.open(finalBoeUrl, '_blank');
-                  }}
-                  className="w-full py-3 bg-white border-2 border-slate-900 text-slate-900 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
-                >
-                  Abrir BOE
-                </button>
-                <p className="text-xs text-slate-400 mt-1 text-center">Paso 1 — descargar certificación del BOE</p>
-                
-                {boeClicked && (
-                  <p className="text-xs text-slate-500 font-medium text-center mt-2">
-                    Esperando el PDF… súbelo aquí cuando lo descargues
-                  </p>
+                {!isStandalone && (
+                  <>
+                    <button 
+                      onClick={() => {
+                        setBoeClicked(true);
+                        window.open(finalBoeUrl, '_blank');
+                      }}
+                      className="w-full py-3 bg-white border-2 border-slate-900 text-slate-900 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                    >
+                      Abrir BOE
+                    </button>
+                    <p className="text-xs text-slate-400 mt-1 text-center">Paso 1 — descargar certificación del BOE</p>
+                    
+                    {boeClicked && (
+                      <p className="text-xs text-slate-500 font-medium text-center mt-2">
+                        Esperando el PDF… súbelo aquí cuando lo descargues
+                      </p>
+                    )}
+                    
+                    <p 
+                      className="text-xs text-slate-500 text-center cursor-pointer hover:underline mt-2 flex items-center justify-center gap-1.5"
+                      onClick={() => setShowHowToModal(true)}
+                    >
+                      <Info size={14} /> ¿Cómo descargar la certificación del BOE?
+                    </p>
+                  </>
                 )}
-                
-                <p 
-                  className="text-xs text-slate-500 text-center cursor-pointer hover:underline mt-2 flex items-center justify-center gap-1.5"
-                  onClick={() => setShowHowToModal(true)}
-                >
-                  <Info size={14} /> ¿Cómo descargar la certificación del BOE?
-                </p>
               </div>
             ) : (
               <div className="text-center mb-6 md:mb-10">
                 <p className="text-lg md:text-xl text-slate-900 font-bold mt-1 max-w-2xl mx-auto leading-tight">
-                  Adjunta Nota Simple o Certificación de cargas. Opcional: edicto.
+                  {isStandalone ? 'Sube tu Nota Simple para analizarla' : 'Adjunta Nota Simple o Certificación de cargas. Opcional: edicto.'}
                 </p>
                 
                 <div className="flex justify-center gap-4 md:gap-10 mt-6 md:mt-10">
@@ -517,15 +554,17 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                       <p className="text-[9px] md:text-[11px] font-bold text-slate-900 uppercase tracking-wider">Certificación</p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-center gap-1.5">
-                    <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
-                      <FileWarning size={20} className="md:hidden" strokeWidth={1.5} />
-                      <FileWarning size={28} className="hidden md:block" strokeWidth={1.5} />
+                  {!isStandalone && (
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 border border-slate-100">
+                        <FileWarning size={20} className="md:hidden" strokeWidth={1.5} />
+                        <FileWarning size={28} className="hidden md:block" strokeWidth={1.5} />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-[9px] md:text-[11px] font-bold text-slate-900 uppercase tracking-wider">Edicto</p>
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <p className="text-[9px] md:text-[11px] font-bold text-slate-900 uppercase tracking-wider">Edicto</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
@@ -634,7 +673,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                         ? "Usarás tu análisis gratuito" 
                         : (planLimit - usage === 2) 
                           ? "Te queda 1 análisis después" 
-                          : "Este análisis consumirá 1 crédito"
+                          : (planLimit - usage === 1)
+                            ? "Último análisis este mes"
+                            : "Este análisis consumirá 1 crédito"
                       }
                     </p>
                   )}
@@ -670,7 +711,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               )}
 
               {/* Help Block */}
-              {!isIntegrated && (
+              {!isIntegrated && !isStandalone && (
                 <div className="w-full bg-slate-50 rounded-2xl p-4 md:p-6 border border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 mt-2 md:mt-4">
                   <div className="text-center md:text-left">
                     <h4 className="font-bold text-slate-900 text-xs md:text-sm mb-1 flex items-center justify-center md:justify-start gap-2">
@@ -725,12 +766,12 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               <div className="hidden md:block w-px h-4 bg-slate-300"></div>
               <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
                 <FileText size={14} className="text-brand-600" />
-                <span>Datos BOE oficiales</span>
+                <span>{isStandalone ? 'Documentos registrales' : 'Datos BOE oficiales'}</span>
               </div>
               <div className="hidden md:block w-px h-4 bg-slate-300"></div>
               <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
                 <TrendingUp size={14} className="text-brand-600" />
-                <span>Estimación mercado</span>
+                <span>{isStandalone ? 'Análisis de riesgos' : 'Estimación mercado'}</span>
               </div>
             </div>
 
