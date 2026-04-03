@@ -5,6 +5,15 @@ import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/fire
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
+const PRICE_TO_PLAN: Record<string, string> = {
+  "price_1TGOT7REW0EzPhwIhbngXF2k": "basic",
+  "price_1TGObwREW0EzPhwIhEiJ3c11": "basic",
+  "price_1TGOZmREW0EzPhwIa3xk5SXr": "basic",
+  "price_1TGOjpREW0EzPhwIqh0xNXer": "pro",
+  "price_1TGOfWREW0EzPhwIQxyxgMO3": "pro",
+  "price_1TGOexREW0EzPhwINiCkV6zn": "pro"
+};
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
@@ -30,7 +39,10 @@ export default async function handler(req: any, res: any) {
         const email = session.customer_details?.email;
 
         if (email) {
-          await syncStripeData(email, customerId, subscriptionId, 'active');
+          const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+          const priceId = lineItems.data[0].price?.id;
+          const plan = priceId ? PRICE_TO_PLAN[priceId] : undefined;
+          await syncStripeData(email, customerId, subscriptionId, 'active', plan);
         }
         break;
       }
@@ -67,7 +79,7 @@ export default async function handler(req: any, res: any) {
   }
 }
 
-async function syncStripeData(email: string, customerId: string, subscriptionId: string, status: string) {
+async function syncStripeData(email: string, customerId: string, subscriptionId: string, status: string, plan?: string) {
   if (!db) return;
 
   const usersRef = collection(db, 'users');
@@ -78,11 +90,17 @@ async function syncStripeData(email: string, customerId: string, subscriptionId:
     const userDoc = querySnapshot.docs[0];
     const userRef = doc(db, 'users', userDoc.id);
     
-    await updateDoc(userRef, {
+    const updateData: any = {
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscriptionId,
       stripeStatus: status
-    });
+    };
+
+    if (plan) {
+      updateData.plan = plan;
+    }
+    
+    await updateDoc(userRef, updateData);
     
     console.log(`Synced Stripe data for user: ${email}`);
   } else {
