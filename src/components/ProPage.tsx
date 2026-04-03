@@ -1,18 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Star, CheckCircle, ArrowRight, FileText, Search, Home } from 'lucide-react';
+import { Star, CheckCircle, ArrowRight, FileText, Search, Home, Lock, Zap, CalendarX, Unlock, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 import { trackConversion } from '../utils/tracking';
 import { motion } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
 import { toast } from 'sonner';
 import { startCheckout, BillingCycle as StripeBillingCycle } from '../lib/billing';
 import { ROUTES } from '../constants/routes';
+import { PRICING } from '../lib/pricing';
 
 type BillingCycle = 'mensual' | 'trimestral' | 'anual';
 
 const ProPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('anual');
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'pro'>('basic');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
   const { user, isLoading, updatePlan, plan: currentPlan } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,38 +39,48 @@ const ProPage: React.FC = () => {
       const stripeCycle: StripeBillingCycle = 
         billingCycle === 'mensual' ? 'monthly' :
         billingCycle === 'trimestral' ? 'quarterly' : 'yearly';
+      
+      const planKey = planToActivate.toUpperCase() as keyof typeof PRICING;
+      const priceId = PRICING[planKey][stripeCycle];
         
-      await startCheckout(planToActivate, stripeCycle);
+      await startCheckout(planToActivate, stripeCycle, priceId, { id: user.id, email: user.email });
     } catch (error) {
       toast.error('Error al iniciar el proceso de pago');
     }
   };
 
   const getPrice = (plan: 'basic' | 'pro') => {
-    if (plan === 'basic') {
-      if (billingCycle === 'mensual') return '9,90€';
-      if (billingCycle === 'trimestral') return '24,90€';
-      return '79€';
-    } else {
-      if (billingCycle === 'mensual') return '19,90€';
-      if (billingCycle === 'trimestral') return '49€';
-      return '149€';
+    const planKey = plan.toUpperCase() as keyof typeof PRICING;
+    const prices = PRICING[planKey].prices;
+    
+    if (billingCycle === 'mensual') {
+      return `${prices.monthly.toFixed(2).replace('.', ',')}€/mes`;
     }
+    
+    if (billingCycle === 'trimestral') {
+      const monthlyEq = (prices.quarterly / 3).toFixed(1).replace('.', ',');
+      return `${monthlyEq}€/mes`;
+    }
+    
+    // Anual
+    const monthlyEq = (prices.yearly / 12).toFixed(1).replace('.', ',');
+    return `${monthlyEq}€/mes`;
   };
 
   const getPeriodLabel = () => {
-    if (billingCycle === 'mensual') return '/ mes';
-    if (billingCycle === 'trimestral') return '/ trimestre';
-    return '/ año';
+    if (billingCycle === 'mensual') return '';
+    if (billingCycle === 'trimestral') return 'facturado trimestralmente';
+    return 'facturado anualmente';
   };
 
   const getSavingsData = (plan: 'basic' | 'pro') => {
     if (billingCycle === 'mensual') return null;
 
-    const basePrice = plan === 'basic' ? 9.90 : 19.90;
-    const currentPrice = plan === 'basic' 
-      ? (billingCycle === 'trimestral' ? 24.90 : 79)
-      : (billingCycle === 'trimestral' ? 49 : 149);
+    const planKey = plan.toUpperCase() as keyof typeof PRICING;
+    const prices = PRICING[planKey].prices;
+    
+    const basePrice = prices.monthly;
+    const currentPrice = billingCycle === 'trimestral' ? prices.quarterly : prices.yearly;
     const months = billingCycle === 'trimestral' ? 3 : 12;
 
     const monthlyEq = (currentPrice / months).toFixed(2).replace('.', ',');
@@ -153,11 +165,13 @@ const ProPage: React.FC = () => {
           
           <ul className="space-y-4 mb-8 flex-1">
             {[
-              'Acceso fichas',
+              'Acceso a fichas analizadas',
               '5 favoritos',
               '1 alerta básica',
-              '1 análisis cargas gratis',
-              'Checklist inversor'
+              'Notas personales',
+              'Datos Catastro + ubicación',
+              '1 análisis de cargas gratis',
+              'Checklist profesional de subastas'
             ].map((feature, i) => (
               <li key={i} className="flex items-start gap-3 text-slate-700">
                 <CheckCircle size={18} className="text-slate-400 shrink-0 mt-0.5" />
@@ -209,17 +223,16 @@ const ProPage: React.FC = () => {
           <ul className="space-y-4 mb-8 flex-1">
             <li className="flex items-start gap-3 text-white font-medium">
               <CheckCircle size={18} className="text-amber-500 shrink-0 mt-0.5" />
-              <span className="text-sm">Todo lo de Gratis, más:</span>
+              <span className="text-sm">Todo lo de FREE +</span>
             </li>
             {[
               'Favoritos ilimitados',
-              'Alertas personalizadas',
-              'Calculadora avanzada',
-              '5 análisis cargas / mes',
-              'Notas personales',
-              'Botón "Ir a BOE oficial"',
-              'Datos Catastro básicos',
-              'Historial subastas vistas'
+              '3 alertas personalizadas inteligentes',
+              'Botón directo a subasta oficial BOE',
+              'Street View del entorno del inmueble',
+              'Comparativa real precio mercado',
+              'Calculadora PRO (PMR)',
+              '3 análisis de cargas al mes'
             ].map((feature, i) => (
               <li key={i} className="flex items-start gap-3 text-slate-300">
                 <CheckCircle size={18} className="text-emerald-500 shrink-0 mt-0.5" />
@@ -251,9 +264,12 @@ const ProPage: React.FC = () => {
           className={`bg-white rounded-3xl border shadow-sm p-8 flex flex-col relative cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200'}`}
           onClick={() => setSelectedPlan('pro')}
         >
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest py-1.5 px-4 rounded-full shadow-lg">
+            Recomendado inversores
+          </div>
           {currentPlan === 'pro' && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full flex items-center gap-1">
-              <CheckCircle size={12} className="text-white" />
+            <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full flex items-center gap-1">
+              <CheckCircle size={10} className="text-white" />
               Plan actual
             </div>
           )}
@@ -275,19 +291,16 @@ const ProPage: React.FC = () => {
             <p className="text-slate-600 text-sm">Para profesionales que necesitan máxima ventaja.</p>
           </div>
           
+          <div className="mb-4">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Todo lo de BASIC +</span>
+          </div>
+
           <ul className="space-y-4 mb-8 flex-1">
-            <li className="flex items-start gap-3 text-slate-900 font-medium">
-              <CheckCircle size={18} className="text-slate-900 shrink-0 mt-0.5" />
-              <span className="text-sm">Todo lo de BASIC, más:</span>
-            </li>
             {[
-              'Análisis cargas IA ilimitado',
-              'Dossier PDF inversión',
-              'Scoring oportunidad',
-              'Riesgo jurídico ampliado',
-              'Alertas avanzadas',
-              '20% descuento asesorías',
-              'Prioridad nuevas oportunidades'
+              '5 alertas personalizadas inteligentes',
+              '5 análisis de cargas al mes',
+              '20% descuento en consultoría',
+              'Soporte prioritario mismo día'
             ].map((feature, i) => (
               <li key={i} className="flex items-start gap-3 text-slate-700">
                 <CheckCircle size={18} className="text-emerald-600 shrink-0 mt-0.5" />
@@ -312,6 +325,80 @@ const ProPage: React.FC = () => {
               Sin compromiso · Cancela cuando quieras
             </p>
           </div>
+        </div>
+      </div>
+
+      {/* Reassurance Block */}
+      <div className="max-w-6xl mx-auto mb-16 px-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 py-8 border-y border-slate-100">
+          <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+              <CalendarX size={16} />
+            </div>
+            <span className="text-xs font-bold text-slate-700">Cancela cuando quieras</span>
+          </div>
+          <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+              <ShieldCheck size={16} />
+            </div>
+            <span className="text-xs font-bold text-slate-700">Pago seguro con Stripe</span>
+          </div>
+          <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+              <Zap size={16} />
+            </div>
+            <span className="text-xs font-bold text-slate-700">Acceso inmediato</span>
+          </div>
+          <div className="flex items-center gap-3 justify-center md:justify-start">
+            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
+              <Unlock size={16} />
+            </div>
+            <span className="text-xs font-bold text-slate-700">Sin permanencia</span>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ Billing Block */}
+      <div className="max-w-3xl mx-auto mb-24 px-4">
+        <div className="text-center mb-10">
+          <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">Preguntas sobre facturación</h2>
+          <p className="text-slate-500 text-sm">Todo lo que necesitas saber sobre tu suscripción.</p>
+        </div>
+        
+        <div className="space-y-3">
+          {[
+            {
+              q: "¿Puedo cancelar cuando quiera?",
+              a: "Sí, puedes cancelar tu suscripción en cualquier momento desde el apartado \"Gestionar suscripción\" en tu perfil de usuario. Sin preguntas ni complicaciones."
+            },
+            {
+              q: "¿Cuándo se renueva mi suscripción?",
+              a: "La suscripción se renueva automáticamente al final de cada periodo (mensual, trimestral o anual) utilizando el método de pago que hayas configurado."
+            },
+            {
+              q: "¿Pierdo el acceso si cancelo?",
+              a: "No. Si cancelas, mantendrás el acceso a todas las funciones de tu plan hasta que finalice el periodo que ya has pagado."
+            },
+            {
+              q: "¿Puedo cambiar de plan más adelante?",
+              a: "Sí, puedes subir o bajar de plan en cualquier momento. Los cambios se prorratearán automáticamente en tu próxima factura a través del portal de Stripe."
+            }
+          ].map((faq, i) => (
+            <div key={i} className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
+              <button 
+                onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-slate-50 transition-colors"
+              >
+                <span className="font-bold text-slate-900 text-sm">{faq.q}</span>
+                {openFaq === i ? <ChevronUp size={18} className="text-slate-400" /> : <ChevronDown size={18} className="text-slate-400" />}
+              </button>
+              {openFaq === i && (
+                <div className="px-6 pb-4 text-slate-600 text-sm leading-relaxed">
+                  {faq.a}
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
 

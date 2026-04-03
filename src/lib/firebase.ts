@@ -21,6 +21,9 @@ export interface UserProfile {
   createdAt: any;
   analysisUsed?: number;
   lastAnalysisReset?: any;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  stripeStatus?: string;
 }
 
 export const loginWithGoogle = async (): Promise<UserProfile> => {

@@ -29,6 +29,7 @@ const AccountPage: React.FC = () => {
   const [alerts, setAlerts] = React.useState<any[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = React.useState(false);
   const [isLoadingAlerts, setIsLoadingAlerts] = React.useState(false);
+  const [isManagingSubscription, setIsManagingSubscription] = React.useState(false);
 
   useEffect(() => {
     console.log("[AUTH_DEBUG] AccountPage: user:", user?.id || 'null', "isLoading:", isLoading);
@@ -86,6 +87,29 @@ const AccountPage: React.FC = () => {
     } catch (error) {
       console.error("Error deleting alert:", error);
       toast.error("Error al eliminar la alerta");
+    }
+  };
+
+  const handleManageSubscription = async () => {
+    if (!user) return;
+    setIsManagingSubscription(true);
+    try {
+      const response = await fetch('/api/create-billing-portal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        toast.error(data.error || "No se pudo abrir el portal de suscripción");
+      }
+    } catch (error) {
+      console.error("Error opening billing portal:", error);
+      toast.error("Error al acceder al portal");
+    } finally {
+      setIsManagingSubscription(false);
     }
   };
 
@@ -428,6 +452,18 @@ const AccountPage: React.FC = () => {
                 </li>
               ))}
             </ul>
+
+            {plan !== 'free' && (
+              <div className="mt-6 pt-6 border-t border-slate-100">
+                <button 
+                  onClick={handleManageSubscription}
+                  disabled={isManagingSubscription}
+                  className="w-full py-2.5 px-4 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-200 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isManagingSubscription ? 'Cargando...' : 'Gestionar suscripción'}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Upgrade Block */}
