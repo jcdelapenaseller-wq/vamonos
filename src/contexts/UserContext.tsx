@@ -140,7 +140,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } catch (error) {
           console.error("[AUTH_DEBUG] Error fetching profile:", error);
-          handleFirestoreError(error, OperationType.GET, `users/${firebaseUser.uid}`);
+          setUser({
+            id: firebaseUser.uid,
+            email: firebaseUser.email || '',
+            name: firebaseUser.displayName || '',
+            plan: 'free',
+            createdAt: new Date(),
+            analysisUsed: 0
+          });
+          setIsLoading(false);
+          return;
         }
       } else {
         console.log("[AUTH_DEBUG] 2. No firebaseUser or no db, calling setUser(null)");
