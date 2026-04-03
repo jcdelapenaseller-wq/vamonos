@@ -262,6 +262,8 @@ const AnalisisCargasPage: React.FC = () => {
             initialStep={isReportReady ? 'result' : 'upload'} 
             isPaid={isPaidState}
             initialData={initialAnalysisData}
+            analysisType="cargas"
+            auctionId={processedId}
           />
         </div>
       )}

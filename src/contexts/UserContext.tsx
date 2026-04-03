@@ -96,19 +96,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Validate connection to Firestore
-    const testConnection = async () => {
-      if (!db) return;
-      try {
-        await getDocFromServer(doc(db, 'test', 'connection'));
-      } catch (error) {
-        if (error instanceof Error && error.message.includes('the client is offline')) {
-          console.error("Please check your Firebase configuration. ");
-        }
-      }
-    };
-    testConnection();
-
     if (!auth) {
       if (isDev) {
         const storedMock = localStorage.getItem('mockUser');
@@ -205,10 +192,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     // Check limits
     if (currentPlan === 'free' && used >= 1) return false;
-    if (currentPlan === 'basic' && used >= 5) return false;
-    if (currentPlan === 'pro') {
-      // Pro is unlimited, but we still track for analytics if needed
-    }
+    if (currentPlan === 'basic' && used >= 3) return false;
+    if (currentPlan === 'pro' && used >= 5) return false;
 
     const newCount = used + 1;
 

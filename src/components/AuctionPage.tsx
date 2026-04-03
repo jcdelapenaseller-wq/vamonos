@@ -1534,6 +1534,8 @@ const AuctionPage: React.FC = () => {
               initialStep="upload"
               isPaid={true}
               noMargin={true}
+              analysisType={postPaymentState.type as 'cargas' | 'completo'}
+              auctionId={auction.id}
             />
           </React.Suspense>
         </main>

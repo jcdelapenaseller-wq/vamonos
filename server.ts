@@ -10,6 +10,7 @@ import stripeWebhookHandler from './api/stripe-webhook.ts';
 import subscribeHandler from './api/subscribe.ts';
 import createCheckoutSessionHandler from './api/create-checkout-session.ts';
 import generateAnalysisHandler from './api/generate-analysis.ts';
+import runAnalysisHandler from './api/run-analysis.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +28,7 @@ async function startServer() {
   app.use('/api/subscribe', express.json());
   app.use('/api/create-checkout-session', express.json());
   app.use('/api/generate-analysis', express.json());
+  // /api/run-analysis uses multer, so we don't need express.json() for it, or we can just leave it.
 
   // Map API routes
   app.all('/api/valuation', (req, res) => valuationHandler(req as any, res as any));
@@ -35,6 +37,7 @@ async function startServer() {
   app.all('/api/subscribe', (req, res) => subscribeHandler(req as any, res as any));
   app.all('/api/create-checkout-session', (req, res) => createCheckoutSessionHandler(req as any, res as any));
   app.all('/api/generate-analysis', (req, res) => generateAnalysisHandler(req as any, res as any));
+  app.all('/api/run-analysis', (req, res) => runAnalysisHandler(req as any, res as any));
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {

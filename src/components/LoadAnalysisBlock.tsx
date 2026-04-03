@@ -1,11 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn } from 'lucide-react';
+import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
-
-import { analyzeDocumentWithAI } from '../services/geminiService';
 
 interface CargaDetectada {
   identificador_registral: string;
@@ -39,6 +37,7 @@ interface AnalysisResult {
     intereses: number;
     costas: number;
     total: number;
+    importe_total?: number; // Alias for total as requested by user
   };
   impacto_economico: {
     coste_estimado: number;
@@ -65,6 +64,13 @@ interface LoadAnalysisBlockProps {
   isPaid?: boolean;
   initialData?: AnalysisResult | null;
   noMargin?: boolean;
+  analysisType?: 'cargas' | 'completo';
+  auctionId?: string;
+  surface?: number;
+  marketPriceM2?: number;
+  appraisalValue?: number;
+  city?: string;
+  propertyType?: string;
 }
 
 const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({ 
@@ -75,13 +81,25 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   initialStep = 'locked',
   isPaid = false,
   initialData = null,
-  noMargin = false
+  noMargin = false,
+  analysisType = 'cargas',
+  auctionId,
+  surface,
+  marketPriceM2,
+  appraisalValue,
+  city,
+  propertyType
 }) => {
   const [step, setStep] = useState<'locked' | 'upload' | 'loading' | 'result'>(initialData ? 'result' : initialStep);
   const [files, setFiles] = useState<File[]>([]);
   const [resultData, setResultData] = useState<AnalysisResult | null>(initialData);
   const [showHowToModal, setShowHowToModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Salvaguarda: Si falta alguno de estos datos, NO calcular nada financiero, 
+  // NO mostrar ROI, NO mostrar valor mercado, NO mostrar estimaciones.
+  // Solo permitir análisis jurídico existente.
+  const canCalculateFinancials = Boolean(surface && marketPriceM2 && appraisalValue);
 
   useEffect(() => {
     if (showHowToModal) {
@@ -123,21 +141,21 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   
   const usage = user?.analysisUsed || 0;
 
-  const planLimit = currentPlan === 'free' ? 1 : currentPlan === 'basic' ? 3 : 10;
+  const planLimit = currentPlan === 'free' ? 1 : currentPlan === 'basic' ? 3 : 5;
 
   const isBlocked = !isPaid && usage >= planLimit;
 
   const getCounterText = () => {
-    if (isPaid) return 'Análisis pagado';
+    if (isPaid) return 'Análisis desbloqueado';
     if (currentPlan === 'free') {
       return usage >= 1 ? 'Sin análisis disponibles' : '1 análisis gratis disponible';
     }
     if (currentPlan === 'basic') {
-      const remaining = Math.max(0, 3 - usage);
-      return remaining === 0 ? 'Sin análisis disponibles' : `${remaining} de 3 restantes`;
+      const remaining = Math.max(0, planLimit - usage);
+      return remaining === 0 ? 'Sin análisis disponibles' : `${remaining} de ${planLimit} restantes`;
     }
-    const remaining = Math.max(0, 10 - usage);
-    return remaining === 0 ? 'Sin análisis disponibles' : `${remaining} de 10 restantes`;
+    const remaining = Math.max(0, planLimit - usage);
+    return remaining === 0 ? 'Sin análisis disponibles' : `${remaining} de ${planLimit} restantes`;
   };
 
   const getCounterVisuals = (): {
@@ -305,7 +323,26 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     setStep('loading');
     
     try {
-      const result = await analyzeDocumentWithAI(files);
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+      formData.append('type', analysisType);
+      if (auctionId) {
+        formData.append('auctionId', auctionId);
+      }
+
+      const response = await fetch('/api/run-analysis', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al analizar el documento.");
+      }
+
+      const result = await response.json();
       
       // Incrementar contador solo cuando análisis se ejecuta correctamente
       let success = true;
@@ -342,17 +379,12 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   return (
     <div ref={blockRef} className={`${isIntegrated ? 'w-full' : `${noMargin ? '' : 'my-8 md:my-12'} bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden`}`}>
-      {!isIntegrated && (
-        <div className="bg-slate-900 px-8 py-5 text-white flex justify-between items-center">
+        {!isIntegrated && (
+        <div className="bg-slate-900 px-8 py-6 text-white flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <ShieldAlert size={20} className="text-brand-400" />
-            <h2 className="font-serif font-bold text-lg">Revisión experta + IA de cargas registrales</h2>
+            <ShieldAlert size={24} className="text-brand-400" />
+            <h2 className="font-serif font-bold text-xl">Revisión experta + IA de cargas registrales</h2>
           </div>
-          {step === 'locked' && (
-            <span className="bg-brand-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
-              Premium
-            </span>
-          )}
         </div>
       )}
 
@@ -398,21 +430,30 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   </div>
                   <p className="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Pago único por expediente</p>
                 </div>
-                <button 
-                  onClick={handleUnlock}
-                  disabled={isBlocked}
-                  className={`w-full font-bold py-3 md:py-2 px-6 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg text-xs md:text-sm whitespace-nowrap ${
-                    isBlocked 
-                      ? 'bg-slate-200 text-slate-500 cursor-not-allowed shadow-none' 
-                      : 'bg-brand-600 text-white hover:bg-brand-800 shadow-brand-100 group/btn'
-                  }`}
-                >
-                  {isBlocked ? 'Sin análisis disponibles' : 'Analizar cargas →'}
-                </button>
-                {isBlocked && (
-                  <p className="text-[10px] text-red-500 font-bold mt-2 text-center md:text-right">
-                    Upgrade para continuar
-                  </p>
+                
+                {isBlocked ? (
+                  <div className="w-full py-3 md:py-2 px-6 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 font-bold text-center text-xs md:text-sm">
+                    Límite alcanzado
+                  </div>
+                ) : (
+                  <>
+                    {user && !isPaid && (
+                      <p className="text-[9px] font-bold text-slate-400 mb-1 text-center md:text-right">
+                        {currentPlan === 'free' 
+                          ? "Usarás tu análisis gratuito" 
+                          : (planLimit - usage === 2) 
+                            ? "Te queda 1 análisis después" 
+                            : "Consumirá 1 crédito"
+                        }
+                      </p>
+                    )}
+                    <button 
+                      onClick={handleUnlock}
+                      className="w-full font-bold py-3 md:py-2 px-6 rounded-xl bg-brand-600 text-white hover:bg-brand-800 shadow-lg shadow-brand-100 transition-all duration-300 flex items-center justify-center gap-2 text-xs md:text-sm whitespace-nowrap group/btn"
+                    >
+                      Analizar cargas →
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -453,16 +494,10 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               </div>
             ) : (
               <div className="text-center mb-6 md:mb-10">
-                <p className="text-sm text-slate-500 mt-1 max-w-2xl mx-auto leading-tight">
-                  Análisis jurídico asistido por IA basado en documentación registral y criterio experto.
+                <p className="text-lg md:text-xl text-slate-900 font-bold mt-1 max-w-2xl mx-auto leading-tight">
+                  Adjunta Nota Simple o Certificación de cargas. Opcional: edicto.
                 </p>
                 
-                <p className="text-[10px] md:text-xs text-slate-600 mt-4 md:mt-6 max-w-2xl mx-auto leading-relaxed font-medium px-4">
-                  Recomendamos adjuntar Nota Simple o Certificación de cargas.<br className="hidden md:block" />
-                  Opcionalmente puedes añadir el edicto para completar el análisis.<br />
-                  <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-tight">Máximo 2 documentos.</span>
-                </p>
-
                 <div className="flex justify-center gap-4 md:gap-10 mt-6 md:mt-10">
                   <div className="flex flex-col items-center gap-1.5">
                     <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100/50">
@@ -471,7 +506,6 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     </div>
                     <div className="text-center">
                       <p className="text-[9px] md:text-[11px] font-bold text-slate-900 uppercase tracking-wider">Nota simple</p>
-                      <p className="text-[8px] md:text-[10px] font-medium text-emerald-600 italic">Recomendado</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
@@ -481,7 +515,6 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     </div>
                     <div className="text-center">
                       <p className="text-[9px] md:text-[11px] font-bold text-slate-900 uppercase tracking-wider">Certificación</p>
-                      <p className="text-[8px] md:text-[10px] font-medium text-emerald-600 italic">Recomendado</p>
                     </div>
                   </div>
                   <div className="flex flex-col items-center gap-1.5">
@@ -491,7 +524,6 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     </div>
                     <div className="text-center">
                       <p className="text-[9px] md:text-[11px] font-bold text-slate-900 uppercase tracking-wider">Edicto</p>
-                      <p className="text-[8px] md:text-[10px] font-medium text-slate-400 italic">Opcional</p>
                     </div>
                   </div>
                 </div>
@@ -590,19 +622,37 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                 );
               })()}
 
-              <button 
-                onClick={handleAnalyze}
-                disabled={files.length === 0}
-                className={`
-                  w-full max-w-lg ${isIntegrated ? 'py-3 md:py-3.5' : 'py-3.5 md:py-4'} px-8 md:px-12 rounded-2xl font-semibold text-sm md:text-lg transition-all flex items-center justify-center gap-3 shadow-sm
-                  ${(files.length > 0) 
-                    ? 'bg-brand-600 text-white hover:bg-brand-700 hover:-translate-y-0.5' 
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'}
-                `}
-              >
-                <Scale size={isIntegrated ? 18 : 20} />
-                <span>Analizar cargas</span>
-              </button>
+              {isBlocked ? (
+                <div className="w-full max-w-lg py-4 px-8 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 font-bold text-center text-sm md:text-base">
+                  Límite alcanzado
+                </div>
+              ) : (
+                <>
+                  {user && !isPaid && files.length > 0 && (
+                    <p className="text-[10px] md:text-xs font-bold text-slate-500 mb-2 animate-in fade-in slide-in-from-bottom-1">
+                      {currentPlan === 'free' 
+                        ? "Usarás tu análisis gratuito" 
+                        : (planLimit - usage === 2) 
+                          ? "Te queda 1 análisis después" 
+                          : "Este análisis consumirá 1 crédito"
+                      }
+                    </p>
+                  )}
+                  <button 
+                    onClick={handleAnalyze}
+                    disabled={files.length === 0}
+                    className={`
+                      w-full max-w-lg ${isIntegrated ? 'py-3 md:py-3.5' : 'py-3.5 md:py-4'} px-8 md:px-12 rounded-2xl font-semibold text-sm md:text-lg transition-all flex items-center justify-center gap-3 shadow-sm
+                      ${(files.length > 0) 
+                        ? 'bg-brand-600 text-white hover:bg-brand-700 hover:-translate-y-0.5' 
+                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'}
+                    `}
+                  >
+                    <Scale size={isIntegrated ? 18 : 20} />
+                    <span>Analizar cargas</span>
+                  </button>
+                </>
+              )}
               
               {!isIntegrated && (
                 <>
@@ -634,20 +684,12 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   </div>
                   <div className="flex flex-col sm:flex-row justify-center gap-2 md:gap-3 shrink-0 w-full md:w-auto">
                     <a 
-                      href={(!user || (currentPlan === 'free' && !isPaid)) ? '#' : finalBoeUrl}
-                      target={(!user || (currentPlan === 'free' && !isPaid)) ? undefined : "_blank"}
-                      rel={(!user || (currentPlan === 'free' && !isPaid)) ? undefined : "noopener noreferrer"}
-                      onClick={(e) => {
-                        if (!user || (currentPlan === 'free' && !isPaid)) {
-                          e.preventDefault();
-                          if (onShowSoftGate) {
-                            onShowSoftGate();
-                          }
-                        }
-                      }}
-                      className={`w-full sm:w-auto px-4 py-2.5 md:py-2.5 rounded-xl bg-white border border-slate-300 text-[10px] md:text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm ${(!user || (currentPlan === 'free' && !isPaid)) ? 'text-slate-400 cursor-pointer hover:text-brand-600' : 'text-slate-900 hover:bg-slate-50'}`}
+                      href={finalBoeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full sm:w-auto px-4 py-2.5 md:py-2.5 rounded-xl bg-white border border-slate-300 text-[10px] md:text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm text-slate-900 hover:bg-slate-50"
                     >
-                      Ver subasta en BOE {(!user || (currentPlan === 'free' && !isPaid)) ? <Lock size={10} className="md:w-3 md:h-3" /> : <ExternalLink size={10} className="md:w-3 md:h-3" />}
+                      Ver subasta en BOE <ExternalLink size={10} className="md:w-3 md:h-3" />
                     </a>
                     <button 
                       onClick={() => setShowHowToModal(true)}
@@ -674,6 +716,342 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
         {step === 'result' && resultData && (
           <div className="space-y-8">
+            {/* Barra de confianza superior */}
+            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl shadow-sm">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <ShieldCheck size={14} className="text-brand-600" />
+                <span>Análisis IA jurídico</span>
+              </div>
+              <div className="hidden md:block w-px h-4 bg-slate-300"></div>
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <FileText size={14} className="text-brand-600" />
+                <span>Datos BOE oficiales</span>
+              </div>
+              <div className="hidden md:block w-px h-4 bg-slate-300"></div>
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                <TrendingUp size={14} className="text-brand-600" />
+                <span>Estimación mercado</span>
+              </div>
+            </div>
+
+            {/* Contador de créditos */}
+            {user && (
+              <div className="flex flex-col items-center -mt-4">
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full shadow-sm">
+                  <div className={`w-2 h-2 rounded-full ${planLimit - usage > 0 ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></div>
+                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                    {planLimit - usage <= 0 
+                      ? "Has alcanzado el límite mensual" 
+                      : currentPlan === 'free' 
+                        ? `Te queda ${planLimit - usage} análisis gratis` 
+                        : `Te quedan ${planLimit - usage} análisis este mes`
+                    }
+                  </span>
+                </div>
+                
+                {user.lastAnalysisReset && currentPlan !== 'free' && (
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">
+                    {(() => {
+                      const lastReset = user.lastAnalysisReset.toDate ? user.lastAnalysisReset.toDate() : new Date(user.lastAnalysisReset);
+                      const resetDate = new Date(lastReset);
+                      resetDate.setMonth(resetDate.getMonth() + 1);
+                      const day = resetDate.getDate();
+                      const month = resetDate.toLocaleString('es-ES', { month: 'long' });
+                      return `Se reinician el ${day} ${month}`;
+                    })()}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Resumen Inversión */}
+            {analysisType === 'completo' && canCalculateFinancials && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  <TrendingUp size={20} className="text-brand-600" /> Resumen inversión
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-medium mb-1">Valor mercado estimado</p>
+                    <p className="text-lg font-bold text-slate-900">
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(surface! * marketPriceM2!)}
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-medium mb-1">Tasación</p>
+                    <p className="text-lg font-bold text-slate-900">
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue!)}
+                    </p>
+                  </div>
+                  <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
+                    <p className="text-xs text-emerald-600 font-medium mb-1">Descuento estimado</p>
+                    <p className="text-lg font-bold text-emerald-700">
+                      {new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: 1 }).format(((surface! * marketPriceM2!) - appraisalValue!) / (surface! * marketPriceM2!))}
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-medium mb-1">Superficie</p>
+                    <p className="text-lg font-bold text-slate-900">
+                      {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(surface!)} m²
+                    </p>
+                  </div>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <p className="text-xs text-slate-500 font-medium mb-1">€/m² mercado</p>
+                    <p className="text-lg font-bold text-slate-900">
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(marketPriceM2!)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Coste total estimado */}
+            {analysisType === 'completo' && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
+              <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
+                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+                  <Calculator size={20} className="text-brand-400" /> Coste total estimado
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-slate-400 text-sm">
+                    <span>Tasación</span>
+                    <span className="font-medium text-slate-200">
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue || 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-slate-400 text-sm">
+                    <span>Cargas que subsisten</span>
+                    <span className="font-medium text-amber-400">
+                      + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total)}
+                    </span>
+                  </div>
+                  <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
+                    <span className="font-bold text-slate-200">Coste total estimado</span>
+                    <span className="text-2xl font-black text-brand-400">
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total))}
+                    </span>
+                  </div>
+                </div>
+                <p className="mt-4 text-[10px] text-slate-500 leading-tight">
+                  * Este cálculo asume una puja igual al valor de tasación. El coste final dependerá de tu puja real en el portal del BOE.
+                </p>
+              </div>
+            )}
+
+            {/* Decisión de inversión - Bloque Agrupado */}
+            {analysisType === 'completo' && canCalculateFinancials && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
+              <div className="bg-slate-50/50 border border-slate-200 rounded-3xl p-8 shadow-sm space-y-10">
+                <div className="text-center space-y-2">
+                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 justify-center uppercase tracking-widest">
+                    <ShieldCheck size={24} className="text-brand-600" /> Decisión de inversión
+                  </h3>
+                  <p className="text-sm text-slate-500 font-medium italic">
+                    Análisis final basado en datos de mercado y cargas detectadas
+                  </p>
+                </div>
+
+                {(() => {
+                  const valorMercadoEstimado = surface! * marketPriceM2!;
+                  const importeCargas = resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total;
+                  const costeTotal = (appraisalValue || 0) + importeCargas;
+                  const margenSeguridad = valorMercadoEstimado - costeTotal;
+                  const margenPorcentaje = (margenSeguridad / valorMercadoEstimado) * 100;
+                  const margenObjetivo = 0.20;
+                  const precioMaximoPuja = (valorMercadoEstimado * (1 - margenObjetivo)) - importeCargas;
+
+                  // Lógica de veredicto
+                  let veredicto = "No recomendable";
+                  let colorClass = "text-rose-600";
+                  let bgColorClass = "bg-rose-50";
+                  let borderColorClass = "border-rose-100";
+                  let Icon = FileWarning;
+                  let explicacion = "El margen es insuficiente para cubrir riesgos imprevistos.";
+                  let ctaText = "Ver otras oportunidades";
+                  let ctaIcon = <ArrowRight size={18} />;
+                  let ctaLink = "/";
+
+                  if (margenPorcentaje >= 25) {
+                    veredicto = "Alta oportunidad";
+                    colorClass = "text-emerald-600";
+                    bgColorClass = "bg-emerald-50";
+                    borderColorClass = "border-emerald-100";
+                    Icon = ShieldCheck;
+                    explicacion = "Excelente margen de seguridad. La operación es muy sólida financieramente.";
+                    ctaText = "Analizar cargas ahora";
+                    ctaIcon = <ShieldCheck size={18} />;
+                    ctaLink = "#analisis-juridico";
+                  } else if (margenPorcentaje >= 15) {
+                    veredicto = "Oportunidad interesante";
+                    colorClass = "text-amber-600";
+                    bgColorClass = "bg-amber-50";
+                    borderColorClass = "border-amber-100";
+                    Icon = CheckCircle;
+                    explicacion = "Buen margen. Operación atractiva si el resto de factores legales son favorables.";
+                    ctaText = "Calcular puja precisa";
+                    ctaIcon = <Calculator size={18} />;
+                    ctaLink = "/pro";
+                  } else if (margenPorcentaje >= 5) {
+                    veredicto = "Analizar con cautela";
+                    colorClass = "text-orange-600";
+                    bgColorClass = "bg-orange-50";
+                    borderColorClass = "border-orange-100";
+                    Icon = AlertTriangle;
+                    explicacion = "Margen ajustado. Requiere un análisis legal y de mercado muy preciso.";
+                    ctaText = "Revisar análisis jurídico";
+                    ctaIcon = <FileSearch size={18} />;
+                    ctaLink = "#analisis-juridico";
+                  }
+
+                  return (
+                    <div className="space-y-10">
+                      {/* 1. Veredicto de Inversión - HERO */}
+                      <div className="flex flex-col items-center text-center space-y-6">
+                        <div className={`inline-flex items-center gap-4 px-10 py-6 rounded-3xl border-2 ${borderColorClass} ${bgColorClass} shadow-md transform transition-all hover:scale-[1.02]`}>
+                          <Icon size={48} className={colorClass} />
+                          <h4 className={`text-4xl font-black ${colorClass} tracking-tight`}>
+                            {veredicto}
+                          </h4>
+                        </div>
+                        <div className="max-w-xl space-y-6">
+                          <div className="space-y-3">
+                            <p className="text-2xl font-black text-slate-900">
+                              Margen de seguridad del {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 }).format(margenPorcentaje)}%
+                            </p>
+                            <p className="text-lg text-slate-600 leading-relaxed font-medium">
+                              {explicacion}
+                            </p>
+                          </div>
+
+                          {/* CTA Dinámico */}
+                          <div className="pt-2">
+                            {ctaLink.startsWith('#') ? (
+                              <button 
+                                onClick={() => {
+                                  const el = document.getElementById(ctaLink.substring(1));
+                                  el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                                }}
+                                className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 ${
+                                  veredicto === 'No recomendable' 
+                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
+                                    : 'bg-brand-600 text-white hover:bg-brand-700'
+                                }`}
+                              >
+                                {ctaIcon}
+                                {ctaText}
+                              </button>
+                            ) : (
+                              <Link 
+                                to={ctaLink}
+                                className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 ${
+                                  veredicto === 'No recomendable' 
+                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
+                                    : 'bg-brand-600 text-white hover:bg-brand-700'
+                                }`}
+                              >
+                                {ctaIcon}
+                                {ctaText}
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* 2. Comparativa Valor vs Coste & Beneficio Potencial */}
+                      <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
+                          {/* Columna Izquierda: Valor Mercado */}
+                          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Valor mercado estimado</p>
+                            <p className="text-3xl font-black text-slate-900">
+                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(valorMercadoEstimado)}
+                            </p>
+                          </div>
+
+                          {/* Separador Visual (Flecha o VS) */}
+                          <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-slate-100 border border-slate-200 rounded-full items-center justify-center z-10 text-slate-400 font-bold text-xs">
+                            VS
+                          </div>
+
+                          {/* Columna Derecha: Coste Total */}
+                          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
+                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Inversión total estimada</p>
+                            <p className="text-3xl font-black text-slate-900">
+                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(costeTotal)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Beneficio Potencial */}
+                        <div className={`p-6 rounded-2xl border flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 ${margenSeguridad >= 0 ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'} shadow-sm`}>
+                          <div className="flex items-center gap-2">
+                            <TrendingUp size={24} />
+                            <span className="text-base font-bold uppercase tracking-wider">Beneficio potencial:</span>
+                          </div>
+                          <span className="text-3xl font-black">
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(margenSeguridad)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 3. Estimación orientativa de puja - Discreta */}
+                      <div className="bg-slate-100/50 border border-slate-200 rounded-2xl p-6 text-center max-w-2xl mx-auto">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
+                          <Scale size={12} /> Estimación orientativa de puja
+                        </div>
+                        <div className="space-y-3">
+                          <p className="text-3xl font-black text-slate-800">
+                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.max(0, precioMaximoPuja))}
+                          </p>
+                          <div className="space-y-1">
+                            <p className="text-sm text-slate-500 font-medium">
+                              Puja máxima sugerida para mantener un margen del 20%
+                            </p>
+                            <p className="text-brand-600 text-xs font-bold">
+                              Para cálculo preciso usar la Calculadora PRO
+                            </p>
+                          </div>
+
+                          {/* CTA para usuarios FREE o sin plan */}
+                          {(!currentPlan || currentPlan === 'free') && (
+                            <div className="mt-4">
+                              <Link 
+                                to="/pro" 
+                                className="inline-flex items-center gap-2 px-5 py-2 bg-brand-600 text-white rounded-lg text-xs font-bold hover:bg-brand-700 transition-all shadow-sm"
+                              >
+                                <Calculator size={14} />
+                                Calcular puja máxima
+                              </Link>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <hr className="border-slate-200" />
+
+                      {/* 4. Margen de Seguridad - Detalle */}
+                      <div className="space-y-4">
+                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest text-center">Detalle del margen de seguridad</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
+                            <p className="text-xs text-slate-400 font-bold uppercase mb-1">Margen en euros</p>
+                            <p className="text-2xl font-black text-slate-900">
+                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(margenSeguridad)}
+                            </p>
+                          </div>
+                          <div className={`${bgColorClass} p-5 rounded-2xl border ${borderColorClass} shadow-sm flex flex-col items-center justify-center text-center`}>
+                            <p className={`text-xs ${colorClass.replace('text', 'text-opacity-70 text')} font-bold uppercase mb-1`}>Margen porcentual</p>
+                            <p className={`text-2xl font-black ${colorClass}`}>
+                              {new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: 1 }).format(margenPorcentaje / 100)}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+
             {/* CTAs Section */}
             <div className="flex flex-col gap-3">
               <button 
@@ -714,7 +1092,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             </div>
 
             {/* Context Header */}
-            <div className="flex flex-wrap gap-4 items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div id="analisis-juridico" className="flex flex-wrap gap-4 items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <FileText size={16} className="text-slate-400" />
                 <span>Fuente: <strong className="text-slate-900">{resultData.fuente_documento}</strong></span>
@@ -1068,6 +1446,14 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                 <Download size={20} /> Descargar Informe PDF
               </button>
             </div>
+
+            {/* Aviso Legal Final */}
+            <div className="mt-12 pt-6 border-t border-slate-100 bg-slate-50/50 -mx-6 px-6 pb-6 rounded-b-2xl">
+              <p className="text-[10px] text-slate-500 leading-relaxed text-center max-w-2xl mx-auto">
+                <span className="font-bold text-slate-600 uppercase tracking-widest mr-1">Aviso legal:</span>
+                Este informe se genera mediante análisis con inteligencia jurídica artificial especializada de la documentación disponible y datos de mercado estimados. Tiene carácter informativo y orientativo. No constituye asesoramiento jurídico, financiero ni de inversión. Se recomienda complementar la información con profesionales cualificados antes de tomar decisiones.
+              </p>
+            </div>
           </div>
         )}
       </div>
@@ -1139,7 +1525,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                 <div className="space-y-6">
                   {[
                     { title: 'Abrir subasta en BOE', desc: 'Accede al enlace oficial de la subasta.' },
-                    { title: 'Descargar certificación de cargas', desc: 'Busca y descarga el documento oficial.' },
+                    { title: 'Descargar nota simple o certificación de cargas', desc: 'Busca y descarga el documento oficial.' },
                     { title: 'Volver a esta pantalla', desc: 'Regresa a la ficha de la subasta.' },
                     { title: 'Subir el PDF', desc: 'Arrastra el archivo descargado aquí.' }
                   ].map((item, idx) => (
@@ -1154,7 +1540,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     </div>
                   ))}
                 </div>
-                <p className="text-[10px] text-slate-400 mt-6 italic">Algunas subastas permiten descarga directa sin iniciar sesión</p>
+                <p className="text-sm text-slate-500 mt-6 font-medium">Algunas subastas permiten descarga directa sin iniciar sesión</p>
 
                 <div className="mt-8">
                   <button 
@@ -1167,7 +1553,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
                 <div className="mt-10 pt-6 border-t border-slate-100 flex flex-col gap-4">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center">¿Tienes dudas?</p>
-                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                  <p className="text-sm text-slate-900 font-bold text-center">Escríbenos y respondemos en menos de 24h</p>
                     <a 
                       href="mailto:contacto@activosoffmarket.es" 
                       target="_blank"
@@ -1186,7 +1572,6 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     </a>
                   </div>
                 </div>
-              </div>
             </motion.div>
           </motion.div>
         </AnimatePresence>,

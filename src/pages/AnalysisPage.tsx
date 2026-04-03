@@ -69,6 +69,11 @@ const AnalysisPage: React.FC = () => {
               boeUrl={auction.boeUrl}
               isIntegrated={true}
               initialStep="upload"
+              surface={auction.surface}
+              marketPriceM2={auction.marketPriceM2}
+              appraisalValue={auction.appraisalValue}
+              city={auction.city}
+              propertyType={auction.propertyType}
             />
           )}
         </div>
