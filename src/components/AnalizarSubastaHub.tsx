@@ -1,5 +1,5 @@
-import React, { useRef, useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useRef, useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { 
   UploadCloud, 
   ShieldCheck, 
@@ -38,11 +38,133 @@ import Footer from './Footer';
 
 const AnalizarSubastaHub: React.FC = () => {
   const { plan, user, isLogged } = useUser();
+  const location = useLocation();
   const uploaderRef = useRef<HTMLDivElement>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const [showUploader, setShowUploader] = useState(false);
+
+  useEffect(() => {
+    // SEO Meta Tags
+    document.title = "Analizador de Nota Simple y Cargas Registrales | Activos Off-Market";
+    
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', 'Detecta cargas, hipotecas y embargos en tu nota simple. IA jurídica especializada para subastas. Informe profesional en minutos.');
+    }
+
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    if (metaRobots) {
+      metaRobots.setAttribute('content', 'index, follow, max-image-preview:large');
+    }
+
+    // Canonical
+    let linkCanonical = document.querySelector('link[rel="canonical"]');
+    if (!linkCanonical) {
+      linkCanonical = document.createElement('link');
+      linkCanonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(linkCanonical);
+    }
+    linkCanonical.setAttribute('href', 'https://activosoffmarket.es/analizar-subasta');
+
+    // Open Graph
+    const ogTitle = document.querySelector('meta[property="og:title"]');
+    if (ogTitle) ogTitle.setAttribute('content', 'Analiza tu nota simple antes de pujar | IA Jurídica');
+    
+    const ogDesc = document.querySelector('meta[property="og:description"]');
+    if (ogDesc) ogDesc.setAttribute('content', 'Detecta cargas, hipotecas y embargos en tu nota simple. IA jurídica especializada para subastas.');
+
+    const ogImage = document.querySelector('meta[property="og:image"]');
+    if (ogImage) ogImage.setAttribute('content', 'https://activosoffmarket.es/og-analisis.jpg');
+
+    const ogUrl = document.querySelector('meta[property="og:url"]');
+    if (ogUrl) ogUrl.setAttribute('content', 'https://activosoffmarket.es/analizar-subasta');
+
+    // JSON-LD Structured Data
+    const scriptId = 'seo-structured-data';
+    let script = document.getElementById(scriptId) as HTMLScriptElement;
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+
+    const structuredData = [
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Analizador de nota simple",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "offers": {
+          "@type": "Offer",
+          "price": "2.99",
+          "priceCurrency": "EUR"
+        }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "¿Para qué sirve analizar una nota simple?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sirve para detectar cargas, hipotecas y embargos que el comprador debe asumir tras la subasta, evitando sorpresas legales."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Detecta cargas ocultas?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Identifica todas las cargas inscritas en el registro, incluyendo afecciones fiscales y limitaciones que no aparecen a simple vista."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "¿Sirve para subastas BOE?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Sí, es ideal para analizar la certificación de cargas y la nota simple antes de pujar en cualquier subasta del BOE."
+            }
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "WebPage",
+        "name": "Analizador de Nota Simple",
+        "description": "Herramienta de IA para el análisis de cargas registrales en subastas."
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Inicio",
+            "item": "https://activosoffmarket.es/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Analizar Subasta",
+            "item": "https://activosoffmarket.es/analizar-subasta"
+          }
+        ]
+      }
+    ];
+    script.text = JSON.stringify(structuredData);
+
+    return () => {
+      // Cleanup if needed
+    };
+  }, []);
 
   const usage = user?.analysisUsed || 0;
   const planLimit = plan === 'free' ? 1 : plan === 'basic' ? 3 : 5;
@@ -137,6 +259,14 @@ const AnalizarSubastaHub: React.FC = () => {
               Analiza tu nota simple <br className="hidden md:block" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-blue-400">antes de pujar</span>
             </motion.h1>
 
+            {/* SEO Hidden Content - Intro */}
+            <div className="sr-only">
+              <p>Analizar la nota simple antes de pujar en una subasta del BOE es el paso más crítico para cualquier inversor inmobiliario en España. Una nota simple del Registro de la Propiedad es un documento informativo que resume la situación jurídica actual de una finca. En ella se detallan la titularidad, la descripción de la propiedad y, lo más importante, las cargas registrales que pesan sobre ella.</p>
+              <p>Cuando hablamos de cargas registrales, nos referimos a cualquier gravamen o limitación que afecte al dominio de la propiedad. Las más comunes son las hipotecas, los embargos judiciales o administrativos, las servidumbres y las afecciones fiscales. Ignorar estas cargas puede llevar a adquirir una propiedad con deudas que el adjudicatario de la subasta deberá asumir. Por ejemplo, una hipoteca anterior a la carga que ejecuta la subasta no se cancela, sino que permanece viva y el nuevo dueño debe hacerse cargo de ella.</p>
+              <p>Nuestro analizador de nota simple utiliza inteligencia artificial jurídica entrenada específicamente en el derecho registral español y la Ley Hipotecaria. El sistema es capaz de leer y extraer automáticamente la información relevante de las notas simples y certificaciones de cargas, identificando riesgos que a menudo pasan desapercibidos para el ojo no experto. Detectamos embargos de la Seguridad Social, de la AEAT, hipotecas de rango preferente y limitaciones dispositivas.</p>
+              <p>Realizar un análisis exhaustivo de las cargas antes de participar en subastas judiciales o notariales permite calcular con precisión el coste real de la inversión. No se trata solo del precio de la puja, sino de la suma de las cargas que permanecen y los gastos de cancelación. Con nuestro informe profesional, obtendrás una visión clara de la viabilidad jurídica de la operación, evitando sorpresas legales y financieras que podrían arruinar tu rentabilidad.</p>
+            </div>
+
             <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -220,8 +350,8 @@ const AnalizarSubastaHub: React.FC = () => {
       <section className="py-24 bg-white rounded-t-[60px] relative z-20 -mt-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-6">Cómo funciona</h2>
-            <p className="text-slate-500 text-lg">Tres pasos para tu seguridad jurídica</p>
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-6">Cómo funciona el análisis de cargas</h2>
+            <p className="text-slate-500 text-lg">Tres pasos para tu seguridad jurídica al analizar nota simple online</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -247,12 +377,55 @@ const AnalizarSubastaHub: React.FC = () => {
         </div>
       </section>
 
+      {/* Qué incluye el informe */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-20 items-center">
+            <div className="order-2 md:order-1">
+              <div className="bg-white p-8 md:p-12 rounded-[40px] shadow-2xl border border-slate-100 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-brand-500/5 rounded-full -mr-16 -mt-16"></div>
+                <h2 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-8">Analizar nota simple: qué incluye el informe</h2>
+                <ul className="space-y-6">
+                  {[
+                    { title: "Resumen ejecutivo", desc: "Conclusión jurídica inmediata sobre la viabilidad de la puja." },
+                    { title: "Desglose de cargas", desc: "Listado detallado de hipotecas, embargos y afecciones fiscales." },
+                    { title: "Cargas preferentes", desc: "Identificación de deudas que NO se cancelan tras la subasta." },
+                    { title: "Alertas de riesgo", desc: "Avisos sobre caducidad de anotaciones o defectos registrales." }
+                  ].map((item, i) => (
+                    <li key={i} className="flex gap-4">
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-1">
+                        <Check size={14} strokeWidth={3} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-slate-900 text-lg">{item.title}</h4>
+                        <p className="text-slate-500">{item.desc}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <div className="order-1 md:order-2">
+              <h3 className="text-2xl md:text-4xl font-serif font-bold text-slate-900 mb-6">IA entrenada en derecho registral español</h3>
+              <p className="text-lg text-slate-500 mb-8 leading-relaxed">
+                Nuestro sistema no solo extrae datos; interpreta la situación jurídica de la finca basándose en la Ley Hipotecaria. Detectamos riesgos que otros pasan por alto, dándote la seguridad necesaria para invertir en subastas BOE.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <div className="px-4 py-2 bg-white rounded-xl border border-slate-200 text-sm font-bold text-slate-600 shadow-sm">Basado en Ley Hipotecaria</div>
+                <div className="px-4 py-2 bg-white rounded-xl border border-slate-200 text-sm font-bold text-slate-600 shadow-sm">Revisión experta</div>
+                <div className="px-4 py-2 bg-white rounded-xl border border-slate-200 text-sm font-bold text-slate-600 shadow-sm">IA Jurídica</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Qué analiza */}
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12 md:mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4 md:mb-6">Qué analiza nuestra IA</h2>
-            <p className="text-slate-500 text-base md:text-lg">Cobertura total de riesgos registrales</p>
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4 md:mb-6">Qué analiza nuestra IA jurídica</h2>
+            <p className="text-slate-500 text-base md:text-lg">Cobertura total de riesgos registrales y certificación de cargas</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
@@ -335,8 +508,8 @@ const AnalizarSubastaHub: React.FC = () => {
       <section className="py-20 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12 md:mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4 md:mb-6">Precio transparente</h2>
-            <p className="text-slate-500 text-base md:text-lg">Sin suscripciones, paga solo por lo que necesitas</p>
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4 md:mb-6">Precio del análisis de cargas</h2>
+            <p className="text-slate-500 text-base md:text-lg">Sin suscripciones, paga solo por lo que necesitas para ver cargas nota simple</p>
           </div>
 
           <div className="max-w-xl mx-auto">
@@ -425,11 +598,36 @@ const AnalizarSubastaHub: React.FC = () => {
       <section className="py-32 bg-white">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-20">
-            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-6">Preguntas frecuentes</h2>
+            <h2 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-6">Preguntas frecuentes sobre nota simple</h2>
           </div>
 
           <div className="space-y-6">
-            {faqs.map((faq, i) => (
+            {[
+              {
+                q: "¿Para qué sirve analizar una nota simple?",
+                a: "Analizar la nota simple antes de pujar evita sorpresas legales. Sirve para detectar cargas registrales, hipotecas nota simple y embargos registro propiedad que el comprador debe asumir tras la subasta."
+              },
+              {
+                q: "¿Detecta cargas ocultas?",
+                a: "Nuestra IA jurídica especializada identifica todas las cargas inscritas en el registro, incluyendo afecciones fiscales, servidumbres y limitaciones que no aparecen a simple vista en una lectura rápida."
+              },
+              {
+                q: "¿Sirve para subastas BOE?",
+                a: "Sí, está optimizado para analizar tanto la nota simple informativa como la certificación de cargas del BOE en subastas judiciales, administrativas y notariales."
+              },
+              {
+                q: "¿Incluye informe jurídico?",
+                a: "Sí, tras el análisis obtienes un informe profesional descargable en PDF con la clasificación jurídica de las cargas y una conclusión clara sobre los riesgos registrales detectados."
+              },
+              {
+                q: "¿Necesito enlace de subasta?",
+                a: "No es necesario. Solo tienes que subir el PDF de la nota simple o la certificación de cargas para que nuestra IA realice el análisis inmediato."
+              },
+              {
+                q: "¿Cuánto tarda el análisis?",
+                a: "El proceso es inmediato. La IA procesa el documento en segundos y genera el informe profesional al instante, ahorrándote horas de revisión manual."
+              }
+            ].map((faq, i) => (
               <details key={i} className="group bg-slate-50 rounded-[32px] border border-slate-100 overflow-hidden transition-all duration-300 hover:bg-white hover:shadow-xl hover:border-brand-100">
                 <summary className="flex items-center justify-between p-8 cursor-pointer list-none">
                   <span className="text-xl font-bold text-slate-900 pr-8">{faq.q}</span>
@@ -445,6 +643,16 @@ const AnalizarSubastaHub: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* SEO Hidden Content - Final */}
+      <div className="sr-only">
+        <p>Entender qué es una nota simple y cómo interpretar las cargas registrales es fundamental para el éxito en las subastas públicas. La nota simple informativa es el documento que emite el Registro de la Propiedad para dar publicidad a los asientos vigentes sobre una finca. Aunque no tiene la fe pública de una certificación, es la herramienta más ágil para conocer el estado de una propiedad.</p>
+        <p>Las cargas registrales son anotaciones que indican que la propiedad responde de una deuda o está sujeta a una limitación. En el contexto de las subastas del BOE, es vital distinguir entre cargas posteriores (que se cancelan tras la subasta) y cargas anteriores o preferentes (que subsisten). La Ley Hipotecaria española establece el principio de prioridad registral: 'prior tempore, potior iure' (primero en el tiempo, mejor en el derecho). Esto significa que si compras una casa en una subasta por un embargo posterior a una hipoteca, la hipoteca seguirá existiendo y tú serás el responsable de pagarla.</p>
+        <p>Los riesgos al pujar sin un análisis previo son múltiples. Además de las hipotecas anteriores, puedes encontrarte con embargos preventivos, prohibiciones de disponer, condiciones resolutorias o incluso derechos de superficie. Otro aspecto crítico es la certificación de cargas, un documento más extenso que el juzgado solicita al registro al inicio del procedimiento de apremio. Analizar tanto la nota simple actualizada como la certificación de cargas es la única forma de tener una seguridad jurídica plena.</p>
+        <p>¿Cómo analizar una nota simple de forma efectiva? Primero, verifica la descripción de la finca para asegurar que coincide con la realidad física. Segundo, comprueba la titularidad y el estado civil de los dueños (por ejemplo, si es vivienda habitual y hay cónyuges no deudores). Tercero, y más importante, desglosa cada una de las cargas por fecha de inscripción y tipo de procedimiento.</p>
+        <p>Nuestro servicio de análisis de cargas mediante IA jurídica simplifica este proceso complejo. El sistema identifica automáticamente la naturaleza de cada anotación, calcula la vigencia de las afecciones fiscales y alerta sobre riesgos específicos como la caducidad de las anotaciones de embargo. Este nivel de detalle es esencial para inversores que buscan profesionalizar su actividad en subastas judiciales, administrativas y notariales.</p>
+        <p>En España, el mercado de subastas ofrece grandes oportunidades, pero solo para aquellos que hacen sus deberes. La transparencia del registro de la propiedad es nuestra mayor aliada, pero su lenguaje técnico puede ser una barrera. Al utilizar tecnología especializada, democratizamos el acceso a la inversión segura, permitiendo que tanto ahorradores como inversores profesionales tomen decisiones basadas en datos y no en suposiciones. Recuerda: en una subasta, lo que no ves en la nota simple es lo que más caro te puede salir.</p>
+      </div>
 
       {/* Final CTA */}
       <section className="py-20 md:py-32 relative overflow-hidden mx-4 md:mx-10 mb-10 rounded-[40px] md:rounded-[60px]">
