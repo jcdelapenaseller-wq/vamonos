@@ -134,6 +134,7 @@ const AuctionPage: React.FC = () => {
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [analysisResult, setAnalysisResult] = React.useState<any>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [autoCheckout, setAutoCheckout] = useState<'cargas' | 'completo' | null>(null);
   const [paymentType, setPaymentType] = useState<'analysis' | 'cargas'>('analysis');
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [postPaymentState, setPostPaymentState] = useState<{ active: boolean, type: string }>({ active: false, type: '' });
@@ -435,6 +436,7 @@ const AuctionPage: React.FC = () => {
 
   const handleAnalyzeCargasClick = () => {
     setPaymentType('cargas');
+    setAutoCheckout(null);
     setShowPaymentModal(true);
   };
 
@@ -2541,6 +2543,7 @@ const AuctionPage: React.FC = () => {
                       <button 
                         onClick={() => {
                           setPaymentType('analysis');
+                          setAutoCheckout('completo');
                           setShowPaymentModal(true);
                         }}
                         className="w-full bg-slate-900 hover:bg-brand-700 text-white font-bold py-5 px-6 rounded-2xl transition-all duration-300 flex items-center justify-center gap-3 group/btn text-lg shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
@@ -2936,9 +2939,13 @@ const AuctionPage: React.FC = () => {
         {/* PAYMENT MODAL */}
         <PaymentModal
           isOpen={showPaymentModal}
-          onClose={() => setShowPaymentModal(false)}
+          onClose={() => {
+            setShowPaymentModal(false);
+            setAutoCheckout(null);
+          }}
           type={paymentType}
           auctionId={auction.boeId || auction.slug || ''}
+          autoCheckout={autoCheckout}
         />
 
         {/* STREET VIEW MODAL */}
@@ -3014,6 +3021,7 @@ const AuctionPage: React.FC = () => {
               <button 
                 onClick={() => {
                   setPaymentType('analysis');
+                  setAutoCheckout('completo');
                   setShowPaymentModal(true);
                 }}
                 className="bg-slate-900 text-white font-bold py-3 px-6 rounded-xl text-sm shadow-sm active:scale-[0.98] transition-all flex items-center gap-2"

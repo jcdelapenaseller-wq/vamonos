@@ -5,7 +5,7 @@ import { AUCTIONS } from '../data/auctions';
 import LoadAnalysisBlock from '../components/LoadAnalysisBlock';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import PremiumModal from '../components/PremiumModal';
+import PaymentModal from '../components/PaymentModal';
 import { normalizePropertyType, normalizeCity } from '../utils/auctionNormalizer';
 
 const AnalysisPage: React.FC = () => {
@@ -13,6 +13,7 @@ const AnalysisPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [autoCheckout, setAutoCheckout] = useState<'cargas' | 'completo' | null>(null);
   const isPaid = searchParams.get('paid') === 'true';
   const cleanSlug = slug ? decodeURIComponent(slug).replace(/\/$/, '').toLowerCase() : '';
   const auction = cleanSlug ? AUCTIONS[cleanSlug] : null;
@@ -55,13 +56,27 @@ const AnalysisPage: React.FC = () => {
               <div className="w-16 h-16 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center mx-auto mb-6">
                 <Lock size={32} />
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-4">Este análisis requiere pago único 2,99€</h2>
-              <button 
-                onClick={() => setIsModalOpen(true)}
-                className="py-4 px-8 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 transition-all shadow-lg"
-              >
-                Analizar cargas
-              </button>
+              <h2 className="text-2xl font-bold text-slate-900 mb-4">Este análisis requiere pago único</h2>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <button 
+                  onClick={() => {
+                    setAutoCheckout(null);
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full sm:w-auto py-4 px-8 bg-white border-2 border-brand-600 text-brand-600 rounded-2xl font-bold hover:bg-brand-50 transition-all shadow-sm"
+                >
+                  Analizar cargas (2,99€)
+                </button>
+                <button 
+                  onClick={() => {
+                    setAutoCheckout('completo');
+                    setIsModalOpen(true);
+                  }}
+                  className="w-full sm:w-auto py-4 px-8 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 transition-all shadow-lg"
+                >
+                  Generar informe completo (4,99€)
+                </button>
+              </div>
             </div>
           ) : (
             <LoadAnalysisBlock 
@@ -87,9 +102,15 @@ const AnalysisPage: React.FC = () => {
         )}
       </main>
 
-      <PremiumModal 
+      <PaymentModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => {
+          setIsModalOpen(false);
+          setAutoCheckout(null);
+        }} 
+        type="analysis"
+        auctionId={auction.boeId || cleanSlug}
+        autoCheckout={autoCheckout}
       />
       <Footer />
     </div>

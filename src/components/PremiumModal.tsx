@@ -28,39 +28,58 @@ const PremiumModal: React.FC<PremiumModalProps> = ({ isOpen, onClose, slug }) =>
           <X size={24} />
         </button>
         
-        <h2 className="text-2xl font-serif font-bold text-slate-900 mb-6 text-center">
-          Análisis jurídico profesional de cargas
-        </h2>
-        
-        <div className="text-slate-600 mb-8 space-y-3">
-          <p>Detectamos antes de pujar:</p>
-          <ul className="list-disc list-inside space-y-1">
-            <li>Cargas que subsisten</li>
-            <li>Deudas ocultas</li>
-            <li>Riesgo jurídico real</li>
-            <li>Impacto económico</li>
-            <li>Recomendación profesional</li>
-          </ul>
-        </div>
-
         <div className="text-center mb-8">
-          <span className="text-4xl font-bold text-slate-900">2,99€</span>
-          <span className="text-slate-500 ml-2">pago único</span>
+          <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">
+            TEST MODAL NUEVO
+          </h2>
+          <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">
+            La decisión inteligente
+          </h2>
+          <p className="text-slate-600">
+            El análisis completo estima rentabilidad y mercado
+          </p>
         </div>
+        
+        <div className="flex flex-col gap-4">
+          {/* Card 1: Análisis cargas */}
+          <div className="border border-slate-200 rounded-2xl p-5 bg-slate-50">
+            <h3 className="font-bold text-slate-900">Análisis cargas</h3>
+            <p className="text-sm text-slate-600 mb-4">Detecta riesgos ocultos</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xl font-bold text-slate-900">2,99€</span>
+              <button 
+                onClick={handlePayment}
+                className="px-4 py-2 bg-slate-200 text-slate-800 rounded-xl font-bold text-sm hover:bg-slate-300 transition-all"
+              >
+                Continuar básico
+              </button>
+            </div>
+          </div>
 
-        <div className="flex flex-col gap-3">
-          <button 
-            onClick={handlePayment}
-            className="w-full py-4 bg-brand-600 text-white rounded-2xl font-bold hover:bg-brand-700 transition-all shadow-lg"
-          >
-            Pagar ahora
-          </button>
-          <button 
-            onClick={onClose}
-            className="w-full py-4 bg-slate-100 text-slate-700 rounded-2xl font-bold hover:bg-slate-200 transition-all"
-          >
-            Cancelar
-          </button>
+          <div className="text-center text-sm font-medium text-slate-400 my-1">
+            O mejor
+          </div>
+
+          {/* Card 2: Informe completo */}
+          <div className="border-2 border-slate-900 rounded-2xl p-6 bg-slate-900/5 shadow-lg relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+              ✨ Recomendado
+            </div>
+            <h3 className="font-bold text-slate-900">Informe completo</h3>
+            <p className="text-sm text-slate-600 mb-4">Añade análisis de rentabilidad vs mercado</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <span className="text-2xl font-bold text-slate-900">4,99€</span>
+                <span className="text-xs font-bold text-emerald-600 ml-2 block">Solo +2,00€</span>
+              </div>
+              <button 
+                onClick={handlePayment}
+                className="px-4 py-2 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all"
+              >
+                Obtener análisis completo
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
