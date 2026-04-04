@@ -159,6 +159,13 @@ const Header: React.FC = () => {
             Analizar
           </Link>
 
+          <Link 
+            to="/pro" 
+            className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === '/pro' ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
+          >
+            Planes
+          </Link>
+
           {/* Auth Section */}
           <div className="flex items-center ml-2 border-l border-slate-200 pl-6 gap-2 whitespace-nowrap flex-shrink-0">
             {!isLoading && isLogged && (
@@ -290,9 +297,10 @@ const Header: React.FC = () => {
               ) : (
                 <Link 
                   to={`${ROUTES.LOGIN}?from=header&redirect=${window.location.pathname}`}
-                  className="text-sm lg:text-base font-medium text-slate-700 hover:text-brand-700 transition-colors"
+                  className="inline-flex items-center gap-2 text-sm lg:text-base font-medium text-slate-700 hover:text-brand-700 transition-colors group"
                 >
-                  Acceder
+                  <User size={18} className="text-slate-400 group-hover:text-brand-600 transition-colors" />
+                  <span>Acceder</span>
                 </Link>
               )
             )}
