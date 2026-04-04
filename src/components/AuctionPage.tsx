@@ -1978,36 +1978,58 @@ const AuctionPage: React.FC = () => {
             <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Superficie estimada</p>
               <p className="text-sm font-bold text-slate-900">
-                {auction.surface ? `${auction.surface} m²` : (
-                  <span className="flex items-center gap-1 text-slate-400 font-medium italic">
-                    <Info size={10} /> Pendiente
-                  </span>
+                {isGenerating ? (
+                  <span className="text-brand-600 animate-pulse">Calculando...</span>
+                ) : (
+                  (analysisResult?.calculations?.surface || auction.surface) ? `${analysisResult?.calculations?.surface || auction.surface} m²` : "—"
                 )}
               </p>
             </div>
             <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Año construcción</p>
               <p className="text-sm font-bold text-slate-900">
-                {auction.yearBuilt || '1995'}
+                {isGenerating ? (
+                  <span className="text-brand-600 animate-pulse">Calculando...</span>
+                ) : (
+                  analysisResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
+                )}
               </p>
             </div>
             <div className={`space-y-1 ${!isLogged ? 'blur-[6px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Referencia catastral</p>
               <p className="text-sm font-mono font-bold text-slate-900">
-                {auction.refCat || (
-                  <span className="flex items-center gap-1 text-slate-400 font-medium italic">
-                    <Info size={10} /> Consultar BOE
-                  </span>
+                {isGenerating ? (
+                  <span className="text-brand-600 animate-pulse">Calculando...</span>
+                ) : (
+                  analysisResult?.metadata?.refCat || auction.refCat || (
+                    <span className="flex items-center gap-1 text-slate-400 font-medium italic">
+                      <Info size={10} /> Consultar
+                    </span>
+                  )
                 )}
               </p>
             </div>
             <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Confianza datos</p>
               <div className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${!isLogged ? 'bg-slate-300' : 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]'}`} />
-                <p className="text-sm font-bold text-slate-900">
-                  {auction.cadastreConfidence || 'ALTA'}
-                </p>
+                {isGenerating ? (
+                  <span className="text-brand-600 text-sm font-bold animate-pulse">Calculando...</span>
+                ) : (
+                  <>
+                    <div className={`w-2 h-2 rounded-full ${
+                      !isLogged ? 'bg-slate-300' : 
+                      (analysisResult?.confidence >= 0.9 || auction.cadastreConfidence === 'ALTA') ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]' :
+                      (analysisResult?.confidence >= 0.75 || auction.cadastreConfidence === 'MEDIA') ? 'bg-amber-500' :
+                      (analysisResult?.confidence > 0 || auction.cadastreConfidence === 'BAJA') ? 'bg-red-500' : 'bg-slate-300'
+                    }`} />
+                    <p className="text-sm font-bold text-slate-900">
+                      {analysisResult?.confidence ? (
+                        analysisResult.confidence >= 0.9 ? 'ALTA' :
+                        analysisResult.confidence >= 0.75 ? 'MEDIA' : 'BAJA'
+                      ) : (auction.cadastreConfidence || "—")}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
