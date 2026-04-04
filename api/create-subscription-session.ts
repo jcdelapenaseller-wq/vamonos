@@ -9,7 +9,7 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { priceId, userId, email } = req.body;
+    const { priceId, userId, email, mode = 'subscription' } = req.body;
 
     if (!priceId) {
       return res.status(400).json({ error: 'Price ID is required' });
@@ -23,7 +23,7 @@ export default async function handler(req: any, res: any) {
           quantity: 1,
         },
       ],
-      mode: 'subscription',
+      mode: mode,
       success_url: `${process.env.APP_URL || 'https://activosoffmarket.es'}/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.APP_URL || 'https://activosoffmarket.es'}/pro`,
       customer_email: email,

@@ -82,6 +82,19 @@ const ProPage: React.FC = () => {
     return `${monthlyEq}€/mes`;
   };
 
+  const getTotalPrice = (plan: 'basic' | 'pro') => {
+    const planKey = plan.toUpperCase() as keyof typeof PRICING;
+    const prices = PRICING[planKey].prices;
+    
+    if (billingCycle === 'mensual') return null;
+    
+    if (billingCycle === 'trimestral') {
+      return `${prices.quarterly.toFixed(1).replace('.', ',')}€ cada 3 meses`;
+    }
+    
+    // Anual
+    return `${prices.yearly.toFixed(0)}€ al año`;
+  };
   const getPeriodLabel = () => {
     if (billingCycle === 'mensual') return '';
     if (billingCycle === 'trimestral') return 'facturado trimestralmente';
@@ -117,12 +130,12 @@ const ProPage: React.FC = () => {
         <h1 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4">
           Todo lo que necesitas para analizar una subasta con seguridad
         </h1>
-        <p className="text-sm text-slate-500 mb-10">
-          Empieza gratis hoy · Mejora cuando quieras
+        <p className="text-sm md:text-base text-slate-500 mb-10 whitespace-nowrap">
+          Empieza gratis · Mejora cuando lo necesites
         </p>
 
         {/* Toggle */}
-        <div className="inline-flex items-center p-1 bg-slate-100 rounded-full border border-slate-200">
+        <div className="inline-flex items-center p-1 bg-slate-100 rounded-full border border-slate-200 mb-8">
           <button
             onClick={() => setBillingCycle('mensual')}
             className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
@@ -157,7 +170,7 @@ const ProPage: React.FC = () => {
             </span>
           </button>
         </div>
-        <p className="text-xs text-slate-500 mt-4">
+        <p className="text-xs text-slate-500 mt-4 hidden">
           Elige anual y ahorra hasta un 35%
         </p>
       </div>
@@ -165,17 +178,19 @@ const ProPage: React.FC = () => {
       {/* Pricing Cards */}
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24">
         {/* GRATIS */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold uppercase tracking-wider py-1 px-4 rounded-full whitespace-nowrap">
-            Empieza gratis · 1 análisis incluido
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col">
+          <div className="flex justify-center mb-3">
+            <div className="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold uppercase tracking-wider py-1 px-4 rounded-full whitespace-nowrap">
+              Empieza gratis · 1 análisis incluido
+            </div>
           </div>
-          <div className="mb-6 mt-2">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">GRATIS</h3>
-            <div className="flex items-baseline gap-1 mb-1">
+          <div className="flex flex-col gap-2 min-h-[140px]">
+            <h3 className="text-xl font-bold text-slate-900">FREE</h3>
+            <p className="text-slate-600 text-sm">Explora el mercado sin coste.</p>
+            <div className="flex items-baseline gap-1">
               <span className="text-4xl font-bold text-slate-900">0€</span>
             </div>
-            <div className="h-6 mb-3"></div>
-            <p className="text-slate-600 text-sm">Para empezar a explorar el mercado.</p>
+            <div className="min-h-[28px] mb-5 opacity-0">placeholder</div>
           </div>
           
           <ul className="space-y-4 mb-8 flex-1">
@@ -198,41 +213,40 @@ const ProPage: React.FC = () => {
           <button className="w-full py-3.5 px-6 rounded-xl bg-slate-100 text-slate-900 font-bold hover:bg-slate-200 transition-colors">
             Explorar gratis
           </button>
+          <div className="h-4"></div>
         </div>
 
         {/* BASIC */}
         <div 
-          className={`bg-slate-900 rounded-3xl border shadow-xl p-8 flex flex-col relative transform md:-translate-y-4 cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-800'}`}
+          className={`bg-slate-900 rounded-3xl border shadow-xl p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-800'} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10`}
           onClick={() => setSelectedPlan('basic')}
         >
-          {currentPlan !== 'basic' && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-amber-500 text-white text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full flex items-center gap-1">
-              <Star size={12} className="fill-white" />
-              Recomendado
-            </div>
-          )}
-          {currentPlan === 'basic' && (
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-white text-xs font-bold uppercase tracking-wider py-1 px-4 rounded-full flex items-center gap-1">
-              <CheckCircle size={12} className="text-white" />
-              Plan actual
-            </div>
-          )}
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-white mb-2">BASIC</h3>
-            <div className="text-[10px] text-amber-400 font-bold uppercase tracking-widest mb-2">Todo lo necesario para analizar una subasta</div>
-            <div className="flex items-baseline gap-1 mb-1">
+          <div className="flex justify-center mt-1 mb-3">
+            {currentPlan !== 'basic' && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-amber-50 text-amber-700 border-amber-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-amber-100">
+                <Star size={12} className="text-amber-600" />
+                Más elegido
+              </div>
+            )}
+            {currentPlan === 'basic' && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-emerald-50 text-emerald-700 border-emerald-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px]">
+                <CheckCircle size={12} className="text-emerald-600" />
+                Plan actual
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-2 min-h-[140px]">
+            <h3 className="text-xl font-bold text-white">BASIC</h3>
+            <p className="text-slate-400 text-sm">Para los que buscan oportunidades.</p>
+            <div className="flex items-baseline gap-1">
               <span className="text-4xl font-bold text-white">{getPrice('basic')}</span>
-              <span className="text-slate-400 text-sm">{getPeriodLabel()}</span>
             </div>
-            <div className="h-6 mb-3">
+            <div className="flex items-center gap-2 mt-1 mb-5">
+              <span className="text-xs text-slate-500">{getTotalPrice('basic')}</span>
               {billingCycle !== 'mensual' && (
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-400">{getSavingsData('basic')?.monthlyEq}€ / mes</span>
-                  <span className="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-medium">Ahorras {getSavingsData('basic')?.savingsPercent}%</span>
-                </div>
+                <span className="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-medium text-xs">Ahorras {getSavingsData('basic')?.savingsPercent}%</span>
               )}
             </div>
-            <p className="text-slate-400 text-sm">Para inversores activos que buscan oportunidades.</p>
           </div>
           
           <ul className="space-y-4 mb-8 flex-1">
@@ -266,7 +280,7 @@ const ProPage: React.FC = () => {
                   : 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20'
               }`}
             >
-              {currentPlan === 'basic' ? 'Plan actual' : `Activar BASIC por ${getPrice('basic')}`}
+              {currentPlan === 'basic' ? 'Plan actual' : 'Activar plan BASIC'}
             </button>
             <p className="text-xs text-gray-400 text-center mt-3">
               Sin compromiso · Cancela cuando quieras
@@ -276,42 +290,37 @@ const ProPage: React.FC = () => {
 
         {/* PRO */}
         <div 
-          className={`bg-white rounded-3xl border shadow-sm p-8 flex flex-col relative cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200'}`}
+          className={`bg-white rounded-3xl border shadow-sm p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200'}`}
           onClick={() => setSelectedPlan('pro')}
         >
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest py-1.5 px-4 rounded-full shadow-lg">
-            Recomendado inversores
+          <div className="flex justify-center mt-1 mb-3">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-slate-50 text-slate-700 border-slate-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-slate-100">
+              Para inversores
+            </div>
+            {currentPlan === 'pro' && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-emerald-50 text-emerald-700 border-emerald-200 ml-2 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px]">
+                <CheckCircle size={12} className="text-emerald-600" />
+                Plan actual
+              </div>
+            )}
           </div>
-          {currentPlan === 'pro' && (
-            <div className="absolute top-4 right-4 bg-emerald-500 text-white text-[10px] font-bold uppercase tracking-wider py-1 px-3 rounded-full flex items-center gap-1">
-              <CheckCircle size={10} className="text-white" />
-              Plan actual
-            </div>
-          )}
-          <div className="mb-6">
-            <h3 className="text-xl font-bold text-slate-900 mb-2">PRO</h3>
-            <div className="text-[10px] text-brand-600 font-bold uppercase tracking-widest mb-2">Para decidir antes de pujar</div>
-            <div className="flex items-baseline gap-1 mb-1">
+          <div className="flex flex-col gap-2 min-h-[140px]">
+            <h3 className="text-xl font-bold text-slate-900">PRO</h3>
+            <p className="text-slate-600 text-sm">Para los que buscan máxima ventaja.</p>
+            <div className="flex items-baseline gap-1">
               <span className="text-4xl font-bold text-slate-900">{getPrice('pro')}</span>
-              <span className="text-slate-500 text-sm">{getPeriodLabel()}</span>
             </div>
-            <div className="h-6 mb-3">
+            <div className="flex items-center gap-2 mt-1 mb-5">
+              <span className="text-xs text-slate-500">{getTotalPrice('pro')}</span>
               {billingCycle !== 'mensual' && (
-                <div className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-500">{getSavingsData('pro')?.monthlyEq}€ / mes</span>
-                  <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-medium">Ahorras {getSavingsData('pro')?.savingsPercent}%</span>
-                </div>
+                <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-medium text-xs">Ahorras {getSavingsData('pro')?.savingsPercent}%</span>
               )}
             </div>
-            <p className="text-slate-600 text-sm">Para profesionales que necesitan máxima ventaja.</p>
           </div>
           
-          <div className="mb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Todo lo de BASIC +</span>
-          </div>
-
           <ul className="space-y-4 mb-8 flex-1">
             {[
+              'Todo lo de BASIC +',
               '5 alertas personalizadas inteligentes',
               '5 análisis de cargas al mes',
               '20% descuento en consultoría',
@@ -334,7 +343,7 @@ const ProPage: React.FC = () => {
                   : 'bg-slate-900 text-white hover:bg-slate-800'
               }`}
             >
-              {currentPlan === 'pro' ? 'Plan actual' : `Activar PRO por ${getPrice('pro')}`}
+              {currentPlan === 'pro' ? 'Plan actual' : 'Activar plan PRO'}
             </button>
             <p className="text-xs text-gray-500 text-center mt-3">
               Sin compromiso · Cancela cuando quieras
@@ -345,32 +354,44 @@ const ProPage: React.FC = () => {
 
       {/* Reassurance Block */}
       <div className="max-w-6xl mx-auto mb-16 px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 py-8 border-y border-slate-100">
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-              <CalendarX size={16} />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 py-8 border-y border-slate-100">
+          <div className="flex items-center gap-4 justify-center md:justify-start">
+            <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
+              <CalendarX size={20} />
             </div>
-            <span className="text-xs font-bold text-slate-700">Cancela cuando quieras</span>
+            <span className="text-sm font-bold text-slate-700">Cancela cuando quieras</span>
           </div>
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-              <ShieldCheck size={16} />
+          <div className="flex items-center gap-4 justify-center md:justify-start">
+            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
+              <ShieldCheck size={20} />
             </div>
-            <span className="text-xs font-bold text-slate-700">Pago seguro con Stripe</span>
+            <span className="text-sm font-bold text-slate-700">Pago seguro con Stripe</span>
           </div>
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-              <Zap size={16} />
+          <div className="flex items-center gap-4 justify-center md:justify-start">
+            <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
+              <Zap size={20} />
             </div>
-            <span className="text-xs font-bold text-slate-700">Acceso inmediato</span>
+            <span className="text-sm font-bold text-slate-700">Acceso inmediato</span>
           </div>
-          <div className="flex items-center gap-3 justify-center md:justify-start">
-            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
-              <Unlock size={16} />
+          <div className="flex items-center gap-4 justify-center md:justify-start">
+            <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-600 shrink-0">
+              <Unlock size={20} />
             </div>
-            <span className="text-xs font-bold text-slate-700">Sin permanencia</span>
+            <span className="text-sm font-bold text-slate-700">Sin permanencia</span>
           </div>
         </div>
+      </div>
+
+      {/* Google Reviews */}
+      <div className="max-w-6xl mx-auto mb-24 px-4 text-center flex items-center justify-center gap-3">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" className="w-5 h-5" />
+        <div className="flex items-center gap-1">
+          <div className="text-amber-400 text-xl">★★★★★</div>
+          <div className="text-lg font-bold text-slate-900">4.8</div>
+        </div>
+        <p className="text-sm text-slate-500">
+          Más de 5.000 inversores ya analizan subastas con Activos OffMarket
+        </p>
       </div>
 
       {/* FAQ Billing Block */}
@@ -491,7 +512,7 @@ const ProPage: React.FC = () => {
         >
           {currentPlan === selectedPlan 
             ? 'Plan actual' 
-            : `Activar ${selectedPlan === 'basic' ? 'BASIC ⭐' : 'PRO'} por ${getPrice(selectedPlan)}`}
+            : `Activar plan ${selectedPlan.toUpperCase()}`}
         </button>
         <p className="text-[11px] text-gray-500 text-center mt-2 font-medium">
           Sin compromiso · Cancela cuando quieras

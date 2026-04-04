@@ -14,14 +14,14 @@ const PAYMENT_LINKS: Record<PlanTier, Record<BillingCycle, string>> = {
   }
 };
 
-export const startCheckout = async (plan: PlanTier, cycle: BillingCycle, priceId?: string, user?: { id: string, email: string }) => {
+export const startCheckout = async (plan: PlanTier | string, cycle: BillingCycle | string, priceId?: string, user?: { id: string, email: string }, mode: 'subscription' | 'payment' = 'subscription') => {
   if (priceId && user) {
-    console.log(`Creating Stripe subscription session for ${plan} (${cycle}) with priceId: ${priceId}`);
+    console.log(`Creating Stripe session for ${plan} (${cycle}) with priceId: ${priceId}, mode: ${mode}`);
     try {
       const response = await fetch('/api/create-subscription-session', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, userId: user.id, email: user.email })
+        body: JSON.stringify({ priceId, userId: user.id, email: user.email, mode })
       });
       const data = await response.json();
       if (data.url) {
@@ -30,14 +30,16 @@ export const startCheckout = async (plan: PlanTier, cycle: BillingCycle, priceId
       }
       throw new Error(data.error || 'No URL returned from session creation');
     } catch (error) {
-      console.error('Error starting subscription checkout:', error);
+      console.error('Error starting checkout:', error);
       throw error;
     }
   }
 
-  const paymentLink = PAYMENT_LINKS[plan][cycle];
-  console.log(`Redirecting to Stripe Payment Link for ${plan} (${cycle})`);
-  
-  // Redirect directly to the Stripe Payment Link
-  window.location.href = paymentLink;
+  const paymentLink = PAYMENT_LINKS[plan as PlanTier]?.[cycle as BillingCycle];
+  if (paymentLink) {
+    console.log(`Redirecting to Stripe Payment Link for ${plan} (${cycle})`);
+    window.location.href = paymentLink;
+  } else {
+    console.error('No payment link or priceId provided');
+  }
 };

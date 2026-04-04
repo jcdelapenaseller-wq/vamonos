@@ -41,8 +41,14 @@ export default async function handler(req: any, res: any) {
         if (email) {
           const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
           const priceId = lineItems.data[0].price?.id;
-          const plan = priceId ? PRICE_TO_PLAN[priceId] : undefined;
-          await syncStripeData(email, customerId, subscriptionId, 'active', plan);
+          
+          if (session.mode === 'subscription') {
+            const plan = priceId ? PRICE_TO_PLAN[priceId] : undefined;
+            await syncStripeData(email, customerId, subscriptionId, 'active', plan);
+          } else if (session.mode === 'payment') {
+            // Handle one-time payment fulfillment here if needed in the future
+            console.log(`One-time payment completed for price: ${priceId}`);
+          }
         }
         break;
       }
