@@ -1969,13 +1969,13 @@ const AuctionPage: React.FC = () => {
           </div>
 
           <div 
-            className={`grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 relative group transition-all ${plan !== 'pro' ? 'cursor-pointer' : ''}`}
-            onClick={() => plan !== 'pro' && setSoftGateOrigin('catastro')}
+            className={`grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 relative group transition-all ${!isLogged ? 'cursor-pointer' : ''}`}
+            onClick={() => !isLogged && setSoftGateOrigin('catastro')}
           >
-            {plan !== 'pro' && (
+            {!isLogged && (
               <div className="absolute inset-0 z-10 bg-slate-900/0 group-hover:bg-slate-900/[0.02] transition-colors rounded-lg" />
             )}
-            <div className={`space-y-1 ${plan !== 'pro' ? 'blur-[4px] select-none' : ''}`}>
+            <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Superficie estimada</p>
               <p className="text-sm font-bold text-slate-900">
                 {auction.surface ? `${auction.surface} m²` : (
@@ -1985,13 +1985,13 @@ const AuctionPage: React.FC = () => {
                 )}
               </p>
             </div>
-            <div className={`space-y-1 ${plan !== 'pro' ? 'blur-[4px] select-none' : ''}`}>
+            <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Año construcción</p>
               <p className="text-sm font-bold text-slate-900">
                 {auction.yearBuilt || '1995'}
               </p>
             </div>
-            <div className={`space-y-1 ${plan !== 'pro' ? 'blur-[6px] select-none' : ''}`}>
+            <div className={`space-y-1 ${!isLogged ? 'blur-[6px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Referencia catastral</p>
               <p className="text-sm font-mono font-bold text-slate-900">
                 {auction.refCat || (
@@ -2001,10 +2001,10 @@ const AuctionPage: React.FC = () => {
                 )}
               </p>
             </div>
-            <div className={`space-y-1 ${plan !== 'pro' ? 'blur-[4px] select-none' : ''}`}>
+            <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Confianza datos</p>
               <div className="flex items-center gap-1.5">
-                <div className={`w-2 h-2 rounded-full ${plan !== 'pro' ? 'bg-slate-300' : 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]'}`} />
+                <div className={`w-2 h-2 rounded-full ${!isLogged ? 'bg-slate-300' : 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]'}`} />
                 <p className="text-sm font-bold text-slate-900">
                   {auction.cadastreConfidence || 'ALTA'}
                 </p>
@@ -2395,18 +2395,16 @@ const AuctionPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                 {/* Card 1: Análisis de cargas */}
                 <div id="analisis-tecnico" className="bg-white border-2 border-slate-900/20 rounded-3xl p-6 md:p-8 shadow-md flex flex-col h-full hover:shadow-lg transition-all order-last md:order-none relative z-10">
-                  <div className="mb-6 mt-2">
+                  <div className="min-h-[120px] flex flex-col mb-6">
                     <div className="flex items-center gap-2 mb-1">
                       <Shield className="w-4 h-4 text-slate-400" />
                       <h3 className="text-2xl font-serif font-bold text-slate-900">Análisis de cargas</h3>
                     </div>
-                    <p className="text-slate-600 text-sm font-medium">La revisión legal antes de pujar</p>
-                  </div>
-                  
-                  <div className="flex-1 flex flex-col">
-                    <div className="mb-6">
+                    <p className="text-slate-600 text-sm font-medium mb-4">La revisión legal antes de pujar</p>
+                    
+                    <div className="mt-auto">
                       <div className="inline-block px-2 py-0.5 bg-slate-100 text-slate-500 text-[9px] font-bold rounded uppercase tracking-wider mb-2">
-                        REVISIÓN LEGAL
+                        Revisión + IA jurídica especializada
                       </div>
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-bold text-slate-900">
@@ -2426,29 +2424,33 @@ const AuctionPage: React.FC = () => {
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">/ Pago único</span>
                         )}
                       </div>
-                      <div className="mt-2 space-y-0.5">
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 flex flex-col">
+                    <div className="flex-1">
+                      <div className="mb-4 space-y-0.5">
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Análisis documental con criterio jurídico</p>
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Basado en Ley Hipotecaria y Registral actual</p>
                       </div>
-                    </div>
 
-                    <div className="space-y-4 mb-8 flex-1">
-                      {[
-                        'Hipotecas',
-                        'Embargos',
-                        'Cargas ocultas',
-                        'Ocupantes'
-                      ].map((item, i) => (
-                        <div key={i} className="flex items-center gap-3 text-slate-700">
-                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                      <div className="space-y-4 mb-8">
+                        {[
+                          'Hipotecas',
+                          'Embargos',
+                          'Cargas ocultas'
+                        ].map((item, i) => (
+                          <div key={i} className="flex items-center gap-3 text-slate-700">
+                            <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            </div>
+                            <span className="text-sm font-medium">{item}</span>
                           </div>
-                          <span className="text-sm font-medium">{item}</span>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="mt-auto space-y-4">
                       <button 
                         onClick={handleAnalyzeCargasClick}
                         className="w-full py-5 px-6 bg-slate-900 hover:bg-brand-700 text-white rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 group shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
@@ -2456,86 +2458,79 @@ const AuctionPage: React.FC = () => {
                         Analizar cargas
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </button>
-                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-500 font-medium text-center">
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Entrega inmediata</div>
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Sin suscripción</div>
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Pago único</div>
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Informe descargable</div>
+                      <div className="mt-4 pt-4 border-t text-xs text-slate-500">
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] font-medium text-center">
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Entrega inmediata</div>
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Sin suscripción</div>
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Pago único</div>
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Informe descargable</div>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center whitespace-nowrap mt-2">Revisión documental experta basada en BOE y Registro</p>
                       </div>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">Revisión documental experta basada en BOE y Registro</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Card 2: Análisis completo */}
-                <div id="analisis-completo" className="bg-slate-50/50 border-2 border-slate-900 rounded-3xl p-6 md:p-8 shadow-md flex flex-col h-full relative hover:shadow-lg transition-all order-first md:order-none z-10">
+                <div id="analisis-completo" className="bg-slate-50/50 border-2 border-slate-900 rounded-3xl p-6 md:p-8 shadow-md flex flex-col h-full relative hover:shadow-lg transition-all order-first md:order-none z-10 scale-[1.01]">
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-slate-900 text-white text-[10px] font-bold rounded-full uppercase tracking-widest shadow-lg border border-slate-800">
                     RECOMENDADO
                   </div>
 
-                  <div className="mb-6 mt-2">
+                  <div className="min-h-[120px] flex flex-col mb-6">
                     <div className="flex items-center gap-2 mb-1">
                       <LineChart className="w-4 h-4 text-brand-500" />
                       <h3 className="text-2xl font-serif font-bold text-slate-900">Análisis completo</h3>
                     </div>
-                    <p className="text-slate-600 text-sm font-medium">La decisión inteligente de inversión</p>
+                    <p className="text-slate-600 text-sm font-medium mb-4">La decisión inteligente de inversión</p>
+                    
+                    <div className="mt-auto">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-4xl font-bold text-slate-900">
+                          {plan === 'pro' ? 'Incluido' : plan === 'basic' ? '2,99€' : '4,99€'}
+                        </span>
+                        {plan === 'pro' && (
+                          <span className="px-2 py-0.5 bg-brand-50 text-brand-600 text-[10px] font-bold rounded-full border border-brand-100">
+                            Incluido ilimitado
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex-1 flex flex-col">
-                    <div className="mb-8">
-                      <div className="flex flex-col">
-                        <span className="text-sm text-slate-400 line-through font-medium mb-0.5">
-                          Valor estimado {plan === 'pro' ? '9,99€' : plan === 'basic' ? '19€' : '29€'}
-                        </span>
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-4xl font-bold text-slate-900">
-                            {plan === 'pro' ? 'Incluido' : plan === 'basic' ? '2,99€' : '4,99€'}
-                          </span>
-                          {plan === 'pro' && (
-                            <span className="px-2 py-0.5 bg-brand-50 text-brand-600 text-[10px] font-bold rounded-full border border-brand-100">
-                              Incluido ilimitado
-                            </span>
-                          )}
+                    <div className="flex-1">
+                      <div className="space-y-4 mb-8">
+                        <div className="flex items-center gap-3 text-slate-700">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          </div>
+                          <span className="text-sm font-medium">Rentabilidad estimada de inversión</span>
                         </div>
-                      </div>
-                      {plan !== 'pro' && (
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="px-2 py-0.5 bg-brand-100 text-brand-700 text-[9px] font-bold rounded uppercase tracking-wider">Ahorro PRO</span>
-                          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Precio PRO: 0,99€</p>
+                        <div className="flex items-center gap-3 text-slate-700">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          </div>
+                          <span className="text-sm font-medium">Riesgos legales detectados</span>
                         </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-4 mb-8">
-                      <div className="flex items-center gap-3 text-slate-700">
-                        <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <div className="flex items-center gap-3 text-slate-700">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          </div>
+                          <span className="text-sm font-medium">Estrategia de puja recomendada</span>
                         </div>
-                        <span className="text-sm font-medium">Rentabilidad estimada de inversión</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-700">
-                        <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <div className="flex items-center gap-3 text-slate-700">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          </div>
+                          <span className="text-sm font-medium">Comparables de mercado</span>
                         </div>
-                        <span className="text-sm font-medium">Riesgos legales detectados</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-700">
-                        <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <div className="flex items-center gap-3 text-slate-700">
+                          <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                          </div>
+                          <span className="text-sm font-medium">Informe profesional en PDF</span>
                         </div>
-                        <span className="text-sm font-medium">Estrategia de puja recomendada</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-700">
-                        <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </div>
-                        <span className="text-sm font-medium">Comparables de mercado</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-slate-700">
-                        <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="w-3 h-3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                        </div>
-                        <span className="text-sm font-medium">Informe profesional en PDF</span>
                       </div>
                     </div>
 
@@ -2551,13 +2546,15 @@ const AuctionPage: React.FC = () => {
                         Generar informe completo
                         <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
                       </button>
-                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] text-slate-500 font-medium text-center">
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Entrega inmediata</div>
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Sin suscripción</div>
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Pago único</div>
-                        <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Informe descargable</div>
+                      <div className="mt-4 pt-4 border-t text-xs text-slate-500">
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] font-medium text-center">
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Entrega inmediata</div>
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Sin suscripción</div>
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Pago único</div>
+                          <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Informe descargable</div>
+                        </div>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center whitespace-nowrap mt-2">Análisis inversión completo con estrategia de puja</p>
                       </div>
-                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest text-center">Análisis inversión completo con estrategia de puja</p>
                     </div>
                   </div>
                 </div>

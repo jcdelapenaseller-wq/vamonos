@@ -12,12 +12,21 @@
     <!-- End MailerLite Universal -->
 
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-K6DV9L7XQ1"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-K6DV9L7XQ1');
+      function gtag(){window.dataLayer.push(arguments);}
+      
+      // Solo cargar en producción y si no es un bot de renderizado (Puppeteer/Headless)
+      if (window.location.hostname === 'activosoffmarket.es' && !navigator.userAgent.includes('Headless')) {
+        const script = document.createElement('script');
+        script.async = true;
+        script.src = "https://www.googletagmanager.com/gtag/js?id=G-K6DV9L7XQ1";
+        document.head.appendChild(script);
+        
+        gtag('js', new Date());
+        // Desactivamos el envío automático de page_view para controlarlo desde React
+        gtag('config', 'G-K6DV9L7XQ1', { send_page_view: false });
+      }
     </script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />

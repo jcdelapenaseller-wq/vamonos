@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Star, CheckCircle, ArrowRight, FileText, Search, Home, Lock, Zap, CalendarX, Unlock, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
+import { Star, CheckCircle, ArrowRight, FileText, Search, Home, Lock, Zap, CalendarX, Unlock, ChevronDown, ChevronUp, ShieldCheck, X } from 'lucide-react';
 import { trackConversion } from '../utils/tracking';
 import { motion } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
@@ -15,6 +15,7 @@ const ProPage: React.FC = () => {
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('anual');
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'pro'>('basic');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isOcupacionModalOpen, setIsOcupacionModalOpen] = useState(false);
   const { user, isLoading, updatePlan, plan: currentPlan } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
@@ -125,14 +126,14 @@ const ProPage: React.FC = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20 pb-32 md:pb-20">
-      <div className="text-center max-w-3xl mx-auto mb-16">
+      <div className="text-center max-w-3xl mx-auto mb-8 md:mb-16">
         {currentPlan === 'free' && (
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-6">
             <CheckCircle size={14} />
             Empieza con 1 análisis gratis incluido
           </div>
         )}
-        <h1 className="text-3xl md:text-5xl font-serif font-bold text-slate-900 mb-4">
+        <h1 className="text-2xl md:text-5xl font-serif font-bold text-slate-900 mb-4">
           Todo lo que necesitas para analizar una subasta con seguridad
         </h1>
         <p className="text-sm md:text-base text-slate-500 mb-10 whitespace-nowrap">
@@ -140,10 +141,10 @@ const ProPage: React.FC = () => {
         </p>
 
         {/* Toggle */}
-        <div className="inline-flex items-center p-1 bg-slate-100 rounded-full border border-slate-200 mb-8">
+        <div className="flex w-full overflow-x-auto items-center p-1 bg-slate-100 rounded-full border border-slate-200 mb-8">
           <button
             onClick={() => setBillingCycle('mensual')}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 md:px-6 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap ${
               billingCycle === 'mensual'
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -153,7 +154,7 @@ const ProPage: React.FC = () => {
           </button>
           <button
             onClick={() => setBillingCycle('trimestral')}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all ${
+            className={`px-4 md:px-6 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap ${
               billingCycle === 'trimestral'
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -163,7 +164,7 @@ const ProPage: React.FC = () => {
           </button>
           <button
             onClick={() => setBillingCycle('anual')}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
+            className={`px-4 md:px-6 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all flex items-center gap-2 whitespace-nowrap ${
               billingCycle === 'anual'
                 ? 'bg-white text-slate-900 shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
@@ -181,9 +182,9 @@ const ProPage: React.FC = () => {
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24">
+      <div className="grid md:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto mb-12 md:mb-24">
         {/* GRATIS */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8 flex flex-col">
           <div className="flex justify-center mb-3 min-h-[32px]">
           </div>
           <div className="flex flex-col gap-2 min-h-[140px]">
@@ -220,7 +221,7 @@ const ProPage: React.FC = () => {
 
         {/* BASIC */}
         <div 
-          className={`bg-white rounded-3xl border shadow-sm p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200'}`}
+          className={`bg-white rounded-3xl border shadow-sm p-6 md:p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200'}`}
           onClick={() => setSelectedPlan('basic')}
         >
           <div className="flex justify-center mt-1 mb-3">
@@ -290,7 +291,7 @@ const ProPage: React.FC = () => {
 
         {/* PRO */}
         <div 
-          className={`bg-slate-900 rounded-3xl border shadow-xl p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-800'} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10`}
+          className={`bg-slate-900 rounded-3xl border shadow-xl p-6 md:p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-800'} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10`}
           onClick={() => setSelectedPlan('pro')}
         >
           <div className="flex justify-center mt-1 mb-3">
@@ -354,7 +355,7 @@ const ProPage: React.FC = () => {
       </div>
 
       {/* Reassurance Block */}
-      <div className="max-w-6xl mx-auto mb-16 px-4">
+      <div className="max-w-6xl mx-auto mb-8 md:mb-16 px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-12 py-8 border-y border-slate-100">
           <div className="flex items-center gap-4 justify-center md:justify-start">
             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
@@ -384,7 +385,7 @@ const ProPage: React.FC = () => {
       </div>
 
       {/* Google Reviews */}
-      <div className="max-w-6xl mx-auto mb-24 px-4 text-center flex items-center justify-center gap-3">
+      <div className="max-w-6xl mx-auto mb-12 md:mb-24 px-4 text-center flex items-center justify-center gap-3">
         <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" className="w-5 h-5" />
         <div className="flex items-center gap-1">
           <div className="text-amber-400 text-xl">★★★★★</div>
@@ -396,7 +397,7 @@ const ProPage: React.FC = () => {
       </div>
 
       {/* FAQ Billing Block */}
-      <div className="max-w-3xl mx-auto mb-24 px-4">
+      <div className="max-w-3xl mx-auto mb-12 md:mb-24 px-4">
         <div className="text-center mb-10">
           <h2 className="text-2xl font-serif font-bold text-slate-900 mb-2">Preguntas sobre facturación</h2>
           <p className="text-slate-500 text-sm">Todo lo que necesitas saber sobre tu suscripción.</p>
@@ -452,7 +453,7 @@ const ProPage: React.FC = () => {
 
         <div className="grid md:grid-cols-3 gap-6">
           {/* Dossier */}
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-slate-300 transition-colors">
+          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-slate-300 transition-colors flex flex-col">
             <div className="w-12 h-12 bg-white rounded-xl border border-slate-200 flex items-center justify-center mb-4 text-slate-700">
               <FileText size={24} />
             </div>
@@ -460,14 +461,21 @@ const ProPage: React.FC = () => {
             <p className="text-slate-600 text-sm mb-4">
               Informe completo en PDF con todos los datos de la subasta listos para analizar.
             </p>
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200">
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200 mb-4">
               <span className="font-bold text-slate-900">3,99€</span>
               <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Pago único</span>
             </div>
+            <button 
+              onClick={() => navigate(ROUTES.ANALIZAR_SUBASTA)}
+              className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 group"
+            >
+              Generar dossier
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
 
           {/* Análisis cargas */}
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-slate-300 transition-colors">
+          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-slate-300 transition-colors flex flex-col">
             <div className="w-12 h-12 bg-white rounded-xl border border-slate-200 flex items-center justify-center mb-4 text-slate-700">
               <Search size={24} />
             </div>
@@ -475,14 +483,21 @@ const ProPage: React.FC = () => {
             <p className="text-slate-600 text-sm mb-4">
               Estudio detallado de la certificación de cargas para detectar riesgos ocultos.
             </p>
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200">
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200 mb-4">
               <span className="font-bold text-slate-900">2,99€</span>
               <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Pago único</span>
             </div>
+            <button 
+              onClick={() => navigate(ROUTES.ANALIZAR_SUBASTA)}
+              className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 group"
+            >
+              Analizar cargas
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
 
           {/* Verificación ocupación */}
-          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-slate-300 transition-colors">
+          <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 hover:border-slate-300 transition-colors flex flex-col">
             <div className="w-12 h-12 bg-white rounded-xl border border-slate-200 flex items-center justify-center mb-4 text-slate-700">
               <Home size={24} />
             </div>
@@ -490,10 +505,17 @@ const ProPage: React.FC = () => {
             <p className="text-slate-600 text-sm mb-4">
               Comprobación in situ del estado de ocupación del inmueble por profesionales.
             </p>
-            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200">
+            <div className="flex items-center justify-between mt-auto pt-4 border-t border-slate-200 mb-4">
               <span className="font-bold text-slate-900">Desde 99€</span>
               <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold">Bajo presupuesto</span>
             </div>
+            <button 
+              onClick={() => setIsOcupacionModalOpen(true)}
+              className="w-full py-3 px-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-colors flex items-center justify-center gap-2 group"
+            >
+              Solicitar verificación
+              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         </div>
       </div>
@@ -519,6 +541,66 @@ const ProPage: React.FC = () => {
           Sin compromiso · Cancela cuando quieras
         </p>
       </div>
+
+      {/* Modal Verificación Ocupación */}
+      {isOcupacionModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl p-8 max-w-md w-full relative shadow-2xl"
+          >
+            <button 
+              onClick={() => setIsOcupacionModalOpen(false)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="mb-6">
+              <div className="w-12 h-12 bg-brand-50 rounded-2xl flex items-center justify-center mb-4 text-brand-600">
+                <Home size={24} />
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-slate-900 mb-2">¿Quién ocupa este inmueble?</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Un profesional se desplaza al inmueble, verifica si está habitado o vacío y te entrega un informe con fotos y conclusiones en 7 días laborables.
+              </p>
+            </div>
+
+            <ul className="space-y-3 mb-8">
+              {[
+                'Visita presencial al inmueble',
+                'Fotos del exterior y entorno',
+                'Verificación de indicios de ocupación',
+                'Contacto administrador o presidente'
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-slate-700">
+                  <CheckCircle size={18} className="text-emerald-500 shrink-0 mt-0.5" />
+                  <span className="text-sm font-medium">{item}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="space-y-4">
+              <a 
+                href="mailto:soporte@activosoffmarket.es?subject=Solicitud verificación ocupación&body=Referencia subasta:"
+                className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-lg"
+              >
+                Solicitar presupuesto
+                <ArrowRight size={18} />
+              </a>
+              <div className="text-center">
+                <p className="text-xs text-slate-500 font-medium">
+                  Este servicio se activa bajo presupuesto.
+                </p>
+                <p className="text-[10px] text-slate-400 mt-1">
+                  Escríbenos con la referencia de la subasta o dirección del inmueble.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
