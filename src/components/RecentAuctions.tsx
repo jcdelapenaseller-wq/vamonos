@@ -343,7 +343,7 @@ const RecentAuctions: React.FC = () => {
           <h1 className="font-serif text-2xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 md:mb-4 leading-tight">
             Últimas subastas BOE e inmuebles detectados en España
           </h1>
-          <div className="min-h-[24px] flex items-center gap-2 text-slate-500 text-xs md:text-sm mb-6 font-medium">
+          <div className="min-h-[24px] md:min-h-0 flex items-center gap-2 text-slate-500 text-xs md:text-sm mb-6 font-medium">
             <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             Actualizado hoy · <b className="text-slate-900">{activeCount}</b> subastas detectadas
           </div>
@@ -402,9 +402,9 @@ const RecentAuctions: React.FC = () => {
               </h2>
               <div className="hidden md:block h-px flex-grow mx-6 bg-slate-200" />
             </div>
-            <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-4 md:gap-6 pb-4 md:pb-0 snap-x scroll-smooth no-scrollbar">
+            <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-3 md:gap-6 pb-1 md:pb-0 snap-x scroll-smooth no-scrollbar">
               {featuredAuctions.map(([slug, data]) => (
-                <div key={`featured-${slug}`} className="min-w-[85%] md:min-w-0 snap-center">
+                <div key={`featured-${slug}`} className="min-w-[85%] max-w-[85%] md:min-w-0 md:max-w-none snap-center">
                   <AuctionCard slug={slug} data={data} showImage={false} />
                 </div>
               ))}

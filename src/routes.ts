@@ -130,6 +130,7 @@ export const routes: RouteObject[] = [
     element: createElement(ProvinceHub),
   },
   {
+    // Ruta técnica — no usar /analisis/:slug para evitar colisión con Discover
     path: ROUTES.ANALISIS_SLUG,
     element: createElement(RedirectSlug, { to: ROUTES.AUCTION_PAGE }),
   },
