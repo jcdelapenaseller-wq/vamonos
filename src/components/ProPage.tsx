@@ -101,6 +101,11 @@ const ProPage: React.FC = () => {
     return 'facturado anualmente';
   };
 
+  const annualSavings = Math.max(
+    Math.round(((PRICING.BASIC.prices.monthly * 12 - PRICING.BASIC.prices.yearly) / (PRICING.BASIC.prices.monthly * 12)) * 100),
+    Math.round(((PRICING.PRO.prices.monthly * 12 - PRICING.PRO.prices.yearly) / (PRICING.PRO.prices.monthly * 12)) * 100)
+  );
+
   const getSavingsData = (plan: 'basic' | 'pro') => {
     if (billingCycle === 'mensual') return null;
 
@@ -166,7 +171,7 @@ const ProPage: React.FC = () => {
           >
             Anual
             <span className="bg-emerald-100 text-emerald-700 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full font-bold">
-              -30%
+              -{annualSavings}%
             </span>
           </button>
         </div>
@@ -179,10 +184,7 @@ const ProPage: React.FC = () => {
       <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-24">
         {/* GRATIS */}
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-8 flex flex-col">
-          <div className="flex justify-center mb-3">
-            <div className="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold uppercase tracking-wider py-1 px-4 rounded-full whitespace-nowrap">
-              Empieza gratis · 1 análisis incluido
-            </div>
+          <div className="flex justify-center mb-3 min-h-[32px]">
           </div>
           <div className="flex flex-col gap-2 min-h-[140px]">
             <h3 className="text-xl font-bold text-slate-900">FREE</h3>
@@ -218,30 +220,28 @@ const ProPage: React.FC = () => {
 
         {/* BASIC */}
         <div 
-          className={`bg-slate-900 rounded-3xl border shadow-xl p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-800'} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10`}
+          className={`bg-white rounded-3xl border shadow-sm p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200'}`}
           onClick={() => setSelectedPlan('basic')}
         >
           <div className="flex justify-center mt-1 mb-3">
-            {currentPlan !== 'basic' && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-amber-50 text-amber-700 border-amber-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-amber-100">
-                <Star size={12} className="text-amber-600" />
-                Más elegido
-              </div>
-            )}
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-amber-50 text-amber-700 border-amber-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-amber-100">
+              <Star size={12} className="text-amber-600" />
+              Más Popular
+            </div>
             {currentPlan === 'basic' && (
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-emerald-50 text-emerald-700 border-emerald-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px]">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-emerald-50 text-emerald-700 border-emerald-200 ml-2 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px]">
                 <CheckCircle size={12} className="text-emerald-600" />
                 Plan actual
               </div>
             )}
           </div>
           <div className="flex flex-col gap-2 min-h-[140px]">
-            <h3 className="text-xl font-bold text-white">BASIC</h3>
-            <p className="text-slate-400 text-sm">Para los que buscan oportunidades.</p>
+            <h3 className="text-xl font-bold text-slate-900">BASIC</h3>
+            <p className="text-slate-600 text-sm">Para los que buscan oportunidades.</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-white">{getPrice('basic')}</span>
+              <span className="text-4xl font-bold text-slate-900">{getPrice('basic')}</span>
             </div>
-            <div className="flex items-center gap-2 mt-1 mb-5">
+            <div className="flex items-center gap-2 mt-2 mb-6">
               <span className="text-xs text-slate-500">{getTotalPrice('basic')}</span>
               {billingCycle !== 'mensual' && (
                 <span className="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-medium text-xs">Ahorras {getSavingsData('basic')?.savingsPercent}%</span>
@@ -250,7 +250,7 @@ const ProPage: React.FC = () => {
           </div>
           
           <ul className="space-y-4 mb-8 flex-1">
-            <li className="flex items-start gap-3 text-white font-medium">
+            <li className="flex items-start gap-3 text-slate-700 font-medium">
               <CheckCircle size={18} className="text-amber-500 shrink-0 mt-0.5" />
               <span className="text-sm">Todo lo de FREE +</span>
             </li>
@@ -263,7 +263,7 @@ const ProPage: React.FC = () => {
               'Calculadora PRO (PMR)',
               '3 análisis de cargas al mes'
             ].map((feature, i) => (
-              <li key={i} className="flex items-start gap-3 text-slate-300">
+              <li key={i} className="flex items-start gap-3 text-slate-700">
                 <CheckCircle size={18} className="text-emerald-500 shrink-0 mt-0.5" />
                 <span className="text-sm">{feature}</span>
               </li>
@@ -274,10 +274,10 @@ const ProPage: React.FC = () => {
             <button 
               onClick={(e) => { e.stopPropagation(); handleActivate('basic'); }}
               disabled={currentPlan === 'basic'}
-              className={`w-full py-3.5 px-6 rounded-xl font-bold transition-colors shadow-lg ${
+              className={`w-full py-3.5 px-6 rounded-xl font-bold transition-colors ${
                 currentPlan === 'basic' 
-                  ? 'bg-slate-800 text-slate-400 cursor-default shadow-none' 
-                  : 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20'
+                  ? 'bg-slate-100 text-slate-400 cursor-default' 
+                  : 'bg-slate-100 text-slate-900 hover:bg-slate-200'
               }`}
             >
               {currentPlan === 'basic' ? 'Plan actual' : 'Activar plan BASIC'}
@@ -290,12 +290,13 @@ const ProPage: React.FC = () => {
 
         {/* PRO */}
         <div 
-          className={`bg-white rounded-3xl border shadow-sm p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-slate-900 ring-2 ring-slate-900/10' : 'border-slate-200'}`}
+          className={`bg-slate-900 rounded-3xl border shadow-xl p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-800'} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10`}
           onClick={() => setSelectedPlan('pro')}
         >
           <div className="flex justify-center mt-1 mb-3">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-slate-50 text-slate-700 border-slate-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-slate-100">
-              Para inversores
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-amber-50 text-amber-700 border-amber-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-amber-100">
+              <Star size={12} className="text-amber-600" />
+              Recomendado
             </div>
             {currentPlan === 'pro' && (
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-emerald-50 text-emerald-700 border-emerald-200 ml-2 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px]">
@@ -305,15 +306,15 @@ const ProPage: React.FC = () => {
             )}
           </div>
           <div className="flex flex-col gap-2 min-h-[140px]">
-            <h3 className="text-xl font-bold text-slate-900">PRO</h3>
-            <p className="text-slate-600 text-sm">Para los que buscan máxima ventaja.</p>
+            <h3 className="text-xl font-bold text-white">PRO</h3>
+            <p className="text-slate-400 text-sm">Para los que buscan máxima ventaja.</p>
             <div className="flex items-baseline gap-1">
-              <span className="text-4xl font-bold text-slate-900">{getPrice('pro')}</span>
+              <span className="text-4xl font-bold text-white">{getPrice('pro')}</span>
             </div>
-            <div className="flex items-center gap-2 mt-1 mb-5">
-              <span className="text-xs text-slate-500">{getTotalPrice('pro')}</span>
+            <div className="flex items-center gap-2 mt-2 mb-6">
+              <span className="text-xs text-slate-400">{getTotalPrice('pro')}</span>
               {billingCycle !== 'mensual' && (
-                <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded font-medium text-xs">Ahorras {getSavingsData('pro')?.savingsPercent}%</span>
+                <span className="text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded font-medium text-xs">Ahorras {getSavingsData('pro')?.savingsPercent}%</span>
               )}
             </div>
           </div>
@@ -326,8 +327,8 @@ const ProPage: React.FC = () => {
               '20% descuento en consultoría',
               'Soporte prioritario mismo día'
             ].map((feature, i) => (
-              <li key={i} className="flex items-start gap-3 text-slate-700">
-                <CheckCircle size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+              <li key={i} className="flex items-start gap-3 text-slate-300">
+                <CheckCircle size={18} className="text-emerald-500 shrink-0 mt-0.5" />
                 <span className="text-sm">{feature}</span>
               </li>
             ))}
@@ -337,15 +338,15 @@ const ProPage: React.FC = () => {
             <button 
               onClick={(e) => { e.stopPropagation(); handleActivate('pro'); }}
               disabled={currentPlan === 'pro'}
-              className={`w-full py-3.5 px-6 rounded-xl font-bold transition-colors ${
+              className={`w-full py-3.5 px-6 rounded-xl font-bold transition-colors shadow-lg ${
                 currentPlan === 'pro'
-                  ? 'bg-slate-100 text-slate-400 cursor-default'
-                  : 'bg-slate-900 text-white hover:bg-slate-800'
+                  ? 'bg-slate-800 text-slate-400 cursor-default shadow-none'
+                  : 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20'
               }`}
             >
               {currentPlan === 'pro' ? 'Plan actual' : 'Activar plan PRO'}
             </button>
-            <p className="text-xs text-gray-500 text-center mt-3">
+            <p className="text-xs text-gray-400 text-center mt-3">
               Sin compromiso · Cancela cuando quieras
             </p>
           </div>
