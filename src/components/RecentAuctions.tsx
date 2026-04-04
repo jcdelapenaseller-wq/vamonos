@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MapPin, DollarSign, TrendingUp, ChevronRight, Calculator, Calendar, ArrowRight, Percent } from 'lucide-react';
+import { MapPin, DollarSign, TrendingUp, ChevronRight, Calculator, Calendar, ArrowRight, Percent, Zap, ShieldCheck, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { AUCTIONS } from '../data/auctions';
 import { ROUTES } from '../constants/routes';
 import { getFilteredAuctions, isAuctionFinished, sortAuctions, formatDate, isAuctionActive } from '../utils/auctionHelpers';
@@ -11,6 +11,90 @@ import { ShareButtons } from './ShareButtons';
 import { DiscoverReportsBlock } from './DiscoverReportsBlock';
 import RadarPremiumCTA from './RadarPremiumCTA';
 import { prefetchAuction } from '../utils/prefetch';
+
+const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, answer }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="border border-slate-200 rounded-2xl bg-white overflow-hidden transition-all hover:border-brand-200">
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-5 text-left font-bold text-slate-900 hover:text-brand-700 transition-colors"
+      >
+        <span className="text-sm md:text-base">{question}</span>
+        {isOpen ? <ChevronUp size={20} className="text-brand-500" /> : <ChevronDown size={20} className="text-slate-400" />}
+      </button>
+      {isOpen && (
+        <div className="px-5 pb-5 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-50 pt-4">
+          {answer}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SeoExpandableContent: React.FC = () => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  
+  return (
+    <div className="mt-20 pt-12 border-t border-slate-200">
+      <div className="max-w-4xl mx-auto">
+        <div className={`relative overflow-hidden transition-all duration-500 ${isExpanded ? 'max-h-[2000px]' : 'max-h-[180px] md:max-h-[280px]'}`}>
+          <div className="prose prose-slate max-w-none">
+            <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-900 mb-4">
+              Subastas del BOE detectadas automáticamente
+            </h2>
+            <p className="text-slate-600 text-sm md:text-base mb-6">
+              Nuestro sistema monitoriza diariamente el <strong>portal subastas BOE</strong> para ofrecerte las mejores <strong>oportunidades</strong> en tiempo real. Filtrar entre miles de <strong>subastas judiciales BOE</strong> puede ser una tarea titánica; por eso, centralizamos toda la información de <strong>subastas inmobiliarias en España</strong> en un solo lugar, permitiéndote detectar activos rentables de forma eficiente. Si buscas <strong>comprar piso subasta BOE</strong>, nuestra plataforma te ofrece las herramientas necesarias para un análisis riguroso. Consulta nuestra <Link to={ROUTES.GUIDE_PILLAR} className="text-brand-600 hover:underline font-medium">guía subastas BOE</Link> para empezar.
+            </p>
+
+            <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-900 mb-4">
+              Cómo encontrar oportunidades en subastas judiciales
+            </h2>
+            <p className="text-slate-600 text-sm md:text-base mb-6">
+              Para localizar <strong>subastas con descuento</strong> real, es fundamental comparar el valor de subasta con el precio de mercado actual. Muchas <strong>subastas de embargos bancarios</strong> salen a licitación con tipos de salida muy atractivos, pero el éxito reside en la detección temprana de <strong>subastas inmobiliarias baratas</strong>. En Activos Off-Market, priorizamos la visibilidad de activos que permiten una inversión segura y con alto margen de beneficio. Puedes solicitar un <Link to={ROUTES.PRO} className="text-brand-600 hover:underline font-medium">análisis completo</Link> de cualquier activo en nuestros <Link to={ROUTES.PRO} className="text-brand-600 hover:underline font-medium">planes</Link>.
+            </p>
+
+            <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-900 mb-4">
+              Qué revisar antes de pujar en una subasta
+            </h2>
+            <p className="text-slate-600 text-sm md:text-base mb-6">
+              Participar en <strong>subastas sin cargas</strong> ocultas es el objetivo de todo inversor que analiza <strong>subastas judiciales viviendas</strong>. Antes de realizar un depósito, es imperativo realizar un <Link to={ROUTES.CHARGES} className="text-brand-600 hover:underline font-medium">análisis de cargas</Link> exhaustivo en el Registro de la Propiedad. Asegúrate de entender la diferencia entre cargas anteriores (que se mantienen) y posteriores (que se cancelan). Un análisis técnico previo del edicto judicial te ahorrará sorpresas desagradables tras la adjudicación del inmueble.
+            </p>
+
+            <div className="bg-slate-50 border border-slate-100 rounded-xl p-6 mb-6">
+              <h3 className="font-bold text-slate-900 mb-3">Cómo participar en una subasta BOE:</h3>
+              <ol className="list-decimal list-inside text-slate-600 text-sm md:text-base space-y-1">
+                <li>Analizar el edicto judicial</li>
+                <li>Revisar cargas en el Registro</li>
+                <li>Estudiar la tasación oficial</li>
+                <li>Definir tu puja máxima rentable</li>
+              </ol>
+            </div>
+
+            <p className="text-[10px] md:text-xs text-slate-400 italic mt-8 border-t border-slate-100 pt-4">
+              Nota: La participación en subastas judiciales puede implicar riesgos. Se recomienda revisar siempre el expediente completo antes de pujar.
+            </p>
+          </div>
+          
+          {!isExpanded && (
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-slate-50 to-transparent z-10" />
+          )}
+        </div>
+        
+        <button 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="mt-4 flex items-center gap-2 text-brand-600 font-bold hover:text-brand-700 transition-colors mx-auto md:mx-0"
+        >
+          {isExpanded ? (
+            <>Ver menos <ChevronUp size={18} /></>
+          ) : (
+            <>Ver más sobre subastas <ChevronDown size={18} /></>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const RecentAuctions: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -84,6 +168,17 @@ const RecentAuctions: React.FC = () => {
   const activeCount = Object.keys(filteredAuctions).length;
   const hasFilters = activeCount !== totalActiveAuctions;
 
+  const featuredAuctions = useMemo(() => {
+    return Object.entries(AUCTIONS)
+      .filter(([_, data]) => isAuctionActive(data) && data.valorTasacion)
+      .sort(([_, a], [__, b]) => {
+        if (a.isNew && !b.isNew) return -1;
+        if (!a.isNew && b.isNew) return 1;
+        return (b.valorTasacion || 0) - (a.valorTasacion || 0);
+      })
+      .slice(0, 3);
+  }, []);
+
   const getSortLabel = (sort: string) => {
     switch (sort) {
       case 'oldest': return 'Más antiguas';
@@ -95,6 +190,16 @@ const RecentAuctions: React.FC = () => {
 
   const sortLabel = getSortLabel(sortBy);
 
+  const marketStats = useMemo(() => {
+    const auctions = Object.values(AUCTIONS);
+    const total = auctions.length;
+    const madrid = auctions.filter(a => a.province?.toLowerCase() === 'madrid').length;
+    const barcelona = auctions.filter(a => a.province?.toLowerCase() === 'barcelona').length;
+    const valencia = auctions.filter(a => a.province?.toLowerCase() === 'valencia').length;
+    
+    return { total, madrid, barcelona, valencia };
+  }, []);
+
   useEffect(() => {
     if (safePage > 1) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -102,10 +207,35 @@ const RecentAuctions: React.FC = () => {
       window.scrollTo(0, 0);
     }
     
-    document.title = "Últimas subastas inmobiliarias detectadas | Activos Off-Market";
+    // Meta Title
+    document.title = "Subastas BOE: Últimas oportunidades inmobiliarias en España";
     
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', "Listado de las subastas judiciales y administrativas más recientes detectadas en España. Análisis técnico y oportunidades de inversión inmobiliaria.");
+    // Meta Description
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', "Subastas inmobiliarias del BOE detectadas automáticamente. Encuentra oportunidades con descuento, analiza cargas y revisa el expediente antes de pujar.");
+
+    // Open Graph Title
+    let ogTitle = document.querySelector('meta[property="og:title"]');
+    if (!ogTitle) {
+      ogTitle = document.createElement('meta');
+      ogTitle.setAttribute('property', 'og:title');
+      document.head.appendChild(ogTitle);
+    }
+    ogTitle.setAttribute('content', "Subastas BOE en España | Oportunidades inmobiliarias");
+
+    // Open Graph Description
+    let ogDesc = document.querySelector('meta[property="og:description"]');
+    if (!ogDesc) {
+      ogDesc = document.createElement('meta');
+      ogDesc.setAttribute('property', 'og:description');
+      document.head.appendChild(ogDesc);
+    }
+    ogDesc.setAttribute('content', "Listado actualizado de subastas inmobiliarias del BOE. Detecta oportunidades, revisa riesgos y analiza antes de pujar.");
 
     // SEO Pagination: noindex,follow for page > 1
     let robotsMeta = document.querySelector('meta[name="robots"]');
@@ -132,29 +262,95 @@ const RecentAuctions: React.FC = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-600">
-      <header className="bg-white border-b border-slate-200 pt-12 pb-16">
+      <script type="application/ld+json">
+        {JSON.stringify([
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Inicio",
+                "item": window.location.origin
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Subastas Recientes",
+                "item": window.location.origin + window.location.pathname
+              }
+            ]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "Últimas subastas inmobiliarias en España",
+            "description": "Listado de las subastas judiciales y administrativas más recientes detectadas en España.",
+            "numberOfItems": activeCount,
+            "itemListElement": paginatedAuctions.map(({ slug, data }, index) => ({
+              "@type": "ListItem",
+              "position": index + 1,
+              "url": `${window.location.origin}/subasta/${slug}`,
+              "name": `${data.propertyType} en ${data.city || data.province}`
+            }))
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "¿Cómo encontrar oportunidades reales en el listado de subastas?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Las mejores oportunidades se encuentran analizando la diferencia entre el valor de tasación y el precio de mercado actual. Es vital filtrar por activos con cargas cancelables y revisar el estado ocupacional del inmueble."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Qué riesgos hay que revisar en el BOE antes de pujar?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Es imprescindible revisar las cargas preferentes en la certificación de dominio y cargas, el estado de ocupación, posibles deudas de comunidad o IBI, y si el edicto contiene errores en la descripción del activo."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Es necesario contar con un abogado para participar en subastas?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Aunque cualquier persona con certificado digital puede pujar, se recomienda encarecidamente contar con asesoramiento legal o técnico para la revisión del expediente judicial y asegurar que la adjudicación sea firme y libre de cargas inesperadas."
+                }
+              }
+            ]
+          }
+        ])}
+      </script>
+      <header className="bg-white border-b border-slate-200 pt-6 md:pt-8 pb-8 md:pb-10">
         <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex items-center text-sm text-slate-500 mb-8 font-medium" aria-label="Breadcrumb">
+          <nav className="flex items-center text-xs md:text-sm text-slate-500 mb-4 md:mb-6 font-medium" aria-label="Breadcrumb">
             <Link 
               to={ROUTES.HOME} 
               className="hover:text-brand-600 transition-colors"
             >
               Inicio
             </Link>
-            <ChevronRight size={14} className="mx-2" />
-            <span className="text-brand-700 bg-brand-50 px-2 py-1 rounded-md" aria-current="page">Subastas Recientes</span>
+            <ChevronRight size={12} className="mx-1.5 md:mx-2" />
+            <span className="text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md" aria-current="page">Subastas Recientes</span>
           </nav>
 
-          <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-slate-900 mb-6 leading-tight">
-            Últimas subastas inmobiliarias detectadas
+          <h1 className="font-serif text-2xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 md:mb-4 leading-tight">
+            Últimas subastas BOE e inmuebles detectados en España
           </h1>
-          <p className="text-slate-500 text-sm mb-8 max-w-2xl">
-            Filtra por provincia, tipo de inmueble o estado para encontrar oportunidades más rápido.
-          </p>
+          <div className="min-h-[24px] flex items-center gap-2 text-slate-500 text-xs md:text-sm mb-6 font-medium">
+            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            Actualizado hoy · <b className="text-slate-900">{activeCount}</b> subastas detectadas
+          </div>
 
           <ShareButtons 
             title="Últimas subastas inmobiliarias detectadas en España" 
-            className="-mt-2" 
+            className="-mt-1" 
             province="España"
             origin="listing"
           />
@@ -174,12 +370,53 @@ const RecentAuctions: React.FC = () => {
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-12">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-100 text-brand-700 font-bold px-4 py-2 rounded-lg shadow-sm w-fit">
-            <span className="relative flex h-3 w-3">
+      <main className="max-w-7xl mx-auto px-6 py-8 md:py-12">
+        {/* Bloque A: Trust Indicators */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 border-b border-slate-200 pb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+              <Zap size={18} />
+            </div>
+            <p className="text-xs md:text-sm font-medium text-slate-700">Detección en tiempo real de nuevos edictos del BOE</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+              <ShieldCheck size={18} />
+            </div>
+            <p className="text-xs md:text-sm font-medium text-slate-700">Análisis técnico de cargas y riesgos catastrales</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+              <FileText size={18} />
+            </div>
+            <p className="text-xs md:text-sm font-medium text-slate-700">Acceso directo a datos clave del expediente judicial</p>
+          </div>
+        </div>
+
+        {!hasFilters && featuredAuctions.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
+                <TrendingUp className="text-brand-500" size={24} />
+                Subastas destacadas hoy
+              </h2>
+              <div className="hidden md:block h-px flex-grow mx-6 bg-slate-200" />
+            </div>
+            <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-4 md:gap-6 pb-4 md:pb-0 snap-x scroll-smooth no-scrollbar">
+              {featuredAuctions.map(([slug, data]) => (
+                <div key={`featured-${slug}`} className="min-w-[85%] md:min-w-0 snap-center">
+                  <AuctionCard slug={slug} data={data} showImage={false} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-100 text-brand-700 font-bold px-3 py-1.5 rounded-lg shadow-sm w-fit text-xs md:text-sm">
+            <span className="relative flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-brand-500"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
             </span>
             {hasFilters 
               ? `Mostrando ${activeCount} de ${totalActiveAuctions} subastas` 
@@ -187,12 +424,12 @@ const RecentAuctions: React.FC = () => {
           </div>
 
           {sortLabel && (
-            <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-600 text-sm px-3 py-1.5 rounded-md w-fit">
+            <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-600 text-xs px-2.5 py-1 rounded-md w-fit">
               <span className="font-medium">Orden:</span> {sortLabel}
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
           {paginatedAuctions.length > 0 ? paginatedAuctions.map(({ slug, data, showNewBadge }) => (
             <AuctionCard key={slug} slug={slug} data={data} showNewBadge={showNewBadge} showImage={false} />
           )) : (
@@ -206,6 +443,37 @@ const RecentAuctions: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+
+        {/* Bloque B: Editorial SEO + FAQ */}
+        <div className="mt-16 pt-12 border-t border-slate-200">
+          <div className="max-w-4xl mx-auto">
+            <div className="prose prose-slate max-w-none mb-12">
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-slate-900 mb-6">Inversión inteligente en subastas inmobiliarias</h2>
+              <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+                El mercado de subastas judiciales y administrativas en España representa una de las vías más eficientes para la adquisición de activos inmobiliarios con descuentos que a menudo superan el 30% o 40% sobre su valor de tasación oficial. No obstante, navegar por el Portal de Subastas del BOE requiere una metodología rigurosa para evitar riesgos jurídicos y financieros. 
+              </p>
+              <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+                En Activos Off-Market, simplificamos este proceso mediante la monitorización constante de nuevos edictos, permitiendo a nuestros usuarios detectar oportunidades en tiempo real sin necesidad de revisar manualmente miles de publicaciones diarias. Nuestro enfoque se centra en la transparencia y el análisis técnico, cruzando datos de Catastro y Registro para identificar posibles cargas preferentes o situaciones posesorias complejas. Antes de participar en cualquier puja, es fundamental realizar una revisión exhaustiva del expediente judicial y contar con una estrategia de puja máxima definida. Nuestra plataforma no solo lista activos, sino que proporciona el contexto necesario para que cada inversión se realice con la máxima seguridad jurídica y rentabilidad potencial.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <h3 className="text-xl font-bold text-slate-900 mb-6">Preguntas frecuentes sobre subastas</h3>
+              <FaqItem 
+                question="¿Cómo encontrar oportunidades reales en el listado de subastas?"
+                answer="Las mejores oportunidades se encuentran analizando la diferencia entre el valor de tasación y el precio de mercado actual. Es vital filtrar por activos con cargas cancelables y revisar el estado ocupacional del inmueble antes de comprometer capital."
+              />
+              <FaqItem 
+                question="¿Qué riesgos hay que revisar en el BOE antes de pujar?"
+                answer="Es imprescindible revisar las cargas preferentes en la certificación de dominio y cargas, el estado de ocupación, posibles deudas de comunidad o IBI, y si el edicto contiene errores en la descripción del activo que puedan invalidar la subasta."
+              />
+              <FaqItem 
+                question="¿Es necesario contar con un abogado para participar en subastas?"
+                answer="Aunque cualquier persona con certificado digital puede pujar, se recomienda encarecidamente contar con asesoramiento legal o técnico para la revisión del expediente judicial y asegurar que la adjudicación sea firme y libre de cargas inesperadas tras el decreto de adjudicación."
+              />
+            </div>
+          </div>
         </div>
 
         {totalPages > 1 && (
@@ -330,6 +598,8 @@ const RecentAuctions: React.FC = () => {
             </Link>
           </div>
         </div>
+
+        <SeoExpandableContent />
 
         <div className="mt-24">
           <DiscoverReportsBlock />

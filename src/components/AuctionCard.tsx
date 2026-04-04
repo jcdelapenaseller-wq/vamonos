@@ -129,47 +129,47 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ slug, data, showNewBad
         </div>
       </div>
 
-      <div className="p-5 pt-24 flex-grow flex flex-col relative">
+      <div className="p-4 pt-20 flex-grow flex flex-col relative">
         <div 
           onClick={() => navigate(`/subasta/${id}`)}
-          className="block mb-4 cursor-pointer"
+          className="block mb-3 cursor-pointer"
         >
-          <h2 className="text-lg font-bold text-slate-900 leading-tight hover:text-brand-600 transition-colors line-clamp-2">
+          <h2 className="text-base md:text-lg font-bold text-slate-900 leading-tight hover:text-brand-600 transition-colors line-clamp-2">
             {normalizePropertyType(data.propertyType)} en {data.address?.split(',')[0] || normalizeLocationLabel(data).split(',')[0]}
           </h2>
           {isUpcoming && (
-            <div className="mt-2 text-[11px] font-medium text-blue-600 flex items-center gap-1">
+            <div className="mt-1.5 text-[10px] font-medium text-blue-600 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
               Disponible próximamente
             </div>
           )}
         </div>
 
-        <div className="space-y-2.5 mb-6 flex-grow">
-          <div className="flex items-start gap-2 text-slate-600 text-sm">
-            <MapPin size={16} className="text-slate-400 mt-0.5 shrink-0" />
+        <div className="space-y-2 mb-4 flex-grow">
+          <div className="flex items-start gap-2 text-slate-600 text-xs md:text-sm">
+            <MapPin size={14} className="text-slate-400 mt-0.5 shrink-0" />
             <span className="font-medium leading-snug">
               {normalizeLocationLabel(data)}
             </span>
           </div>
           
-          <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 mt-3">
+          <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-100 mt-2">
             {valorReferencia && (
-              <div className="flex justify-between items-center text-sm mb-1">
+              <div className="flex justify-between items-center text-xs md:text-sm mb-1">
                 <span className="text-slate-500">Tasación:</span>
                 <span className="font-bold text-slate-900">{valorReferencia.toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0})}</span>
               </div>
             )}
 
             {cantidadReclamada !== undefined && cantidadReclamada !== null && (
-              <div className={`flex justify-between items-center text-sm ${pricePerM2 ? 'mb-1' : ''}`}>
+              <div className={`flex justify-between items-center text-xs md:text-sm ${pricePerM2 ? 'mb-1' : ''}`}>
                 <span className="text-slate-500">Deuda:</span>
                 <span className="font-bold text-rose-700/90">{cantidadReclamada.toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0})}</span>
               </div>
             )}
 
             {pricePerM2 ? (
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex justify-between items-center text-xs md:text-sm">
                 <span className="text-slate-500">Precio m²:</span>
                 <span className="font-bold text-slate-700">💸 {pricePerM2.toLocaleString('es-ES')} €/m²</span>
               </div>
@@ -181,26 +181,26 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ slug, data, showNewBad
                 trackConversion(province, 'listing', 'calculator_from_card_click', { precio: cantidadReclamada || 0 });
                 navigate(`${ROUTES.CALCULATOR}?tasacion=${valorReferencia || 0}&precio=${cantidadReclamada || 0}&ccaa=${province}`);
               }}
-              className="w-full mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-center gap-1.5 text-[11px] font-bold text-brand-600 hover:text-brand-700 transition-colors group/calc"
+              className="w-full mt-2.5 pt-2.5 border-t border-slate-200/60 flex items-center justify-center gap-1.5 text-[10px] font-bold text-brand-600 hover:text-brand-700 transition-colors group/calc"
             >
-              <Calculator size={14} className="group-hover/calc:scale-110 transition-transform" />
+              <Calculator size={12} className="group-hover/calc:scale-110 transition-transform" />
               Calcular puja máxima
             </button>
           </div>
         </div>
 
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-1">
           {isActive && !isFinished && !isSuspended && !isUpcoming && (
-            <div className="text-center mb-2">
-              <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Disponible ahora</span>
+            <div className="text-center mb-1.5">
+              <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Disponible ahora</span>
             </div>
           )}
           <button 
             onClick={() => navigate(`/subasta/${id}`)}
-            className={`w-full inline-flex items-center justify-center font-bold py-3.5 px-6 rounded-xl transition-all group ${isFinished ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' : isSuspended ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-brand-600 text-white hover:bg-brand-700 shadow-sm hover:shadow-md hover:-translate-y-0.5'}`}
+            className={`w-full inline-flex items-center justify-center font-bold py-3 px-5 rounded-xl transition-all group ${isFinished ? 'bg-slate-100 text-slate-500 hover:bg-slate-200' : isSuspended ? 'bg-amber-100 text-amber-700 hover:bg-amber-200' : 'bg-brand-600 text-white hover:bg-brand-700 shadow-sm hover:shadow-md hover:-translate-y-0.5'}`}
           >
             {isFinished ? 'Ver resultado' : isSuspended ? 'Ver detalles' : 'Ver oportunidad'}
-            <ChevronRight size={18} className="ml-1 group-hover:translate-x-1 transition-transform" />
+            <ChevronRight size={16} className="ml-1 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </div>

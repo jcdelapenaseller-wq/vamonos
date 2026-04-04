@@ -37,7 +37,7 @@ const RadarPremiumCTA: React.FC<RadarPremiumCTAProps> = ({
               {title}
             </p>
             <p className="text-slate-500 text-sm mt-1">
-              Ahorra horas infinitas revisando el BOE cada día y activa las alertas
+              Crea alertas por ciudad o provincia gratis
             </p>
           </div>
         </div>
@@ -46,10 +46,10 @@ const RadarPremiumCTA: React.FC<RadarPremiumCTAProps> = ({
             to={ROUTES.ALERTAS} onClick={handleTrack}
             className="w-full md:w-auto whitespace-nowrap px-8 py-3 bg-brand-600 text-white font-bold rounded-xl text-base hover:bg-brand-700 transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-600/10"
           >
-            Crear alerta gratis <ArrowRight size={18} />
+            Crear alerta <ArrowRight size={18} />
           </Link>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            7 días gratis · luego 5€/mes
+            Disponible según tu plan
           </p>
         </div>
       </div>
@@ -65,20 +65,18 @@ const RadarPremiumCTA: React.FC<RadarPremiumCTAProps> = ({
             {title}
           </h3>
           <p className="text-slate-600 text-sm mb-6">
-            Ahorra horas infinitas revisando el BOE cada día y activa las alertas
+            Crea alertas por ciudad o provincia gratis
           </p>
           <div className="flex flex-col gap-3">
             <Link 
               to={ROUTES.ALERTAS} onClick={handleTrack}
               className="w-full py-3 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700 transition-all flex items-center justify-center gap-2 shadow-md shadow-brand-600/10"
             >
-              Crear alerta gratis <ArrowRight size={16} />
+              Crear alerta <ArrowRight size={16} />
             </Link>
-            <Link 
-              to={ROUTES.ALERTAS} className="text-center text-xs text-slate-400 hover:text-brand-600 underline underline-offset-4"
-            >
-              ¿cómo funciona?
-            </Link>
+            <p className="text-center text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+              Disponible según tu plan
+            </p>
           </div>
         </div>
       </div>
@@ -104,7 +102,7 @@ const RadarPremiumCTA: React.FC<RadarPremiumCTAProps> = ({
             Recíbelas antes de que otros las vean
           </div>
           <p className="text-slate-400 text-sm mb-4">
-            Ahorra horas infinitas revisando el BOE cada día y activa las alertas
+            Crea alertas por ciudad o provincia gratis
           </p>
           <div className="flex items-center gap-2 text-[10px] text-slate-500 mb-4">
             <Star size={10} className="text-brand-400" fill="currentColor" />
@@ -114,11 +112,11 @@ const RadarPremiumCTA: React.FC<RadarPremiumCTAProps> = ({
             to={ROUTES.ALERTAS} onClick={handleTrack}
             className="w-full py-3 bg-brand-600 text-white font-bold rounded-xl text-sm hover:bg-brand-700 transition-all flex items-center justify-center gap-2"
           >
-            7 días gratis <ArrowRight size={16} />
+            Crear alerta <ArrowRight size={16} />
           </Link>
           <div className="mt-3 text-center space-y-1">
-            <p className="text-[10px] text-slate-400">Después 5€/mes. Sin compromiso.</p>
-            <p className="text-[9px] text-slate-500 italic">Cancela en 1 clic desde tu panel</p>
+            <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">Disponible según tu plan</p>
+            <p className="text-[9px] text-slate-500 italic">Configura tus zonas preferidas</p>
           </div>
         </div>
       </div>
@@ -143,7 +141,7 @@ const RadarPremiumCTA: React.FC<RadarPremiumCTAProps> = ({
             Recibe nuevas subastas antes de que otros las vean
           </div>
           <p className="text-slate-600 text-lg mb-6">
-            Ahorra horas infinitas revisando el BOE cada día y activa las alertas
+            Crea alertas por ciudad o provincia gratis
           </p>
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-8">
             <div className="flex -space-x-2">
@@ -162,11 +160,11 @@ const RadarPremiumCTA: React.FC<RadarPremiumCTAProps> = ({
             to={ROUTES.ALERTAS} onClick={handleTrack}
             className="px-8 py-4 bg-brand-600 text-white font-bold rounded-2xl text-lg hover:bg-brand-700 transition-all flex items-center justify-center gap-3 shadow-lg shadow-brand-600/20"
           >
-            Probar 7 días gratis <ArrowRight size={20} />
+            Crear alerta <ArrowRight size={20} />
           </Link>
           <div className="text-center">
-            <p className="text-slate-500 text-sm font-bold">Después 5€/mes</p>
-            <p className="text-slate-400 text-xs">Sin compromiso. Cancela en 1 clic.</p>
+            <p className="text-slate-500 text-sm font-bold uppercase tracking-wider">Disponible según tu plan</p>
+            <p className="text-slate-400 text-xs">Configura tus zonas preferidas</p>
           </div>
         </div>
       </div>

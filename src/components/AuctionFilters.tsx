@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { MapPin, Map, Activity, Building2, ArrowUpDown } from 'lucide-react';
 import { AuctionData } from '../data/auctions';
 import { getComputedStatus, getAuctionType, isAuctionActive } from '../utils/auctionHelpers';
 
@@ -82,27 +83,42 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({ auctions, onFilt
   }, [auctions]);
   const types = useMemo(() => Array.from(new Set(Object.values(auctions).map(a => getAuctionType(a.boeId)).filter(Boolean))), [auctions]);
 
-  const selectBaseClass = "border border-slate-200 bg-white focus:ring-2 focus:ring-brand-500 outline-none transition-all w-full";
-  const selectSizeClass = isScrolled ? "p-1.5 text-xs rounded-lg" : "p-2.5 text-sm rounded-xl";
+  const selectBaseClass = "appearance-none border border-slate-300 bg-white focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all w-full pl-9 pr-8";
+  const selectSizeClass = isScrolled ? "py-1.5 text-xs rounded-lg" : "py-2.5 text-sm rounded-xl";
 
   return (
-    <div className={`sticky top-0 md:top-2 z-40 transition-all duration-300 mb-8 ${isScrolled ? 'bg-white/95 shadow-md md:rounded-2xl border-b md:border border-slate-200/50 p-2.5 md:p-3 -mx-6 px-6 md:mx-0 md:px-3' : 'bg-white p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm'}`}>
+    <div className={`sticky top-0 md:top-2 z-40 transition-all duration-300 mb-8 ${isScrolled ? 'bg-white/95 shadow-md md:rounded-2xl border-b md:border border-slate-200/50 p-2 md:p-3 -mx-6 px-6 md:mx-0 md:px-3' : 'bg-slate-50 p-4 md:p-6 rounded-2xl border border-slate-200 shadow-sm'}`}>
       <div className={`grid gap-2 md:gap-3 ${onSortChange ? 'grid-cols-2 md:grid-cols-6' : 'grid-cols-2 md:grid-cols-4'}`}>
-        <div className="col-span-1">
+        <div className="col-span-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MapPin size={16} className="text-slate-400" />
+          </div>
           <select value={city} onChange={e => setCity(e.target.value)} className={`${selectBaseClass} ${selectSizeClass}`}>
             <option value="">Municipio</option>
             {cities.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
+          <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+            <ArrowUpDown size={14} className="text-slate-400" />
+          </div>
         </div>
         
-        <div className="hidden md:block col-span-1">
+        <div className="hidden md:block col-span-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Map size={16} className="text-slate-400" />
+          </div>
           <select value={province} onChange={e => setProvince(e.target.value)} className={`${selectBaseClass} ${selectSizeClass}`}>
             <option value="">Provincia</option>
             {provinces.map(p => <option key={p} value={p}>{p}</option>)}
           </select>
+          <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+            <ArrowUpDown size={14} className="text-slate-400" />
+          </div>
         </div>
 
-        <div className="col-span-1">
+        <div className="col-span-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Activity size={16} className="text-slate-400" />
+          </div>
           <select value={status} onChange={e => setStatus(e.target.value)} className={`${selectBaseClass} ${selectSizeClass}`}>
             <option value="">Situación</option>
             <option value="active">En curso</option>
@@ -110,18 +126,30 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({ auctions, onFilt
             <option value="suspended">Pausada</option>
             <option value="closed">Finalizada</option>
           </select>
+          <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+            <ArrowUpDown size={14} className="text-slate-400" />
+          </div>
         </div>
         
-        <div className="hidden md:block col-span-1">
+        <div className="hidden md:block col-span-1 relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Building2 size={16} className="text-slate-400" />
+          </div>
           <select value={type} onChange={e => setType(e.target.value)} className={`${selectBaseClass} ${selectSizeClass}`}>
             <option value="">Tipo de subasta</option>
             {types.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
+          <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+            <ArrowUpDown size={14} className="text-slate-400" />
+          </div>
         </div>
 
         {onSortChange && (
-          <div className="col-span-2 md:col-span-1">
-            <select value={sortBy} onChange={e => setSortBy(e.target.value)} className={`${selectBaseClass} ${selectSizeClass} bg-slate-50 font-medium`}>
+          <div className="col-span-2 md:col-span-1 relative">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <ArrowUpDown size={16} className="text-slate-400" />
+            </div>
+            <select value={sortBy} onChange={e => setSortBy(e.target.value)} className={`${selectBaseClass} ${selectSizeClass} font-medium`}>
               <option value="recent">Más recientes</option>
               <option value="oldest">Más antiguas</option>
               <option value="value_high">Mayor valor</option>
