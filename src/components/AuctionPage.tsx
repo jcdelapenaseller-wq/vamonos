@@ -740,7 +740,10 @@ const AuctionPage: React.FC = () => {
   }, [auction?.appraisalValue, auction?.claimedDebt]);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [slug]);
+
+  useEffect(() => {
     if (auction) {
       setValorMercado(auction?.appraisalValue || '');
       setDeudas(auction?.claimedDebt || '');

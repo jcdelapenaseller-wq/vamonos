@@ -340,7 +340,7 @@ const RecentAuctions: React.FC = () => {
             <span className="text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md" aria-current="page">Subastas Recientes</span>
           </nav>
 
-          <h1 className="font-serif text-2xl md:text-4xl lg:text-5xl font-bold text-slate-900 mb-3 md:mb-4 leading-tight">
+          <h1 className="font-serif text-3xl md:text-5xl font-bold text-slate-900 mb-3 md:mb-4 leading-tight">
             Últimas subastas BOE e inmuebles detectados en España
           </h1>
           <div className="min-h-[24px] md:min-h-0 flex items-center gap-2 text-slate-500 text-xs md:text-sm mb-6 font-medium">
@@ -402,7 +402,7 @@ const RecentAuctions: React.FC = () => {
               </h2>
               <div className="hidden md:block h-px flex-grow mx-6 bg-slate-200" />
             </div>
-            <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-3 md:gap-6 pb-1 md:pb-0 snap-x scroll-smooth no-scrollbar">
+            <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-3 md:gap-6 pb-1 md:pb-0 snap-x snap-mandatory scroll-smooth scrollbar-none">
               {featuredAuctions.map(([slug, data]) => (
                 <div key={`featured-${slug}`} className="min-w-[85%] max-w-[85%] md:min-w-0 md:max-w-none snap-center">
                   <AuctionCard slug={slug} data={data} showImage={false} />

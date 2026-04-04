@@ -79,8 +79,10 @@ const Header: React.FC = () => {
 
   return (
     <header 
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 shadow-md py-3' : 'bg-white/80 py-4 md:py-5'
+      className={`fixed top-0 w-full z-50 transition-all duration-300 border-b ${
+        isScrolled 
+          ? 'bg-white/98 shadow-sm py-2.5 border-slate-100' 
+          : 'bg-white/90 py-3.5 md:py-5 border-transparent'
       }`}
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center whitespace-nowrap min-w-0">
@@ -210,10 +212,10 @@ const Header: React.FC = () => {
                       {/* Plan Status Block */}
                       <div className="px-4 py-3 border-b border-slate-100 mb-1">
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                            plan === 'pro' ? 'bg-amber-100 text-amber-700' : 
-                            plan === 'basic' ? 'bg-blue-100 text-blue-700' : 
-                            'bg-slate-100 text-slate-600'
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                            plan === 'pro' ? 'bg-purple-50 text-purple-700 border-purple-200' : 
+                            plan === 'basic' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                            'bg-slate-50 text-slate-600 border-slate-200'
                           }`}>
                             {plan === 'pro' ? '👑 Plan PRO' : plan === 'basic' ? '⭐ Plan BASIC' : '🟢 Plan FREE'}
                           </span>
@@ -307,13 +309,37 @@ const Header: React.FC = () => {
           </div>
         </nav>
 
-        {/* Mobile Menu Button */}
-        <div className="flex items-center md:hidden whitespace-nowrap flex-shrink-0">
+        {/* Mobile Actions */}
+        <div className="flex items-center md:hidden gap-2 whitespace-nowrap flex-shrink-0">
+          {!isLoading && !isLogged && (
+            <Link 
+              to={`${ROUTES.LOGIN}?from=header&redirect=${window.location.pathname}`}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 text-brand-700 rounded-full text-xs font-bold border border-brand-100 hover:bg-brand-100 transition-all active:scale-95"
+            >
+              <span>✨</span>
+              <span>Acceder</span>
+            </Link>
+          )}
+          
+          {isLogged && (
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="w-8 h-8 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-brand-700 overflow-hidden"
+            >
+              <User size={16} />
+            </button>
+          )}
+
           <button 
-            className="text-slate-700 p-2"
+            className="text-slate-800 p-1.5 hover:bg-slate-50 rounded-lg transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Menú"
           >
-            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+            {isMobileMenuOpen ? (
+              <X size={28} strokeWidth={2.5} />
+            ) : (
+              <Menu size={28} strokeWidth={2.5} />
+            )}
           </button>
         </div>
       </div>
@@ -330,14 +356,14 @@ const Header: React.FC = () => {
                   <User size={24} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-bold text-slate-900 truncate max-w-[200px]">
+                  <span className="font-bold text-slate-900 truncate max-w-[180px]">
                     {user?.email || 'Mi Perfil'}
                   </span>
                   <div className="flex items-center gap-2">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      plan === 'pro' ? 'bg-amber-100 text-amber-700' : 
-                      plan === 'basic' ? 'bg-blue-100 text-blue-700' : 
-                      'bg-slate-100 text-slate-600'
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                      plan === 'pro' ? 'bg-purple-50 text-purple-700 border-purple-200' : 
+                      plan === 'basic' ? 'bg-blue-50 text-blue-700 border-blue-200' : 
+                      'bg-slate-50 text-slate-600 border-slate-200'
                     }`}>
                       {plan === 'pro' ? 'Plan PRO' : plan === 'basic' ? 'Plan BASIC' : 'Plan FREE'}
                     </span>
