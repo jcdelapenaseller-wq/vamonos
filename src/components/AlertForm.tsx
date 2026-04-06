@@ -6,7 +6,7 @@ import { subscribeToMailerLite, sendAlertConfirmationEmail } from '../utils/mail
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
 import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp, getCountFromServer, query } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { toast } from 'sonner';
 
 const PROVINCIAS = [
@@ -40,8 +40,8 @@ const AlertForm: React.FC = () => {
       if (isLogged && user && db) {
         try {
           const alertsRef = collection(db, 'users', user.id, 'alerts');
-          const snapshot = await getCountFromServer(query(alertsRef));
-          const count = snapshot.data().count;
+          const snapshot = await getDocs(alertsRef);
+          const count = snapshot.size;
           setAlertsCount(count);
           
           // Check if limit already reached
