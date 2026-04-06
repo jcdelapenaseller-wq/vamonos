@@ -15,8 +15,9 @@ export interface AlertData {
 
 export const alertService = {
   async createAlert(data: Omit<AlertData, 'userId' | 'createdAt' | 'active' | 'id'>) {
-    const user = auth.currentUser;
-    if (!user || !user.uid) throw new Error("Usuario no autenticado");
+    console.log("AUTH USER (createAlert):", auth.currentUser);
+    console.log("AUTH UID (createAlert):", auth.currentUser?.uid);
+    if (!auth.currentUser || !auth.currentUser.uid) throw new Error("Usuario no autenticado");
     
     if (!data.email || !data.province || !data.propertyType || !data.plan) {
       throw new Error("Faltan datos obligatorios para la alerta");
@@ -24,7 +25,7 @@ export const alertService = {
 
     const alertsRef = collection(db, 'alerts');
     const docRef = await addDoc(alertsRef, {
-      userId: user.uid,
+      userId: auth.currentUser.uid,
       email: data.email,
       province: data.province,
       municipality: data.municipality || '',
@@ -38,11 +39,12 @@ export const alertService = {
   },
 
   async getUserAlerts() {
-    const user = auth.currentUser;
-    if (!user || !user.uid) throw new Error("Usuario no autenticado");
+    console.log("AUTH USER (getUserAlerts):", auth.currentUser);
+    console.log("AUTH UID (getUserAlerts):", auth.currentUser?.uid);
+    if (!auth.currentUser || !auth.currentUser.uid) throw new Error("Usuario no autenticado");
 
     const alertsRef = collection(db, 'alerts');
-    const q = query(alertsRef, where('userId', '==', user.uid));
+    const q = query(alertsRef, where('userId', '==', auth.currentUser.uid));
     const snapshot = await getDocs(q);
     
     return snapshot.docs.map(doc => ({
@@ -52,8 +54,7 @@ export const alertService = {
   },
 
   async deleteAlert(alertId: string) {
-    const user = auth.currentUser;
-    if (!user || !user.uid) throw new Error("Usuario no autenticado");
+    if (!auth.currentUser || !auth.currentUser.uid) throw new Error("Usuario no autenticado");
     if (!alertId) throw new Error("ID de alerta no proporcionado");
 
     const alertRef = doc(db, 'alerts', alertId);
@@ -61,11 +62,12 @@ export const alertService = {
   },
 
   async getAlertCount() {
-    const user = auth.currentUser;
-    if (!user || !user.uid) return 0;
+    console.log("AUTH USER (getAlertCount):", auth.currentUser);
+    console.log("AUTH UID (getAlertCount):", auth.currentUser?.uid);
+    if (!auth.currentUser || !auth.currentUser.uid) return 0;
 
     const alertsRef = collection(db, 'alerts');
-    const q = query(alertsRef, where('userId', '==', user.uid));
+    const q = query(alertsRef, where('userId', '==', auth.currentUser.uid));
     const snapshot = await getDocs(q);
     return snapshot.size;
   }
