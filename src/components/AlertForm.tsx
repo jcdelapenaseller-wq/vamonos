@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, MapPin, Home, Bell, ArrowRight, ShieldCheck, AlertCircle, Sparkles } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Mail, MapPin, Home, Bell, ArrowRight, ShieldCheck } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { subscribeToMailerLite, sendAlertConfirmationEmail } from '../utils/mailerlite';
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
-import { db, auth } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { db } from '../lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { toast } from 'sonner';
 
 const PROVINCIAS = [
@@ -28,36 +28,11 @@ const AlertForm: React.FC = () => {
   const [province, setProvince] = useState('');
   const [municipality, setMunicipality] = useState('');
   const [propertyType, setPropertyType] = useState('Todos');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error' | 'limit_reached'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [alertsCount, setAlertsCount] = useState<number | null>(null);
 
   useEffect(() => {
     trackConversion('espana', 'alert_creation', 'email_submit', { step: 'arrival' });
-    
-    // Check current alerts count if logged in
-    const checkAlertsLimit = async () => {
-      if (isLogged && user && db) {
-        try {
-          const alertsRef = collection(db, 'alerts');
-          const q = query(alertsRef, where('userId', '==', user.id));
-          const snapshot = await getDocs(q);
-          const count = snapshot.size;
-          setAlertsCount(count);
-          
-          // Check if limit already reached
-          if (plan === 'free' && count >= 1) {
-            setStatus('limit_reached');
-          } else if (plan === 'basic' && count >= 3) {
-            setStatus('limit_reached');
-          }
-        } catch (error) {
-          console.error("[DEBUG AlertForm] Error checking alerts limit:", error);
-        }
-      }
-    };
-    
-    checkAlertsLimit();
   }, [isLogged, user, plan]);
 
   useEffect(() => {
@@ -73,18 +48,6 @@ const AlertForm: React.FC = () => {
     if (!isLogged || !user) {
       navigate(ROUTES.LOGIN);
       return;
-    }
-
-    // If logged in, we check the count we fetched in useEffect
-    if (alertsCount !== null) {
-      if (plan === 'free' && alertsCount >= 1) {
-        setStatus('limit_reached');
-        return;
-      }
-      if (plan === 'basic' && alertsCount >= 3) {
-        setStatus('limit_reached');
-        return;
-      }
     }
 
     setStatus('loading');
@@ -141,37 +104,6 @@ const AlertForm: React.FC = () => {
       setErrorMessage('Error al guardar la alerta en el sistema.');
     }
   };
-
-  if (status === 'limit_reached') {
-    return (
-      <div className="bg-white border border-slate-200 rounded-3xl p-8 md:p-12 shadow-sm max-w-2xl mx-auto text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-50 rounded-full text-amber-600 mb-6">
-          <AlertCircle size={32} />
-        </div>
-        <h2 className="font-serif text-2xl md:text-3xl font-bold text-slate-900 mb-4">Has alcanzado tu límite de alertas</h2>
-        <p className="text-slate-600 text-base md:text-lg mb-8">
-          Tu plan actual ({plan.toUpperCase()}) permite hasta {plan === 'free' ? '1 alerta' : '3 alertas'}. 
-          Actualiza a PRO para alertas ilimitadas y personalizadas.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link
-            to={ROUTES.PRO}
-            className="bg-brand-600 text-white font-bold py-4 px-8 rounded-xl text-lg hover:bg-brand-700 transition-all flex items-center justify-center gap-2 shadow-md"
-          >
-            <Sparkles size={20} /> Ver planes
-          </Link>
-          <button
-            onClick={() => setStatus('idle')}
-            className="bg-slate-100 text-slate-600 font-bold py-4 px-8 rounded-xl text-lg hover:bg-slate-200 transition-all"
-          >
-            Volver
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const limit = plan === 'free' ? 1 : plan === 'basic' ? 3 : Infinity;
 
   return (
     <div className="bg-white border border-slate-200 rounded-3xl p-8 md:p-12 shadow-sm max-w-2xl mx-auto">
@@ -247,19 +179,6 @@ const AlertForm: React.FC = () => {
           />
         </div>
 
-        {isLogged && alertsCount !== null && (
-          <div className={`text-xs mb-2 flex justify-between items-center ${alertsCount >= limit ? 'text-amber-600 font-medium' : 'text-slate-500'}`}>
-            {plan === 'pro' ? (
-              <span>Alertas ilimitadas</span>
-            ) : (
-              <span>
-                {alertsCount} / {limit} alertas usadas
-                {alertsCount >= limit && ' — límite alcanzado'}
-              </span>
-            )}
-          </div>
-        )}
-
         <button
           type="submit"
           disabled={status === 'loading'}
@@ -271,13 +190,10 @@ const AlertForm: React.FC = () => {
         </button>
 
         <div className="text-center mt-1">
-          {plan === 'free' && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">1 alerta disponible</p>}
-          {plan === 'basic' && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">3 alertas simultáneas</p>}
           {plan === 'pro' && (
             <div className="flex flex-col items-center gap-1">
               <div className="flex items-center justify-center gap-1.5">
                 <span className="px-1.5 py-0.5 rounded bg-brand-50 text-brand-600 text-[8px] font-bold uppercase tracking-wider border border-brand-100">PRO activo</span>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Alertas ilimitadas</p>
               </div>
               <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Alertas prioritarias activas</p>
             </div>
