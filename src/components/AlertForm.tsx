@@ -5,7 +5,7 @@ import { ROUTES } from '../constants/routes';
 import { subscribeToMailerLite, sendAlertConfirmationEmail } from '../utils/mailerlite';
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
 import { toast } from 'sonner';
 
