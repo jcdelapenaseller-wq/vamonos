@@ -88,6 +88,10 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /{path=**}/alerts/{alertId} {
+      allow read: if request.auth != null;
+    }
+
     match /users/{userId} {
       // Users can only read their own profile (contains PII like email)
       allow read: if isOwner(userId) || isAdmin();
