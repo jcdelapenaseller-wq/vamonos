@@ -93,6 +93,10 @@ service cloud.firestore {
       if request.auth != null && request.auth.uid == userId;
     }
 
+    match /users/{userId}/alerts {
+      allow list: if request.auth != null && request.auth.uid == userId;
+    }
+
     match /{path=**}/alerts/{alertId} {
       allow read: if request.auth != null;
     }
