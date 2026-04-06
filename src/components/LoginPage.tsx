@@ -67,7 +67,15 @@ const LoginPage: React.FC = () => {
     setAuthError('');
 
     try {
-      await signInWithPopup(auth, googleProvider);
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      
+      // Ensure user document exists
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        plan: "free",
+        createdAt: serverTimestamp()
+      }, { merge: true });
     } catch (e) {
       console.error('Error logging in with popup:', e);
       if (isMounted.current) setIsAuthenticating(false);
@@ -81,7 +89,15 @@ const LoginPage: React.FC = () => {
     setAuthError('');
     setIsAuthenticating(true);
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const user = result.user;
+
+      // Ensure user document exists
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        plan: "free",
+        createdAt: serverTimestamp()
+      }, { merge: true });
     } catch (error: any) {
       console.error('Error logging in with email:', error.code, error.message);
       if (!isMounted.current) return;
