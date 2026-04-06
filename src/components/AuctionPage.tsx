@@ -31,7 +31,7 @@ import Footer from './Footer';
 import AuctionCalculator from './AuctionCalculator';
 import { useUser, UserContext } from '../contexts/UserContext';
 import { db } from '../lib/firebase';
-import { collection, query, where, getDocs, addDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp, getCountFromServer } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuctionValuation, ValuationResult } from '../services/valuationService';
 import PaymentModal from './PaymentModal';
 
@@ -469,8 +469,8 @@ const AuctionPage: React.FC = () => {
 
           // Load alerts count from Firestore
           const alertsRef = collection(db, 'users', user.id, 'alerts');
-          const snapshot = await getCountFromServer(query(alertsRef));
-          setAlertsCount(snapshot.data().count);
+          const snapshot = await getDocs(alertsRef);
+          setAlertsCount(snapshot.size);
 
           // Check if alert already exists for this city/type
           if (auction) {
@@ -572,8 +572,8 @@ const AuctionPage: React.FC = () => {
 
         if (plan === 'free') {
           const countQuery = query(collection(db, 'favorites'), where('userId', '==', user.id));
-          const snapshot = await getCountFromServer(countQuery);
-          setFavoritesCount(snapshot.data().count);
+          const snapshot = await getDocs(countQuery);
+          setFavoritesCount(snapshot.size);
         }
       } catch (error) {
         console.error("Error checking favorite status:", error);
@@ -620,8 +620,8 @@ const AuctionPage: React.FC = () => {
         // Check limits for free users
         if (plan === 'free') {
           const countQuery = query(collection(db, 'favorites'), where('userId', '==', user.id));
-          const snapshot = await getCountFromServer(countQuery);
-          if (snapshot.data().count >= 3) {
+          const snapshot = await getDocs(countQuery);
+          if (snapshot.size >= 3) {
             setShowPremiumModal(true);
             setIsTogglingFavorite(false);
             return;
