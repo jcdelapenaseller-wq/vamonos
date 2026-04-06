@@ -4,7 +4,7 @@ import admin from 'firebase-admin';
 import { AUCTIONS } from '../src/data/auctions';
 
 // Configuración
-const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
+// const MAILERLITE_API_KEY = process.env.MAILERLITE_API_KEY;
 const SENT_ALERTS_FILE = path.join(process.cwd(), 'src/data/sent_alerts.json');
 
 // Initialize Firebase Admin
@@ -116,85 +116,23 @@ function saveSentAlerts(data: SentAlertsData) {
 }
 
 async function sendAlertEmail(email: string, auction: any, plan: string = 'free') {
-  console.log(`📧 [NOTIFY] Preparando envío MailerLite para: ${email} (Plan: ${plan})`);
-
+  console.log(`📧 [NOTIFY] [SIMULATED] Preparando envío para: ${email} (Plan: ${plan})`);
+  console.log(`⚠️ [NOTIFY] MailerLite ha sido desactivado. No se enviará el email.`);
+  return false; // Return false to avoid marking as sent if we want to retry later with another provider
+  
+  /* 
   const isPro = plan.toLowerCase() === 'pro';
-  const proBadge = isPro ? `
-    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
-      <p style="margin: 0; color: #166534; font-size: 13px; font-weight: bold;">⚡ Alerta prioritaria PRO</p>
-      <p style="margin: 5px 0 0 0; color: #15803d; font-size: 11px;">Has recibido esta oportunidad antes que otros usuarios</p>
-      <p style="margin: 2px 0 0 0; color: #166534; font-size: 10px; font-style: italic;">Gracias a tu acceso prioritario PRO</p>
-    </div>
-  ` : '';
-
-  const upgradeCTA = !isPro ? `
-    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
-      <p style="margin: 0; color: #475569; font-size: 13px;">¿Quieres recibir estas oportunidades antes?</p>
-      <p style="margin: 5px 0 15px 0; color: #1e293b; font-size: 14px; font-weight: bold;">Activa PRO y recibe alertas prioritarias</p>
-      <a href="https://activosoffmarket.es/pro" 
-         style="display: inline-block; background: #f8fafc; color: #1d4ed8; padding: 8px 20px; text-decoration: none; border-radius: 6px; font-size: 13px; font-weight: bold; border: 1px solid #e2e8f0;">
-         Ver planes
-      </a>
-    </div>
-  ` : '';
-
-  try {
-    const response = await fetch('https://connect.mailerlite.com/api/emails/transactional', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${MAILERLITE_API_KEY}`,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      },
-      body: JSON.stringify({
-        subject: `⚠️ Nueva subasta detectada: ${auction.propertyType} en ${auction.city}`,
-        from: "alertas@activosoffmarket.es",
-        from_name: "Alertas Off-Market",
-        to: email,
-        content: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            ${proBadge}
-            <h2 style="color: #0f172a;">Nueva oportunidad detectada</h2>
-            <p>Hola,</p>
-            <p>Hemos encontrado una nueva subasta que coincide con tus filtros de búsqueda:</p>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>Tipo:</strong> ${auction.propertyType}</p>
-              <p><strong>Ubicación:</strong> ${auction.address}, ${auction.city} (${auction.province})</p>
-              <p><strong>Valor Tasación:</strong> ${auction.appraisalValue ? auction.appraisalValue.toLocaleString('es-ES') + '€' : 'Consultar'}</p>
-            </div>
-            <a href="https://activosoffmarket.es/subasta/${auction.slug}" 
-               style="display: inline-block; background: #1d4ed8; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-               Ver detalles de la subasta
-            </a>
-            <p style="margin-top: 30px; font-size: 12px; color: #64748b;">
-              Recibes este email porque tienes activo el Radar de Alertas en Activos Off-Market.
-            </p>
-            ${upgradeCTA}
-          </div>
-        `
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error(`❌ [NOTIFY] Error MailerLite (${response.status}):`, data);
-      return false;
-    }
-
-    console.log(`✅ [NOTIFY] Email enviado con éxito a ${email}`);
-    return true;
-  } catch (error) {
-    console.error(`❌ [NOTIFY] Error en el envío a ${email}:`, error);
-    return false;
-  }
+  ...
+  */
 }
 
 async function main() {
+  /*
   if (!MAILERLITE_API_KEY) {
     console.error('❌ [NOTIFY] MAILERLITE_API_KEY no configurada.');
     return;
   }
+  */
 
   const alerts = await fetchFirestoreAlerts();
   

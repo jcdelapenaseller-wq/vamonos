@@ -1,8 +1,76 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { MailerSend, EmailParams, Sender, Recipient } from "mailersend";
 
 admin.initializeApp();
 const db = admin.firestore();
+
+export const onAuctionCreateEmailAlert = functions
+  .region('europe-west1')
+  .runWith({
+    timeoutSeconds: 60,
+    memory: '256MB'
+  })
+  .firestore
+  .document('auctions/{auctionId}')
+  .onCreate(async (snap, context) => {
+    const auctionData = snap.data();
+    const province = auctionData.province;
+    const municipality = auctionData.municipality;
+    const propertyType = auctionData.propertyType;
+    const valorSubasta = auctionData.valorSubasta;
+    const slug = auctionData.slug;
+
+    // Buscar alerts
+    const alertsSnapshot = await db.collection('alerts')
+      .where('province', '==', province)
+      .where('active', '==', true)
+      .get();
+
+    functions.logger.info(`[INFO] auction detected: ${context.params.auctionId}`);
+    functions.logger.info(`[INFO] alerts matched count: ${alertsSnapshot.size}`);
+
+    let emailSentCount = 0;
+
+    const mailerSendApiKey = process.env.MAILERSEND_API_KEY || functions.config().mailersend?.key;
+    const fromEmailAddress = process.env.FROM_EMAIL || 'alerts@activosoffmarket.es';
+
+    if (!mailerSendApiKey) {
+      functions.logger.error('[ERROR] MAILERSEND_API_KEY is not set.');
+      return null;
+    }
+
+    const mailerSend = new MailerSend({
+      apiKey: mailerSendApiKey,
+    });
+
+    const sentFrom = new Sender(fromEmailAddress, "Alertas Off-Market");
+
+    for (const doc of alertsSnapshot.docs) {
+      const alertData = doc.data();
+      const email = alertData.email;
+
+      if (!email) continue;
+
+      const recipients = [new Recipient(email)];
+
+      const emailParams = new EmailParams()
+        .setFrom(sentFrom)
+        .setTo(recipients)
+        .setSubject(`Nueva subasta en ${province}`)
+        .setText(`Nueva subasta detectada\n\nTipo: ${propertyType}\nMunicipio: ${municipality}\nPrecio: ${valorSubasta}€\n\nVer subasta:\nhttps://activosoffmarket.es/subasta/${slug}`);
+
+      try {
+        await mailerSend.email.send(emailParams);
+        emailSentCount++;
+      } catch (error) {
+        functions.logger.error(`[ERROR] Failed to send email to ${email}:`, error);
+      }
+    }
+
+    functions.logger.info(`[INFO] emails sent count: ${emailSentCount}`);
+    return null;
+  });
 
 export const onAuctionCreate = functions
   .region('europe-west1')
@@ -206,10 +274,12 @@ export const onNotificationQueueCreate = functions
           throw new Error(`Usuario ${userId} no tiene email configurado.`);
         }
 
+        /*
         const mailerliteApiKey = process.env.MAILERLITE_API_KEY || functions.config().mailerlite?.key;
         if (!mailerliteApiKey) {
           throw new Error('MAILERLITE_API_KEY no configurada en el entorno.');
         }
+        */
 
         const emailPayload = {
           subject: `Nueva subasta detectada: ${auction.propertyType} en ${auction.city}`,
@@ -250,6 +320,7 @@ export const onNotificationQueueCreate = functions
           return null;
         }
 
+        /*
         const response = await fetch('https://connect.mailerlite.com/api/emails/transactional', {
           method: 'POST',
           headers: {
@@ -264,6 +335,8 @@ export const onNotificationQueueCreate = functions
           const errorData = await response.text();
           throw new Error(`Error MailerLite (${response.status}): ${errorData}`);
         }
+        */
+        functions.logger.info(`[SIMULATED] Email would be sent to ${userEmail} (MailerLite disabled)`);
       }
 
       // 2. Después enviar OK

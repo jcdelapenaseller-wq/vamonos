@@ -5,9 +5,7 @@ import { fileURLToPath } from 'url';
 
 // Import API handlers
 import valuationHandler from './api/valuation.ts';
-import sendConfirmationHandler from './api/send-confirmation.ts';
 import stripeWebhookHandler from './api/stripe-webhook.ts';
-import subscribeHandler from './api/subscribe.ts';
 import createCheckoutSessionHandler from './api/create-checkout-session.ts';
 import generateAnalysisHandler from './api/generate-analysis.ts';
 import runAnalysisHandler from './api/run-analysis.ts';
@@ -26,8 +24,6 @@ async function startServer() {
   
   // Other routes need JSON body
   app.use('/api/valuation', express.json());
-  app.use('/api/send-confirmation', express.json());
-  app.use('/api/subscribe', express.json());
   app.use('/api/create-checkout-session', express.json());
   app.use('/api/generate-analysis', express.json());
   app.use('/api/create-billing-portal', express.json());
@@ -35,9 +31,7 @@ async function startServer() {
 
   // Map API routes
   app.all('/api/valuation', (req, res) => valuationHandler(req as any, res as any));
-  app.all('/api/send-confirmation', (req, res) => sendConfirmationHandler(req as any, res as any));
   app.all('/api/stripe-webhook', (req, res) => stripeWebhookHandler(req as any, res as any));
-  app.all('/api/subscribe', (req, res) => subscribeHandler(req as any, res as any));
   app.all('/api/create-checkout-session', (req, res) => createCheckoutSessionHandler(req as any, res as any));
   app.all('/api/generate-analysis', (req, res) => generateAnalysisHandler(req as any, res as any));
   app.all('/api/run-analysis', (req, res) => runAnalysisHandler(req as any, res as any));

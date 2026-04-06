@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 import { trackConversion } from '../utils/tracking';
-import { subscribeToMailerLite } from '../utils/mailerlite';
 import { useUser } from '../contexts/UserContext';
 
 const ITP_RATES: Record<string, number> = {
@@ -694,15 +693,6 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
                       // Save email to localStorage for PRO unlock later
                       localStorage.setItem('aom_user_email', email);
                       
-                      const result = await subscribeToMailerLite({
-                        email,
-                        source: 'calculadora_free',
-                        groups: ['182569815674717523'],
-                        fields: {
-                          source: 'calculadora_free'
-                        }
-                      });
-                      
                       trackConversion(comunidad, 'calculator', 'email_submit', { 
                         roi: results.roi.toFixed(1), 
                         precio: adjudicacion, 
@@ -710,11 +700,7 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
                       });
                       
                       setIsSubmitting(false);
-                      if (result.success) {
-                        setIsSubscribed(true);
-                      } else {
-                        alert(result.error || 'Hubo un error al enviar el análisis.');
-                      }
+                      setIsSubscribed(true);
                     }}
                     className="flex flex-col sm:flex-row gap-3"
                   >

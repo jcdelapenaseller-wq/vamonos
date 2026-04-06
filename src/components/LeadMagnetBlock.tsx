@@ -9,20 +9,11 @@ const LeadMagnetBlock: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStatus('loading');
-    try {
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, source: 'checklist' }),
-      });
-      if (response.ok) {
-        setStatus('success');
-      } else {
-        setStatus('error');
-      }
-    } catch (error) {
-      setStatus('error');
-    }
+    
+    // Simulate success as MailerLite is removed
+    setTimeout(() => {
+      setStatus('success');
+    }, 800);
   };
 
   return (

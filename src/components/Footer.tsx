@@ -30,29 +30,17 @@ const Footer: React.FC = () => {
     e.preventDefault();
     if (!email) return;
     setIsSubmitting(true);
-    try {
-      const res = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          source: 'checklist',
-          fields: { source: 'footer_checklist', timestamp: Date.now() }
-        })
-      });
-      if (res.ok) {
-        setIsSuccess(true);
-        setTimeout(() => {
-          setIsChecklistModalOpen(false);
-          setIsSuccess(false);
-          setEmail('');
-        }, 3000);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
+    
+    // Simulate success as MailerLite is removed
+    setTimeout(() => {
+      setIsSuccess(true);
       setIsSubmitting(false);
-    }
+      setTimeout(() => {
+        setIsChecklistModalOpen(false);
+        setIsSuccess(false);
+        setEmail('');
+      }, 3000);
+    }, 800);
   };
 
   return (

@@ -136,8 +136,9 @@ const ProtocoloAnalisisSubastas: React.FC = () => {
                 <p className="text-slate-300 mb-8 max-w-md mx-auto leading-relaxed">
                     Recibe el protocolo en tu email y accede a nuestra lista privada de oportunidades diarias.
                 </p>
-                {/* MailerLite Form */}
-                <div className="ml-embedded" data-form="NhdDQe"></div>
+                <div className="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-slate-400 text-sm">
+                    El sistema de descarga está siendo actualizado. Por favor, contacta con nosotros directamente para recibir el protocolo.
+                </div>
             </div>
         </div>
 

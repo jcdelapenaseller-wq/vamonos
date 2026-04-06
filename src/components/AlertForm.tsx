@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Mail, MapPin, Home, Bell, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
-import { subscribeToMailerLite, sendAlertConfirmationEmail } from '../utils/mailerlite';
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
 import { alertService } from '../services/alertService';
@@ -62,29 +61,7 @@ const AlertForm: React.FC = () => {
         plan
       });
 
-      // 2. MailerLite subscription (Separate Try/Catch)
-      try {
-        const result = await subscribeToMailerLite({
-          email,
-          source: 'alertas',
-          fields: {
-            alerta_provincia: province,
-            alerta_municipio: municipality,
-            alerta_tipo: propertyType,
-            plan_status: plan === 'free' ? 'free' : 'pro'
-          }
-        });
-
-        if (result.success) {
-          sendAlertConfirmationEmail(email, province);
-        } else {
-          console.warn("MailerLite subscription failed:", result.error);
-        }
-      } catch (mailerError) {
-        console.warn("MailerLite subscription threw error:", mailerError);
-      }
-
-      // 3. Success (Firestore succeeded, MailerLite might have failed)
+      // 3. Success (Firestore succeeded)
       trackConversion(province.toLowerCase(), 'alert_creation', 'listado');
       setStatus('success');
       navigate(`${ROUTES.ALERTA_CONFIRMADA}?email=${encodeURIComponent(email)}`);

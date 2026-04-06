@@ -16,7 +16,6 @@ import { getFilteredAuctions, isAuctionFinished, getAuctionType, getProcedureTyp
 import { ROUTES } from '../constants/routes';
 import { normalizePropertyType, normalizeCity, normalizeLocationLabel, normalizeProvince, formatAddress } from '../utils/auctionNormalizer';
 import { trackConversion } from '../utils/tracking';
-import { subscribeToMailerLite, sendAlertConfirmationEmail } from '../utils/mailerlite';
 import FinishedAuctionBanner from './FinishedAuctionBanner';
 import { ShareButtons } from './ShareButtons';
 import ConversionBlock from './ConversionBlock';
@@ -692,20 +691,6 @@ const AuctionPage: React.FC = () => {
         propertyType: type,
         plan: plan
       });
-
-      // 2. Sync with MailerLite (Legacy/Sync)
-      await subscribeToMailerLite({
-        email: user.email,
-        source: 'alertas_ficha',
-        fields: {
-          alerta_provincia: city,
-          alerta_tipo: type,
-          plan_status: plan === 'free' ? 'free' : 'pro'
-        }
-      });
-
-      // 3. Send confirmation email (Transactional)
-      sendAlertConfirmationEmail(user.email, city);
 
       setAlertsCount(prev => prev + 1);
       setHasActiveAlert(true);
