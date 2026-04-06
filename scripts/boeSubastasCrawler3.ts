@@ -3,9 +3,21 @@ import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import admin from 'firebase-admin';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Initialize Firebase Admin
+const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+if (!admin.apps.length && projectId) {
+  try {
+    admin.initializeApp({ projectId });
+  } catch (e) {
+    console.error('Firebase Admin Init Error:', e);
+  }
+}
+const db = admin.apps.length ? admin.firestore() : null;
 
 const normalizeProvince = (raw: string): string => {
   if (!raw) return raw;
@@ -637,6 +649,61 @@ async function runCrawler() {
         console.error('Error al actualizar auctions.ts:', (err as any).message);
       }
     }
+
+    // --- INICIO ESCRITURA DUAL EN FIRESTORE ---
+    if (finalResults.length > 0 && db) {
+      console.log('\n--- SINCRONIZANDO CON FIRESTORE ---');
+      let firestoreInsertadas = 0;
+      let firestoreActualizadas = 0;
+
+      for (const s of finalResults) {
+        try {
+          const boeId = s.idSub;
+          const slug = `subasta-${boeId.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
+          const mappedStatus = normalizeStatus(s.estadoSubasta || '');
+          const now = admin.firestore.FieldValue.serverTimestamp();
+
+          const docRef = db.collection('auctions').doc(boeId);
+          const docSnap = await docRef.get();
+
+          if (!docSnap.exists) {
+            await docRef.set({
+              boeId,
+              slug,
+              city: s.city || '',
+              province: normalizeProvince(s.province || ''),
+              propertyType: s.tipoBien || 'Inmueble',
+              appraisalValue: s.valorTasacion || 0,
+              claimedDebt: s.claimedDebt || 0,
+              status: mappedStatus,
+              firstSeenAt: now,
+              lastSeenAt: now,
+              createdAt: now,
+              isNew: true
+            }, { merge: true });
+            firestoreInsertadas++;
+          } else {
+            await docRef.set({
+              city: s.city || '',
+              province: normalizeProvince(s.province || ''),
+              propertyType: s.tipoBien || 'Inmueble',
+              appraisalValue: s.valorTasacion || 0,
+              claimedDebt: s.claimedDebt || 0,
+              status: mappedStatus,
+              lastSeenAt: now,
+              isNew: false
+            }, { merge: true });
+            firestoreActualizadas++;
+          }
+        } catch (err) {
+          console.error(`Error guardando en Firestore subasta ${s.idSub}:`, err);
+        }
+      }
+      console.log(`Firestore sync: ${firestoreInsertadas} insertadas, ${firestoreActualizadas} actualizadas.`);
+      (output as any).firestoreInsertadas = firestoreInsertadas;
+      (output as any).firestoreActualizadas = firestoreActualizadas;
+    }
+    // --- FIN ESCRITURA DUAL EN FIRESTORE ---
 
     console.log('\n--- RESULTADOS DEL CRAWLER ---');
     console.log(JSON.stringify(output, null, 2));
