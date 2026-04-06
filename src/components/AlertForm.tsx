@@ -100,29 +100,32 @@ const AlertForm: React.FC = () => {
         });
       }
 
-      // 2. Keep MailerLite subscription (Legacy/Sync)
-      const result = await subscribeToMailerLite({
-        email,
-        source: 'alertas',
-        fields: {
-          alerta_provincia: province,
-          alerta_municipio: municipality,
-          alerta_tipo: propertyType,
-          plan_status: plan === 'free' ? 'free' : 'pro'
-        }
-      });
+      // 2. MailerLite subscription (Separate Try/Catch)
+      try {
+        const result = await subscribeToMailerLite({
+          email,
+          source: 'alertas',
+          fields: {
+            alerta_provincia: province,
+            alerta_municipio: municipality,
+            alerta_tipo: propertyType,
+            plan_status: plan === 'free' ? 'free' : 'pro'
+          }
+        });
 
-      if (result.success) {
-        // 3. Send confirmation email (Transactional)
-        sendAlertConfirmationEmail(email, province);
-        
-        trackConversion(province.toLowerCase(), 'alert_creation', 'listado');
-        setStatus('success');
-        navigate(`${ROUTES.ALERTA_CONFIRMADA}?email=${encodeURIComponent(email)}`);
-      } else {
-        setStatus('error');
-        setErrorMessage(result.error || 'Hubo un error al crear la alerta.');
+        if (result.success) {
+          sendAlertConfirmationEmail(email, province);
+        } else {
+          console.warn("MailerLite subscription failed:", result.error);
+        }
+      } catch (mailerError) {
+        console.warn("MailerLite subscription threw error:", mailerError);
       }
+
+      // 3. Success (Firestore succeeded, MailerLite might have failed)
+      trackConversion(province.toLowerCase(), 'alert_creation', 'listado');
+      setStatus('success');
+      navigate(`${ROUTES.ALERTA_CONFIRMADA}?email=${encodeURIComponent(email)}`);
     } catch (error) {
       console.error("Error creating alert:", error);
       setStatus('error');
