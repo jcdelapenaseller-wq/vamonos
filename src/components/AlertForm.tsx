@@ -51,7 +51,7 @@ const AlertForm: React.FC = () => {
             setStatus('limit_reached');
           }
         } catch (error) {
-          console.error("Error checking alerts limit:", error);
+          console.error("[DEBUG AlertForm] Error checking alerts limit:", error);
         }
       }
     };
@@ -69,9 +69,13 @@ const AlertForm: React.FC = () => {
     e.preventDefault();
     if (!email || !province) return;
 
-    // If not logged in, we allow 1 alert (legacy behavior)
+    if (!isLogged || !user) {
+      navigate(ROUTES.LOGIN);
+      return;
+    }
+
     // If logged in, we check the count we fetched in useEffect
-    if (isLogged && alertsCount !== null) {
+    if (alertsCount !== null) {
       if (plan === 'free' && alertsCount >= 1) {
         setStatus('limit_reached');
         return;
@@ -86,8 +90,8 @@ const AlertForm: React.FC = () => {
     setErrorMessage(null);
     
     try {
-      // 1. Save to Firestore if logged in
-      if (isLogged && user && db) {
+      // 1. Save to Firestore
+      if (user && db) {
         const alertsRef = collection(db, 'users', user.id, 'alerts');
         await addDoc(alertsRef, {
           city: province,

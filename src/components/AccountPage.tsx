@@ -32,16 +32,16 @@ const AccountPage: React.FC = () => {
   const [isManagingSubscription, setIsManagingSubscription] = React.useState(false);
 
   useEffect(() => {
-    console.log("[AUTH_DEBUG] AccountPage: user:", user?.id || 'null', "isLoading:", isLoading);
+    console.log("[DEBUG AccountPage] user:", user, "isLoading:", isLoading);
     if (isLoading) {
-      console.log("[AUTH_DEBUG] AccountPage: Still loading, skipping redirect check.");
+      console.log("[DEBUG AccountPage] Still loading, skipping redirect check.");
       return;
     }
     if (!user) {
-      console.log("[AUTH_DEBUG] AccountPage: No user found after loading, REDIRECTING TO LOGIN...");
+      console.log("[DEBUG AccountPage] Condition (!user) triggered redirect to LOGIN");
       navigate(ROUTES.LOGIN);
     } else {
-      console.log("[AUTH_DEBUG] AccountPage: User found, access granted.");
+      console.log("[DEBUG AccountPage] User found, access granted.");
     }
   }, [user, isLoading, navigate]);
 
