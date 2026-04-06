@@ -23,6 +23,18 @@ service cloud.firestore {
     //   - title: string (required, max 200 chars) - Title of the auction
     //   - viewedAt: timestamp (required) - Date and time of the view
     //
+    // Collection: alerts
+    // Document ID: {alertId} (Auto-generated)
+    // Fields:
+    //   - userId: string (required) - Owner's UID
+    //   - province: string (required) - Province for the alert
+    //   - municipality: string (optional) - Municipality for the alert
+    //   - propertyType: string (required) - Type of property
+    //   - email: string (required) - User's email
+    //   - plan: string (required) - User's plan
+    //   - createdAt: timestamp (required) - Creation date
+    //   - active: bool (required) - Whether the alert is active
+    //
     // ===============================================================
 
     // ===============================================================
@@ -35,6 +47,10 @@ service cloud.firestore {
 
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
     }
 
     function isAdmin() {
@@ -58,7 +74,7 @@ service cloud.firestore {
 
     function isValidUser(data) {
       return data.keys().hasAll(['id', 'email', 'name', 'plan', 'createdAt']) &&
-             data.keys().hasOnly(['id', 'email', 'name', 'plan', 'createdAt', 'analysisUsed', 'lastAnalysisReset', 'role', 'provider', 'favorites', 'alerts']) &&
+             data.keys().hasOnly(['id', 'email', 'name', 'plan', 'createdAt', 'analysisUsed', 'lastAnalysisReset', 'role', 'provider', 'favorites']) &&
              data.id == request.auth.uid &&
              data.email is string && isValidEmail(data.email) &&
              data.name is string && data.name.size() <= 100 &&
@@ -67,8 +83,18 @@ service cloud.firestore {
              (!('analysisUsed' in data) || data.analysisUsed is int) &&
              (!('lastAnalysisReset' in data) || data.lastAnalysisReset is timestamp) &&
              (!('provider' in data) || data.provider is string) &&
-             (!('favorites' in data) || data.favorites is list) &&
-             (!('alerts' in data) || data.alerts is list);
+             (!('favorites' in data) || data.favorites is list);
+    }
+
+    function isValidAlert(data) {
+      return data.keys().hasAll(['userId', 'province', 'propertyType', 'email', 'plan', 'createdAt', 'active']) &&
+             data.userId == request.auth.uid &&
+             data.province is string &&
+             data.propertyType is string &&
+             isValidEmail(data.email) &&
+             isValidPlan(data.plan) &&
+             data.createdAt is timestamp &&
+             data.active is bool;
     }
 
     function isValidViewHistory(data) {
@@ -83,9 +109,10 @@ service cloud.firestore {
     // Rules
     // ===============================================================
 
-    match /users/{userId}/alerts/{alertId} {
-      allow get, list, create, update, delete:
-      if request.auth != null && request.auth.uid == userId;
+    match /alerts/{alertId} {
+      allow read, delete: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidAlert(request.resource.data);
+      allow update: if (isDocOwner() || isAdmin()) && isValidAlert(request.resource.data);
     }
 
     match /users/{userId} {

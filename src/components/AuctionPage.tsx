@@ -468,15 +468,20 @@ const AuctionPage: React.FC = () => {
           }
 
           // Load alerts count from Firestore
-          const alertsRef = collection(db, 'users', user.id, 'alerts');
-          const snapshot = await getDocs(alertsRef);
+          const alertsRef = collection(db, 'alerts');
+          const qCount = query(alertsRef, where('userId', '==', user.id));
+          const snapshot = await getDocs(qCount);
           setAlertsCount(snapshot.size);
 
           // Check if alert already exists for this city/type
           if (auction) {
             const city = normalizeCity(auction) || '';
             const type = normalizePropertyType(auction.propertyType) || 'Vivienda';
-            const q = query(alertsRef, where('city', '==', city), where('propertyType', '==', type));
+            const q = query(alertsRef, 
+              where('userId', '==', user.id),
+              where('province', '==', city), 
+              where('propertyType', '==', type)
+            );
             const alertSnap = await getDocs(q);
             if (!alertSnap.empty) {
               setHasActiveAlert(true);
@@ -651,7 +656,7 @@ const AuctionPage: React.FC = () => {
     if (!user || !db || !activeAlertId) return;
     
     try {
-      await deleteDoc(doc(db, 'users', user.id, 'alerts', activeAlertId));
+      await deleteDoc(doc(db, 'alerts', activeAlertId));
       setHasActiveAlert(false);
       setActiveAlertId(null);
       setAlertsCount(prev => Math.max(0, prev - 1));
@@ -683,13 +688,16 @@ const AuctionPage: React.FC = () => {
 
     try {
       // 1. Save to Firestore
-      const alertsRef = collection(db, 'users', user.id, 'alerts');
-      const docRef = await addDoc(alertsRef, {
-        city,
-        zone: '',
+      const rootAlertsRef = collection(db, 'alerts');
+      const docRef = await addDoc(rootAlertsRef, {
+        userId: user.id,
+        province: city,
+        municipality: '',
         propertyType: type,
         minPrice: 0,
         maxPrice: 10000000,
+        email: user.email,
+        plan: plan,
         createdAt: serverTimestamp(),
         active: true
       });

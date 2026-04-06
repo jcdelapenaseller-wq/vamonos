@@ -6,7 +6,7 @@ import { subscribeToMailerLite, sendAlertConfirmationEmail } from '../utils/mail
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
 import { db, auth } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 import { toast } from 'sonner';
 
 const PROVINCIAS = [
@@ -39,12 +39,9 @@ const AlertForm: React.FC = () => {
     const checkAlertsLimit = async () => {
       if (isLogged && user && db) {
         try {
-          const alertsRef = collection(db, 'users', user.id, 'alerts');
-          console.log("AUTH currentUser", auth.currentUser);
-          console.log("isLogged", isLogged);
-          console.log("user", user);
-          console.log("about to run getDocs users/"+user?.id+"/alerts");
-          const snapshot = await getDocs(alertsRef);
+          const alertsRef = collection(db, 'alerts');
+          const q = query(alertsRef, where('userId', '==', user.id));
+          const snapshot = await getDocs(q);
           const count = snapshot.size;
           setAlertsCount(count);
           
@@ -96,16 +93,17 @@ const AlertForm: React.FC = () => {
     try {
       // 1. Save to Firestore
       if (user && db) {
-        const alertsRef = collection(db, 'users', user.id, 'alerts');
-        console.log("AUTH UID", auth.currentUser?.uid);
-        console.log("USER ID", user?.id);
-        console.log("PATH", "users/" + user?.id + "/alerts");
-        await addDoc(alertsRef, {
-          city: province,
-          zone: municipality,
+        // Save to Root Collection
+        const rootAlertsRef = collection(db, 'alerts');
+        await addDoc(rootAlertsRef, {
+          userId: user.id,
+          province: province,
+          municipality: municipality,
           propertyType: propertyType,
           minPrice: 0,
           maxPrice: 10000000,
+          email: email,
+          plan: plan,
           createdAt: serverTimestamp(),
           active: true
         });

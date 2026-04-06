@@ -19,7 +19,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { motion } from 'motion/react';
 import { db, auth } from '../lib/firebase';
-import { collection, query, orderBy, limit, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, deleteDoc, doc, where } from 'firebase/firestore';
 import { toast } from 'sonner';
 
 const AccountPage: React.FC = () => {
@@ -60,8 +60,8 @@ const AccountPage: React.FC = () => {
         setHistory(historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         // Fetch Alerts
-        const alertsRef = collection(db, 'users', user.id, 'alerts');
-        const qAlerts = query(alertsRef, orderBy('createdAt', 'desc'));
+        const alertsRef = collection(db, 'alerts');
+        const qAlerts = query(alertsRef, where('userId', '==', user.id), orderBy('createdAt', 'desc'));
         const alertsSnapshot = await getDocs(qAlerts);
         setAlerts(alertsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
       } catch (error) {
@@ -81,7 +81,7 @@ const AccountPage: React.FC = () => {
     if (!user || !db) return;
     
     try {
-      await deleteDoc(doc(db, 'users', user.id, 'alerts', alertId));
+      await deleteDoc(doc(db, 'alerts', alertId));
       setAlerts(prev => prev.filter(a => a.id !== alertId));
       toast.success("Alerta eliminada correctamente");
     } catch (error) {

@@ -50,20 +50,19 @@ async function fetchFirestoreAlerts(): Promise<FirestoreAlert[]> {
   const allAlerts: FirestoreAlert[] = [];
 
   try {
-    // Usamos collectionGroup para obtener todas las alertas de todos los usuarios
-    const alertsSnapshot = await db.collectionGroup('alerts')
+    // Usamos la colección raíz 'alerts'
+    const alertsSnapshot = await db.collection('alerts')
       .where('active', '==', true)
       .get();
 
     console.log(`✅ [NOTIFY] Encontradas ${alertsSnapshot.size} alertas potenciales.`);
 
     // Para cada alerta, necesitamos el email y el plan del usuario
-    // El email está en el documento del usuario: users/{uid}
     const userCache: Record<string, { email: string, plan: 'free' | 'basic' | 'pro' }> = {};
 
     for (const doc of alertsSnapshot.docs) {
       const alertData = doc.data();
-      const uid = doc.ref.parent.parent?.id;
+      const uid = alertData.userId;
 
       if (!uid) continue;
 
@@ -87,8 +86,8 @@ async function fetchFirestoreAlerts(): Promise<FirestoreAlert[]> {
           uid,
           email: userData.email,
           plan: userData.plan,
-          city: alertData.city || '',
-          zone: alertData.zone || '',
+          city: alertData.province || '',
+          zone: alertData.municipality || '',
           propertyType: alertData.propertyType || 'Todos',
           minPrice: alertData.minPrice || 0,
           maxPrice: alertData.maxPrice || 10000000,

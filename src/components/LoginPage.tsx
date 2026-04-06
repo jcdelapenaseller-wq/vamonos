@@ -158,7 +158,6 @@ const LoginPage: React.FC = () => {
         plan: 'free',
         analysisUsed: 0,
         favorites: [],
-        alerts: [],
         createdAt: serverTimestamp(),
         lastAnalysisReset: serverTimestamp(),
         provider: 'email'

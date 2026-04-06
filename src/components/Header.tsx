@@ -4,7 +4,7 @@ import { Menu, X, Gavel, Sparkles, ChevronDown, Calculator, FileText, Calendar, 
 import { ROUTES } from '../constants/routes';
 import { useUser } from '../contexts/UserContext';
 import { db, auth } from '../lib/firebase';
-import { collection, getDocs, query } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -22,12 +22,9 @@ const Header: React.FC = () => {
     const fetchAlertsCount = async () => {
       if (isLogged && user && db) {
         try {
-          const alertsRef = collection(db, 'users', user.id, 'alerts');
-          console.log("AUTH currentUser", auth.currentUser);
-          console.log("isLogged", isLogged);
-          console.log("user", user);
-          console.log("about to run getDocs users/"+user?.id+"/alerts");
-          const snapshot = await getDocs(query(alertsRef));
+          const alertsRef = collection(db, 'alerts');
+          const q = query(alertsRef, where('userId', '==', user.id));
+          const snapshot = await getDocs(q);
           setAlertsCount(snapshot.size);
         } catch (error) {
           console.error("Error fetching alerts count:", error);

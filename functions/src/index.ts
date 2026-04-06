@@ -32,10 +32,10 @@ export const onAuctionCreate = functions
       const auctionPrice = auctionData.appraisalValue || 0;
 
       // 3. Optimizar: NO leer todas las alertas
-      // En el schema actual, la provincia se guarda en el campo 'city' de la alerta
-      const alertsSnapshot = await db.collectionGroup('alerts')
+      // En el nuevo schema, usamos la colección raíz 'alerts'
+      const alertsSnapshot = await db.collection('alerts')
         .where('active', '==', true)
-        .where('city', '==', auctionProvince)
+        .where('province', '==', auctionProvince)
         .get();
 
       functions.logger.info(`[INFO] Alertas encontradas para provincia '${auctionProvince}': ${alertsSnapshot.size}`);
@@ -60,7 +60,7 @@ export const onAuctionCreate = functions
       for (const doc of alertsSnapshot.docs) {
         const alertData = doc.data();
         const alertId = doc.id;
-        const userId = doc.ref.parent.parent?.id;
+        const userId = alertData.userId;
 
         if (!userId) continue;
 
@@ -70,11 +70,11 @@ export const onAuctionCreate = functions
           continue;
         }
 
-        // city/zone (si existe en la alerta)
-        const alertZone = (alertData.zone || '').toLowerCase();
-        if (alertZone) {
+        // municipality (si existe en la alerta)
+        const alertMunicipality = (alertData.municipality || '').toLowerCase();
+        if (alertMunicipality) {
           // Comprobar si coincide con el municipio (city) o la zona de la subasta
-          if (auctionCity !== alertZone && auctionZone !== alertZone) {
+          if (auctionCity !== alertMunicipality && auctionZone !== alertMunicipality) {
             continue;
           }
         }
