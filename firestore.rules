@@ -119,8 +119,8 @@ service cloud.firestore {
       }
       
       match /alerts/{alertId} {
-        // Only owner can read/write their alerts
-        allow read, write: if isOwner(userId);
+        allow create: if request.auth != null && request.auth.uid == userId;
+        allow read, update, delete: if request.auth != null && request.auth.uid == userId;
       }
       
       match /favorites/{favoriteId} {
