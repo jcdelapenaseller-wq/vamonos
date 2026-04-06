@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Gavel, Sparkles, ChevronDown, Calculator, FileText, Calendar, ExternalLink, User, LogOut, Star, Search, Bell, ArrowRight } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
 import { useUser } from '../contexts/UserContext';
-import { db } from '../lib/firebase';
+import { db, auth } from '../lib/firebase';
 import { collection, getDocs, query } from 'firebase/firestore';
 
 const Header: React.FC = () => {
@@ -23,6 +23,10 @@ const Header: React.FC = () => {
       if (isLogged && user && db) {
         try {
           const alertsRef = collection(db, 'users', user.id, 'alerts');
+          console.log("AUTH currentUser", auth.currentUser);
+          console.log("isLogged", isLogged);
+          console.log("user", user);
+          console.log("about to run getDocs users/"+user?.id+"/alerts");
           const snapshot = await getDocs(query(alertsRef));
           setAlertsCount(snapshot.size);
         } catch (error) {

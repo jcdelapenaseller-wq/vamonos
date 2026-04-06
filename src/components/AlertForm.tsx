@@ -40,6 +40,10 @@ const AlertForm: React.FC = () => {
       if (isLogged && user && db) {
         try {
           const alertsRef = collection(db, 'users', user.id, 'alerts');
+          console.log("AUTH currentUser", auth.currentUser);
+          console.log("isLogged", isLogged);
+          console.log("user", user);
+          console.log("about to run getDocs users/"+user?.id+"/alerts");
           const snapshot = await getDocs(alertsRef);
           const count = snapshot.size;
           setAlertsCount(count);
