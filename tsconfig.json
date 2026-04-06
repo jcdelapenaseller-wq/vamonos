@@ -38,6 +38,7 @@
     "truncate.js",
     "*.txt",
     "*.html",
-    "crawler.pid"
+    "crawler.pid",
+    "functions"
   ]
 }
