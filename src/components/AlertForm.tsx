@@ -93,6 +93,9 @@ const AlertForm: React.FC = () => {
       // 1. Save to Firestore
       if (user && db) {
         const alertsRef = collection(db, 'users', user.id, 'alerts');
+        console.log("AUTH UID", auth.currentUser?.uid);
+        console.log("USER ID", user?.id);
+        console.log("PATH", "users/" + user?.id + "/alerts");
         await addDoc(alertsRef, {
           city: province,
           zone: municipality,
