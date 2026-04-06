@@ -19,14 +19,15 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
 import { motion } from 'motion/react';
 import { db, auth } from '../lib/firebase';
-import { collection, query, orderBy, limit, getDocs, deleteDoc, doc, where } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { alertService, AlertData } from '../services/alertService';
 import { toast } from 'sonner';
 
 const AccountPage: React.FC = () => {
   const { user, isLogged, plan, isLoading } = useUser();
   const navigate = useNavigate();
   const [history, setHistory] = React.useState<any[]>([]);
-  const [alerts, setAlerts] = React.useState<any[]>([]);
+  const [alerts, setAlerts] = React.useState<AlertData[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = React.useState(false);
   const [isLoadingAlerts, setIsLoadingAlerts] = React.useState(false);
   const [isManagingSubscription, setIsManagingSubscription] = React.useState(false);
@@ -59,11 +60,15 @@ const AccountPage: React.FC = () => {
         const historySnapshot = await getDocs(qHistory);
         setHistory(historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
-        // Fetch Alerts
-        const alertsRef = collection(db, 'alerts');
-        const qAlerts = query(alertsRef, where('userId', '==', user.id), orderBy('createdAt', 'desc'));
-        const alertsSnapshot = await getDocs(qAlerts);
-        setAlerts(alertsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+        // Fetch Alerts via Service
+        const userAlerts = await alertService.getUserAlerts();
+        // Sort alerts by createdAt descending
+        userAlerts.sort((a, b) => {
+          const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
+          const timeB = b.createdAt?.toMillis ? b.createdAt.toMillis() : 0;
+          return timeB - timeA;
+        });
+        setAlerts(userAlerts);
       } catch (error) {
         console.error("Error fetching account data:", error);
       } finally {
@@ -78,10 +83,10 @@ const AccountPage: React.FC = () => {
   }, [isLogged, user]);
 
   const handleDeleteAlert = async (alertId: string) => {
-    if (!user || !db) return;
+    if (!user) return;
     
     try {
-      await deleteDoc(doc(db, 'alerts', alertId));
+      await alertService.deleteAlert(alertId);
       setAlerts(prev => prev.filter(a => a.id !== alertId));
       toast.success("Alerta eliminada correctamente");
     } catch (error) {
@@ -329,7 +334,7 @@ const AccountPage: React.FC = () => {
                           <MapPin size={20} />
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-slate-900">{alert.city} {alert.zone && `(${alert.zone})`}</p>
+                          <p className="text-sm font-bold text-slate-900">{alert.province} {alert.municipality && `(${alert.municipality})`}</p>
                           <div className="flex items-center gap-3 mt-1">
                             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded">
                               {alert.propertyType}
@@ -341,7 +346,7 @@ const AccountPage: React.FC = () => {
                         </div>
                       </div>
                       <button 
-                        onClick={() => handleDeleteAlert(alert.id)}
+                        onClick={() => alert.id && handleDeleteAlert(alert.id)}
                         className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
                       >
                         Eliminar alerta

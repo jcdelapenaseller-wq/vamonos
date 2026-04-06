@@ -3,8 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Gavel, Sparkles, ChevronDown, Calculator, FileText, Calendar, ExternalLink, User, LogOut, Star, Search, Bell, ArrowRight } from 'lucide-react';
 import { ROUTES } from '../constants/routes';
 import { useUser } from '../contexts/UserContext';
-import { db, auth } from '../lib/firebase';
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { alertService } from '../services/alertService';
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -20,12 +19,10 @@ const Header: React.FC = () => {
 
   useEffect(() => {
     const fetchAlertsCount = async () => {
-      if (isLogged && user && db) {
+      if (isLogged && user) {
         try {
-          const alertsRef = collection(db, 'alerts');
-          const q = query(alertsRef, where('userId', '==', user.id));
-          const snapshot = await getDocs(q);
-          setAlertsCount(snapshot.size);
+          const count = await alertService.getAlertCount();
+          setAlertsCount(count);
         } catch (error) {
           console.error("Error fetching alerts count:", error);
         }

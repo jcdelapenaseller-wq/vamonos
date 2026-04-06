@@ -33,6 +33,7 @@ import { useUser, UserContext } from '../contexts/UserContext';
 import { db } from '../lib/firebase';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuctionValuation, ValuationResult } from '../services/valuationService';
+import { alertService } from '../services/alertService';
 import PaymentModal from './PaymentModal';
 
 interface LockedFeatureBlockProps {
@@ -467,25 +468,21 @@ const AuctionPage: React.FC = () => {
             setNote(noteSnap.data().content);
           }
 
-          // Load alerts count from Firestore
-          const alertsRef = collection(db, 'alerts');
-          const qCount = query(alertsRef, where('userId', '==', user.id));
-          const snapshot = await getDocs(qCount);
-          setAlertsCount(snapshot.size);
+          // Load alerts count from Firestore via Service
+          const count = await alertService.getAlertCount();
+          setAlertsCount(count);
 
           // Check if alert already exists for this city/type
           if (auction) {
             const city = normalizeCity(auction) || '';
             const type = normalizePropertyType(auction.propertyType) || 'Vivienda';
-            const q = query(alertsRef, 
-              where('userId', '==', user.id),
-              where('province', '==', city), 
-              where('propertyType', '==', type)
-            );
-            const alertSnap = await getDocs(q);
-            if (!alertSnap.empty) {
+            
+            const userAlerts = await alertService.getUserAlerts();
+            const existingAlert = userAlerts.find(a => a.province === city && a.propertyType === type);
+            
+            if (existingAlert) {
               setHasActiveAlert(true);
-              setActiveAlertId(alertSnap.docs[0].id);
+              setActiveAlertId(existingAlert.id || null);
             } else {
               setHasActiveAlert(false);
               setActiveAlertId(null);
@@ -653,10 +650,10 @@ const AuctionPage: React.FC = () => {
   };
 
   const handleDeleteAlert = async () => {
-    if (!user || !db || !activeAlertId) return;
+    if (!user || !activeAlertId) return;
     
     try {
-      await deleteDoc(doc(db, 'alerts', activeAlertId));
+      await alertService.deleteAlert(activeAlertId);
       setHasActiveAlert(false);
       setActiveAlertId(null);
       setAlertsCount(prev => Math.max(0, prev - 1));
@@ -681,25 +678,19 @@ const AuctionPage: React.FC = () => {
       return;
     }
 
-    if (!auction || !user || !db) return;
+    if (!auction || !user) return;
 
     const city = normalizeCity(auction) || '';
     const type = normalizePropertyType(auction.propertyType) || 'Vivienda';
 
     try {
-      // 1. Save to Firestore
-      const rootAlertsRef = collection(db, 'alerts');
-      const docRef = await addDoc(rootAlertsRef, {
-        userId: user.id,
+      // 1. Save to Firestore via Service
+      const docId = await alertService.createAlert({
+        email: user.email,
         province: city,
         municipality: '',
         propertyType: type,
-        minPrice: 0,
-        maxPrice: 10000000,
-        email: user.email,
-        plan: plan,
-        createdAt: serverTimestamp(),
-        active: true
+        plan: plan
       });
 
       // 2. Sync with MailerLite (Legacy/Sync)
@@ -718,11 +709,11 @@ const AuctionPage: React.FC = () => {
 
       setAlertsCount(prev => prev + 1);
       setHasActiveAlert(true);
-      setActiveAlertId(docRef.id);
+      setActiveAlertId(docId);
       toast.success(`Alerta creada para ${type} en ${city}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating alert:", error);
-      toast.error("Error al crear la alerta");
+      toast.error(error.message || "Error al crear la alerta");
     }
   };
 

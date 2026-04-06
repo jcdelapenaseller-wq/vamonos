@@ -5,8 +5,7 @@ import { ROUTES } from '../constants/routes';
 import { subscribeToMailerLite, sendAlertConfirmationEmail } from '../utils/mailerlite';
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
-import { db } from '../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { alertService } from '../services/alertService';
 import { toast } from 'sonner';
 
 const PROVINCIAS = [
@@ -54,23 +53,14 @@ const AlertForm: React.FC = () => {
     setErrorMessage(null);
     
     try {
-      // 1. Save to Firestore
-      if (user && db) {
-        // Save to Root Collection
-        const rootAlertsRef = collection(db, 'alerts');
-        await addDoc(rootAlertsRef, {
-          userId: user.id,
-          province: province,
-          municipality: municipality,
-          propertyType: propertyType,
-          minPrice: 0,
-          maxPrice: 10000000,
-          email: email,
-          plan: plan,
-          createdAt: serverTimestamp(),
-          active: true
-        });
-      }
+      // 1. Save to Firestore via Service
+      await alertService.createAlert({
+        email,
+        province,
+        municipality,
+        propertyType,
+        plan
+      });
 
       // 2. MailerLite subscription (Separate Try/Catch)
       try {
@@ -98,10 +88,10 @@ const AlertForm: React.FC = () => {
       trackConversion(province.toLowerCase(), 'alert_creation', 'listado');
       setStatus('success');
       navigate(`${ROUTES.ALERTA_CONFIRMADA}?email=${encodeURIComponent(email)}`);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating alert:", error);
       setStatus('error');
-      setErrorMessage('Error al guardar la alerta en el sistema.');
+      setErrorMessage(error.message || 'Error al guardar la alerta en el sistema.');
     }
   };
 
