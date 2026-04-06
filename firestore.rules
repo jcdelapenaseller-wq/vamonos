@@ -110,9 +110,10 @@ service cloud.firestore {
     // ===============================================================
 
     match /alerts/{alertId} {
-      allow read, delete: if isDocOwner() || isAdmin();
-      allow create: if isAuthenticated() && isValidAlert(request.resource.data);
-      allow update: if (isDocOwner() || isAdmin()) && isValidAlert(request.resource.data);
+      allow create: if request.auth != null;
+      allow read, update, delete: 
+        if request.auth != null 
+        && request.auth.uid == resource.data.userId;
     }
 
     match /users/{userId} {
