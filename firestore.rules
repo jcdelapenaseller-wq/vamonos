@@ -88,6 +88,11 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    match /users/{userId}/alerts/{alertId} {
+      allow create, read, update, delete:
+      if request.auth != null && request.auth.uid == userId;
+    }
+
     match /{path=**}/alerts/{alertId} {
       allow read: if request.auth != null;
     }
