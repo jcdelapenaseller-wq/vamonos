@@ -1,6 +1,20 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import admin from 'firebase-admin';
 import axios from 'axios';
+import fs from 'fs';
+
+const LOG_FILE = './catastro_diagnostic.log';
+
+const logDiagnostic = (message: string) => {
+  const timestamp = new Date().toISOString();
+  const logMessage = `[${timestamp}] ${message}\n`;
+  console.log(message);
+  try {
+    fs.appendFileSync(LOG_FILE, logMessage);
+  } catch (e) {
+    console.error('Error writing to log file:', e);
+  }
+};
 
 // Initialize Firebase Admin
 const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
@@ -41,25 +55,35 @@ const getPricePerM2 = (province?: string, city?: string): number => {
  * Utiliza el servicio Consulta_DNPRC para obtener datos no protegidos por Referencia Catastral.
  */
 const fetchCatastroSurface = async (refCat: string): Promise<number | null> => {
+  logDiagnostic(`fetchCatastroSurface START: refCat=${refCat}`);
   try {
-    const url = `https://ovc.catastro.meh.es/OVCSWLocalizacionRC/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPRC?RefCat=${refCat}`;
-    const response = await axios.get(url, { timeout: 5000 });
+    const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/OVCCallejero.svc/Consulta_DNPRC?RefCat=${refCat}`;
+    logDiagnostic(`fetchCatastroSurface REQUEST URL: ${url}`);
     
-    if (response.data && response.data.consulta_dnp) {
-      const dnp = response.data.consulta_dnp;
-      // La superficie suele estar en debi.sfc (urbano) o ssf (finca)
-      // Buscamos en diferentes campos según el tipo de inmueble
-      const surface = dnp.bico?.bi?.debi?.sfc || // Superficie construida (urbano)
-                      dnp.bico?.bi?.dff?.ssf ||  // Superficie de la finca (rústico)
-                      dnp.bico?.bi?.dff?.ss;     // Superficie del solar
+    const startTime = Date.now();
+    const response = await axios.get(url, { timeout: 5000 });
+    const duration = Date.now() - startTime;
+    
+    logDiagnostic(`fetchCatastroSurface RESPONSE: status=${response.status}, duration=${duration}ms`);
+    
+    const xml = response.data;
+    if (typeof xml === 'string') {
+      const match = xml.match(/<debi>[\s\S]*?<sfc>([\d.,]+)<\/sfc>/i);
+      console.log("CATASTRO XML MATCH", match?.[1]);
       
-      if (surface) {
-        return parseFloat(surface);
+      if (match) {
+        const parsedSurface = parseFloat(match[1].replace(",", "."));
+        logDiagnostic(`fetchCatastroSurface SUCCESS: surface=${match[1]}, parsed=${parsedSurface}`);
+        return parsedSurface;
       }
+      logDiagnostic(`fetchCatastroSurface NULL: No <debi><sfc> tag found in XML.`);
+    } else {
+      logDiagnostic(`fetchCatastroSurface NULL: Response data is not a string.`);
     }
     return null;
-  } catch (error) {
-    console.error('Catastro API Error:', error);
+  } catch (error: any) {
+    const isTimeout = error.code === 'ECONNABORTED';
+    logDiagnostic(`fetchCatastroSurface EXCEPTION: isTimeout=${isTimeout}, message=${error.message}, code=${error.code}, status=${error.response?.status}`);
     return null;
   }
 };
@@ -71,26 +95,51 @@ const extractRefCat = (text?: string): string | null => {
 };
 
 const fetchCatastroSurfaceByAddress = async (province: string, city: string, address: string): Promise<number | null> => {
+  logDiagnostic(`fetchCatastroSurfaceByAddress START: prov=${province}, city=${city}, addr=${address}`);
   try {
-    // La API de Catastro por dirección es muy estricta (Requiere Sigla, Calle, Numero exactos).
-    // Hacemos un intento básico de extraer la calle y el número.
     const streetMatch = address.match(/([a-zA-Z\s]+)\s+(\d+)/);
-    if (!streetMatch) return null;
+    if (!streetMatch) {
+      logDiagnostic(`fetchCatastroSurfaceByAddress NULL: Address format invalid (no street/number match): ${address}`);
+      return null;
+    }
     
     const calle = streetMatch[1].trim();
     const numero = streetMatch[2];
     
-    const url = `https://ovc.catastro.meh.es/OVCSWLocalizacionRC/OVCWcfCallejero/COVCCallejero.svc/json/Consulta_DNPLOC?Provincia=${encodeURIComponent(province)}&Municipio=${encodeURIComponent(city)}&Sigla=&Calle=${encodeURIComponent(calle)}&Numero=${numero}`;
-    const response = await axios.get(url, { timeout: 5000 });
+    const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/OVCCallejero.svc/Consulta_DNPPP?Provincia=${encodeURIComponent(province)}&Municipio=${encodeURIComponent(city)}&Sigla=&Calle=${encodeURIComponent(calle)}&Numero=${numero}`;
+    logDiagnostic(`fetchCatastroSurfaceByAddress REQUEST URL: ${url}`);
     
-    if (response.data && response.data.consulta_dnp) {
-      const dnp = response.data.consulta_dnp;
-      const surface = dnp.bico?.bi?.debi?.sfc || dnp.bico?.bi?.dff?.ssf || dnp.bico?.bi?.dff?.ss;
-      if (surface) return parseFloat(surface);
+    const startTime = Date.now();
+    console.log("CATASTRO PARAMS", {
+      Provincia: province,
+      Municipio: city,
+      Sigla: "",
+      Calle: calle,
+      Numero: numero
+    });
+    const response = await axios.get(url, { timeout: 5000 });
+    const duration = Date.now() - startTime;
+    
+    logDiagnostic(`fetchCatastroSurfaceByAddress RESPONSE: status=${response.status}, duration=${duration}ms`);
+    
+    const xml = response.data;
+    if (typeof xml === 'string') {
+      const match = xml.match(/<debi>[\s\S]*?<sfc>([\d.,]+)<\/sfc>/i);
+      console.log("CATASTRO XML MATCH", match?.[1]);
+      
+      if (match) {
+        const parsedSurface = parseFloat(match[1].replace(",", "."));
+        logDiagnostic(`fetchCatastroSurfaceByAddress SUCCESS: surface=${match[1]}, parsed=${parsedSurface}`);
+        return parsedSurface;
+      }
+      logDiagnostic(`fetchCatastroSurfaceByAddress NULL: No <debi><sfc> tag found in XML.`);
+    } else {
+      logDiagnostic(`fetchCatastroSurfaceByAddress NULL: Response data is not a string.`);
     }
     return null;
-  } catch (error) {
-    console.error('Catastro Address API Error:', error);
+  } catch (error: any) {
+    const isTimeout = error.code === 'ECONNABORTED';
+    logDiagnostic(`fetchCatastroSurfaceByAddress EXCEPTION: isTimeout=${isTimeout}, message=${error.message}, code=${error.code}, status=${error.response?.status}`);
     return null;
   }
 };
@@ -100,7 +149,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { boeId, address, surface, city, province, appraisalValue, refCat, description } = req.body;
+  const { boeId, address, surface, city, province, appraisalValue, refCat, description, slug } = req.body;
+
+  logDiagnostic(`handler START: slug=${slug}, boeId=${boeId}, refCat=${refCat}, address=${address}, city=${city}, province=${province}`);
 
   if (!boeId) {
     return res.status(400).json({ error: 'boeId is required' });
@@ -115,6 +166,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const valuationSnap = await valuationRef.get();
         if (valuationSnap.exists) {
           const data = valuationSnap.data();
+          logDiagnostic(`handler CACHE HIT: boeId=${boeId}`);
           return res.status(200).json({ ...data, metadata: { ...data?.metadata, cached: true } });
         }
       } catch (e) {
@@ -140,9 +192,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         sourceSurface = 'catastro_ref';
         confidence = 0.95; // Alta
       }
-    }
-
-    if (!realSurface && address && city && province) {
+    } else if (!realSurface && address && city && province) {
       const catastroSurface = await fetchCatastroSurfaceByAddress(province, city, address);
       if (catastroSurface) {
         realSurface = catastroSurface;
@@ -155,6 +205,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       realSurface = Math.round(baseValue / priceM2);
       sourceSurface = 'estimada';
       confidence = 0.60; // Baja
+      logDiagnostic(`handler NULL_CATASTRO: Falling back to estimation. surface=${realSurface}`);
     }
 
     // 4. Calcular Valor de Mercado
@@ -196,13 +247,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    logDiagnostic(`handler SUCCESS: boeId=${boeId}, surface=${realSurface}, source=${sourceSurface}`);
     return res.status(200).json(result);
 
   } catch (error) {
     console.error('Valuation Error:', error);
+    logDiagnostic(`handler EXCEPTION: error=${error instanceof Error ? error.message : String(error)}`);
     return res.status(500).json({ 
       error: 'Error interno en la valoración',
       details: error instanceof Error ? error.message : String(error)
     });
   }
 }
+

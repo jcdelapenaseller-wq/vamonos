@@ -39,6 +39,7 @@ const getPricePerM2 = (province?: string, city?: string): number => {
 };
 
 export const getAuctionValuation = async (auctionData: any): Promise<ValuationResult> => {
+  console.log(`[DIAGNOSTIC] getAuctionValuation: boeId=${auctionData.boeId}, refCat=${auctionData.refCat}, addr=${auctionData.address}`);
   try {
     const response = await fetch('/api/valuation', {
       method: 'POST',
@@ -46,6 +47,7 @@ export const getAuctionValuation = async (auctionData: any): Promise<ValuationRe
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
+        slug: auctionData.slug || auctionData.id,
         boeId: auctionData.boeId,
         address: auctionData.address,
         surface: auctionData.surface,
@@ -62,6 +64,7 @@ export const getAuctionValuation = async (auctionData: any): Promise<ValuationRe
     const trimmedText = responseText.trim();
 
     if (!response.ok) {
+      console.log(`[DIAGNOSTIC] API Error: ${response.status}, Body: ${responseText}`);
       try {
         if (!trimmedText) {
           throw new Error(`Error ${response.status}: Empty response`);
@@ -83,13 +86,15 @@ export const getAuctionValuation = async (auctionData: any): Promise<ValuationRe
     }
 
     try {
-      return JSON.parse(trimmedText);
+      const result = JSON.parse(trimmedText);
+      console.log(`[DIAGNOSTIC] API Success: source=${result.metadata?.source}, surfaceSource=${result.metadata?.surfaceSource}`);
+      return result;
     } catch (e) {
       console.error('Valuation API returned invalid JSON:', responseText);
       throw new Error('La API de valoración devolvió un formato inválido');
     }
   } catch (error) {
-    console.error('Error in getAuctionValuation, falling back to local calculation:', error);
+    console.log(`[DIAGNOSTIC] Falling back to local calculation. Error: ${error}`);
     
     // Local Fallback Logic
     const province = auctionData.province || '';
@@ -105,6 +110,8 @@ export const getAuctionValuation = async (auctionData: any): Promise<ValuationRe
     const maxBid = Math.round(marketValue * 0.75);
     const estimatedProfit = marketValue - maxBid;
     const roi = Math.round((estimatedProfit / maxBid) * 100);
+
+    console.log(`[DIAGNOSTIC] Fallback result: surface=${realSurface}, source=local_fallback`);
 
     return {
       boeId: auctionData.boeId || 'unknown',

@@ -195,7 +195,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const incrementAnalysisCount = async (): Promise<boolean> => {
-    if (!user) return false;
+    if (!user?.id) return false;
     
     const currentPlan = user.plan.toLowerCase() as 'free' | 'basic' | 'pro';
     const used = user.analysisUsed || 0;
@@ -229,7 +229,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const trackAuctionView = async (auctionId: string, auctionTitle: string) => {
-    if (!user) return;
+    if (!user?.id) return;
     if (!auth || !db) {
       console.log("Mock tracking view:", auctionId, auctionTitle);
       return;

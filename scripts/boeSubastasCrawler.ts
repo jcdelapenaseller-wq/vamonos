@@ -351,10 +351,16 @@ async function runCrawler() {
             var provincia = getVal('Provincia');
             var superficie = getVal('Superficie');
             var cargas = getVal('Cargas');
+            var referenciaCatastral = getVal('Referencia catastral');
+            var idufir = getVal('IDUFIR');
 
-            return { tipoBien: tipoBien, direccion: direccion, localidad: localidad, provincia: provincia, superficie: superficie, cargas: cargas };
+            return { tipoBien: tipoBien, direccion: direccion, localidad: localidad, provincia: provincia, superficie: superficie, cargas: cargas, referenciaCatastral: referenciaCatastral, idufir: idufir };
           })()
         `) as any;
+
+        if (bienesData.referenciaCatastral || bienesData.idufir) {
+          console.log(`[DIAGNOSTIC] BOE Bienes Data Found: referenciaCatastral=${bienesData.referenciaCatastral}, idufir=${bienesData.idufir} for ${item.titulo}`);
+        }
 
         const urlObj = new URL(item.urlDetalle);
         const idSub = urlObj.searchParams.get('idSub') || 'N/A';
@@ -513,6 +519,13 @@ async function runCrawler() {
           // clamp 0-100
           opportunityScore = Math.max(0, Math.min(100, opportunityScore));
 
+          // Limpiar referencia catastral
+          const rawRefCat = bienesData.referenciaCatastral;
+          const cleanedRefCat = (function() {
+            if (!rawRefCat || rawRefCat === "no consta" || rawRefCat === "-" || rawRefCat === "") return null;
+            return /^[0-9A-Z]{14,20}$/.test(rawRefCat) ? rawRefCat : null;
+          })();
+
           finalResults.push({
             idSub,
             titulo: item.titulo,
@@ -534,6 +547,8 @@ async function runCrawler() {
             zone,
             superficie: superficieNum,
             cargas: bienesData.cargas,
+            refCat: cleanedRefCat,
+            idufir: bienesData.idufir || null,
             opportunityScore,
             opportunityRatio,
           });
@@ -649,6 +664,20 @@ async function runCrawler() {
                 updated = updated.replace(/isActive:\s*(true|false)/, `isActive: $1,\n    isNew: false`);
               }
 
+              // Actualizar refCat
+              if (updated.includes('refCat:')) {
+                updated = updated.replace(/refCat:\s*("[^"]*"|undefined|null)/, `refCat: ${s.refCat ? `"${s.refCat}"` : 'null'}`);
+              } else {
+                updated = updated.replace(/isNew:\s*(true|false),?/, `isNew: $1,\n    refCat: ${s.refCat ? `"${s.refCat}"` : 'null'},`);
+              }
+
+              // Actualizar idufir
+              if (updated.includes('idufir:')) {
+                updated = updated.replace(/idufir:\s*("[^"]*"|undefined|null)/, `idufir: ${s.idufir ? `"${s.idufir}"` : 'null'}`);
+              } else {
+                updated = updated.replace(/refCat:\s*[^,]+,?/, `$& \n    idufir: ${s.idufir ? `"${s.idufir}"` : 'null'},`);
+              }
+
               return updated;
             });
             output.subastasActualizadas++;
@@ -672,6 +701,8 @@ async function runCrawler() {
     deposito: ${s.deposito || 'undefined'},
     procedureType: "${s.autoridad.replace(/"/g, '\\"')}",
     surface: ${s.superficie || 'undefined'},
+    refCat: ${s.refCat ? `"${s.refCat}"` : 'null'},
+    idufir: ${s.idufir ? `"${s.idufir}"` : 'null'},
     description: "${desc.replace(/"/g, '\\"').replace(/\n/g, ' ')}",
     boeId: "${s.idSub}",
     boeUrl: "${s.urlDetalle}",

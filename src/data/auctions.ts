@@ -22,7 +22,8 @@ export interface AuctionData {
   publishedAt?: string; // ISO date string
   lastCheckedAt?: string; // ISO date string
   slug?: string;
-  refCat?: string;
+  refCat?: string | null;
+  idufir?: string | null;
   startDate?: string;
   auctionDate?: string;
   status?: AuctionStatus;
@@ -48,6 +49,34 @@ export interface AuctionData {
 }
 
 export const AUCTIONS: Record<string, AuctionData> = {
+  'subasta-sub-ja-2026-257445': {
+    propertyType: "Piso",
+    city: "Arganda del Rey",
+    province: "Madrid",
+    municipality: "Arganda del Rey",
+    zone: "",
+    address: "C/ Las Eras Nº 11",
+    appraisalValue: 262000,
+    claimedDebt: 140830.21,
+    valorSubasta: 262000,
+    valorTasacion: 262000,
+    deposito: 13100,
+    procedureType: "Sección Civil TI Arganda del Rey. Plz.n 4",
+    surface: undefined,
+    description: "(Referencia SUB-JA-2026-257445) | Cargas: TIENE CARGAS POSTERIORES A LA HIPOTECA OBJETO DE EJECUCION | Depósito: 13100€",
+    boeId: "SUB-JA-2026-257445",
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2026-257445&idBus=NW5oQ0dSSTlWYUJKVDJzSHZKbFlKZWJ5RjVkRmhuV2tLaWZlM1ZXRFdINVp1eFlIUCtIZ3hzQWRESWxqampWb0JSTWViK3o5OExmMmZEbXNEVElYYVNOWlV1UDRXc0pZQjFrQnRSMEd6eUJRMFQvcVlqZlozdTEvTUtRL0Q5US9uaXlHR1RRNkQvRjMxYnhuQmYwSE1BT2orcVplT3A2RWJZMXV1NEZLb2w3YkVlbzg2Y21qMkNYczlFeTVWZThTK0thYzRiYkR5eXh4WFVTWkFwa0w2QmlCMGI4azZYUjZhUFp0eTIwLzJjWlVXWk8xaEZ2cEN2RThwektyUXNzaEgwa2JuWHRwRXpFM2RSdjU5d29ubzBZNGhFUGsxWGZMTGxCamRYNnBiUU14WmdzR282ZEZvM2FKekZNZmp3Ynozcm93d05udGdDVUd3cnhHeFF5Q2JpcE9QUGZTNVR3RmRnNzRoanpRUDI4PQ,,--50",
+    publishedAt: "2026-03-31",
+    lastCheckedAt: "2026-04-07T20:50:58.999Z", 
+    refCat: null, 
+    idufir: "28076000244931",
+    startDate: "2026-03-31",
+    auctionDate: "2026-04-20",
+    status: "active",
+    isActive: true,
+    isNew: true,
+    opportunityScore: 90
+  },
   'subasta-sub-ja-2025-256263': {
     propertyType: "Piso",
     city: "ZAMORA",
@@ -4687,7 +4716,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     boeId: "SUB-JA-2025-252364",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2025-252364&idBus=NW5oQ0dSSTlWYUJKVDJzSHZKbFlKZWJ5RjVkRmhuV2tLaWZlM1ZXRFdINVp1eFlIUCtIZ3hzQWRESWxqampWb0JSTWViK3o5OExmMmZEbXNEVElYYVNOWlV1UDRXc0pZQjFrQnRSMEd6eUJRMFQvcVlqZlozdTEvTUtRL0Q5US9uaXlHR1RRNkQvRjMxYnhuQmYwSE1BT2orcVplT3A2RWJZMXV1NEZLb2w3YkVlbzg2Y21qMkNYczlFeTVWZThTK0thYzRiYkR5eXh4WFVTWkFwa0w2QmlCMGI4azZYUjZhUFp0eTIwLzJjWlVXWk8xaEZ2cEN2RThwektyUXNzaEgwa2JuWHRwRXpFM2RSdjU5d29ubzBZNGhFUGsxWGZMTGxCamRYNnBiUU14WmdzR282ZEZvM2FKekZNZmp3Ynozcm93d05udGdDVUd3cnhHeFF5Q2JpcE9QUGZTNVR3RmRnNzRoanpRUDI4PQ,,--50",
     publishedAt: "2026-03-24",
-    lastCheckedAt: "2026-03-27T15:01:25.237Z",
+    lastCheckedAt: "2026-04-07T20:50:59.009Z", 
+    refCat: null, 
+    idufir: null,
     startDate: "2026-03-24",
     auctionDate: "2026-04-13",
     status: "active",
@@ -4714,7 +4745,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     boeId: "SUB-AT-2026-26R2886001014",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R2886001014&idBus=NW5oQ0dSSTlWYUJKVDJzSHZKbFlKZWJ5RjVkRmhuV2tLaWZlM1ZXRFdINVp1eFlIUCtIZ3hzQWRESWxqampWb0JSTWViK3o5OExmMmZEbXNEVElYYVNOWlV1UDRXc0pZQjFrQnRSMEd6eUJRMFQvcVlqZlozdTEvTUtRL0Q5US9uaXlHR1RRNkQvRjMxYnhuQmYwSE1BT2orcVplT3A2RWJZMXV1NEZLb2w3YkVlbzg2Y21qMkNYczlFeTVWZThTK0thYzRiYkR5eXh4WFVTWkFwa0w2QmlCMGI4azZYUjZhUFp0eTIwLzJjWlVXWk8xaEZ2cEN2RThwektyUXNzaEgwa2JuWHRwRXpFM2RSdjU5d29ubzBZNGhFUGsxWGZMTGxCamRYNnBiUU14WmdzR282ZEZvM2FKekZNZmp3Ynozcm93d05udGdDVUd3cnhHeFF5Q2JpcE9QUGZTNVR3RmRnNzRoanpRUDI4PQ,,--50",
     publishedAt: "2026-03-24",
-    lastCheckedAt: "2026-03-27T15:01:25.232Z",
+    lastCheckedAt: "2026-04-07T20:50:59.007Z", 
+    refCat: "6530802VK286380056RL", 
+    idufir: "28120000097704",
     startDate: "2026-03-24",
     auctionDate: "2026-04-13",
     status: "active",
@@ -4741,7 +4774,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     boeId: "SUB-AT-2026-26R0886001043",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R0886001043&idBus=NW5oQ0dSSTlWYUJKVDJzSHZKbFlKZWJ5RjVkRmhuV2tLaWZlM1ZXRFdINVp1eFlIUCtIZ3hzQWRESWxqampWb0JSTWViK3o5OExmMmZEbXNEVElYYVNOWlV1UDRXc0pZQjFrQnRSMEd6eUJRMFQvcVlqZlozdTEvTUtRL0Q5US9uaXlHR1RRNkQvRjMxYnhuQmYwSE1BT2orcVplT3A2RWJZMXV1NEZLb2w3YkVlbzg2Y21qMkNYczlFeTVWZThTK0thYzRiYkR5eXh4WFVTWkFwa0w2QmlCMGI4azZYUjZhUFp0eTIwLzJjWlVXWk8xaEZ2cEN2RThwektyUXNzaEgwa2JuWHRwRXpFM2RSdjU5d29ubzBZNGhFUGsxWGZMTGxCamRYNnBiUU14WmdzR282ZEZvM2FKekZNZmp3Ynozcm93d05udGdDVUd3cnhHeFF5Q2JpcE9QUGZTNVR3RmRnNzRoanpRUDI4PQ,,--50",
     publishedAt: "2026-03-24",
-    lastCheckedAt: "2026-03-27T15:01:25.229Z",
+    lastCheckedAt: "2026-04-07T20:50:59.004Z", 
+    refCat: "1394702VK3519S0014DX", 
+    idufir: "28083000270167",
     startDate: "2026-03-24",
     auctionDate: "2026-04-13",
     status: "active",
@@ -4795,7 +4830,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     boeId: "SUB-JA-2026-258798",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2026-258798&idBus=NW5oQ0dSSTlWYUJKVDJzSHZKbFlKZWJ5RjVkRmhuV2tLaWZlM1ZXRFdINVp1eFlIUCtIZ3hzQWRESWxqampWb0JSTWViK3o5OExmMmZEbXNEVElYYVNOWlV1UDRXc0pZQjFrQnRSMEd6eUJRMFQvcVlqZlozdTEvTUtRL0Q5US9uaXlHR1RRNkQvRjMxYnhuQmYwSE1BT2orcVplT3A2RWJZMXV1NEZLb2w3YkVlbzg2Y21qMkNYczlFeTVWZThTK0thYzRiYkR5eXh4WFVTWkFwa0w2QmlCMGI4azZYUjZhUFp0eTIwLzJjWlVXWk8xaEZ2cEN2RThwektyUXNzaEgwa2JuWHRwRXpFM2RSdjU5d29ubzBZNGhFUGsxWGZMTGxCamRYNnBiUU14WmdzR282ZEZvM2FKekZNZmp3Ynozcm93d05udGdDVUd3cnhHeFF5Q2JpcE9QUGZTNVR3RmRnNzRoanpRUDI4PQ,,--50",
     publishedAt: "2026-03-26",
-    lastCheckedAt: "2026-03-27T15:01:25.224Z",
+    lastCheckedAt: "2026-04-07T20:50:59.002Z", 
+    refCat: "5013971VL3051S0001RB", 
+    idufir: null,
     startDate: "2026-03-26",
     auctionDate: "2026-04-15",
     status: "active",
@@ -4849,7 +4886,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     boeId: "SUB-JA-2026-259025",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2026-259025&idBus=NW5oQ0dSSTlWYUJKVDJzSHZKbFlKZWJ5RjVkRmhuV2tLaWZlM1ZXRFdINVp1eFlIUCtIZ3hzQWRESWxqampWb0JSTWViK3o5OExmMmZEbXNEVElYYVNOWlV1UDRXc0pZQjFrQnRSMEd6eUJRMFQvcVlqZlozdTEvTUtRL0Q5US9uaXlHR1RRNkQvRjMxYnhuQmYwSE1BT2orcVplT3A2RWJZMXV1NEZLb2w3YkVlbzg2Y21qMkNYczlFeTVWZThTK0thYzRiYkR5eXh4WFVTWkFwa0w2QmlCMGI4azZYUjZhUFp0eTIwLzJjWlVXWk8xaEZ2cEN2RThwektyUXNzaEgwa2JuWHRwRXpFM2RSdjU5d29ubzBZNGhFUGsxWGZMTGxCamRYNnBiUU14WmdzR282ZEZvM2FKekZNZmp3Ynozcm93d05udGdDVUd3cnhHeFF5Q2JpcE9QUGZTNVR3RmRnNzRoanpRUDI4PQ,,--50",
     publishedAt: "2026-03-20",
-    lastCheckedAt: "2026-03-27T15:01:25.243Z",
+    lastCheckedAt: "2026-04-07T20:50:59.014Z", 
+    refCat: "9860102VK2696S0036DS", 
+    idufir: "28073000577052",
     startDate: "2026-03-20",
     auctionDate: "2026-04-09",
     status: "active",
@@ -4876,7 +4915,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     boeId: "SUB-JA-2024-226924",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2024-226924&idBus=NW5oQ0dSSTlWYUJKVDJzSHZKbFlKZWJ5RjVkRmhuV2tLaWZlM1ZXRFdINVp1eFlIUCtIZ3hzQWRESWxqampWb0JSTWViK3o5OExmMmZEbXNEVElYYVNOWlV1UDRXc0pZQjFrQnRSMEd6eUJRMFQvcVlqZlozdTEvTUtRL0Q5US9uaXlHR1RRNkQvRjMxYnhuQmYwSE1BT2orcVplT3A2RWJZMXV1NEZLb2w3YkVlbzg2Y21qMkNYczlFeTVWZThTK0thYzRiYkR5eXh4WFVTWkFwa0w2QmlCMGI4azZYUjZhUFp0eTIwLzJjWlVXWk8xaEZ2cEN2RThwektyUXNzaEgwa2JuWHRwRXpFM2RSdjU5d29ubzBZNGhFUGsxWGZMTGxCamRYNnBiUU14WmdzR282ZEZvM2FKekZNZmp3Ynozcm93d05udGdDVUd3cnhHeFF5Q2JpcE9QUGZTNVR3RmRnNzRoanpRUDI4PQ,,--50",
     publishedAt: "2026-03-20",
-    lastCheckedAt: "2026-03-27T15:01:25.241Z",
+    lastCheckedAt: "2026-04-07T20:50:59.011Z", 
+    refCat: "1075102VK6717N0045HW", 
+    idufir: null,
     startDate: "2026-03-20",
     auctionDate: "2026-04-09",
     status: "active",

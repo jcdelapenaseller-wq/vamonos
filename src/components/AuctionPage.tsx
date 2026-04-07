@@ -96,6 +96,16 @@ const AuctionPage: React.FC = () => {
     setAuction(foundAuction || null);
     setIsLoading(false);
     
+    // Diagnostic log for cadastral reference
+    if (foundAuction) {
+      const auctionAny = foundAuction as any;
+      console.log("DIAGNOSTIC - Auction Cadastral Fields:", {
+        refCat: auctionAny.refCat,
+        cadastralReference: auctionAny.cadastralReference,
+        referenciaCatastral: auctionAny.referenciaCatastral
+      });
+    }
+    
     // Update user's lastActiveAt if logged in
     if (user?.id) {
       updateLastActiveAt(user.id).catch(console.error);
@@ -280,7 +290,7 @@ const AuctionPage: React.FC = () => {
         window.history.replaceState({}, document.title, newUrl);
       }
 
-      if (params.get('openBoe') === 'true' && user && auction) {
+      if (params.get('openBoe') === 'true' && user?.id && auction) {
         const boeUrl = auction.boeUrl || `https://subastas.boe.es/detalle_subasta.php?idSub=${auction.boeId}`;
         window.open(boeUrl, '_blank');
         
@@ -451,18 +461,18 @@ const AuctionPage: React.FC = () => {
 
   // Track view
   useEffect(() => {
-    if (isLogged && auction && cleanSlug) {
+    if (user?.id && auction && cleanSlug) {
       const propertyType = normalizePropertyType(auction.propertyType) || 'Propiedad';
       const cityName = normalizeCity(auction) || 'España';
       const title = `${propertyType} en ${cityName}`;
       trackAuctionView(cleanSlug, title);
     }
-  }, [isLogged, auction, cleanSlug, trackAuctionView]);
+  }, [user?.id, auction, cleanSlug, trackAuctionView]);
 
   // Load note and check alerts from Firestore/localStorage
   useEffect(() => {
     const loadData = async () => {
-      if (isLogged && user && db && cleanSlug) {
+      if (user?.id && db && cleanSlug) {
         try {
           // Load note
           const noteRef = doc(db, 'users', user.id, 'notes', cleanSlug);
@@ -512,7 +522,7 @@ const AuctionPage: React.FC = () => {
     };
 
     loadData();
-  }, [cleanSlug, isLogged, user, auction]);
+  }, [cleanSlug, user?.id, auction]);
 
   // Autosave note
   useEffect(() => {
@@ -552,7 +562,7 @@ const AuctionPage: React.FC = () => {
 
   useEffect(() => {
     const checkFavoriteStatus = async () => {
-      if (!user || !cleanSlug || !db) {
+      if (!user?.id || !cleanSlug || !db) {
         setIsFavorite(false);
         setFavoriteId(null);
         setFavoritesCount(0);
@@ -586,7 +596,7 @@ const AuctionPage: React.FC = () => {
     };
 
     checkFavoriteStatus();
-  }, [user, cleanSlug]);
+  }, [user?.id, cleanSlug]);
 
   const scrollToNotes = () => {
     if (!isLogged) {
@@ -610,7 +620,7 @@ const AuctionPage: React.FC = () => {
       return;
     }
 
-    if (!user || !cleanSlug || isTogglingFavorite || !db || !auction) return;
+    if (!user?.id || !cleanSlug || isTogglingFavorite || !db || !auction) return;
 
     setIsTogglingFavorite(true);
 
@@ -653,7 +663,7 @@ const AuctionPage: React.FC = () => {
   };
 
   const handleDeleteAlert = async () => {
-    if (!user || !activeAlertId) return;
+    if (!user?.id || !activeAlertId) return;
     
     try {
       await alertService.deleteAlert(activeAlertId);
@@ -681,7 +691,7 @@ const AuctionPage: React.FC = () => {
       return;
     }
 
-    if (!auction || !user) return;
+    if (!auction || !user?.id) return;
 
     const city = normalizeCity(auction) || '';
     const type = normalizePropertyType(auction.propertyType) || 'Vivienda';
@@ -1987,14 +1997,16 @@ const AuctionPage: React.FC = () => {
               </p>
             </div>
             <div className={`space-y-1 ${!isLogged ? 'blur-[6px] select-none' : ''}`}>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Referencia catastral</p>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                {(!auction.refCat && auction.idufir) ? "IDUFIR (sin ref. catastral)" : "Referencia catastral"}
+              </p>
               <p className="text-sm font-mono font-bold text-slate-900">
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  analysisResult?.metadata?.refCat || auction.refCat || (
-                    <span className="flex items-center gap-1 text-slate-400 font-medium italic">
-                      <Info size={10} /> Consultar
+                  auction.refCat || auction.idufir || (
+                    <span className="text-slate-400 font-medium italic">
+                      requiere análisis
                     </span>
                   )
                 )}
