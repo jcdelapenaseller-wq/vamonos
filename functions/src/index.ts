@@ -255,13 +255,35 @@ export const onNotificationQueueCreate = functions
       const shouldPush = notificationData.push !== false;
       const shouldEmail = notificationData.email === true;
 
-      // 2. Lógica Push Actual
-      if (shouldPush) {
-        if (user.pushToken) {
-          functions.logger.info(`[PUSH] Enviando notificación push al usuario ${userId}`);
-          // Aquí iría el envío real de FCM en el futuro
+      // 2. Lógica Push Actualizada
+      const isAlert = !notificationData.type || notificationData.type === 'alert';
+      if (shouldPush && isAlert) {
+        if (user.fcmToken) {
+          try {
+            const pushTitle = `Nueva subasta detectada: ${auction.propertyType || 'Inmueble'} en ${auction.city || 'tu zona'}`;
+            const pushBody = `Valor Tasación: ${auction.appraisalValue ? auction.appraisalValue.toLocaleString('es-ES') + '€' : 'Consultar'}`;
+            const targetUrl = `https://activosoffmarket.es/subasta/${auction.slug || auctionId}`;
+
+            await admin.messaging().send({
+              token: user.fcmToken,
+              notification: {
+                title: pushTitle,
+                body: pushBody,
+              },
+              data: {
+                url: targetUrl
+              }
+            });
+            functions.logger.info(`[PUSH] push sent to ${userId}`);
+          } catch (pushError: any) {
+            if (pushError.code === 'messaging/invalid-registration-token' || pushError.code === 'messaging/registration-token-not-registered') {
+              functions.logger.warn(`[PUSH] push invalid token for user ${userId}`);
+            } else {
+              functions.logger.error(`[PUSH] push error for user ${userId}:`, pushError);
+            }
+          }
         } else {
-          functions.logger.info(`[SKIP] Usuario ${userId} sin pushToken.`);
+          functions.logger.info(`[PUSH] push skipped no token for user ${userId}`);
         }
       }
 
@@ -347,7 +369,7 @@ export const onNotificationQueueCreate = functions
       });
 
       // 5. Logs: enviado
-      functions.logger.info(`[SENT] Email enviado con éxito a ${userEmail} para subasta ${auctionId}`);
+      functions.logger.info(`[SENT] Notificación procesada con éxito para usuario ${userId} y subasta ${auctionId}`);
       return null;
 
     } catch (error: any) {

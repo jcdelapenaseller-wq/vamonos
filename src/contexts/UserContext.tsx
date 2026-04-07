@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { auth, db, loginWithGoogle, logout, updateUserPlan, UserProfile } from '../lib/firebase';
+import { requestAndSaveFCMToken } from '../lib/messaging';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
@@ -186,6 +187,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
       let profile = await loginWithGoogle();
       profile = await checkMonthlyReset(profile);
       setUser(profile);
+
+      // Request and save FCM token asynchronously without blocking login
+      if (!profile.fcmToken) {
+        requestAndSaveFCMToken(profile.id).catch(() => {});
+      }
+
       return profile;
     } catch (error) {
       console.error("Error logging in:", error);

@@ -24,6 +24,7 @@ export interface UserProfile {
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   stripeStatus?: string;
+  fcmToken?: string;
 }
 
 export const loginWithGoogle = async (): Promise<UserProfile> => {
