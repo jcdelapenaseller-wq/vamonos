@@ -130,7 +130,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log("[FCM_DEBUG] Auth state changed. Checking FCM token...");
             if (!userData.fcmToken) {
               console.log("[FCM_DEBUG] Calling requestAndSaveFCMToken from onAuthStateChanged...");
-              requestAndSaveFCMToken(userData.id).catch((err) => {
+              requestAndSaveFCMToken(firebaseUser.uid).catch((err) => {
                 console.error("[FCM_DEBUG] Error in requestAndSaveFCMToken promise:", err);
               });
             } else {
@@ -150,7 +150,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setUser(fallbackUser);
 
             console.log("[FCM_DEBUG] Auth state changed (fallback). Calling requestAndSaveFCMToken...");
-            requestAndSaveFCMToken(fallbackUser.id).catch((err) => {
+            requestAndSaveFCMToken(firebaseUser.uid).catch((err) => {
               console.error("[FCM_DEBUG] Error in requestAndSaveFCMToken promise:", err);
             });
           }
