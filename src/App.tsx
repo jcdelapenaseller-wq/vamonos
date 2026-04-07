@@ -6,6 +6,7 @@ import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import { UserProvider } from './contexts/UserContext';
 import { Toaster } from 'sonner';
+import { PushNotificationModal } from './components/PushNotificationModal';
 
 function AppContent() {
   const element = useRoutes(routes);
@@ -47,6 +48,7 @@ function AppContent() {
       </main>
       {!isFocusPremiumMode && <Footer />}
       <Toaster position="bottom-center" />
+      <PushNotificationModal />
     </div>
   );
 }

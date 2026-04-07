@@ -126,16 +126,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             userData = await checkMonthlyReset(userData);
             console.log("[AUTH_DEBUG] 4. Calling setUser(userData)");
             setUser(userData);
-
-            console.log("[FCM_DEBUG] Auth state changed. Checking FCM token...");
-            if (!userData.fcmToken) {
-              console.log("[FCM_DEBUG] Calling requestAndSaveFCMToken from onAuthStateChanged...");
-              requestAndSaveFCMToken(firebaseUser.uid).catch((err) => {
-                console.error("[FCM_DEBUG] Error in requestAndSaveFCMToken promise:", err);
-              });
-            } else {
-              console.log("[FCM_DEBUG] User already has fcmToken, skipping request.");
-            }
           } else {
             console.log("[AUTH_DEBUG] 3. Profile NOT found in Firestore, using fallback");
             const fallbackUser: UserProfile = {
@@ -148,11 +138,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
             };
             console.log("[AUTH_DEBUG] 4. Calling setUser(fallbackUser)");
             setUser(fallbackUser);
-
-            console.log("[FCM_DEBUG] Auth state changed (fallback). Calling requestAndSaveFCMToken...");
-            requestAndSaveFCMToken(firebaseUser.uid).catch((err) => {
-              console.error("[FCM_DEBUG] Error in requestAndSaveFCMToken promise:", err);
-            });
           }
         } catch (error) {
           console.error("[AUTH_DEBUG] Error fetching profile:", error);

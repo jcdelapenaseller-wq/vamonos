@@ -260,8 +260,8 @@ export const onNotificationQueueCreate = functions
       if (shouldPush && isAlert) {
         if (user.fcmToken) {
           try {
-            const pushTitle = `Nueva subasta detectada: ${auction.propertyType || 'Inmueble'} en ${auction.city || 'tu zona'}`;
-            const pushBody = `Valor Tasación: ${auction.appraisalValue ? auction.appraisalValue.toLocaleString('es-ES') + '€' : 'Consultar'}`;
+            const pushTitle = `Nueva subasta en ${auction.province || 'tu zona'}`;
+            const pushBody = `${auction.propertyType || 'Inmueble'} detectado — revisa antes que otros`;
             const targetUrl = `https://activosoffmarket.es/subasta/${auction.slug || auctionId}`;
 
             await admin.messaging().send({
