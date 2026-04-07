@@ -25,7 +25,18 @@ export interface UserProfile {
   stripeSubscriptionId?: string;
   stripeStatus?: string;
   fcmToken?: string;
+  lastActiveAt?: any;
 }
+
+export const updateLastActiveAt = async (userId: string) => {
+  if (!db) return;
+  try {
+    const userRef = doc(db, 'users', userId);
+    await setDoc(userRef, { lastActiveAt: serverTimestamp() }, { merge: true });
+  } catch (error) {
+    console.error("Error updating lastActiveAt:", error);
+  }
+};
 
 export const loginWithGoogle = async (): Promise<UserProfile> => {
   if (!auth || !db) throw new Error("Firebase no está configurado. Añade las variables de entorno VITE_FIREBASE_*");
@@ -44,7 +55,8 @@ export const loginWithGoogle = async (): Promise<UserProfile> => {
       plan: 'free',
       createdAt: serverTimestamp(),
       analysisUsed: 0,
-      lastAnalysisReset: serverTimestamp()
+      lastAnalysisReset: serverTimestamp(),
+      lastActiveAt: serverTimestamp()
     };
     await setDoc(userRef, newUser);
     return newUser;
@@ -52,12 +64,14 @@ export const loginWithGoogle = async (): Promise<UserProfile> => {
   
   const data = userSnap.data() as UserProfile;
   // Initialize fields if they don't exist for old users
+  const updates: any = { lastActiveAt: serverTimestamp() };
   if (data.analysisUsed === undefined) {
-    await setDoc(userRef, { analysisUsed: 0, lastAnalysisReset: serverTimestamp() }, { merge: true });
-    return { ...data, analysisUsed: 0, lastAnalysisReset: new Date() };
+    updates.analysisUsed = 0;
+    updates.lastAnalysisReset = serverTimestamp();
   }
+  await setDoc(userRef, updates, { merge: true });
   
-  return data;
+  return { ...data, ...updates, lastActiveAt: new Date() };
 };
 
 export const logout = async () => {

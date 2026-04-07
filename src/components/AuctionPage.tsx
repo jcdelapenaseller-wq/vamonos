@@ -29,7 +29,7 @@ import Header from './Header';
 import Footer from './Footer';
 import AuctionCalculator from './AuctionCalculator';
 import { useUser, UserContext } from '../contexts/UserContext';
-import { db } from '../lib/firebase';
+import { db, updateLastActiveAt } from '../lib/firebase';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuctionValuation, ValuationResult } from '../services/valuationService';
 import { alertService } from '../services/alertService';
@@ -86,17 +86,21 @@ const AuctionPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [auction, setAuction] = useState<any>(null);
   const cleanSlug = slug ? decodeURIComponent(slug).replace(/\/$/, '').toLowerCase() : '';
+  const { user, isLogged, requireLogin, plan, trackAuctionView } = useUser();
+  const hasAccess = isLogged && (plan === 'basic' || plan === 'pro');
+  const userContext = useContext(UserContext);
 
   useEffect(() => {
     // Simulate loading or handle data finding safely
     const foundAuction = cleanSlug ? AUCTIONS[cleanSlug] : null;
     setAuction(foundAuction || null);
     setIsLoading(false);
-  }, [cleanSlug]);
-
-  const { user, isLogged, requireLogin, plan, trackAuctionView } = useUser();
-  const hasAccess = isLogged && (plan === 'basic' || plan === 'pro');
-  const userContext = useContext(UserContext);
+    
+    // Update user's lastActiveAt if logged in
+    if (user?.id) {
+      updateLastActiveAt(user.id).catch(console.error);
+    }
+  }, [cleanSlug, user?.id]);
 
   // Payment State
   const auctionId = auction?.boeId || auction?.slug || '';

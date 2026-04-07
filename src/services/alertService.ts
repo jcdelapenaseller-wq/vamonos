@@ -1,4 +1,4 @@
-import { db, auth } from '../lib/firebase';
+import { db, auth, updateLastActiveAt } from '../lib/firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
 
 export interface AlertData {
@@ -34,6 +34,9 @@ export const alertService = {
       active: true,
       createdAt: serverTimestamp()
     });
+    
+    // Update user's lastActiveAt
+    updateLastActiveAt(auth.currentUser.uid).catch(console.error);
     
     return docRef.id;
   },

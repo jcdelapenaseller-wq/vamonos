@@ -58,7 +58,21 @@ export const onAuctionCreateEmailAlert = functions
         .setFrom(sentFrom)
         .setTo(recipients)
         .setSubject(`Nueva subasta en ${province}`)
-        .setText(`Nueva subasta detectada\n\nTipo: ${propertyType}\nMunicipio: ${municipality}\nPrecio: ${valorSubasta}€\n\nVer subasta:\nhttps://activosoffmarket.es/subasta/${slug}`);
+        .setText(`Nueva subasta detectada
+
+Tipo: ${propertyType}
+Municipio: ${municipality}
+Precio: ${valorSubasta}€
+
+━━━━━━━━━━━━━━━━━━
+VER SUBASTAS RECIENTES
+https://activosoffmarket.es/subasta/${slug}
+━━━━━━━━━━━━━━━━━━
+
+—
+Activos OffMarket
+Preferencias:
+https://activosoffmarket.es/unsubscribe?email=${email}`);
 
       try {
         await mailerSend.email.send(emailParams);
@@ -237,12 +251,16 @@ export const onNotificationQueueCreate = functions
 
       const { userId, auctionId } = notificationData;
 
-      // 3. Leer subasta
-      const auctionDoc = await db.collection('auctions').doc(auctionId).get();
-      if (!auctionDoc.exists) {
-        throw new Error(`Subasta ${auctionId} no encontrada.`);
+      // 3. Leer subasta (opcional para promos)
+      let auction: any = {};
+      if (auctionId) {
+        const auctionDoc = await db.collection('auctions').doc(auctionId).get();
+        if (auctionDoc.exists) {
+          auction = auctionDoc.data()!;
+        } else if (!notificationData.type || notificationData.type === 'alert') {
+          throw new Error(`Subasta ${auctionId} no encontrada.`);
+        }
       }
-      const auction = auctionDoc.data()!;
 
       // 4. Leer usuario
       const userDoc = await db.collection('users').doc(userId).get();
@@ -257,12 +275,24 @@ export const onNotificationQueueCreate = functions
 
       // 2. Lógica Push Actualizada
       const isAlert = !notificationData.type || notificationData.type === 'alert';
-      if (shouldPush && isAlert) {
-        if (user.fcmToken) {
+      if ((shouldPush && isAlert) || notificationData.push === true) {
+        let isActive = false;
+        if (user.lastActiveAt) {
+          const lastActiveDate = user.lastActiveAt.toDate ? user.lastActiveAt.toDate() : new Date(user.lastActiveAt);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          if (lastActiveDate > thirtyDaysAgo) {
+            isActive = true;
+          }
+        }
+
+        if (!isActive) {
+          functions.logger.info(`[PUSH] skipped inactive user ${userId}`);
+        } else if (user.fcmToken) {
           try {
-            const pushTitle = `Nueva subasta en ${auction.province || 'tu zona'}`;
-            const pushBody = `${auction.propertyType || 'Inmueble'} detectado — revisa antes que otros`;
-            const targetUrl = `https://activosoffmarket.es/subasta/${auction.slug || auctionId}`;
+            const pushTitle = notificationData.title || `Nueva subasta en ${auction.province || 'tu zona'}`;
+            const pushBody = notificationData.body || `${auction.propertyType || 'Inmueble'} detectado — revisa antes que otros`;
+            const targetUrl = notificationData.url || `https://activosoffmarket.es/subasta/${auction.slug || auctionId}`;
 
             await admin.messaging().send({
               token: user.fcmToken,
