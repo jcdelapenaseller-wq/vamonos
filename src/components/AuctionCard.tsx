@@ -42,6 +42,7 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ slug, data, showNewBad
   
   const isCapitalCity = isCapital(data);
   const discount = calculateDiscount(data.valorTasacion, data.valorSubasta, data.claimedDebt);
+  const discountBadge = discount && discount >= 10 && discount <= 80 ? `-${discount}% DTO` : null;
   
   // Urgency: closing in less than 3 days
   const isClosingSoon = data.auctionDate ? (new Date(data.auctionDate).getTime() - new Date().getTime()) < (3 * 24 * 60 * 60 * 1000) && (new Date(data.auctionDate).getTime() - new Date().getTime()) > 0 : false;
@@ -83,6 +84,11 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ slug, data, showNewBad
     >
       {/* Left: Commercial Badges (Max 2) */}
       <div className="absolute top-4 left-4 z-10 flex flex-col items-start gap-1.5">
+        {discountBadge && (
+          <span className={`inline-flex items-center text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border shadow-sm ${getDiscountColor(discount || 0)}`}>
+            {discountBadge}
+          </span>
+        )}
         {oppBadge && (
           <span className={`inline-flex items-center text-[10px] font-bold px-2 py-1 rounded-md uppercase tracking-wider border shadow-sm ${oppBadge.color}`}>
             {oppBadge.label}
