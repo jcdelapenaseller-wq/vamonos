@@ -523,7 +523,13 @@ async function runCrawler() {
           const rawRefCat = bienesData.referenciaCatastral;
           const cleanedRefCat = (function() {
             if (!rawRefCat || rawRefCat === "no consta" || rawRefCat === "-" || rawRefCat === "") return null;
-            return /^[0-9A-Z]{14,20}$/.test(rawRefCat) ? rawRefCat : null;
+            const cleaned = rawRefCat
+              ?.toUpperCase()
+              .replace(/[^a-zA-Z0-9/]/g, '')
+              .replace(/\s+/g, '')
+              .trim();
+            
+            return (cleaned && cleaned.length > 10) ? cleaned : null;
           })();
 
           finalResults.push({
