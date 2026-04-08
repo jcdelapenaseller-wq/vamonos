@@ -16,6 +16,8 @@ export interface ValuationResult {
     cached: boolean;
     timestamp: string;
     refCat?: string;
+    yearBuilt?: number | string;
+    floor?: string;
     error?: string;
   };
 }

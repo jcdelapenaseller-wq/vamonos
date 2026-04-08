@@ -54,38 +54,35 @@ const getPricePerM2 = (province?: string, city?: string): number => {
  * Consulta a la Sede Electrónica del Catastro (SEC)
  * Utiliza el servicio Consulta_DNPRC para obtener datos no protegidos por Referencia Catastral.
  */
-const fetchCatastroSurface = async (refCat: string): Promise<number | null> => {
-  logDiagnostic(`fetchCatastroSurface START: refCat=${refCat}`);
+const fetchCatastroData = async (refCat: string): Promise<{ surface: number | null, yearBuilt: number | null, floor: string | null }> => {
+  logDiagnostic(`fetchCatastroData START: refCat=${refCat}`);
   try {
     const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/OVCCallejero.svc/Consulta_DNPRC?RefCat=${refCat}`;
-    logDiagnostic(`fetchCatastroSurface REQUEST URL: ${url}`);
+    logDiagnostic(`fetchCatastroData REQUEST URL: ${url}`);
     
     const startTime = Date.now();
     const response = await axios.get(url, { timeout: 5000 });
-    console.log("VAL response:", response.data);
     const duration = Date.now() - startTime;
     
-    logDiagnostic(`fetchCatastroSurface RESPONSE: status=${response.status}, duration=${duration}ms`);
+    logDiagnostic(`fetchCatastroData RESPONSE: status=${response.status}, duration=${duration}ms`);
     
     const xml = response.data;
     if (typeof xml === 'string') {
-      const match = xml.match(/<debi>[\s\S]*?<sfc>([\d.,]+)<\/sfc>/i);
-      console.log("CATASTRO XML MATCH", match?.[1]);
+      const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
+      const yearMatch = xml.match(/<ant>(\d+)<\/ant>/i);
+      const floorMatch = xml.match(/<pau>([^<]+)<\/pau>/i);
       
-      if (match) {
-        const parsedSurface = parseFloat(match[1].replace(",", "."));
-        logDiagnostic(`fetchCatastroSurface SUCCESS: surface=${match[1]}, parsed=${parsedSurface}`);
-        return parsedSurface;
-      }
-      logDiagnostic(`fetchCatastroSurface NULL: No <debi><sfc> tag found in XML.`);
-    } else {
-      logDiagnostic(`fetchCatastroSurface NULL: Response data is not a string.`);
+      const surface = surfaceMatch ? parseFloat(surfaceMatch[1].replace(",", ".")) : null;
+      const yearBuilt = yearMatch ? parseInt(yearMatch[1]) : null;
+      const floor = floorMatch ? floorMatch[1].trim() : null;
+
+      logDiagnostic(`fetchCatastroData SUCCESS: surface=${surface}, yearBuilt=${yearBuilt}, floor=${floor}`);
+      return { surface, yearBuilt, floor };
     }
-    return null;
+    return { surface: null, yearBuilt: null, floor: null };
   } catch (error: any) {
-    const isTimeout = error.code === 'ECONNABORTED';
-    logDiagnostic(`fetchCatastroSurface EXCEPTION: isTimeout=${isTimeout}, message=${error.message}, code=${error.code}, status=${error.response?.status}`);
-    return null;
+    logDiagnostic(`fetchCatastroData EXCEPTION: message=${error.message}`);
+    return { surface: null, yearBuilt: null, floor: null };
   }
 };
 
@@ -95,54 +92,33 @@ const extractRefCat = (text?: string): string | null => {
   return match ? match[0].toUpperCase() : null;
 };
 
-const fetchCatastroSurfaceByAddress = async (province: string, city: string, address: string): Promise<number | null> => {
-  logDiagnostic(`fetchCatastroSurfaceByAddress START: prov=${province}, city=${city}, addr=${address}`);
+const fetchCatastroDataByAddress = async (province: string, city: string, address: string): Promise<{ surface: number | null, yearBuilt: number | null, floor: string | null }> => {
+  logDiagnostic(`fetchCatastroDataByAddress START: prov=${province}, city=${city}, addr=${address}`);
   try {
     const streetMatch = address.match(/([a-zA-Z\s]+)\s+(\d+)/);
-    if (!streetMatch) {
-      logDiagnostic(`fetchCatastroSurfaceByAddress NULL: Address format invalid (no street/number match): ${address}`);
-      return null;
-    }
+    if (!streetMatch) return { surface: null, yearBuilt: null, floor: null };
     
     const calle = streetMatch[1].trim();
     const numero = streetMatch[2];
     
     const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/OVCCallejero.svc/Consulta_DNPPP?Provincia=${encodeURIComponent(province)}&Municipio=${encodeURIComponent(city)}&Sigla=&Calle=${encodeURIComponent(calle)}&Numero=${numero}`;
-    logDiagnostic(`fetchCatastroSurfaceByAddress REQUEST URL: ${url}`);
-    
-    const startTime = Date.now();
-    console.log("CATASTRO PARAMS", {
-      Provincia: province,
-      Municipio: city,
-      Sigla: "",
-      Calle: calle,
-      Numero: numero
-    });
     const response = await axios.get(url, { timeout: 5000 });
-    console.log("VAL response:", response.data);
-    const duration = Date.now() - startTime;
-    
-    logDiagnostic(`fetchCatastroSurfaceByAddress RESPONSE: status=${response.status}, duration=${duration}ms`);
     
     const xml = response.data;
     if (typeof xml === 'string') {
-      const match = xml.match(/<debi>[\s\S]*?<sfc>([\d.,]+)<\/sfc>/i);
-      console.log("CATASTRO XML MATCH", match?.[1]);
+      const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
+      const yearMatch = xml.match(/<ant>(\d+)<\/ant>/i);
+      const floorMatch = xml.match(/<pau>([^<]+)<\/pau>/i);
       
-      if (match) {
-        const parsedSurface = parseFloat(match[1].replace(",", "."));
-        logDiagnostic(`fetchCatastroSurfaceByAddress SUCCESS: surface=${match[1]}, parsed=${parsedSurface}`);
-        return parsedSurface;
-      }
-      logDiagnostic(`fetchCatastroSurfaceByAddress NULL: No <debi><sfc> tag found in XML.`);
-    } else {
-      logDiagnostic(`fetchCatastroSurfaceByAddress NULL: Response data is not a string.`);
+      return {
+        surface: surfaceMatch ? parseFloat(surfaceMatch[1].replace(",", ".")) : null,
+        yearBuilt: yearMatch ? parseInt(yearMatch[1]) : null,
+        floor: floorMatch ? floorMatch[1].trim() : null
+      };
     }
-    return null;
+    return { surface: null, yearBuilt: null, floor: null };
   } catch (error: any) {
-    const isTimeout = error.code === 'ECONNABORTED';
-    logDiagnostic(`fetchCatastroSurfaceByAddress EXCEPTION: isTimeout=${isTimeout}, message=${error.message}, code=${error.code}, status=${error.response?.status}`);
-    return null;
+    return { surface: null, yearBuilt: null, floor: null };
   }
 };
 
@@ -153,32 +129,29 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const { boeId, address, surface, city, province, appraisalValue, refCat, description, slug } = req.body;
 
-  logDiagnostic(`handler START: slug=${slug}, boeId=${boeId}, refCat=${refCat}, address=${address}, city=${city}, province=${province}`);
+  logDiagnostic(`handler START: slug=${slug}, boeId=${boeId}, refCat=${refCat}`);
 
   if (!boeId) {
     return res.status(400).json({ error: 'boeId is required' });
   }
 
   try {
-    // 1. Check Cache in Firestore (only if db is available)
-    let valuationRef = null;
+    // 1. Check Cache in Firestore
     if (db) {
-      valuationRef = db.collection('auctions').doc(boeId).collection('valuations').doc('latest');
+      const valuationRef = db.collection('auctions').doc(boeId).collection('valuations').doc('latest');
       try {
         const valuationSnap = await valuationRef.get();
         if (valuationSnap.exists) {
           const data = valuationSnap.data();
-          logDiagnostic(`handler CACHE HIT: boeId=${boeId}`);
           return res.status(200).json({ ...data, metadata: { ...data?.metadata, cached: true } });
         }
-      } catch (e) {
-        console.error('Firestore Cache Read Error:', e);
-        // Continue without cache
-      }
+      } catch (e) {}
     }
 
-    // 2. Obtener superficie (Estrategia Triple: RefCat > Dirección > Estimación)
+    // 2. Obtener datos (Estrategia Triple: RefCat > Dirección > Estimación)
     let realSurface = surface;
+    let yearBuilt = null;
+    let floor = null;
     let sourceSurface = 'auction_data';
     let confidence = 0.75;
     
@@ -186,51 +159,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const baseValue = appraisalValue || 150000;
 
     let finalRefCat = refCat || extractRefCat(description);
-    console.log("VAL refCat:", finalRefCat);
 
     if (finalRefCat) {
-      const catastroSurface = await fetchCatastroSurface(finalRefCat);
-      if (catastroSurface) {
-        realSurface = catastroSurface;
+      const catData = await fetchCatastroData(finalRefCat);
+      if (catData.surface) {
+        realSurface = catData.surface;
+        yearBuilt = catData.yearBuilt;
+        floor = catData.floor;
         sourceSurface = 'catastro_ref';
-        confidence = 0.95; // Alta
+        confidence = 0.95;
       }
     } else if (!realSurface && address && city && province) {
-      const catastroSurface = await fetchCatastroSurfaceByAddress(province, city, address);
-      if (catastroSurface) {
-        realSurface = catastroSurface;
+      const catData = await fetchCatastroDataByAddress(province, city, address);
+      if (catData.surface) {
+        realSurface = catData.surface;
+        yearBuilt = catData.yearBuilt;
+        floor = catData.floor;
         sourceSurface = 'catastro_address';
-        confidence = 0.80; // Media
+        confidence = 0.80;
       }
     }
 
     if (!realSurface) {
       realSurface = Math.round(baseValue / priceM2);
       sourceSurface = 'estimada';
-      confidence = 0.60; // Baja
-      logDiagnostic(`handler NULL_CATASTRO: Falling back to estimation. surface=${realSurface}`);
+      confidence = 0.60;
     }
 
-    console.log("VAL surface:", realSurface);
-
-    // 4. Calcular Valor de Mercado
     const marketValue = Math.round(realSurface * priceM2);
-
-    // 5. Cálculos de Inversión
-    const realDiscount = Math.round(((marketValue - baseValue) / marketValue) * 100);
-    const maxBid = Math.round(marketValue * 0.75); // 75% del valor de mercado
-    const estimatedProfit = marketValue - maxBid;
-    const roi = Math.round((estimatedProfit / maxBid) * 100);
-
     const result = {
       boeId,
       marketValue,
       confidence,
       calculations: {
-        realDiscount,
-        maxBid,
-        estimatedProfit,
-        roi,
+        realDiscount: Math.round(((marketValue - baseValue) / marketValue) * 100),
+        maxBid: Math.round(marketValue * 0.75),
+        estimatedProfit: marketValue - Math.round(marketValue * 0.75),
+        roi: Math.round(((marketValue - Math.round(marketValue * 0.75)) / Math.round(marketValue * 0.75)) * 100),
         surface: realSurface,
         priceM2
       },
@@ -239,29 +204,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         surfaceSource: sourceSurface,
         cached: false,
         timestamp: new Date().toISOString(),
-        refCat: finalRefCat || null
+        refCat: finalRefCat || null,
+        yearBuilt,
+        floor
       }
     };
 
-    // 6. Save to Cache (only if db is available)
-    if (db && valuationRef) {
-      try {
-        await valuationRef.set(result);
-      } catch (e) {
-        console.error('Firestore Cache Write Error:', e);
-      }
+    if (db) {
+      await db.collection('auctions').doc(boeId).collection('valuations').doc('latest').set(result);
     }
 
-    logDiagnostic(`handler SUCCESS: boeId=${boeId}, surface=${realSurface}, source=${sourceSurface}`);
     return res.status(200).json(result);
-
   } catch (error) {
-    console.error('Valuation Error:', error);
-    logDiagnostic(`handler EXCEPTION: error=${error instanceof Error ? error.message : String(error)}`);
-    return res.status(500).json({ 
-      error: 'Error interno en la valoración',
-      details: error instanceof Error ? error.message : String(error)
-    });
+    return res.status(500).json({ error: 'Error interno' });
   }
 }
 

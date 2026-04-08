@@ -147,6 +147,31 @@ const AuctionPage: React.FC = () => {
   }, [auctionId]);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [analysisResult, setAnalysisResult] = React.useState<any>(null);
+  const formatFloor = (floor?: string): string => {
+    if (!floor) return "—";
+    const raw = floor.trim().toUpperCase();
+    
+    // Si tiene espacios (ej: "02 01"), nos quedamos con la primera parte
+    const firstPart = raw.split(/\s+/)[0];
+
+    const mapping: Record<string, string> = {
+      "00": "Bajo",
+      "BJ": "Bajo",
+      "SM": "Semisótano",
+      "SS": "Sótano"
+    };
+
+    if (mapping[firstPart]) return mapping[firstPart];
+
+    // Intentar parsear como número para plantas (01, 02, etc)
+    const num = parseInt(firstPart, 10);
+    if (!isNaN(num) && num > 0) {
+      return `${num}ª planta`;
+    }
+
+    return firstPart; // Fallback al valor original si no encaja
+  };
+
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [autoCheckout, setAutoCheckout] = useState<'cargas' | 'completo' | null>(null);
   const [paymentType, setPaymentType] = useState<'analysis' | 'cargas'>('analysis');
@@ -1982,7 +2007,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  (analysisResult?.calculations?.surface || auction.surface) ? `${analysisResult?.calculations?.surface || auction.surface} m²` : "—"
+                  (analysisResult?.calculations?.surface || valuationResult?.calculations?.surface || auction.surface) ? `${analysisResult?.calculations?.surface || valuationResult?.calculations?.surface || auction.surface} m²` : "—"
                 )}
               </p>
             </div>
@@ -1992,7 +2017,17 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  analysisResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
+                  analysisResult?.metadata?.yearBuilt || valuationResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
+                )}
+              </p>
+            </div>
+            <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
+              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Planta</p>
+              <p className="text-sm font-bold text-slate-900">
+                {isGenerating ? (
+                  <span className="text-brand-600 animate-pulse">Calculando...</span>
+                ) : (
+                  formatFloor(analysisResult?.metadata?.floor || valuationResult?.metadata?.floor)
                 )}
               </p>
             </div>
@@ -2011,29 +2046,6 @@ const AuctionPage: React.FC = () => {
                   )
                 )}
               </p>
-            </div>
-            <div className={`space-y-1 ${!isLogged ? 'blur-[4px] select-none' : ''}`}>
-              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Confianza datos</p>
-              <div className="flex items-center gap-1.5">
-                {isGenerating ? (
-                  <span className="text-brand-600 text-sm font-bold animate-pulse">Calculando...</span>
-                ) : (
-                  <>
-                    <div className={`w-2 h-2 rounded-full ${
-                      !isLogged ? 'bg-slate-300' : 
-                      (analysisResult?.confidence >= 0.9 || auction.cadastreConfidence === 'ALTA') ? 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.4)]' :
-                      (analysisResult?.confidence >= 0.75 || auction.cadastreConfidence === 'MEDIA') ? 'bg-amber-500' :
-                      (analysisResult?.confidence > 0 || auction.cadastreConfidence === 'BAJA') ? 'bg-red-500' : 'bg-slate-300'
-                    }`} />
-                    <p className="text-sm font-bold text-slate-900">
-                      {analysisResult?.confidence ? (
-                        analysisResult.confidence >= 0.9 ? 'ALTA' :
-                        analysisResult.confidence >= 0.75 ? 'MEDIA' : 'BAJA'
-                      ) : (auction.cadastreConfidence || "—")}
-                    </p>
-                  </>
-                )}
-              </div>
             </div>
           </div>
         </section>
