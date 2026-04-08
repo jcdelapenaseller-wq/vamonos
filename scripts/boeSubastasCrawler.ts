@@ -66,8 +66,8 @@ async function runCrawler() {
       const options = Array.from(select.options);
       
       return options.map(opt => {
-        const match = opt.text.match(/\((\d+)\)/);
-        return { value: opt.value, text: opt.text, count: match ? parseInt(match[1]) : 0 };
+        const provinceCountMatch = opt.text.match(/\((\d+)\)/);
+        return { value: opt.value, text: opt.text, count: provinceCountMatch ? parseInt(provinceCountMatch[1]) : 0 };
       }).filter(o => o.value && o.count > 0)
         .sort((a, b) => b.count - a.count);
     });
@@ -219,9 +219,9 @@ async function runCrawler() {
       let auctionsContent = fs.readFileSync(auctionsFilePath, 'utf-8');
       
       const idRegex = /boeId:\s*["']([^"']+)["']/g;
-      let match;
-      while ((match = idRegex.exec(auctionsContent)) !== null) {
-        existingIds.add(match[1]);
+      let idMatch;
+      while ((idMatch = idRegex.exec(auctionsContent)) !== null) {
+        existingIds.add(idMatch[1]);
       }
       console.log(`Cargadas ${existingIds.size} subastas existentes desde auctions.ts`);
     } catch (err) {
@@ -395,9 +395,9 @@ async function runCrawler() {
             .replace(/\s+/g, ' ')
             .trim();
 
-          const match = cleaned.match(/(Calle|Avenida|Plaza|Paseo|Camino|Ctra\.|Av\.|Pl\.|Ps\.)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ\s\.]+?)\s+(\d+)/i);
-          if (match) {
-            return `${toTitleCase(match[1])} ${toTitleCase(match[2].trim())} ${match[3]}`;
+          const addressMatch = cleaned.match(/(Calle|Avenida|Plaza|Paseo|Camino|Ctra\.|Av\.|Pl\.|Ps\.)\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ\s\.]+?)\s+(\d+)/i);
+          if (addressMatch) {
+            return `${toTitleCase(addressMatch[1])} ${toTitleCase(addressMatch[2].trim())} ${addressMatch[3]}`;
           }
           
           const firstPart = raw.split(',')[0].split('(')[0].trim();
@@ -624,8 +624,8 @@ async function runCrawler() {
             // ACTUALIZAR: status, auctionDate, startDate, isActive, lastCheckedAt, opportunityScore, opportunityRatio
             // Usar regex para reemplazar campos específicos dentro del bloque de la subasta
             const blockRegex = new RegExp(`('${slug}':\\s*{[\\s\\S]*?})`, 'g');
-            auctionsContent = auctionsContent.replace(blockRegex, (match) => {
-              let updated = match;
+            auctionsContent = auctionsContent.replace(blockRegex, (fullBlock) => {
+              let updated = fullBlock;
               
               // Actualizar status
               updated = updated.replace(/status:\s*"[^"]*"/, `status: "${mappedStatus}"`);
@@ -672,8 +672,8 @@ async function runCrawler() {
               }
 
               // Actualizar refCat
-              const match = updated.match(/refCat:\s*("[^"]*"|undefined|null)/);
-              const existingRefCat = match ? match[1].replace(/"/g, '') : null;
+              const refCatMatch = updated.match(/refCat:\s*("[^"]*"|undefined|null)/);
+              const existingRefCat = refCatMatch ? refCatMatch[1].replace(/"/g, '') : null;
               const finalRefCat = s.refCat || (existingRefCat !== 'null' && existingRefCat !== 'undefined' ? existingRefCat : null);
 
               if (updated.includes('refCat:')) {

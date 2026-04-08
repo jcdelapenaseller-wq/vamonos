@@ -46,12 +46,15 @@ interface AnalysisResult {
   alertas: string[];
   recomendacion: string;
   // Datos de mercado opcionales
+  refCat?: string | null;
   ciudad?: string | null;
   codigo_postal?: string | null;
   superficie_m2?: number | null;
   valor_subasta?: number | null;
   valor_tasacion?: number | null;
   tipo_inmueble?: string | null;
+  yearBuilt?: number | null;
+  floor?: string | null;
   marketDataReady?: boolean;
 }
 

@@ -228,12 +228,15 @@ C) OCUPACIÓN DEL INMUEBLE:
 
 10. EXTRACCIÓN DE DATOS DE MERCADO (OPCIONAL):
 - Busca y extrae los siguientes datos si aparecen explícitamente en el Edicto o la Nota Simple:
+  - 'refCat': Referencia catastral de 20 caracteres (ej. 6530802VK286380056RL).
   - 'ciudad': Nombre de la localidad donde se ubica el inmueble.
   - 'codigo_postal': Código postal de 5 dígitos.
   - 'superficie_m2': Superficie construida o útil en metros cuadrados (solo el número).
   - 'valor_subasta': El valor por el que sale a subasta el bien.
   - 'valor_tasacion': El valor de tasación a efectos de subasta (si difiere del valor de subasta).
   - 'tipo_inmueble': Clasifica como 'vivienda' o 'piso' si se indica expresamente.
+  - 'yearBuilt': Año de construcción (ej. 1995).
+  - 'floor': Planta o piso (ej. '1º B', 'Bajo').
 - REGLA DE ORO: Si alguno de estos datos NO aparece de forma literal y clara, ponlo como null. NO los inventes ni los calcules.
 
 ---
@@ -338,12 +341,15 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
               },
               recomendacion: { type: Type.STRING, description: "Recomendación accionable sobre cómo ajustar la puja" },
               // Datos de mercado opcionales
+              refCat: { type: Type.STRING, description: "Referencia catastral de 20 caracteres o null si no consta" },
               ciudad: { type: Type.STRING, description: "Localidad del inmueble o null si no consta" },
               codigo_postal: { type: Type.STRING, description: "Código postal o null si no consta" },
               superficie_m2: { type: Type.NUMBER, description: "Superficie en m2 o null si no consta" },
               valor_subasta: { type: Type.NUMBER, description: "Valor de subasta o null si no consta" },
               valor_tasacion: { type: Type.NUMBER, description: "Valor de tasación o null si no consta" },
-              tipo_inmueble: { type: Type.STRING, description: "Tipo de inmueble (vivienda/piso) o null si no consta" }
+              tipo_inmueble: { type: Type.STRING, description: "Tipo de inmueble (vivienda/piso) o null si no consta" },
+              yearBuilt: { type: Type.NUMBER, description: "Año de construcción o null si no consta" },
+              floor: { type: Type.STRING, description: "Planta/piso o null si no consta" }
             },
             required: ["razonamiento_juridico", "documentos_detectados", "cargas_detectadas_regex", "fuente_documento", "nivel_confianza_global", "riesgo_global", "cargas_detectadas", "incoherencias_detectadas", "ocupacion_detectada", "nivel_riesgo_ocupacion", "peor_escenario", "impacto_economico", "alertas", "recomendacion"]
           }

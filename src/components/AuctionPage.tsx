@@ -147,6 +147,20 @@ const AuctionPage: React.FC = () => {
   }, [auctionId]);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [analysisResult, setAnalysisResult] = React.useState<any>(null);
+
+  // Load analysis result from sessionStorage if available
+  useEffect(() => {
+    if (!auction?.boeId) return;
+    try {
+      const savedResult = sessionStorage.getItem(`analysisResult_${auction.boeId}`);
+      if (savedResult && !analysisResult) {
+        setAnalysisResult(JSON.parse(savedResult));
+      }
+    } catch (e) {
+      console.warn("Error loading analysis result from sessionStorage:", e);
+    }
+  }, [auction?.boeId, analysisResult]);
+
   const formatFloor = (floor?: string): string => {
     if (!floor) return "—";
     const raw = floor.trim().toUpperCase();
@@ -371,6 +385,27 @@ const AuctionPage: React.FC = () => {
 
   // Valuation State
   const [valuationResult, setValuationResult] = useState<ValuationResult | null>(null);
+
+  // Cadastral Reference Logic
+  const cadastralRefValue = analysisResult?.refCat || 
+                            analysisResult?.metadata?.refCat || 
+                            valuationResult?.metadata?.refCat || 
+                            auction?.refCat || 
+                            auction?.idufir;
+                            
+  // DIAGNOSTIC LOGS
+  console.log('DEBUG - Auction Object:', auction);
+  console.log('DEBUG - auction.refCat:', auction?.refCat);
+  console.log('DEBUG - analysisResult.refCat:', analysisResult?.refCat);
+  console.log('DEBUG - analysisResult.metadata.refCat:', analysisResult?.metadata?.refCat);
+  console.log('DEBUG - valuationResult.metadata.refCat:', valuationResult?.metadata?.refCat);
+  console.log('DEBUG - cadastralRefValue:', cadastralRefValue);
+
+  const isIdufir = !analysisResult?.refCat && 
+                   !analysisResult?.metadata?.refCat && 
+                   !valuationResult?.metadata?.refCat && 
+                   !auction?.refCat && 
+                   auction?.idufir;
 
   // Market Comparator State
   const [purchasePriceSlider, setPurchasePriceSlider] = useState<number>(0);
@@ -1998,7 +2033,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  (analysisResult?.calculations?.surface || valuationResult?.calculations?.surface || auction.surface) ? `${analysisResult?.calculations?.surface || valuationResult?.calculations?.surface || auction.surface} m²` : "—"
+                  (analysisResult?.superficie_m2 || analysisResult?.calculations?.surface || valuationResult?.calculations?.surface || auction.surface) ? `${analysisResult?.superficie_m2 || analysisResult?.calculations?.surface || valuationResult?.calculations?.surface || auction.surface} m²` : "—"
                 )}
               </p>
             </div>
@@ -2008,7 +2043,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  analysisResult?.metadata?.yearBuilt || valuationResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
+                  analysisResult?.yearBuilt || analysisResult?.metadata?.yearBuilt || valuationResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
                 )}
               </p>
             </div>
@@ -2018,19 +2053,19 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  formatFloor(analysisResult?.metadata?.floor || valuationResult?.metadata?.floor)
+                  formatFloor(analysisResult?.floor || analysisResult?.metadata?.floor || valuationResult?.metadata?.floor)
                 )}
               </p>
             </div>
             <div className={`space-y-1 ${!isLogged ? 'blur-[6px] select-none' : ''}`}>
               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-                {(!auction.refCat && auction.idufir) ? "IDUFIR (sin ref. catastral)" : "Referencia catastral"}
+                {isIdufir ? "IDUFIR (sin ref. catastral)" : "Referencia catastral"}
               </p>
               <p className="text-sm font-mono font-bold text-slate-900">
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  auction.refCat || auction.idufir || (
+                  cadastralRefValue || (
                     <span className="text-slate-400 font-medium italic">
                       requiere análisis
                     </span>

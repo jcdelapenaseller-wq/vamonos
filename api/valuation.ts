@@ -158,7 +158,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const priceM2 = getPricePerM2(province, city);
     const baseValue = appraisalValue || 150000;
 
-    let finalRefCat = refCat || extractRefCat(description);
+    let finalRefCat = refCat;
+    
+    if (!finalRefCat) {
+      finalRefCat = extractRefCat(description) || extractRefCat(address);
+    }
 
     if (finalRefCat) {
       const catData = await fetchCatastroData(finalRefCat);
