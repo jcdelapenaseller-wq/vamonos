@@ -165,7 +165,10 @@ const RecentAuctions: React.FC = () => {
     }, { replace: false });
   }, [setSearchParams]);
   
-  const activeCount = Object.keys(filteredAuctions).length;
+  const activeCount = Object
+    .values(filteredAuctions)
+    .filter(a => isAuctionActive(a))
+    .length;
   const hasFilters = activeCount !== totalActiveAuctions;
 
   const featuredAuctions = useMemo(() => {
