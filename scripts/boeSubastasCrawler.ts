@@ -211,22 +211,75 @@ async function runCrawler() {
 
     console.log(`Se han recopilado ${allAuctions.length} subastas para procesar.`);
 
-    // Cargar subastas existentes para comparar
+    // Cargar subastas existentes para comparar y para backfill
     const auctionsFilePath = path.join(__dirname, '../src/data/auctions.ts');
     let existingIds = new Set();
-    let countAntes = 0;
+    let incompleteAuctions: any[] = [];
+    
     try {
       let auctionsContent = fs.readFileSync(auctionsFilePath, 'utf-8');
       
-      const idRegex = /boeId:\s*["']([^"']+)["']/g;
-      let idMatch;
-      while ((idMatch = idRegex.exec(auctionsContent)) !== null) {
-        existingIds.add(idMatch[1]);
+      // Regex para capturar bloques de subastas
+      const blockRegex = /'([^']+)':\s*{([\s\S]*?)}/g;
+      let blockMatch;
+      
+      while ((blockMatch = blockRegex.exec(auctionsContent)) !== null) {
+        const slug = blockMatch[1];
+        const content = blockMatch[2];
+        
+        const boeIdMatch = content.match(/boeId:\s*["']([^"']+)["']/);
+        if (boeIdMatch) {
+          const boeId = boeIdMatch[1];
+          existingIds.add(boeId);
+          
+          // Verificar si falta refCat o idufir (Guard permanente)
+          const refCatMatch = content.match(/refCat:\s*("[^"]*"|undefined|null)/);
+          const idufirMatch = content.match(/idufir:\s*("[^"]*"|undefined|null)/);
+          
+          const refCatVal = refCatMatch ? refCatMatch[1].replace(/"/g, '').trim() : null;
+          const idufirVal = idufirMatch ? idufirMatch[1].replace(/"/g, '').trim() : null;
+          
+          const hasRefCat = refCatVal && refCatVal !== 'null' && refCatVal !== 'undefined' && refCatVal !== '';
+          const hasIdufir = idufirVal && idufirVal !== 'null' && idufirVal !== 'undefined' && idufirVal !== '';
+          
+          if (!hasRefCat || !hasIdufir) {
+            const boeUrlMatch = content.match(/boeUrl:\s*["']([^"']+)["']/);
+            const tituloMatch = content.match(/description:\s*["']([^"']+)["']/);
+            const provinceMatch = content.match(/province:\s*["']([^"']+)["']/);
+            
+            if (boeUrlMatch) {
+              incompleteAuctions.push({
+                idSub: boeId,
+                urlDetalle: boeUrlMatch[1],
+                titulo: tituloMatch ? tituloMatch[1] : boeId,
+                provinceText: provinceMatch ? provinceMatch[1] : 'Desconocida',
+                isBackfill: true
+              });
+            }
+          }
+        }
       }
-      console.log(`Cargadas ${existingIds.size} subastas existentes desde auctions.ts`);
+      console.log(`Cargadas ${existingIds.size} subastas existentes.`);
+      console.log(`Backfill queued: ${incompleteAuctions.length} auctions missing cadastral data`);
+      
+      // Añadir incompletas a la lista de procesamiento si no están ya
+      for (const ia of incompleteAuctions) {
+        if (!processedSlugs.has(ia.urlDetalle)) {
+          processedSlugs.add(ia.urlDetalle);
+          allAuctions.push({
+            ...ia,
+            onlyCapital: false,
+            capitalName: '',
+            minRatio: 0,
+            minTasacion: 0
+          });
+        }
+      }
     } catch (err) {
-      console.error('No se pudo leer auctions.ts, se procesarán todas como nuevas:', (err as any).message);
+      console.error('No se pudo leer auctions.ts para backfill:', (err as any).message);
     }
+
+    console.log(`Total subastas a procesar (nuevas + backfill): ${allAuctions.length}`);
 
     const finalResults: any[] = [];
 
@@ -674,7 +727,8 @@ async function runCrawler() {
               // Actualizar refCat
               const refCatMatch = updated.match(/refCat:\s*("[^"]*"|undefined|null)/);
               const existingRefCat = refCatMatch ? refCatMatch[1].replace(/"/g, '') : null;
-              const finalRefCat = s.refCat || (existingRefCat !== 'null' && existingRefCat !== 'undefined' ? existingRefCat : null);
+              // Lógica: finalRefCat = newRefCat || existingRefCat || null
+              const finalRefCat = s.refCat || (existingRefCat && existingRefCat !== 'null' && existingRefCat !== 'undefined' ? existingRefCat : null);
 
               if (updated.includes('refCat:')) {
                 updated = updated.replace(/refCat:\s*("[^"]*"|undefined|null)/, `refCat: ${finalRefCat ? `"${finalRefCat}"` : 'null'}`);
@@ -683,10 +737,15 @@ async function runCrawler() {
               }
 
               // Actualizar idufir
+              const idufirMatch = updated.match(/idufir:\s*("[^"]*"|undefined|null)/);
+              const existingIdufir = idufirMatch ? idufirMatch[1].replace(/"/g, '') : null;
+              // Lógica: finalIdufir = newIdufir || existingIdufir || null
+              const finalIdufir = s.idufir || (existingIdufir && existingIdufir !== 'null' && existingIdufir !== 'undefined' ? existingIdufir : null);
+
               if (updated.includes('idufir:')) {
-                updated = updated.replace(/idufir:\s*("[^"]*"|undefined|null)/, `idufir: ${s.idufir ? `"${s.idufir}"` : 'null'}`);
+                updated = updated.replace(/idufir:\s*("[^"]*"|undefined|null)/, `idufir: ${finalIdufir ? `"${finalIdufir}"` : 'null'}`);
               } else {
-                updated = updated.replace(/refCat:\s*[^,]+,?/, `$& \n    idufir: ${s.idufir ? `"${s.idufir}"` : 'null'},`);
+                updated = updated.replace(/refCat:\s*[^,]+,?/, `$& \n    idufir: ${finalIdufir ? `"${finalIdufir}"` : 'null'},`);
               }
 
               return updated;

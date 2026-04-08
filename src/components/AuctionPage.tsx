@@ -99,11 +99,16 @@ const AuctionPage: React.FC = () => {
     // Diagnostic log for cadastral reference
     if (foundAuction) {
       const auctionAny = foundAuction as any;
+      console.log("DIAGNOSTIC - Full Auction Object:", auctionAny);
       console.log("DIAGNOSTIC - Auction Cadastral Fields:", {
         refCat: auctionAny.refCat,
         cadastralReference: auctionAny.cadastralReference,
-        referenciaCatastral: auctionAny.referenciaCatastral
+        referenciaCatastral: auctionAny.referenciaCatastral,
+        idufir: auctionAny.idufir
       });
+    } else {
+      console.log("DIAGNOSTIC - Auction NOT found for slug:", cleanSlug);
+      console.log("DIAGNOSTIC - Available slugs (first 5):", Object.keys(AUCTIONS).slice(0, 5));
     }
     
     // Update user's lastActiveAt if logged in
@@ -394,6 +399,14 @@ const AuctionPage: React.FC = () => {
                             auction?.idufir;
                             
   // DIAGNOSTIC LOGS
+  console.log('DEBUG - Render State:', {
+    auction_exists: !!auction,
+    refCat_in_auction: auction?.refCat,
+    idufir_in_auction: auction?.idufir,
+    analysisResult_exists: !!analysisResult,
+    analysisResult_refCat: analysisResult?.refCat,
+    cadastralRefValue
+  });
   console.log('DEBUG - Auction Object:', auction);
   console.log('DEBUG - auction.refCat:', auction?.refCat);
   console.log('DEBUG - analysisResult.refCat:', analysisResult?.refCat);
