@@ -62,6 +62,7 @@ const fetchCatastroSurface = async (refCat: string): Promise<number | null> => {
     
     const startTime = Date.now();
     const response = await axios.get(url, { timeout: 5000 });
+    console.log("VAL response:", response.data);
     const duration = Date.now() - startTime;
     
     logDiagnostic(`fetchCatastroSurface RESPONSE: status=${response.status}, duration=${duration}ms`);
@@ -118,6 +119,7 @@ const fetchCatastroSurfaceByAddress = async (province: string, city: string, add
       Numero: numero
     });
     const response = await axios.get(url, { timeout: 5000 });
+    console.log("VAL response:", response.data);
     const duration = Date.now() - startTime;
     
     logDiagnostic(`fetchCatastroSurfaceByAddress RESPONSE: status=${response.status}, duration=${duration}ms`);
@@ -184,6 +186,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const baseValue = appraisalValue || 150000;
 
     let finalRefCat = refCat || extractRefCat(description);
+    console.log("VAL refCat:", finalRefCat);
 
     if (finalRefCat) {
       const catastroSurface = await fetchCatastroSurface(finalRefCat);
@@ -207,6 +210,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       confidence = 0.60; // Baja
       logDiagnostic(`handler NULL_CATASTRO: Falling back to estimation. surface=${realSurface}`);
     }
+
+    console.log("VAL surface:", realSurface);
 
     // 4. Calcular Valor de Mercado
     const marketValue = Math.round(realSurface * priceM2);
