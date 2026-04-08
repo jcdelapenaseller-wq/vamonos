@@ -171,17 +171,6 @@ const RecentAuctions: React.FC = () => {
     .length;
   const hasFilters = activeCount !== totalActiveAuctions;
 
-  const featuredAuctions = useMemo(() => {
-    return Object.entries(AUCTIONS)
-      .filter(([_, data]) => isAuctionActive(data) && data.valorTasacion)
-      .sort(([_, a], [__, b]) => {
-        if (a.isNew && !b.isNew) return -1;
-        if (!a.isNew && b.isNew) return 1;
-        return (b.valorTasacion || 0) - (a.valorTasacion || 0);
-      })
-      .slice(0, 3);
-  }, []);
-
   const getSortLabel = (sort: string) => {
     switch (sort) {
       case 'oldest': return 'Más antiguas';
@@ -330,109 +319,68 @@ const RecentAuctions: React.FC = () => {
           }
         ])}
       </script>
-      <header className="bg-white border-b border-slate-200 pt-6 md:pt-8 pb-8 md:pb-10">
+      <header className="bg-white border-b border-slate-200 pt-8 pb-6">
         <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex items-center text-xs md:text-sm text-slate-500 mb-4 md:mb-6 font-medium" aria-label="Breadcrumb">
+          <nav className="flex items-center text-xs opacity-50 mb-2 font-medium uppercase tracking-wider" aria-label="Breadcrumb">
             <Link 
               to={ROUTES.HOME} 
               className="hover:text-brand-600 transition-colors"
             >
               Inicio
             </Link>
-            <ChevronRight size={12} className="mx-1.5 md:mx-2" />
-            <span className="text-brand-700 bg-brand-50 px-2 py-0.5 rounded-md" aria-current="page">Subastas Recientes</span>
+            <ChevronRight size={10} className="mx-1.5" />
+            <span aria-current="page">Subastas Recientes</span>
           </nav>
 
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-slate-900 mb-3 md:mb-4 leading-tight">
-            Últimas subastas BOE e inmuebles detectados en España
-          </h1>
-          <div className="min-h-[24px] md:min-h-0 flex items-center gap-2 text-slate-500 text-xs md:text-sm mb-6 font-medium">
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            Actualizado hoy · <b className="text-slate-900">{activeCount}</b> subastas detectadas
+          <div className="flex flex-col md:flex-row md:items-baseline md:justify-between gap-2 md:gap-6">
+            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight tracking-tight">
+              Subastas BOE activas hoy
+            </h1>
+
+            <div className="flex items-center gap-2 shrink-0 text-slate-600 font-medium text-sm md:text-base">
+              <span className="tabular-nums font-bold text-slate-900">{activeCount}</span> activas
+              <span className="text-slate-300">·</span>
+              <ShareButtons 
+                title="Subastas BOE activas hoy" 
+                label=""
+                variant="minimal"
+                province="España"
+                origin="listing"
+              />
+            </div>
           </div>
 
-          <ShareButtons 
-            title="Últimas subastas inmobiliarias detectadas en España" 
-            className="-mt-1" 
-            province="España"
-            origin="listing"
-          />
+          <div className="flex items-center gap-2 text-slate-500 text-xs md:text-sm font-medium mt-1 md:mt-2">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            Actualizado hoy · Datos oficiales BOE
+          </div>
         </div>
       </header>
 
-      <div>
+      {/* Trust Bar */}
+      <div className="bg-slate-50/50 border-b border-slate-200 py-3 md:py-4">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="bg-slate-50/95 -mx-6 px-6 pt-4 pb-2 mb-6 border-b border-slate-200/50">
-            <RadarPremiumCTA 
-              location="España" 
-              variant="bar"
-              origin="listing"
-            />
-            <AuctionFilters auctions={AUCTIONS} onFilteredChange={handleFilterChange} onSortChange={handleSortChange} />
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-10">
+            <div className="flex items-center gap-2 text-slate-500">
+              <Zap size={16} className="text-brand-500" />
+              <span className="text-xs md:text-sm font-medium">Detección en tiempo real BOE</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-500">
+              <ShieldCheck size={16} className="text-brand-500" />
+              <span className="text-xs md:text-sm font-medium">Análisis técnico de cargas</span>
+            </div>
+            <div className="flex items-center gap-2 text-slate-500">
+              <FileText size={16} className="text-brand-500" />
+              <span className="text-xs md:text-sm font-medium">Acceso directo al expediente</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 md:py-12">
-        {/* Bloque A: Trust Indicators */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 border-b border-slate-200 pb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
-              <Zap size={18} />
-            </div>
-            <p className="text-xs md:text-sm font-medium text-slate-700">Detección en tiempo real de nuevos edictos del BOE</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
-              <ShieldCheck size={18} />
-            </div>
-            <p className="text-xs md:text-sm font-medium text-slate-700">Análisis técnico de cargas y riesgos catastrales</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
-              <FileText size={18} />
-            </div>
-            <p className="text-xs md:text-sm font-medium text-slate-700">Acceso directo a datos clave del expediente judicial</p>
-          </div>
-        </div>
+      <main className="max-w-7xl mx-auto px-6 py-6 md:py-8">
+        <AuctionFilters auctions={AUCTIONS} onFilteredChange={handleFilterChange} onSortChange={handleSortChange} />
 
-        {!hasFilters && featuredAuctions.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2">
-                <TrendingUp className="text-brand-500" size={24} />
-                Subastas destacadas hoy
-              </h2>
-              <div className="hidden md:block h-px flex-grow mx-6 bg-slate-200" />
-            </div>
-            <div className="flex overflow-x-auto md:grid md:grid-cols-3 gap-3 md:gap-6 pb-1 md:pb-0 snap-x snap-mandatory scroll-smooth scrollbar-none">
-              {featuredAuctions.map(([slug, data]) => (
-                <div key={`featured-${slug}`} className="min-w-[85%] max-w-[85%] md:min-w-0 md:max-w-none snap-center">
-                  <AuctionCard slug={slug} data={data} showImage={false} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
-          <div className="inline-flex items-center gap-2 bg-brand-50 border border-brand-100 text-brand-700 font-bold px-3 py-1.5 rounded-lg shadow-sm w-fit text-xs md:text-sm">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
-            </span>
-            {hasFilters 
-              ? `Mostrando ${activeCount} de ${totalActiveAuctions} subastas` 
-              : `${totalActiveAuctions} subastas activas ahora`}
-          </div>
-
-          {sortLabel && (
-            <div className="inline-flex items-center gap-1.5 bg-slate-100 border border-slate-200 text-slate-600 text-xs px-2.5 py-1 rounded-md w-fit">
-              <span className="font-medium">Orden:</span> {sortLabel}
-            </div>
-          )}
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mt-6">
           {paginatedAuctions.length > 0 ? paginatedAuctions.map(({ slug, data, showNewBadge }) => (
             <AuctionCard key={slug} slug={slug} data={data} showNewBadge={showNewBadge} showImage={false} />
           )) : (
@@ -446,6 +394,14 @@ const RecentAuctions: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+
+        <div className="mt-8 md:mt-12">
+          <RadarPremiumCTA 
+            location="España" 
+            variant="bar"
+            origin="listing"
+          />
         </div>
 
         {/* Bloque B: Editorial SEO + FAQ */}

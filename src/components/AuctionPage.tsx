@@ -1654,14 +1654,15 @@ const AuctionPage: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex items-center gap-1 md:gap-2 shrink-0">
+            <div className="flex items-center justify-center gap-2 shrink-0">
+              {/* Favorite Toggle */}
               {(() => {
                 const isBlocked = !isLogged || (plan === 'free' && !isFavorite);
                 return (
                   <button 
                     onClick={handleToggleFavorite}
                     disabled={isTogglingFavorite}
-                    className={`p-2 rounded-full transition-all duration-300 flex items-center gap-1.5 ${
+                    className={`flex flex-col items-center justify-center w-12 py-2 rounded-xl transition-all duration-300 ${
                       isFavorite 
                         ? 'text-red-500 bg-red-50 hover:bg-red-100' 
                         : isBlocked
@@ -1679,7 +1680,7 @@ const AuctionPage: React.FC = () => {
                       )}
                     </div>
                     {isLogged && plan === 'free' && (
-                      <span className={`text-[10px] font-bold tabular-nums opacity-60`}>
+                      <span className="text-[11px] text-slate-500 leading-none mt-1 tabular-nums">
                         {favoritesCount}/3
                       </span>
                     )}
@@ -1692,50 +1693,40 @@ const AuctionPage: React.FC = () => {
                 const isLimitReached = (plan === 'free' && alertsCount >= 1) || (plan === 'basic' && alertsCount >= 3);
                 const limit = plan === 'free' ? 1 : plan === 'basic' ? 3 : null;
                 const tooltip = hasActiveAlert 
-                  ? "Eliminar alerta" 
+                  ? "Ver alertas" 
                   : isLimitReached 
                     ? "Límite alcanzado" 
                     : `Crear alerta de esta zona (${limit} disponible en Plan ${plan.toUpperCase()})`;
                 
-                return (
-                  <div className="flex flex-col items-center">
-                    <button 
-                      onClick={hasActiveAlert ? handleDeleteAlert : handleCreateAlert}
-                      className={`p-2 rounded-full transition-all relative flex items-center gap-1.5 ${
-                        hasActiveAlert 
-                          ? 'text-brand-600 bg-brand-50 hover:bg-brand-100 shadow-sm shadow-brand-100' 
-                          : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
-                      }`}
-                      title={tooltip}
-                    >
-                      <div className="relative">
-                        <Bell size={20} className={hasActiveAlert ? 'fill-brand-600' : ''} />
-                        {!hasActiveAlert && isLimitReached && (
-                          <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                            <Lock size={8} className="text-slate-400" />
-                          </div>
-                        )}
-                      </div>
-                      {isLogged && limit && (
-                        <span className={`text-[10px] font-bold tabular-nums ${isLimitReached && !hasActiveAlert ? 'text-amber-600' : 'opacity-60'}`}>
-                          {alertsCount}/{limit}
-                        </span>
+                const ButtonContent = (
+                  <div 
+                    className={`flex flex-col items-center justify-center w-12 py-2 rounded-xl transition-all relative ${
+                      hasActiveAlert 
+                        ? 'text-brand-600 bg-brand-50 hover:bg-brand-100' 
+                        : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
+                    }`}
+                    title={tooltip}
+                  >
+                    <div className="relative">
+                      <Bell size={20} className={hasActiveAlert ? 'fill-brand-600' : ''} />
+                      {!hasActiveAlert && isLimitReached && (
+                        <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+                          <Lock size={8} className="text-slate-400" />
+                        </div>
                       )}
-                    </button>
-                    
-                    {isLogged && (
-                      <div className="mt-1 flex flex-col items-center">
-                        {plan === 'free' && <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter whitespace-nowrap">1 alerta disp.</span>}
-                        {plan === 'basic' && <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter whitespace-nowrap">3 alertas sim.</span>}
-                        {plan === 'pro' && (
-                          <div className="flex flex-col items-center gap-0.5">
-                            <span className="px-1 py-0 rounded bg-brand-50 text-brand-600 text-[6px] font-bold uppercase tracking-tighter border border-brand-100">PRO activo</span>
-                            <span className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter whitespace-nowrap">Ilimitadas</span>
-                          </div>
-                        )}
-                      </div>
+                    </div>
+                    {isLogged && limit && (
+                      <span className="text-[11px] text-slate-500 leading-none mt-1 tabular-nums">
+                        {alertsCount}/{limit}
+                      </span>
                     )}
                   </div>
+                );
+
+                return hasActiveAlert ? (
+                  <a href="/alertas-subastas">{ButtonContent}</a>
+                ) : (
+                  <button onClick={handleCreateAlert}>{ButtonContent}</button>
                 );
               })()}
 

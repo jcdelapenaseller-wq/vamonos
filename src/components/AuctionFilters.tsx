@@ -87,7 +87,7 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({ auctions, onFilt
   const selectSizeClass = isScrolled ? "py-1.5 text-xs rounded-lg" : "py-2 md:py-2.5 text-xs md:text-sm rounded-lg md:rounded-xl";
 
   return (
-    <div className={`sticky top-0 md:top-2 z-40 transition-all duration-300 mb-8 ${isScrolled ? 'bg-white/95 shadow-md md:rounded-2xl border-b md:border border-slate-200/50 p-2 md:p-3 -mx-6 px-6 md:mx-0 md:px-3' : 'bg-slate-50 p-3 md:p-6 rounded-2xl border border-slate-200 shadow-sm'}`}>
+    <div className={`sticky top-[72px] md:top-[80px] z-40 transition-all duration-300 mb-8 ${isScrolled ? 'bg-white/95 shadow-md md:rounded-2xl border-b md:border border-slate-200/50 p-2 md:p-3 -mx-6 px-6 md:mx-0 md:px-3' : 'bg-slate-50 p-3 md:p-6 rounded-2xl border border-slate-200 shadow-sm'}`}>
       <div className={`grid gap-2 md:gap-3 ${onSortChange ? 'grid-cols-2 md:grid-cols-6' : 'grid-cols-2 md:grid-cols-4'}`}>
         <div className="col-span-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
