@@ -69,9 +69,9 @@ interface LoadAnalysisBlockProps {
   noMargin?: boolean;
   analysisType?: 'cargas' | 'completo';
   auctionId?: string;
-  surface?: number;
+  surface?: number | null;
   marketPriceM2?: number;
-  appraisalValue?: number;
+  appraisalValue?: number | null;
   city?: string;
   propertyType?: string;
   isStandalone?: boolean;

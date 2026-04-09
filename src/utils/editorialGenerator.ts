@@ -129,7 +129,10 @@ export function shouldGenerateDiscoverArticle(auction: AuctionData): boolean {
   return isCapital || isHighValue || isNew || isDeserted;
 }
 
-const formatCurrency = (num: number) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num);
+const formatCurrency = (num: number | null) => {
+  if (num === null) return '0 €';
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num);
+};
 
 export function generateEditorialArticle(slug: string, auction: AuctionData): EditorialArticle {
   const phase = detectPhase(auction);
@@ -142,7 +145,7 @@ export function generateEditorialArticle(slug: string, auction: AuctionData): Ed
   const appraisalValue = auction.appraisalValue || auction.valorTasacion || auction.valorSubasta || 0;
   const appraisal = formatCurrency(appraisalValue);
   const debtValue = auction.claimedDebt;
-  const debt = debtValue !== undefined ? formatCurrency(debtValue) : null;
+  const debt = debtValue != null ? formatCurrency(debtValue) : null;
   const discountValue = debt !== null ? calculateDiscount(appraisalValue, auction.valorSubasta, debtValue) : null;
   const discount = discountValue !== null ? `${discountValue}%` : null;
   const procedureTypeRaw = auction.procedureType || 'Ejecución';

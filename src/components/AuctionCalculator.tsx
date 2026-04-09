@@ -27,9 +27,9 @@ const ITP_RATES: Record<string, number> = {
 };
 
 interface AuctionCalculatorProps {
-  appraisalValue?: number;
-  claimedDebt?: number;
-  surface?: number;
+  appraisalValue?: number | null;
+  claimedDebt?: number | null;
+  surface?: number | null;
   city?: string;
   onClose?: () => void;
 }

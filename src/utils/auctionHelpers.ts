@@ -113,10 +113,10 @@ export function sortAuctions(items: [string, AuctionData][], sortBy: string = 'd
   });
 }
 
-export function calculateDiscount(valorTasacion?: number, valorSubasta?: number, claimedDebt?: number): number | null {
+export function calculateDiscount(valorTasacion?: number | null, valorSubasta?: number | null, claimedDebt?: number | null): number | null {
   const valorReferencia = valorTasacion || valorSubasta;
 
-  if (valorReferencia && valorReferencia > 0 && claimedDebt !== undefined && claimedDebt > 0) {
+  if (valorReferencia && valorReferencia > 0 && claimedDebt != null && claimedDebt > 0) {
     const discount = ((valorReferencia - claimedDebt) / valorReferencia) * 100;
     return Math.round(discount);
   }
