@@ -45,6 +45,7 @@ const normalizeProvince = (raw: string): string => {
 async function runCrawler() {
   const url = 'https://subastas.boe.es/index.php?ver=1'; // Todos los inmuebles
   console.log(`Iniciando crawler en: ${url}`);
+  const targetIds = ['SUB-JA-2026-259511', 'SUB-AT-2024-23R4586001244', 'SUB-AT-2026-25R2886001818'];
 
   const browser = await puppeteer.launch({
     headless: true,
@@ -75,7 +76,8 @@ async function runCrawler() {
     console.log(`Provincias encontradas con resultados: ${provinces.length}`);
     
     const provinceConfig: Record<string, { maxPages: number; onlyCapital: boolean; minRatio?: number; minTasacion?: number }> = {
-      '28': { maxPages: 15, onlyCapital: false, minTasacion: 50000 }, // Madrid
+      '28': { maxPages: 30, onlyCapital: false, minTasacion: 50000 }, // Madrid (Increased for diagnostic)
+      '23': { maxPages: 10, onlyCapital: false, minTasacion: 50000 }, // Jaén
       '08': { maxPages: 15, onlyCapital: false, minTasacion: 200000 }, // Barcelona
       '46': { maxPages: 5, onlyCapital: false, minTasacion: 180000 }, // Valencia
       '03': { maxPages: 5, onlyCapital: false, minTasacion: 180000 }, // Alicante
@@ -84,8 +86,8 @@ async function runCrawler() {
       '50': { maxPages: 5, onlyCapital: false, minTasacion: 180000 }, // Zaragoza
     };
 
-    const provincesToTest = provinces;
-    console.log(`Ejecutando para ${provincesToTest.length} provincias.`);
+    const provincesToTest = provinces.filter(p => p.value === '28' || p.value === '23'); // Madrid and Jaén
+    console.log(`Ejecutando para ${provincesToTest.length} provincias (DIAGNOSTIC MODE: MADRID ONLY).`);
     
     const allAuctions: any[] = [];
     const processedSlugs = new Set();
@@ -116,6 +118,7 @@ async function runCrawler() {
         }
 
         while (hasNextPage && currentPage <= maxPages) {
+          console.log(` - Página ${currentPage}: Buscando subastas...`);
           totalPagesCrawled++;
           const currentUrl = page.url();
           if (visitedPages.has(currentUrl)) break;
@@ -148,6 +151,21 @@ async function runCrawler() {
             }).filter(r => r.urlDetalle);
           });
 
+          // Diagnostic Logs for specific IDs
+          provinceResults.forEach(r => {
+            const idMatch = r.urlDetalle.match(/idSub=([^&]+)/);
+            if (idMatch) {
+              const idSub = idMatch[1];
+              if (targetIds.includes(idSub)) {
+                // We use a local variable to capture the current page number safely
+                const pageNum = currentPage;
+                console.log(`[DIAGNOSTIC] ID ${idSub} DETECTED in list at page ${pageNum}`);
+              }
+              // Log all IDs found to see what's in the list
+              // console.log(`[DEBUG] Found ID: ${idSub}`);
+            }
+          });
+
           console.log(` - Página ${currentPage}: Encontradas ${provinceResults.length} subastas.`);
 
           for (const res of provinceResults) {
@@ -170,8 +188,11 @@ async function runCrawler() {
           }
 
           const nextPageUrl = await page.evaluate(() => {
-            const links = Array.from(document.querySelectorAll('a[href*="accion=Mas"]'));
-            const next = links.find(a => a.textContent?.toLowerCase().includes('siguiente'));
+            const links = Array.from(document.querySelectorAll('a'));
+            const next = links.find(a => 
+              (a.getAttribute('href')?.includes('accion=Mas') || a.getAttribute('title')?.includes('Siguiente')) &&
+              (a.textContent?.toLowerCase().includes('siguiente') || a.getAttribute('title')?.toLowerCase().includes('siguiente'))
+            );
             return next ? (next as HTMLAnchorElement).href : null;
           });
 
@@ -334,7 +355,18 @@ async function runCrawler() {
             var deposito = getVal('Importe del depósito');
             var fechaInicio = getVal('Fecha de inicio');
             var fechaFin = getVal('Fecha de conclusión') || getVal('Fecha de fin');
-            var estadoSubasta = getVal('Estado') || 'Celebrándose';
+            var estadoSubasta = getVal('Estado');
+            if (!estadoSubasta) {
+              var pageText = document.body.innerText.toLowerCase();
+              if (pageText.includes('suspendida') || pageText.includes('temporalmente suspendida') || pageText.includes('subasta suspendida')) {
+                var fechaReanudacion = getVal('Fecha de reanudación prevista');
+                if (fechaReanudacion) {
+                  estadoSubasta = 'próxima apertura';
+                } else {
+                  estadoSubasta = 'suspendida';
+                }
+              }
+            }
             var pujasText = getVal('Puja máxima de la subasta');
 
             return { valorSubasta: valorSubasta, valorTasacion: valorTasacion, cantidadReclamada: cantidadReclamada, deposito: deposito, fechaInicio: fechaInicio, fechaFin: fechaFin, estadoSubasta: estadoSubasta, pujasText: pujasText };
@@ -528,6 +560,24 @@ async function runCrawler() {
         const isExisting = existingIds.has(idSub);
         const passesFilters = valorReferencia !== null && valorReferencia >= 5000 && !esEstadoInvalido && !esTipoExcluido && !esRatioBajo && !esRatioExcesivo && !esValorBajo && !esDeudaCero;
 
+        if (targetIds.includes(idSub)) {
+          const rawStatus = generalData.estadoSubasta || '';
+          const tempMappedStatus = normalizeStatus(rawStatus);
+          console.log(`[DIAGNOSTIC] ID ${idSub} processing:`);
+          console.log(` - isExisting: ${isExisting}`);
+          console.log(` - passesFilters: ${passesFilters}`);
+          console.log(` - rawStatus: ${rawStatus}`);
+          console.log(` - mappedStatus: ${tempMappedStatus}`);
+          console.log(` - tasacionNum: ${tasacionNum}`);
+          console.log(` - subastaNum: ${subastaNum}`);
+          console.log(` - deudaNum: ${deudaNum}`);
+          console.log(` - ratio: ${ratio}`);
+          console.log(` - city: ${city}`);
+          if (!passesFilters) {
+            console.log(` - discardReason: esEstadoInvalido=${esEstadoInvalido}, esTipoExcluido=${esTipoExcluido}, esRatioBajo=${esRatioBajo} (ratio=${ratio} < minRatio=${minRatio}), esRatioExcesivo=${esRatioExcesivo}, esValorBajo=${esValorBajo}, esDeudaCero=${esDeudaCero}`);
+          }
+        }
+
         if (isExisting || passesFilters) {
           let opportunityScore = 0;
           let opportunityRatio = ratio / 100;
@@ -677,6 +727,9 @@ async function runCrawler() {
           const exists = auctionsContent.includes(`boeId: "${boeId}"`);
 
           if (exists) {
+            if (targetIds.includes(boeId)) {
+              console.log(`[DIAGNOSTIC] ID ${boeId} FOUND in auctions.ts. Attempting update...`);
+            }
             // ACTUALIZAR: status, auctionDate, startDate, isActive, lastCheckedAt, opportunityScore, opportunityRatio
             // Usar regex para reemplazar campos específicos dentro del bloque de la subasta que contiene este boeId
             const blockRegex = new RegExp(`('[^']+':\\s*{[\\s\\S]*?boeId:\\s*"${boeId}"[\\s\\S]*?})`, 'g');
@@ -842,7 +895,12 @@ async function runCrawler() {
 
       if (isSpecific) {
         // Specific Rules
-        if (isMadrid && tasacion < 50000) return false;
+        if (isMadrid && tasacion < 50000) {
+          if (block.includes('SUB-JA-2026-259511') || block.includes('SUB-AT-2024-23R4586001244') || block.includes('SUB-AT-2026-25R2886001818')) {
+            console.log(`[DIAGNOSTIC] ID in block discarded by Madrid tasacion < 50000: ${tasacion}`);
+          }
+          return false;
+        }
         if (isBarcelona && tasacion < 200000) return false;
         if (isSevilla && !city.includes('sevilla')) return false;
         if (isSevilla && tasacion < 150000) return false;
@@ -861,7 +919,12 @@ async function runCrawler() {
         if (!isCapital) {
           const key = `spec-${provinceLower}-${city}`;
           cityCounts[key] = (cityCounts[key] || 0) + 1;
-          if (cityCounts[key] > 5) return false;
+          if (cityCounts[key] > 5) {
+            if (block.includes('SUB-JA-2026-259511') || block.includes('SUB-AT-2024-23R4586001244') || block.includes('SUB-AT-2026-25R2886001818')) {
+              console.log(`[DIAGNOSTIC] ID in block discarded by cityCounts > 5 for ${key}: ${cityCounts[key]}`);
+            }
+            return false;
+          }
         }
       } else {
         // Global Rule
@@ -897,6 +960,18 @@ async function runCrawler() {
     });
     
     totalProvinciasConReglaGlobal = globalProvincesSet.size;
+
+    // Diagnostic for orphaned auctions
+    const currentAuctionsContent = fs.readFileSync(auctionsFilePath, 'utf-8');
+    targetIds.forEach(id => {
+      const existsInFile = currentAuctionsContent.includes(`boeId: "${id}"`);
+      if (existsInFile) {
+        const isUpdated = finalResults.some(r => r.idSub === id);
+        if (!isUpdated) {
+          console.log(`[DIAGNOSTIC] ID ${id} is ORPHANED (exists in file but not found/updated in this run)`);
+        }
+      }
+    });
 
     fs.writeFileSync(auctionsFilePath, filteredBlocks.join(''));
 
