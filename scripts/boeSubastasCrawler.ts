@@ -653,6 +653,9 @@ async function runCrawler() {
           const slug = `subasta-${s.idSub.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
           const boeId = s.idSub;
           
+          const mappedStatus = normalizeStatus(s.estadoSubasta || '');
+          const now = new Date().toISOString();
+          
           let auctionDate = s.fechaFin;
           let startDate = s.fechaInicio;
           let isActive = false;
@@ -661,7 +664,8 @@ async function runCrawler() {
           if (isoMatchFin) {
             auctionDate = isoMatchFin[1].split('T')[0];
             const endDate = new Date(isoMatchFin[1]);
-            isActive = new Date() < endDate;
+            // Una subasta solo es activa si no ha terminado Y su estado es 'active'
+            isActive = new Date() < endDate && mappedStatus === 'active';
           }
 
           const isoMatchInicio = (s.fechaInicio || '').match(/ISO:\s*([^)]+)/);
@@ -669,17 +673,13 @@ async function runCrawler() {
             startDate = isoMatchInicio[1].split('T')[0];
           }
 
-          const mappedStatus = normalizeStatus(s.estadoSubasta || '');
-          const now = new Date().toISOString();
-
-          // Verificar si ya existe en el archivo
-          const slugPattern = new RegExp(`'${slug}':\\s*{`, 'g');
-          const exists = slugPattern.test(auctionsContent);
+          // Verificar si ya existe en el archivo por boeId (más fiable que el slug)
+          const exists = auctionsContent.includes(`boeId: "${boeId}"`);
 
           if (exists) {
             // ACTUALIZAR: status, auctionDate, startDate, isActive, lastCheckedAt, opportunityScore, opportunityRatio
-            // Usar regex para reemplazar campos específicos dentro del bloque de la subasta
-            const blockRegex = new RegExp(`('${slug}':\\s*{[\\s\\S]*?})`, 'g');
+            // Usar regex para reemplazar campos específicos dentro del bloque de la subasta que contiene este boeId
+            const blockRegex = new RegExp(`('[^']+':\\s*{[\\s\\S]*?boeId:\\s*"${boeId}"[\\s\\S]*?})`, 'g');
             auctionsContent = auctionsContent.replace(blockRegex, (fullBlock) => {
               let updated = fullBlock;
               
@@ -768,13 +768,13 @@ async function runCrawler() {
     municipality: "${(s.municipality || '').replace(/"/g, '\\"')}",
     zone: "${(s.zone || '').replace(/"/g, '\\"')}",
     address: "${(s.direccion || 'No indicada').replace(/"/g, '\\"')}",
-    appraisalValue: ${s.valorTasacion || s.valorSubasta},
-    claimedDebt: ${s.claimedDebt || 'undefined'},
-    valorSubasta: ${s.valorSubasta || 'undefined'},
-    valorTasacion: ${s.valorTasacion || 'undefined'},
-    deposito: ${s.deposito || 'undefined'},
+    appraisalValue: ${s.valorTasacion || s.valorSubasta || 'null'},
+    claimedDebt: ${s.claimedDebt ?? 'null'},
+    valorSubasta: ${s.valorSubasta ?? 'null'},
+    valorTasacion: ${s.valorTasacion ?? 'null'},
+    deposito: ${s.deposito ?? 'null'},
     procedureType: "${s.autoridad.replace(/"/g, '\\"')}",
-    surface: ${s.superficie || 'undefined'},
+    surface: ${s.superficie ?? 'null'},
     refCat: ${finalRefCat ? `"${finalRefCat}"` : 'null'},
     idufir: ${s.idufir ? `"${s.idufir}"` : 'null'},
     description: "${desc.replace(/"/g, '\\"').replace(/\n/g, ' ')}",
