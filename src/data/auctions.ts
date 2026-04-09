@@ -69,7 +69,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     boeId: "SUB-JA-2026-259501",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2026-259501&idBus=cmN4VGgycVZtckZ2NG9jRk1pNGptQStMUTR5OHBLejlRWU41dzhaRUVtV2NqQ1Q0enlYT21VaS8xQnFtanpiRXBsVURYN041VnY3eXRYSUw2YVVlR0txNllKeW1JQVRrYXNuZFF6Um5yRUNxNmpVWUpRMHNmblZnTDFXT1IrSXUwZktZSnpQdk9KMjZGNFlIbDNGTHhFbVNMT2NiMnlyTzdIeEw1OWd5VHQxSXlsVnlhWVd5WHdJRUZLQWNZemZONWdhZDVjejZrS1pTNk9nb255SU12UTA5RmRHMVB3RXVyK2ZzSE1GL0FXQjdqeGhWd2hvZFdoVnNiVnRzYnpHem1zeDBoSDFrYmF2OE5EK0t2SnhrU1pOVTJOMU56Mk5meER5SElXWnc0b2NOSVBERm9BSTNmZ2tqT2FSSjd1WGFZdkh3c25STmY2SkgwMU5RMlcyMEJtTE8zUnAzSHdKLzAzazV1NFozQVJvPQ,,--50",
     publishedAt: "2026-03-31",
-    lastCheckedAt: "2026-04-09T17:17:36.071Z",
+    lastCheckedAt: "2026-04-09T18:02:59.425Z",
     startDate: "null",
     auctionDate: "null",
     status: "upcoming",
