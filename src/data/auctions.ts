@@ -63,19 +63,19 @@ export const AUCTIONS: Record<string, AuctionData> = {
     deposito: 11500,
     procedureType: "Sección Civil e Instruc TI Melilla. Plz.n 3",
     surface: null,
-    refCat: "123670500000000001XQ",
-    idufir: "19008000234034",
+    refCat: "1267906VK4716E0052QX",
+    idufir: "28093000224428",
     description: "(Referencia SUB-JA-2026-259501) | Depósito: 11500€",
     boeId: "SUB-JA-2026-259501",
     boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2026-259501&idBus=cmN4VGgycVZtckZ2NG9jRk1pNGptQStMUTR5OHBLejlRWU41dzhaRUVtV2NqQ1Q0enlYT21VaS8xQnFtanpiRXBsVURYN041VnY3eXRYSUw2YVVlR0txNllKeW1JQVRrYXNuZFF6Um5yRUNxNmpVWUpRMHNmblZnTDFXT1IrSXUwZktZSnpQdk9KMjZGNFlIbDNGTHhFbVNMT2NiMnlyTzdIeEw1OWd5VHQxSXlsVnlhWVd5WHdJRUZLQWNZemZONWdhZDVjejZrS1pTNk9nb255SU12UTA5RmRHMVB3RXVyK2ZzSE1GL0FXQjdqeGhWd2hvZFdoVnNiVnRzYnpHem1zeDBoSDFrYmF2OE5EK0t2SnhrU1pOVTJOMU56Mk5meER5SElXWnc0b2NOSVBERm9BSTNmZ2tqT2FSSjd1WGFZdkh3c25STmY2SkgwMU5RMlcyMEJtTE8zUnAzSHdKLzAzazV1NFozQVJvPQ,,--50",
     publishedAt: "2026-03-31",
-    lastCheckedAt: "2026-04-09T15:43:01.329Z",
-    startDate: "2026-02-17",
-    auctionDate: "2026-03-09",
-    status: "active",
+    lastCheckedAt: "2026-04-09T17:17:36.071Z",
+    startDate: "null",
+    auctionDate: "null",
+    status: "upcoming",
     isActive: false,
     isNew: false,
-    opportunityScore: 70,
+    opportunityScore: 60,
     opportunityRatio: -0.03
   },
   'subasta-sub-ja-2025-251932': {
@@ -250,7 +250,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     isActive: true,
     isNew: false,
     opportunityScore: 70,
-    opportunityRatio: 0.82
+    opportunityRatio: 0
   },
   'subasta-sub-ja-2026-259631': {
     propertyType: "Inmueble",
