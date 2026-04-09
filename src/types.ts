@@ -1,1 +1,1 @@
-export type AuctionStatus = 'active' | 'upcoming' | 'suspended' | 'closed';
+export type AuctionStatus = 'active' | 'upcoming' | 'suspended' | 'closed' | 'unknown';

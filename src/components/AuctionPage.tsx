@@ -1372,8 +1372,12 @@ const AuctionPage: React.FC = () => {
       auction?.publishedAt
     ].filter(Boolean) as string[];
 
-    const dateModified = dateCandidates.length > 0 
-      ? new Date(Math.max(...dateCandidates.map(d => new Date(d).getTime()))).toISOString()
+    const validDates = dateCandidates
+      .map(d => new Date(d))
+      .filter(d => !isNaN(d.getTime()));
+
+    const dateModified = validDates.length > 0 
+      ? new Date(Math.max(...validDates.map(d => d.getTime()))).toISOString()
       : publishedDate.toISOString();
 
     const availability = isFinished 
@@ -1443,12 +1447,15 @@ const AuctionPage: React.FC = () => {
     };
 
     if (auction?.auctionDate) {
-      product.offers["priceValidUntil"] = new Date(auction.auctionDate).toISOString().split('T')[0];
-      product.additionalProperty.push({
-        "@type": "PropertyValue",
-        "name": "Fecha Cierre",
-        "value": auction.auctionDate
-      });
+      const aDate = new Date(auction.auctionDate);
+      if (!isNaN(aDate.getTime())) {
+        product.offers["priceValidUntil"] = aDate.toISOString().split('T')[0];
+        product.additionalProperty.push({
+          "@type": "PropertyValue",
+          "name": "Fecha Cierre",
+          "value": auction.auctionDate
+        });
+      }
     }
 
     const faqPage: any = {

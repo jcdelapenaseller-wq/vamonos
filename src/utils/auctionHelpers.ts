@@ -55,7 +55,7 @@ export function getProcedureType(auction: AuctionData): string {
   return auction.procedureType || 'No especificado';
 }
 
-export function getComputedStatus(data: { status?: string; auctionDate?: string }): string {
+export function getComputedStatus(data: { status?: string; auctionDate?: string | null }): string {
   if (data.status === 'closed' || isAuctionFinished(data.auctionDate)) return 'closed';
   if (data.status === 'suspended') return 'suspended';
   if (data.status === 'upcoming') return 'upcoming';
@@ -134,8 +134,8 @@ export function extractFinalPrice(pujasText?: string): number | null {
   return null;
 }
 
-export function isAuctionFinished(auctionDate?: string): boolean {
-  if (!auctionDate) return false;
+export function isAuctionFinished(auctionDate?: string | null): boolean {
+  if (!auctionDate || auctionDate === 'null') return false;
   
   // Parsear asegurando formato UTC para evitar problemas de timezone
   const endDate = new Date(auctionDate.includes('T') ? auctionDate : `${auctionDate}T00:00:00Z`);
@@ -150,7 +150,8 @@ export function isAuctionFinished(auctionDate?: string): boolean {
   return now.getTime() > endDate.getTime();
 }
 
-export function formatDate(dateString: string): string {
+export function formatDate(dateString: string | null): string {
+  if (!dateString || dateString === 'null') return '';
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return '';
   return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -221,7 +222,7 @@ export function isConflictZone(auction: AuctionData): boolean {
 
 export function sortActiveFirst<T>(
   items: T[],
-  getDate: (item: T) => string | undefined
+  getDate: (item: T) => string | null | undefined
 ): T[] {
   return [...items].sort((a, b) => {
     const aFinished = isAuctionFinished(getDate(a));

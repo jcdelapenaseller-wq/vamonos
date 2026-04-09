@@ -806,6 +806,10 @@ async function runCrawler() {
                 updated = updated.replace(/isActive:\s*(true|false)/, `isActive: ${isActive}`);
                 // Actualizar lastCheckedAt
                 updated = updated.replace(/lastCheckedAt:\s*"[^"]*"/, `lastCheckedAt: "${now}"`);
+                // Actualizar startDate
+                updated = updated.replace(/startDate:\s*[^,]*,/, `startDate: ${startDate ? `"${startDate}"` : 'null'},`);
+                // Actualizar auctionDate
+                updated = updated.replace(/auctionDate:\s*[^,]*,/, `auctionDate: ${auctionDate ? `"${auctionDate}"` : 'null'},`);
                 
                 // Usar función para evitar problemas con $ en el bloque de reemplazo
                 auctionsContent = auctionsContent.replace(fullBlock, () => updated);
@@ -814,7 +818,7 @@ async function runCrawler() {
             output.subastasActualizadas++;
           } else {
             // INSERTAR NUEVA
-            let desc = s.titulo;
+            let desc = s.titulo || s.idSub || 'Subasta sin título';
             if (s.cargas) desc += ` | Cargas: ${s.cargas}`;
             if (s.deposito) desc += ` | Depósito: ${s.deposito}€`;
 
@@ -831,7 +835,7 @@ async function runCrawler() {
     valorSubasta: ${s.valorSubasta ?? 'null'},
     valorTasacion: ${s.valorTasacion ?? 'null'},
     deposito: ${s.deposito ?? 'null'},
-    procedureType: "${s.autoridad.replace(/"/g, '\\"')}",
+    procedureType: "${(s.autoridad || 'No especificado').replace(/"/g, '\\"')}",
     surface: ${s.superficie ?? 'null'},
     refCat: ${finalRefCat ? `"${finalRefCat}"` : 'null'},
     idufir: ${s.idufir ? `"${s.idufir}"` : 'null'},
@@ -840,10 +844,10 @@ async function runCrawler() {
     boeUrl: "${s.urlDetalle}",
     publishedAt: "${startDate || auctionDate || now}",
     lastCheckedAt: "${now}",
-    startDate: "${startDate}",
-    auctionDate: "${auctionDate}",
-    status: "${mappedStatus}",
-    isActive: ${isActive},
+    startDate: ${startDate ? `"${startDate}"` : 'null'},
+    auctionDate: ${auctionDate ? `"${auctionDate}"` : 'null'},
+    status: "${mappedStatus || 'unknown'}",
+    isActive: ${isActive ? 'true' : 'false'},
     isNew: true,
     opportunityScore: ${s.opportunityScore || 0},
     opportunityRatio: ${s.opportunityRatio || 0}
