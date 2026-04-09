@@ -525,7 +525,10 @@ async function runCrawler() {
         let esValorBajo = tasacionEfectiva !== null && tasacionEfectiva < minTasacion;
         let esDeudaCero = deudaNum === 0;
 
-        if (valorReferencia !== null && valorReferencia >= 5000 && !esEstadoInvalido && !esTipoExcluido && !esRatioBajo && !esRatioExcesivo && !esValorBajo && !esDeudaCero) {
+        const isExisting = existingIds.has(idSub);
+        const passesFilters = valorReferencia !== null && valorReferencia >= 5000 && !esEstadoInvalido && !esTipoExcluido && !esRatioBajo && !esRatioExcesivo && !esValorBajo && !esDeudaCero;
+
+        if (isExisting || passesFilters) {
           let opportunityScore = 0;
           let opportunityRatio = ratio / 100;
 
