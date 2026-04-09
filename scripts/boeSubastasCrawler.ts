@@ -256,6 +256,8 @@ async function runCrawler() {
           // Verificar si falta refCat o idufir (Guard permanente)
           const refCatMatch = content.match(/refCat:\s*("[^"]*"|undefined|null)/);
           const idufirMatch = content.match(/idufir:\s*("[^"]*"|undefined|null)/);
+          const statusMatch = content.match(/status:\s*["']([^"']+)["']/);
+          const lastCheckedAtMatch = content.match(/lastCheckedAt:\s*["']([^"']+)["']/);
           
           const refCatVal = refCatMatch ? refCatMatch[1].replace(/"/g, '').trim() : null;
           const idufirVal = idufirMatch ? idufirMatch[1].replace(/"/g, '').trim() : null;
@@ -263,7 +265,11 @@ async function runCrawler() {
           const hasRefCat = refCatVal && refCatVal !== 'null' && refCatVal !== 'undefined' && refCatVal !== '';
           const hasIdufir = idufirVal && idufirVal !== 'null' && idufirVal !== 'undefined' && idufirVal !== '';
           
-          if (!hasRefCat || !hasIdufir) {
+          const status = statusMatch ? statusMatch[1] : '';
+          const lastCheckedAt = lastCheckedAtMatch ? new Date(lastCheckedAtMatch[1]) : new Date(0);
+          const isOld = (new Date().getTime() - lastCheckedAt.getTime()) > (24 * 60 * 60 * 1000);
+          
+          if (!hasRefCat || !hasIdufir || (status === 'active' && isOld)) {
             const boeUrlMatch = content.match(/boeUrl:\s*["']([^"']+)["']/);
             const tituloMatch = content.match(/description:\s*["']([^"']+)["']/);
             const provinceMatch = content.match(/province:\s*["']([^"']+)["']/);
