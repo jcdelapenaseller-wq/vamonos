@@ -19,24 +19,14 @@ async function startServer() {
   const app = express();
   const PORT = 3000;
 
-  // Stripe webhook needs raw body
-  app.use('/api/stripe-webhook', express.raw({ type: 'application/json' }));
-  
-  // Other routes need JSON body
-  app.use('/api/valuation', express.json());
-  app.use('/api/create-checkout-session', express.json());
-  app.use('/api/generate-analysis', express.json());
-  app.use('/api/create-billing-portal', express.json());
-  app.use('/api/create-subscription-session', express.json());
-
   // Map API routes
-  app.all('/api/valuation', (req, res) => valuationHandler(req as any, res as any));
-  app.all('/api/stripe-webhook', (req, res) => stripeWebhookHandler(req as any, res as any));
-  app.all('/api/create-checkout-session', (req, res) => createCheckoutSessionHandler(req as any, res as any));
-  app.all('/api/generate-analysis', (req, res) => generateAnalysisHandler(req as any, res as any));
-  app.all('/api/run-analysis', (req, res) => runAnalysisHandler(req as any, res as any));
-  app.all('/api/create-billing-portal', (req, res) => createBillingPortalHandler(req as any, res as any));
-  app.all('/api/create-subscription-session', (req, res) => createSubscriptionSessionHandler(req as any, res as any));
+  app.all('/api/valuation', express.json(), (req, res) => valuationHandler(req as any, res as any));
+  app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), (req, res) => stripeWebhookHandler(req as any, res as any));
+  app.all('/api/create-checkout-session', express.json(), (req, res) => createCheckoutSessionHandler(req as any, res as any));
+  app.all('/api/generate-analysis', express.json(), (req, res) => generateAnalysisHandler(req as any, res as any));
+  app.all('/api/run-analysis', express.json(), (req, res) => runAnalysisHandler(req as any, res as any));
+  app.all('/api/create-billing-portal', express.json(), (req, res) => createBillingPortalHandler(req as any, res as any));
+  app.all('/api/create-subscription-session', express.json(), (req, res) => createSubscriptionSessionHandler(req as any, res as any));
 
   // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
