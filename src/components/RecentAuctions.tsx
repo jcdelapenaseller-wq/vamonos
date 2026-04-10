@@ -98,8 +98,16 @@ const SeoExpandableContent: React.FC = () => {
 
 const RecentAuctions: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Paso 1: Leer desde URL al montar
+  const initialCity = searchParams.get('city') || '';
+  const initialProvince = searchParams.get('province') || '';
+  const initialStatus = searchParams.get('status') || '';
+  const initialType = searchParams.get('type') || '';
+  const initialSort = searchParams.get('sortBy') || 'recent';
+
   const [filteredAuctions, setFilteredAuctions] = useState<Record<string, AuctionData>>(AUCTIONS);
-  const [sortBy, setSortBy] = useState<string>('recent');
+  const [sortBy, setSortBy] = useState<string>(initialSort);
   
   const currentPage = useMemo(() => {
     const pageParam = searchParams.get("page");
@@ -149,21 +157,55 @@ const RecentAuctions: React.FC = () => {
     }, { replace: false });
   };
 
-  const handleFilterChange = useCallback((newFiltered: Record<string, AuctionData>) => {
+  const handleFilterChange = useCallback((newFiltered: Record<string, AuctionData>, params: any) => {
     setFilteredAuctions(newFiltered);
-    setSearchParams(prev => {
-      const params = new URLSearchParams(prev);
-      return params;
-    }, { replace: false });
-  }, [setSearchParams]);
+    
+    // Evitar bucles: solo actualizar si los params son distintos a los de la URL
+    const currentCity = searchParams.get('city') || '';
+    const currentProvince = searchParams.get('province') || '';
+    const currentStatus = searchParams.get('status') || '';
+    const currentType = searchParams.get('type') || '';
+    const currentSort = searchParams.get('sortBy') || 'recent';
 
-  const handleSortChange = useCallback((newSort: string) => {
-    setSortBy(newSort);
+    if (
+      params.city === currentCity &&
+      params.province === currentProvince &&
+      params.status === currentStatus &&
+      params.type === currentType &&
+      params.sortBy === currentSort
+    ) {
+      return;
+    }
+
     setSearchParams(prev => {
-      const params = new URLSearchParams(prev);
-      return params;
+      const newParams = new URLSearchParams(prev);
+      if (params.city) newParams.set('city', params.city); else newParams.delete('city');
+      if (params.province) newParams.set('province', params.province); else newParams.delete('province');
+      if (params.status) newParams.set('status', params.status); else newParams.delete('status');
+      if (params.type) newParams.set('type', params.type); else newParams.delete('type');
+      if (params.sortBy) newParams.set('sortBy', params.sortBy); else newParams.delete('sortBy');
+      
+      // Reset page to 1 on filter change
+      newParams.delete('page');
+      return newParams;
     }, { replace: false });
-  }, [setSearchParams]);
+  }, [setSearchParams, searchParams]);
+
+  const handleSortChange = useCallback((newSort: string, params: any) => {
+    setSortBy(newSort);
+    
+    // Evitar bucles
+    const currentSort = searchParams.get('sortBy') || 'recent';
+    if (newSort === currentSort) return;
+
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('sortBy', newSort);
+      // Reset page to 1 on sort change
+      newParams.delete('page');
+      return newParams;
+    }, { replace: false });
+  }, [setSearchParams, searchParams]);
   
   const activeCount = Object
     .values(filteredAuctions)
@@ -378,7 +420,16 @@ const RecentAuctions: React.FC = () => {
       </div>
 
       <main className="max-w-7xl mx-auto px-6 py-6 md:py-8">
-        <AuctionFilters auctions={AUCTIONS} onFilteredChange={handleFilterChange} onSortChange={handleSortChange} />
+        <AuctionFilters 
+          auctions={AUCTIONS} 
+          onFilteredChange={handleFilterChange} 
+          onSortChange={handleSortChange}
+          initialCity={initialCity}
+          initialProvince={initialProvince}
+          initialStatus={initialStatus}
+          initialType={initialType}
+          initialSort={initialSort}
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 mt-6">
           {paginatedAuctions.length > 0 ? paginatedAuctions.map(({ slug, data, showNewBadge }) => (
@@ -395,6 +446,24 @@ const RecentAuctions: React.FC = () => {
             </div>
           )}
         </div>
+
+        {totalPages > 1 && (
+          <div className="mt-8 mb-6 flex flex-wrap justify-center items-center gap-2">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`w-10 h-10 rounded-lg font-bold transition-all ${
+                  safePage === page
+                    ? 'bg-brand-600 text-white shadow-md shadow-brand-200'
+                    : 'bg-white border border-slate-200 text-slate-600 hover:border-brand-500 hover:text-brand-600'
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="mt-8 md:mt-12">
           <RadarPremiumCTA 

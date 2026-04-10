@@ -5,16 +5,30 @@ import { getComputedStatus, getAuctionType, isAuctionActive } from '../utils/auc
 
 interface AuctionFiltersProps {
   auctions: Record<string, AuctionData>;
-  onFilteredChange: (filtered: Record<string, AuctionData>) => void;
-  onSortChange?: (sort: string) => void;
+  onFilteredChange: (filtered: Record<string, AuctionData>, params: any) => void;
+  onSortChange?: (sort: string, params: any) => void;
+  initialCity?: string;
+  initialProvince?: string;
+  initialStatus?: string;
+  initialType?: string;
+  initialSort?: string;
 }
 
-export const AuctionFilters: React.FC<AuctionFiltersProps> = ({ auctions, onFilteredChange, onSortChange }) => {
-  const [city, setCity] = useState('');
-  const [province, setProvince] = useState('');
-  const [status, setStatus] = useState<string>('');
-  const [type, setType] = useState<string>('');
-  const [sortBy, setSortBy] = useState<string>('recent');
+export const AuctionFilters: React.FC<AuctionFiltersProps> = ({ 
+  auctions, 
+  onFilteredChange, 
+  onSortChange,
+  initialCity = '',
+  initialProvince = '',
+  initialStatus = '',
+  initialType = '',
+  initialSort = 'recent'
+}) => {
+  const [city, setCity] = useState(initialCity);
+  const [province, setProvince] = useState(initialProvince);
+  const [status, setStatus] = useState<string>(initialStatus);
+  const [type, setType] = useState<string>(initialType);
+  const [sortBy, setSortBy] = useState<string>(initialSort);
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -46,14 +60,14 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({ auctions, onFilt
   }, [auctions, city, province, status, type]);
 
   useEffect(() => {
-    onFilteredChange(filteredAuctions);
-  }, [filteredAuctions, onFilteredChange]);
+    onFilteredChange(filteredAuctions, { city, province, status, type, sortBy });
+  }, [filteredAuctions, onFilteredChange, city, province, status, type, sortBy]);
 
   useEffect(() => {
     if (onSortChange) {
-      onSortChange(sortBy);
+      onSortChange(sortBy, { city, province, status, type, sortBy });
     }
-  }, [sortBy, onSortChange]);
+  }, [sortBy, onSortChange, city, province, status, type, sortBy]);
 
   const clearFilters = () => {
     setCity('');
