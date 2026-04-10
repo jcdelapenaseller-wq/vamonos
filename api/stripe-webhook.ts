@@ -1,6 +1,15 @@
 import Stripe from 'stripe';
-import { db } from '../src/lib/firebase';
-import { collection, query, where, getDocs, doc, updateDoc } from 'firebase/firestore';
+import admin from 'firebase-admin';
+
+// Lazy initialization of Firebase Admin
+const initAdmin = () => {
+  if (admin.apps.length === 0) {
+    admin.initializeApp({
+      projectId: process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID
+    });
+  }
+  return admin.firestore();
+};
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
@@ -86,15 +95,14 @@ export default async function handler(req: any, res: any) {
 }
 
 async function syncStripeData(email: string, customerId: string, subscriptionId: string, status: string, plan?: string) {
-  if (!db) return;
+  const db = initAdmin();
 
-  const usersRef = collection(db, 'users');
-  const q = query(usersRef, where('email', '==', email));
-  const querySnapshot = await getDocs(q);
+  const usersRef = db.collection('users');
+  const querySnapshot = await usersRef.where('email', '==', email).get();
 
   if (!querySnapshot.empty) {
     const userDoc = querySnapshot.docs[0];
-    const userRef = doc(db, 'users', userDoc.id);
+    const userRef = userDoc.ref;
     
     const updateData: any = {
       stripeCustomerId: customerId,
@@ -106,7 +114,7 @@ async function syncStripeData(email: string, customerId: string, subscriptionId:
       updateData.plan = plan;
     }
     
-    await updateDoc(userRef, updateData);
+    await userRef.update(updateData);
     
     console.log(`Synced Stripe data for user: ${email}`);
   } else {

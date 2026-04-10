@@ -399,6 +399,7 @@ const AuctionPage: React.FC = () => {
                             auction?.idufir;
                             
   // DIAGNOSTIC LOGS
+  console.log("valuation floor", valuationResult?.metadata?.floor);
   console.log('DEBUG - Render State:', {
     auction_exists: !!auction,
     refCat_in_auction: auction?.refCat,

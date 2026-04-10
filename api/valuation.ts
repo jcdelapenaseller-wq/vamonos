@@ -66,15 +66,30 @@ const fetchCatastroData = async (refCat: string): Promise<{ surface: number | nu
     
     logDiagnostic(`fetchCatastroData RESPONSE: status=${response.status}, duration=${duration}ms`);
     
-    const xml = response.data;
+    const xml =
+      typeof response.data === "string"
+        ? response.data
+        : response.data?.toString?.() || "";
+    console.log("CATASTRO XML RAW:");
+    console.log(xml.slice(0, 2000));
     if (typeof xml === 'string') {
       const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
-      const yearMatch = xml.match(/<ant>(\d+)<\/ant>/i);
-      const floorMatch = xml.match(/<pau>([^<]+)<\/pau>/i);
+      const yearMatch =
+        xml.match(/<ant>(\d{4})<\/ant>/i) ||
+        xml.match(/<year>(\d{4})<\/year>/i) ||
+        xml.match(/<anno>(\d{4})<\/anno>/i) ||
+        xml.match(/CONSTRUCCION\s*(\d{4})/i);
+      
+      const floorMatch =
+        xml.match(/<pln>([^<]+)<\/pln>/i) ||
+        xml.match(/<plant>([^<]+)<\/plant>/i) ||
+        xml.match(/<pau>([^<]+)<\/pau>/i) ||
+        xml.match(/PLANTA\s*([0-9]+)/i) ||
+        xml.match(/<ldt>[^<]*PLANTA\s*([0-9]+)/i);
       
       const surface = surfaceMatch ? parseFloat(surfaceMatch[1].replace(",", ".")) : null;
-      const yearBuilt = yearMatch ? parseInt(yearMatch[1]) : null;
-      const floor = floorMatch ? floorMatch[1].trim() : null;
+      const yearBuilt = yearMatch?.[1] ? parseInt(yearMatch[1]) : null;
+      const floor = floorMatch?.[1]?.trim() ?? null;
 
       logDiagnostic(`fetchCatastroData SUCCESS: surface=${surface}, yearBuilt=${yearBuilt}, floor=${floor}`);
       return { surface, yearBuilt, floor };
@@ -104,16 +119,31 @@ const fetchCatastroDataByAddress = async (province: string, city: string, addres
     const url = `https://ovc.catastro.meh.es/OVCServWeb/OVCWcfCallejero/OVCCallejero.svc/Consulta_DNPPP?Provincia=${encodeURIComponent(province)}&Municipio=${encodeURIComponent(city)}&Sigla=&Calle=${encodeURIComponent(calle)}&Numero=${numero}`;
     const response = await axios.get(url, { timeout: 5000 });
     
-    const xml = response.data;
+    const xml =
+      typeof response.data === "string"
+        ? response.data
+        : response.data?.toString?.() || "";
     if (typeof xml === 'string') {
       const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
-      const yearMatch = xml.match(/<ant>(\d+)<\/ant>/i);
-      const floorMatch = xml.match(/<pau>([^<]+)<\/pau>/i);
+      const yearMatch =
+        xml.match(/<ant>(\d{4})<\/ant>/i) ||
+        xml.match(/<year>(\d{4})<\/year>/i) ||
+        xml.match(/<anno>(\d{4})<\/anno>/i) ||
+        xml.match(/CONSTRUCCION\s*(\d{4})/i);
+      
+      const floorMatch =
+        xml.match(/<pln>([^<]+)<\/pln>/i) ||
+        xml.match(/<plant>([^<]+)<\/plant>/i) ||
+        xml.match(/<pau>([^<]+)<\/pau>/i) ||
+        xml.match(/PLANTA\s*([0-9]+)/i) ||
+        xml.match(/<ldt>[^<]*PLANTA\s*([0-9]+)/i);
+      
+      const floor = floorMatch?.[1]?.trim() ?? null;
       
       return {
         surface: surfaceMatch ? parseFloat(surfaceMatch[1].replace(",", ".")) : null,
-        yearBuilt: yearMatch ? parseInt(yearMatch[1]) : null,
-        floor: floorMatch ? floorMatch[1].trim() : null
+        yearBuilt: yearMatch?.[1] ? parseInt(yearMatch[1]) : null,
+        floor: floor
       };
     }
     return { surface: null, yearBuilt: null, floor: null };
@@ -123,19 +153,19 @@ const fetchCatastroDataByAddress = async (province: string, city: string, addres
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { boeId, address, surface, city, province, appraisalValue, refCat, description, slug } = req.body;
-
-  logDiagnostic(`handler START: slug=${slug}, boeId=${boeId}, refCat=${refCat}`);
-
-  if (!boeId) {
-    return res.status(400).json({ error: 'boeId is required' });
-  }
-
   try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method not allowed' });
+    }
+
+    const { boeId, address, surface, city, province, appraisalValue, refCat, description, slug } = req.body;
+
+    logDiagnostic(`handler START: slug=${slug}, boeId=${boeId}, refCat=${refCat}`);
+
+    if (!boeId) {
+      return res.status(400).json({ error: 'boeId is required' });
+    }
+
     // 1. Check Cache in Firestore
     if (db) {
       const valuationRef = db.collection('auctions').doc(boeId).collection('valuations').doc('latest');
@@ -219,8 +249,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     return res.status(200).json(result);
-  } catch (error) {
-    return res.status(500).json({ error: 'Error interno' });
+  } catch (err: any) {
+    console.error("VALUATION ERROR:", err);
+    return res.status(500).json({ 
+      error: String(err), 
+      stack: err?.stack 
+    });
   }
 }
 
