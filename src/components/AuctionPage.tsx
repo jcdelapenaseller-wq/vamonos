@@ -226,6 +226,8 @@ const AuctionPage: React.FC = () => {
   const [activeAlertId, setActiveAlertId] = useState<string | null>(null);
   const [alertsCount, setAlertsCount] = useState(0);
   const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const [showHowItWorksCargas, setShowHowItWorksCargas] = useState(false);
+  const [showHowItWorksCompleto, setShowHowItWorksCompleto] = useState(false);
   
   // Notes State
   const [note, setNote] = useState('');
@@ -2535,6 +2537,51 @@ const AuctionPage: React.FC = () => {
                     </div>
 
                     <div className="mt-auto space-y-4">
+                      <div className="mb-2">
+                        <button 
+                          onClick={() => setShowHowItWorksCargas(!showHowItWorksCargas)}
+                          className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors text-[11px] font-bold uppercase tracking-wider py-1"
+                        >
+                          <HelpCircle size={14} className="text-brand-500" />
+                          ¿Cómo funciona el proceso?
+                          <ChevronDown size={14} className={`transition-transform duration-300 ${showHowItWorksCargas ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        <AnimatePresence>
+                          {showHowItWorksCargas && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-2 p-4 bg-slate-50 border border-slate-200 rounded-xl text-left">
+                                <div className="space-y-3">
+                                  <div className="flex gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0">1</div>
+                                    <p className="text-[11px] text-slate-600 leading-tight"><span className="font-bold text-slate-900">Pago seguro</span> para desbloquear el análisis.</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0">2</div>
+                                    <p className="text-[11px] text-slate-600 leading-tight"><span className="font-bold text-slate-900">Sube el PDF</span> de la Nota Simple o Certificación.</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0">3</div>
+                                    <p className="text-[11px] text-slate-600 leading-tight"><span className="font-bold text-slate-900">Informe listo</span> en menos de 2 minutos.</p>
+                                  </div>
+                                </div>
+                                <div className="mt-3 pt-3 border-t border-slate-200">
+                                  <p className="text-[10px] text-brand-700 font-medium leading-tight">
+                                    <span className="font-bold">¿No tienes el documento?</span> Tras el pago te damos el enlace oficial del BOE para descargarlo.
+                                  </p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
                       <button 
                         onClick={handleAnalyzeCargasClick}
                         className="w-full py-5 px-6 bg-slate-900 hover:bg-brand-700 text-white rounded-2xl font-semibold text-lg transition-all flex items-center justify-center gap-3 group shadow-lg hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
@@ -2542,6 +2589,7 @@ const AuctionPage: React.FC = () => {
                         Analizar cargas
                         <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </button>
+                      
                       <div className="mt-4 pt-4 border-t text-xs text-slate-500">
                         <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] font-medium text-center">
                           <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Entrega inmediata</div>
@@ -2619,6 +2667,51 @@ const AuctionPage: React.FC = () => {
                     </div>
 
                     <div className="mt-auto space-y-4">
+                      <div className="mb-2">
+                        <button 
+                          onClick={() => setShowHowItWorksCompleto(!showHowItWorksCompleto)}
+                          className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors text-[11px] font-bold uppercase tracking-wider py-1"
+                        >
+                          <HelpCircle size={14} className="text-brand-500" />
+                          ¿Cómo funciona el proceso?
+                          <ChevronDown size={14} className={`transition-transform duration-300 ${showHowItWorksCompleto ? 'rotate-180' : ''}`} />
+                        </button>
+                        
+                        <AnimatePresence>
+                          {showHowItWorksCompleto && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="mt-2 p-4 bg-white border border-slate-200 rounded-xl text-left shadow-sm">
+                                <div className="space-y-3">
+                                  <div className="flex gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0">1</div>
+                                    <p className="text-[11px] text-slate-600 leading-tight"><span className="font-bold text-slate-900">Pago seguro</span> para desbloquear el análisis.</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0">2</div>
+                                    <p className="text-[11px] text-slate-600 leading-tight"><span className="font-bold text-slate-900">Sube el PDF</span> de la Nota Simple o Certificación.</p>
+                                  </div>
+                                  <div className="flex gap-2">
+                                    <div className="w-5 h-5 rounded-full bg-slate-900 text-white flex items-center justify-center text-[9px] font-bold shrink-0">3</div>
+                                    <p className="text-[11px] text-slate-600 leading-tight"><span className="font-bold text-slate-900">Informe listo</span> en menos de 2 minutos.</p>
+                                  </div>
+                                </div>
+                                <div className="mt-3 pt-3 border-t border-slate-100">
+                                  <p className="text-[10px] text-brand-700 font-medium leading-tight">
+                                    <span className="font-bold">¿No tienes el documento?</span> Tras el pago te damos el enlace oficial del BOE para descargarlo.
+                                  </p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
                       <button 
                         onClick={() => {
                           setPaymentType('analysis');
@@ -2630,6 +2723,7 @@ const AuctionPage: React.FC = () => {
                         Generar informe completo
                         <ArrowRight size={20} className="group-hover/btn:translate-x-1 transition-transform" />
                       </button>
+                      
                       <div className="mt-4 pt-4 border-t text-xs text-slate-500">
                         <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[10px] font-medium text-center">
                           <div className="flex items-center gap-1 justify-center"><Check className="w-3 h-3 text-emerald-500" /> Entrega inmediata</div>
@@ -2643,6 +2737,7 @@ const AuctionPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
               <div className="mt-8 text-center text-slate-400 text-xs">
                 <p className="font-medium">
                   Compra segura • Pago único sin suscripción • Acceso inmediato al informe • Servicio independiente • No necesitas crear cuenta
