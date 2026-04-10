@@ -21,11 +21,7 @@ async function startServer() {
 
   // Map API routes
   app.all('/api/valuation', express.json(), (req, res) => valuationHandler(req as any, res as any));
-  app.post('/api/stripe-webhook', express.json({
-    verify: (req: any, res, buf) => {
-      req.rawBody = buf;
-    }
-  }), (req, res) => stripeWebhookHandler(req as any, res as any));
+  app.post('/api/stripe-webhook', express.raw({ type: '*/*' }), (req, res) => stripeWebhookHandler(req as any, res as any));
   app.all('/api/create-checkout-session', express.json(), (req, res) => createCheckoutSessionHandler(req as any, res as any));
   app.all('/api/generate-analysis', express.json(), (req, res) => generateAnalysisHandler(req as any, res as any));
   app.all('/api/run-analysis', express.json(), (req, res) => runAnalysisHandler(req as any, res as any));
