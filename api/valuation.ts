@@ -70,8 +70,11 @@ const fetchCatastroData = async (refCat: string): Promise<{ surface: number | nu
       typeof response.data === "string"
         ? response.data
         : response.data?.toString?.() || "";
-    console.log("CATASTRO XML RAW:");
-    console.log(xml.slice(0, 2000));
+
+    console.log("CATASTRO XML RAW START");
+    console.log(xml);
+    console.log("CATASTRO XML RAW END");
+
     if (typeof xml === 'string') {
       const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
       const yearMatch =
@@ -123,6 +126,11 @@ const fetchCatastroDataByAddress = async (province: string, city: string, addres
       typeof response.data === "string"
         ? response.data
         : response.data?.toString?.() || "";
+
+    console.log("CATASTRO XML BY ADDRESS RAW START");
+    console.log(xml);
+    console.log("CATASTRO XML BY ADDRESS RAW END");
+
     if (typeof xml === 'string') {
       const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
       const yearMatch =
