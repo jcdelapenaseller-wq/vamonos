@@ -206,14 +206,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // PRIORIDAD 1: Catastro por Referencia
     if (finalRefCat) {
+      console.log("CALLING CATASTRO WITH REF:", finalRefCat);
       const catData = await fetchCatastroData(finalRefCat);
+      
+      if (catData.surface) {
+        realSurface = catData.surface;
+        sourceSurface = 'catastro_ref';
+      }
+      if (catData.yearBuilt) yearBuilt = catData.yearBuilt;
+      if (catData.floor) floor = catData.floor;
+      
       if (catData.surface || catData.yearBuilt || catData.floor) {
-        if (catData.surface) {
-          realSurface = catData.surface;
-          sourceSurface = 'catastro_ref';
-        }
-        yearBuilt = catData.yearBuilt;
-        floor = catData.floor;
         confidence = 0.95;
         dataSource = 'catastro_xml';
       }
