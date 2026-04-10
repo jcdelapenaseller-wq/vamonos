@@ -1,5 +1,21 @@
 import Stripe from 'stripe';
 import admin from 'firebase-admin';
+import { Readable } from 'stream';
+
+// Helper to read raw body for Vercel serverless
+async function buffer(readable: Readable) {
+  const chunks = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
 
 // Lazy initialization of Firebase Admin
 const initAdmin = () => {
@@ -33,7 +49,8 @@ export default async function handler(req: any, res: any) {
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    const rawBody = await buffer(req);
+    event = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
   } catch (err: any) {
     console.error(`Webhook signature verification failed: ${err.message}`);
     return res.status(400).send(`Webhook Error: ${err.message}`);
