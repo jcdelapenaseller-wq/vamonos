@@ -166,54 +166,67 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'boeId is required' });
     }
 
-    // 1. Check Cache in Firestore
+    // 1. Check Cache in Firestore (Optional)
     if (db) {
-      const valuationRef = db.collection('auctions').doc(boeId).collection('valuations').doc('latest');
       try {
+        const valuationRef = db.collection('auctions').doc(boeId).collection('valuations').doc('latest');
         const valuationSnap = await valuationRef.get();
         if (valuationSnap.exists) {
           const data = valuationSnap.data();
           return res.status(200).json({ ...data, metadata: { ...data?.metadata, cached: true } });
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn("Firestore cache read failed:", e);
+      }
     }
 
-    // 2. Obtener datos (Estrategia Triple: RefCat > Dirección > Estimación)
+    // 2. Obtener datos (Estrategia: Catastro XML > Dirección > Estimación Interna)
     let realSurface = surface;
     let yearBuilt = null;
     let floor = null;
-    let sourceSurface = 'auction_data';
+    let sourceSurface = surface ? 'auction_data' : 'estimated';
     let confidence = 0.75;
+    let dataSource = 'internal_fallback';
     
     const priceM2 = getPricePerM2(province, city);
     const baseValue = appraisalValue || 150000;
 
     let finalRefCat = refCat;
-    
     if (!finalRefCat) {
       finalRefCat = extractRefCat(description) || extractRefCat(address);
     }
 
+    // PRIORIDAD 1: Catastro por Referencia
     if (finalRefCat) {
       const catData = await fetchCatastroData(finalRefCat);
-      if (catData.surface) {
-        realSurface = catData.surface;
+      if (catData.surface || catData.yearBuilt || catData.floor) {
+        if (catData.surface) {
+          realSurface = catData.surface;
+          sourceSurface = 'catastro_ref';
+        }
         yearBuilt = catData.yearBuilt;
         floor = catData.floor;
-        sourceSurface = 'catastro_ref';
         confidence = 0.95;
-      }
-    } else if (!realSurface && address && city && province) {
-      const catData = await fetchCatastroDataByAddress(province, city, address);
-      if (catData.surface) {
-        realSurface = catData.surface;
-        yearBuilt = catData.yearBuilt;
-        floor = catData.floor;
-        sourceSurface = 'catastro_address';
-        confidence = 0.80;
+        dataSource = 'catastro_xml';
       }
     }
 
+    // PRIORIDAD 2: Catastro por Dirección (si no hay datos aún)
+    if (dataSource === 'internal_fallback' && address && city && province) {
+      const catData = await fetchCatastroDataByAddress(province, city, address);
+      if (catData.surface || catData.yearBuilt || catData.floor) {
+        if (catData.surface) {
+          realSurface = catData.surface;
+          sourceSurface = 'catastro_address';
+        }
+        yearBuilt = catData.yearBuilt;
+        floor = catData.floor;
+        confidence = 0.85;
+        dataSource = 'catastro_xml_address';
+      }
+    }
+
+    // FALLBACK: Estimación matemática
     if (!realSurface) {
       realSurface = Math.round(baseValue / priceM2);
       sourceSurface = 'estimada';
@@ -234,7 +247,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         priceM2
       },
       metadata: {
-        source: 'internal_dataset_catastro',
+        source: dataSource,
         surfaceSource: sourceSurface,
         cached: false,
         timestamp: new Date().toISOString(),
@@ -244,8 +257,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     };
 
+    // 3. Save to Cache (Optional - Don't block if permissions fail)
     if (db) {
-      await db.collection('auctions').doc(boeId).collection('valuations').doc('latest').set(result);
+      try {
+        await db.collection('auctions').doc(boeId).collection('valuations').doc('latest').set(result);
+      } catch (e) {
+        console.warn("Firestore cache write failed (Permission Denied?):", e);
+      }
     }
 
     return res.status(200).json(result);
