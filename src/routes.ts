@@ -92,6 +92,7 @@ import ProPage from './components/ProPage';
 import SuccessPage from './components/SuccessPage';
 import CancelPage from './components/CancelPage';
 import LoginPage from './components/LoginPage';
+import VehicleAuctionsPage from './components/VehicleAuctionsPage';
 const AnalisisCargasPage = React.lazy(() => import('./components/AnalisisCargasPage'));
 const AnalisisInversionPage = React.lazy(() => import('./components/AnalisisInversionPage'));
 const AnalizarSubastaHub = React.lazy(() => import('./components/AnalizarSubastaHub'));
@@ -373,6 +374,10 @@ export const routes: RouteObject[] = [
   {
     path: ROUTES.REPORTS_INDEX,
     element: createElement(DiscoverReportsIndex),
+  },
+  {
+    path: ROUTES.VEHICLE_AUCTIONS,
+    element: createElement(VehicleAuctionsPage),
   },
   {
     path: ROUTES.NOTICIAS_SUBASTAS,

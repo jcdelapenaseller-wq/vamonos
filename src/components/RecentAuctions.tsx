@@ -106,7 +106,7 @@ const RecentAuctions: React.FC = () => {
   const initialType = searchParams.get('type') || '';
   const initialSort = searchParams.get('sortBy') || 'recent';
 
-  const [filteredAuctions, setFilteredAuctions] = useState<Record<string, AuctionData>>(AUCTIONS);
+  const [filteredAuctions, setFilteredAuctions] = useState<Record<string, AuctionData>>(() => getFilteredAuctions(AUCTIONS));
   const [sortBy, setSortBy] = useState<string>(initialSort);
   
   const currentPage = useMemo(() => {
@@ -122,7 +122,7 @@ const RecentAuctions: React.FC = () => {
   
   // Calculate total active auctions (without filters)
   const totalActiveAuctions = useMemo(() => {
-    return Object.values(AUCTIONS).filter(a => isAuctionActive(a)).length;
+    return Object.values(AUCTIONS).filter(a => isAuctionActive(a) && a.assetCategory !== 'vehiculo').length;
   }, []);
 
   console.log('RecentAuctions: Total AUCTIONS keys:', Object.keys(AUCTIONS).length);

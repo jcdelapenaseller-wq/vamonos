@@ -35,7 +35,7 @@ const ProvinceHub: React.FC = () => {
   const provinceAuctions = useMemo(() => {
     if (!province) return [];
     const filtered = Object.entries(AUCTIONS).filter(([_, a]) => {
-      if (!isAuctionActive(a)) return false;
+      if (!isAuctionActive(a) || a.assetCategory === 'vehiculo') return false;
       const p = normalizeProvince(a.province || a.city).toLowerCase();
       return p === normalizedProvinceParam || p.includes(normalizedProvinceParam) || normalizedProvinceParam.includes(p);
     });

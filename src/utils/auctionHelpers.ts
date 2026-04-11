@@ -177,7 +177,7 @@ export function getFilteredAuctions(
 ): Record<string, AuctionData> {
   const filtered: Record<string, AuctionData> = {};
   for (const [slug, data] of Object.entries(auctions)) {
-    if (isAuctionActive(data) && applyBasicFilters(data)) {
+    if (isAuctionActive(data) && applyBasicFilters(data) && data.assetCategory !== 'vehiculo') {
       filtered[slug] = data;
     }
   }

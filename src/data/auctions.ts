@@ -2,6 +2,13 @@
 import { AuctionStatus } from '../types';
 
 export interface AuctionData {
+  assetCategory?: 'inmueble' | 'vehiculo';
+  brand?: string;
+  model?: string;
+  licensePlate?: string;
+  year?: number;
+  vin?: string;
+  images?: string[];
   propertyType?: string;
   city?: string;
   province?: string;
@@ -46,10 +53,453 @@ export interface AuctionData {
   cadastreConfidence?: 'ALTA' | 'MEDIA' | 'BAJA';
   lat?: number;
   lng?: number;
+  pickupLocation?: string;
+  locationText?: string;
+  documents?: { name: string; url: string }[];
 }
 
 export const AUCTIONS: Record<string, AuctionData> = {
-  'subasta-sub-at-2024-23r4586001244': {
+  'subasta-sub-at-2026-25r0886002146': {
+    boeId: "SUB-AT-2026-25R0886002146",
+    status: "active",
+    valorSubasta: 10700,
+    valorTasacion: 10700,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:06:40.556Z",
+    auctionDate: "13-04-2026",
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002146&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "NISSAN",
+    model: "NV200",
+    licensePlate: "7044HZC",
+    year: 2014,
+    vin: "VSKHBAM20U0089286",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925697/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002146_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925843/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002146_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925844/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002146_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925844/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002146_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934322/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934326/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934331/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934335/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934339/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934343/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934349/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934353/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934357/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934361/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934365/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934370/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934374/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934378/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934382/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934386/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934391/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934395/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934399/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002146_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002147': {
+    boeId: "SUB-AT-2026-25R0886002147",
+    status: "active",
+    valorSubasta: 17917.5,
+    valorTasacion: 17917.5,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:07:32.199Z",
+    auctionDate: "13-04-2026",
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002147&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "PEUGEOT",
+    model: "N5008 ALLURE 1.5L BLUE",
+    licensePlate: "9704KJC",
+    year: 2018,
+    vin: "VF3MCYHZJJL006032",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925701/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002147_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925848/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002147_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925848/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002147_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925849/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002147_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925850/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002147_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934409/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934413/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934417/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934421/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934425/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934430/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934435/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934439/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934443/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934447/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934451/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002147_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002154': {
+    boeId: "SUB-AT-2026-25R0886002154",
+    status: "active",
+    valorSubasta: 34969,
+    valorTasacion: 34969,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:08:10.688Z",
+    auctionDate: "13-04-2026",
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002154&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "RIMOR",
+    model: "RIMOR AAF59P3",
+    licensePlate: "9404GBY",
+    year: 2008,
+    vin: "WF0FXXTTFF7U09561",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925705/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002154_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925853/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002154_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925853/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002154_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925854/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002154_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925855/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002154_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934460/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934464/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934468/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934472/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934477/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934481/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934485/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934490/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002154_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002155': {
+    boeId: "SUB-AT-2026-25R0886002155",
+    status: "active",
+    valorSubasta: 11477.47,
+    valorTasacion: 12462.5,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:08:39.752Z",
+    auctionDate: "13-04-2026",
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002155&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "PEUGEOT",
+    model: "BOXER",
+    licensePlate: "4980MKX",
+    year: 2015,
+    vin: "VF3YBTMFA12779491",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925707/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002155_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925858/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002155_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925858/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002155_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925859/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002155_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925859/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002155_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934498/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002155_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934502/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002155_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934506/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002155_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934510/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002155_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934515/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002155_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934519/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002155_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002185': {
+    boeId: "SUB-AT-2026-25R0886002185",
+    status: "active",
+    valorSubasta: 12750,
+    valorTasacion: 12750,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:09:13.916Z",
+    auctionDate: "13-04-2026",
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002185&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "RENAULT",
+    model: "MEGANE",
+    licensePlate: "5987KKG",
+    year: 2018,
+    vin: "VF1RFB00059700703",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925711/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002185_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925861/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002185_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925862/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002185_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925862/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002185_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925863/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002185_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934528/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002185_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934532/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002185_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934536/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002185_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934541/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002185_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934545/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002185_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934549/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002185_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934553/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002185_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002189': {
+    boeId: "SUB-AT-2026-25R0886002189",
+    status: "active",
+    valorSubasta: 5074.75,
+    valorTasacion: 5074.75,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T18:56:35.192Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "CITROEN",
+    model: "XSARA PICASSO",
+    licensePlate: "4779GTJ",
+    year: 2010,
+    vin: "VF7CH9HXC9J332623",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925713/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002189_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775929766/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002189_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925865/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002189_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925865/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002189_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925866/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002189_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933781/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002189_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933786/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002189_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933790/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002189_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933794/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002189_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002190': {
+    boeId: "SUB-AT-2026-25R0886002190",
+    status: "active",
+    valorSubasta: 17795,
+    valorTasacion: 17795,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T18:56:57.187Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "FORD",
+    model: "TRANSIT CUSTOM",
+    licensePlate: "4524JWS",
+    year: 2017,
+    vin: "WF0YXXTTGYGT44914",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925715/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002190_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775929774/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002190_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775929775/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002190_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925868/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002190_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925868/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002190_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933803/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002190_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933808/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002190_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933812/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002190_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933816/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002190_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002191': {
+    boeId: "SUB-AT-2026-25R0886002191",
+    status: "active",
+    valorSubasta: 3947.5,
+    valorTasacion: 3947.5,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T18:57:51.193Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "MERCEDES-BENZ",
+    model: "C 220 CDI",
+    licensePlate: "3481LBS",
+    year: 2003,
+    vin: "WDB2030061F321079",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925719/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002191_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925871/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002191_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925872/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002191_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925872/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002191_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925873/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002191_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933824/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933828/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933832/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933836/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933840/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933845/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933849/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933853/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933857/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933862/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933866/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933870/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002191_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002192': {
+    boeId: "SUB-AT-2026-25R0886002192",
+    status: "active",
+    valorSubasta: 4687.5,
+    valorTasacion: 4687.5,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T18:58:12.263Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "PIAGGIO",
+    model: "MP3 300 HPE",
+    licensePlate: "8274LJG",
+    year: 2020,
+    vin: "ZAPTA210000005535",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925722/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002192_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925875/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002192_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925875/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002192_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925876/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002192_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925877/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002192_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933878/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002192_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933882/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002192_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933887/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002192_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933891/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002192_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002200': {
+    boeId: "SUB-AT-2026-25R0886002200",
+    status: "active",
+    valorSubasta: 8120,
+    valorTasacion: 8120,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T18:58:59.064Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "DACIA",
+    model: "SANDERO",
+    licensePlate: "9480HZS",
+    year: 2014,
+    vin: "UU15SDAAC51577057",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925725/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002200_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925879/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002200_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775929808/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002200_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925880/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002200_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775925881/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002200_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933899/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933903/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933908/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933912/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933916/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933921/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933925/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933929/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933934/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933938/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002200_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002202': {
+    boeId: "SUB-AT-2026-25R0886002202",
+    status: "active",
+    valorSubasta: 26600.01,
+    valorTasacion: 26600.01,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T18:59:41.391Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "VOLVO",
+    model: "XC40",
+    licensePlate: "4747LCM",
+    year: 2019,
+    vin: "YV1XZACVCL2251699",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933940/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002202_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933941/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002202_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933942/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002202_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933942/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002202_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933943/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002202_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933947/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933951/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933955/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933959/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933963/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933967/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933972/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933976/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933980/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002202_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002203': {
+    boeId: "SUB-AT-2026-25R0886002203",
+    status: "active",
+    valorSubasta: 5390.02,
+    valorTasacion: 5390.02,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:00:44.552Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "RENAULT",
+    model: "KANGOO",
+    licensePlate: "8847HVW",
+    year: 2014,
+    vin: "VF1FW17BE50324261",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933983/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002203_img_1.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933987/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933991/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775933995/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934000/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934004/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934009/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934014/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934018/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934022/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934026/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934030/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934035/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934039/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934043/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002203_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002204': {
+    boeId: "SUB-AT-2026-25R0886002204",
+    status: "active",
+    valorSubasta: 7375,
+    valorTasacion: 7375,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:01:30.561Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "A.U.D.I.",
+    model: "AUDI A4",
+    licensePlate: "6069GXK",
+    year: 2010,
+    vin: "WAUZZZ8K1AN062936",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934045/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002204_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934046/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002204_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934047/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002204_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934047/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002204_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934051/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934056/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934060/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934064/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934069/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934073/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934077/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934081/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934086/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934090/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002204_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002205': {
+    boeId: "SUB-AT-2026-25R0886002205",
+    status: "active",
+    valorSubasta: 8546.25,
+    valorTasacion: 8546.25,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:02:25.380Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "A.U.D.I.",
+    model: "A3",
+    licensePlate: "5786GCM",
+    year: 2008,
+    vin: "WAUZZZ8P98A165034",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934091/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002205_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934092/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002205_img_4.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934096/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934100/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934105/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934110/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934114/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934118/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934123/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934127/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934132/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934136/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934140/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934144/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002205_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002206': {
+    boeId: "SUB-AT-2026-25R0886002206",
+    status: "active",
+    valorSubasta: 13949.75,
+    valorTasacion: 13949.75,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:02:58.729Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "KIA",
+    model: "SPORTAGE",
+    licensePlate: "5840JSB",
+    year: 2016,
+    vin: "U5YPG814AGL123149",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934146/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002206_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934146/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002206_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934147/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002206_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934147/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002206_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934148/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002206_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934152/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002206_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934156/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002206_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934160/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002206_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934165/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002206_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934169/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002206_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934173/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002206_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934178/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002206_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002207': {
+    boeId: "SUB-AT-2026-25R0886002207",
+    status: "active",
+    valorSubasta: 4787.25,
+    valorTasacion: 4787.25,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:03:32.484Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "VOLKSWAGEN",
+    model: "TOURAN",
+    licensePlate: "9821JTW",
+    year: 2005,
+    vin: "WVGZZZ1TZ5W141226",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934180/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002207_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934181/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002207_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934181/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002207_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934182/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002207_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934182/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002207_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934186/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002207_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934190/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002207_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934195/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002207_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934199/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002207_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934203/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002207_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934207/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002207_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934211/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002207_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002209': {
+    boeId: "SUB-AT-2026-25R0886002209",
+    status: "active",
+    valorSubasta: 9132.5,
+    valorTasacion: 9132.5,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:03:58.150Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "B.M.W.",
+    model: "118D AUT.",
+    licensePlate: "7552HCK",
+    year: 2011,
+    vin: "WBAUD71030P498177",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934214/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002209_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934214/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002209_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934215/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002209_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934216/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002209_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934216/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002209_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934220/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002209_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934224/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002209_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934229/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002209_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934233/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002209_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934237/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002209_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002210': {
+    boeId: "SUB-AT-2026-25R0886002210",
+    status: "active",
+    valorSubasta: 3099.5,
+    valorTasacion: 3099.5,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:04:36.660Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "CITROEN",
+    model: "C4",
+    licensePlate: "1996GFB",
+    year: 2008,
+    vin: "VF7LC9HXC74845121",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934239/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002210_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934240/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002210_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934241/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002210_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934241/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002210_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934242/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002210_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934246/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934250/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934254/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934259/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934263/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934267/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934272/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934276/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002210_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002211': {
+    boeId: "SUB-AT-2026-25R0886002211",
+    status: "active",
+    valorSubasta: 3049.5,
+    valorTasacion: 3049.5,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:05:06.901Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "FORD",
+    model: "C-MAX",
+    licensePlate: "8896FYN",
+    year: 2007,
+    vin: "WF0EXXGCDE7U70514",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934278/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002211_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934279/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002211_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934279/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002211_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934280/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002211_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934281/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002211_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934285/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002211_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934289/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002211_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934293/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002211_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934297/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002211_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934301/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002211_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934306/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002211_documento.jpg"}]
+  },
+  'subasta-sub-at-2026-25r0886002212': {
+    boeId: "SUB-AT-2026-25R0886002212",
+    status: "active",
+    valorSubasta: 12250.26,
+    valorTasacion: 15574.75,
+    province: "Desconocida",
+    city: "Desconocida",
+    publishedAt: "2026-04-11T19:05:47.262Z",
+    auctionDate: undefined,
+    boeUrl: "undefined",
+    assetCategory: "vehiculo",
+    brand: "OPEL",
+    model: "VIVARO",
+    licensePlate: "7264LCL",
+    year: 2019,
+    vin: "VXEVBYHVKL7002293",
+    images: ["https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934307/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002212_img_1.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934308/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002212_img_2.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934309/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002212_img_3.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934310/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002212_img_4.webp","https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934311/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002212_img_5.webp"],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: [{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934315/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934320/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934324/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934329/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934333/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934337/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934342/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"},{"name":"Documento","url":"https://res.cloudinary.com/dmw71xf7z/image/upload/v1775934346/activos_offmarket/documentos_imagenes/SUB-AT-2026-25R0886002212_documento.jpg"}]
+  },
+'subasta-sub-at-2024-23r4586001244': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -78,7 +528,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-rc-2026-2800500103325': {
+'subasta-sub-rc-2026-2800500103325': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -107,7 +557,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.87
   },
-  'subasta-sub-ja-2026-259726': {
+'subasta-sub-ja-2026-259726': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -136,7 +586,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.91
   },
-  'subasta-sub-ja-2026-259511': {
+'subasta-sub-ja-2026-259511': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -165,7 +615,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.94
   },
-  'subasta-sub-ja-2026-259733': {
+'subasta-sub-ja-2026-259733': {
     propertyType: "Piso",
     city: "FUENLABRADA",
     province: "Madrid",
@@ -194,7 +644,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.36
   },
-  'subasta-sub-ja-2026-259268': {
+'subasta-sub-ja-2026-259268': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -223,7 +673,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.46
   },
-  'subasta-sub-ja-2026-259417': {
+'subasta-sub-ja-2026-259417': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -252,7 +702,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.61
   },
-  'subasta-sub-ja-2026-259460': {
+'subasta-sub-ja-2026-259460': {
     propertyType: "Piso",
     city: "ALGETE",
     province: "Madrid",
@@ -281,7 +731,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.4
   },
-  'subasta-sub-at-2026-26r2886001050': {
+'subasta-sub-at-2026-26r2886001050': {
     propertyType: "Inmueble",
     city: "SANTA MARIA DE LA ALAMEDA",
     province: "Madrid",
@@ -310,7 +760,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-25r4786001402': {
+'subasta-sub-at-2026-25r4786001402': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -339,7 +789,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-259501': {
+'subasta-sub-ja-2026-259501': {
     propertyType: "Piso",
     city: "MELILLA",
     province: "Melilla",
@@ -368,7 +818,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: -0.03
   },
-  'subasta-sub-ja-2025-251932': {
+'subasta-sub-ja-2025-251932': {
     propertyType: "Piso",
     city: "Vitoria-Gasteiz",
     province: "Araba/Álava",
@@ -397,7 +847,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: -0.03
   },
-  'subasta-sub-ja-2026-257649': {
+'subasta-sub-ja-2026-257649': {
     propertyType: "Piso",
     city: "VALLADOLID",
     province: "Valladolid",
@@ -426,7 +876,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: -0.03
   },
-  'subasta-sub-ja-2026-259534': {
+'subasta-sub-ja-2026-259534': {
     propertyType: "Piso",
     city: "Salamanca",
     province: "Salamanca",
@@ -455,7 +905,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: -0.03
   },
-  'subasta-sub-ja-2026-259209': {
+'subasta-sub-ja-2026-259209': {
     propertyType: "Piso",
     city: "Torrejón del Rey",
     province: "Guadalajara",
@@ -484,7 +934,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: -0.03
   },
-  'subasta-sub-ja-2026-259425': {
+'subasta-sub-ja-2026-259425': {
     propertyType: "Piso",
     city: "CÁCERES",
     province: "Cáceres",
@@ -513,7 +963,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: -0.03
   },
-  'subasta-sub-ja-2026-259473': {
+'subasta-sub-ja-2026-259473': {
     propertyType: "Piso",
     city: "CÁCERES",
     province: "Cáceres",
@@ -542,7 +992,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.76
   },
-  'subasta-sub-ja-2026-259631': {
+'subasta-sub-ja-2026-259631': {
     propertyType: "Inmueble",
     city: "BURGOS",
     province: "Burgos",
@@ -571,7 +1021,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-257001': {
+'subasta-sub-ja-2026-257001': {
     propertyType: "Inmueble",
     city: "BURGOS",
     province: "Burgos",
@@ -600,7 +1050,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.31
   },
-  'subasta-sub-ja-2026-259450': {
+'subasta-sub-ja-2026-259450': {
     propertyType: "Inmueble",
     city: "Tardobispo",
     province: "Zamora",
@@ -629,7 +1079,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.7
   },
-  'subasta-sub-ja-2025-253549': {
+'subasta-sub-ja-2025-253549': {
     propertyType: "Piso",
     city: "EIBAR",
     province: "Gipuzkoa",
@@ -658,7 +1108,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.67
   },
-  'subasta-sub-ja-2025-253113': {
+'subasta-sub-ja-2025-253113': {
     propertyType: "Piso",
     city: "DONOSTIA",
     province: "Gipuzkoa",
@@ -687,7 +1137,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.66
   },
-  'subasta-sub-ja-2026-258579': {
+'subasta-sub-ja-2026-258579': {
     propertyType: "Piso",
     city: "EL ASTILLERO",
     province: "Cantabria",
@@ -716,7 +1166,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.43
   },
-  'subasta-sub-jv-2026-259274': {
+'subasta-sub-jv-2026-259274': {
     propertyType: "Inmueble",
     city: "PONTEVEDRA",
     province: "Pontevedra",
@@ -745,7 +1195,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.21
   },
-  'subasta-sub-ja-2026-259663': {
+'subasta-sub-ja-2026-259663': {
     propertyType: "Inmueble",
     city: "LOGROÑO",
     province: "La Rioja",
@@ -774,7 +1224,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.67
   },
-  'subasta-sub-ja-2026-257886': {
+'subasta-sub-ja-2026-257886': {
     propertyType: "Inmueble",
     city: "Puerto del Carmen",
     province: "Las Palmas",
@@ -803,7 +1253,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.56
   },
-  'subasta-sub-ja-2026-259290': {
+'subasta-sub-ja-2026-259290': {
     propertyType: "Piso",
     city: "GRANADA",
     province: "Granada",
@@ -832,7 +1282,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.37
   },
-  'subasta-sub-ja-2023-222460': {
+'subasta-sub-ja-2023-222460': {
     propertyType: "Inmueble",
     city: "ugijar",
     province: "Granada",
@@ -861,7 +1311,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.23
   },
-  'subasta-sub-ja-2026-258384': {
+'subasta-sub-ja-2026-258384': {
     propertyType: "Piso",
     city: "SAN ROQUE",
     province: "Cádiz",
@@ -890,7 +1340,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.61
   },
-  'subasta-sub-ja-2026-259366': {
+'subasta-sub-ja-2026-259366': {
     propertyType: "Piso",
     city: "VEJER DE LA FRONTERA",
     province: "Cádiz",
@@ -919,7 +1369,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2026-259315': {
+'subasta-sub-ja-2026-259315': {
     propertyType: "Piso",
     city: "DON BENITO",
     province: "Badajoz",
@@ -948,7 +1398,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.55
   },
-  'subasta-sub-ja-2026-258368': {
+'subasta-sub-ja-2026-258368': {
     propertyType: "Piso",
     city: "Badajoz",
     province: "Badajoz",
@@ -977,7 +1427,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.77
   },
-  'subasta-sub-ja-2026-259523': {
+'subasta-sub-ja-2026-259523': {
     propertyType: "Piso",
     city: "BENICARLO",
     province: "Castellón/Castelló",
@@ -1006,7 +1456,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2026-259172': {
+'subasta-sub-ja-2026-259172': {
     propertyType: "Piso",
     city: "CASTELLON",
     province: "Castellón/Castelló",
@@ -1035,7 +1485,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.62
   },
-  'subasta-sub-ja-2026-258824': {
+'subasta-sub-ja-2026-258824': {
     propertyType: "Inmueble",
     city: "Villa del Rio",
     province: "Córdoba",
@@ -1064,7 +1514,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.53
   },
-  'subasta-sub-ja-2026-257344': {
+'subasta-sub-ja-2026-257344': {
     propertyType: "Piso",
     city: "CASTILLO DE LOCUBIN",
     province: "Jaén",
@@ -1093,7 +1543,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.34
   },
-  'subasta-sub-ja-2026-259429': {
+'subasta-sub-ja-2026-259429': {
     propertyType: "Inmueble",
     city: "Carolina (La)",
     province: "Jaén",
@@ -1122,7 +1572,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.41
   },
-  'subasta-sub-ja-2025-255129': {
+'subasta-sub-ja-2025-255129': {
     propertyType: "Piso",
     city: "JAEN",
     province: "Jaén",
@@ -1151,7 +1601,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.67
   },
-  'subasta-sub-ja-2026-259589': {
+'subasta-sub-ja-2026-259589': {
     propertyType: "Piso",
     city: "SANT FELIU DE GUÍXOLS",
     province: "Girona",
@@ -1180,7 +1630,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.47
   },
-  'subasta-sub-ja-2026-258728': {
+'subasta-sub-ja-2026-258728': {
     propertyType: "Inmueble",
     city: "Lloret de Mar",
     province: "Girona",
@@ -1209,7 +1659,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.83
   },
-  'subasta-sub-ja-2026-259424': {
+'subasta-sub-ja-2026-259424': {
     propertyType: "Piso",
     city: "ALMERIA",
     province: "Almería",
@@ -1238,7 +1688,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.43
   },
-  'subasta-sub-ja-2026-259356': {
+'subasta-sub-ja-2026-259356': {
     propertyType: "Piso",
     city: "Palma",
     province: "Illes Balears",
@@ -1267,7 +1717,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.47
   },
-  'subasta-sub-ja-2024-238297': {
+'subasta-sub-ja-2024-238297': {
     propertyType: "Inmueble",
     city: "MARRATXI",
     province: "Illes Balears",
@@ -1296,7 +1746,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.83
   },
-  'subasta-sub-at-2026-26r0786001002': {
+'subasta-sub-at-2026-26r0786001002': {
     propertyType: "Piso",
     city: "LLUCMAJOR",
     province: "Illes Balears",
@@ -1325,7 +1775,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-25r0786001041': {
+'subasta-sub-at-2026-25r0786001041': {
     propertyType: "Piso",
     city: "LLUCMAJOR",
     province: "Illes Balears",
@@ -1354,7 +1804,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-259563': {
+'subasta-sub-ja-2026-259563': {
     propertyType: "Piso",
     city: "PALMA",
     province: "Illes Balears",
@@ -1383,7 +1833,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.64
   },
-  'subasta-sub-ja-2026-258559': {
+'subasta-sub-ja-2026-258559': {
     propertyType: "Piso",
     city: "Sant Antoni de Portmany",
     province: "Illes Balears",
@@ -1412,7 +1862,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.37
   },
-  'subasta-sub-ja-2026-257819': {
+'subasta-sub-ja-2026-257819': {
     propertyType: "Piso",
     city: "Alcantarilla",
     province: "Murcia",
@@ -1441,7 +1891,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.51
   },
-  'subasta-sub-ja-2026-257817': {
+'subasta-sub-ja-2026-257817': {
     propertyType: "Piso",
     city: "Ceutí",
     province: "Murcia",
@@ -1470,7 +1920,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.51
   },
-  'subasta-sub-ja-2026-257475': {
+'subasta-sub-ja-2026-257475': {
     propertyType: "Piso",
     city: "Alguazas",
     province: "Murcia",
@@ -1499,7 +1949,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.21
   },
-  'subasta-sub-ja-2026-251278': {
+'subasta-sub-ja-2026-251278': {
     propertyType: "Piso",
     city: "Almacelles",
     province: "Lleida",
@@ -1528,7 +1978,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.31
   },
-  'subasta-sub-ja-2023-208721': {
+'subasta-sub-ja-2023-208721': {
     propertyType: "Piso",
     city: "La Seu d'Urgell",
     province: "Lleida",
@@ -1557,7 +2007,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.25
   },
-  'subasta-sub-at-2026-26r0886001056': {
+'subasta-sub-at-2026-26r0886001056': {
     propertyType: "Piso",
     city: "LLEIDA",
     province: "Lleida",
@@ -1586,7 +2036,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-25r0886001718': {
+'subasta-sub-at-2026-25r0886001718': {
     propertyType: "Nave",
     city: "VILA-SANA",
     province: "Lleida",
@@ -1615,7 +2065,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 10,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-259191': {
+'subasta-sub-ja-2026-259191': {
     propertyType: "Piso",
     city: "OLIVA",
     province: "Valencia",
@@ -1644,7 +2094,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.7
   },
-  'subasta-sub-at-2026-26r4686001035': {
+'subasta-sub-at-2026-26r4686001035': {
     propertyType: "Nave",
     city: "DAIMUS",
     province: "Valencia",
@@ -1673,7 +2123,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-257418': {
+'subasta-sub-ja-2026-257418': {
     propertyType: "Inmueble",
     city: "TERRATEIG",
     province: "Valencia",
@@ -1702,7 +2152,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.32
   },
-  'subasta-sub-ja-2026-259449': {
+'subasta-sub-ja-2026-259449': {
     propertyType: "Inmueble",
     city: "Torredembarra",
     province: "Tarragona",
@@ -1731,7 +2181,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.27
   },
-  'subasta-sub-ja-2026-258626': {
+'subasta-sub-ja-2026-258626': {
     propertyType: "Piso",
     city: "El Vendrell",
     province: "Tarragona",
@@ -1760,7 +2210,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.4
   },
-  'subasta-sub-ja-2026-259219': {
+'subasta-sub-ja-2026-259219': {
     propertyType: "Piso",
     city: "El Vendrell",
     province: "Tarragona",
@@ -1789,7 +2239,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.8
   },
-  'subasta-sub-ja-2025-252787': {
+'subasta-sub-ja-2025-252787': {
     propertyType: "Inmueble",
     city: "EL MORELL",
     province: "Tarragona",
@@ -1818,7 +2268,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.52
   },
-  'subasta-sub-ja-2026-259731': {
+'subasta-sub-ja-2026-259731': {
     propertyType: "Piso",
     city: "La Bisbal del Penedès",
     province: "Tarragona",
@@ -1847,7 +2297,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.3
   },
-  'subasta-sub-ja-2026-259146': {
+'subasta-sub-ja-2026-259146': {
     propertyType: "Piso",
     city: "TARRAGOONA",
     province: "Tarragona",
@@ -1876,7 +2326,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.53
   },
-  'subasta-sub-ja-2026-258993': {
+'subasta-sub-ja-2026-258993': {
     propertyType: "Piso",
     city: "Calafell",
     province: "Tarragona",
@@ -1905,7 +2355,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.29
   },
-  'subasta-sub-ja-2026-257438': {
+'subasta-sub-ja-2026-257438': {
     propertyType: "Piso",
     city: "ALFARA DE CARLES",
     province: "Tarragona",
@@ -1934,7 +2384,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.49
   },
-  'subasta-sub-ja-2026-259721': {
+'subasta-sub-ja-2026-259721': {
     propertyType: "Piso",
     city: "El Vendrell",
     province: "Tarragona",
@@ -1963,7 +2413,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.31
   },
-  'subasta-sub-ja-2026-259286': {
+'subasta-sub-ja-2026-259286': {
     propertyType: "Piso",
     city: "Vilallonga del Camp",
     province: "Tarragona",
@@ -1992,7 +2442,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.27
   },
-  'subasta-sub-ja-2026-258468': {
+'subasta-sub-ja-2026-258468': {
     propertyType: "Inmueble",
     city: "La Ràpita",
     province: "Tarragona",
@@ -2021,7 +2471,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.4
   },
-  'subasta-sub-ja-2026-259089': {
+'subasta-sub-ja-2026-259089': {
     propertyType: "Piso",
     city: "Torredembarra",
     province: "Tarragona",
@@ -2050,7 +2500,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.32
   },
-  'subasta-sub-ja-2025-250879': {
+'subasta-sub-ja-2025-250879': {
     propertyType: "Piso",
     city: "Estepona",
     province: "Málaga",
@@ -2079,7 +2529,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.24
   },
-  'subasta-sub-at-2026-25r2986001250': {
+'subasta-sub-at-2026-25r2986001250': {
     propertyType: "Piso",
     city: "MARBELLA",
     province: "Málaga",
@@ -2108,7 +2558,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-25r2986001213': {
+'subasta-sub-at-2026-25r2986001213': {
     propertyType: "Piso",
     city: "BENALMADENA",
     province: "Málaga",
@@ -2137,7 +2587,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-259540': {
+'subasta-sub-ja-2026-259540': {
     propertyType: "Piso",
     city: "MIJAS",
     province: "Málaga",
@@ -2166,7 +2616,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.22
   },
-  'subasta-sub-ja-2026-258443': {
+'subasta-sub-ja-2026-258443': {
     propertyType: "Inmueble",
     city: "Mijas",
     province: "Málaga",
@@ -2195,7 +2645,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.61
   },
-  'subasta-sub-ja-2026-259395': {
+'subasta-sub-ja-2026-259395': {
     propertyType: "Piso",
     city: "TORREJON DE ARDOZ",
     province: "Madrid",
@@ -2224,7 +2674,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-259301': {
+'subasta-sub-ja-2026-259301': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -2253,7 +2703,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-259455': {
+'subasta-sub-ja-2026-259455': {
     propertyType: "Inmueble",
     city: "Madrid",
     province: "Madrid",
@@ -2282,7 +2732,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.28
   },
-  'subasta-sub-ja-2026-259152': {
+'subasta-sub-ja-2026-259152': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -2311,7 +2761,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.25
   },
-  'subasta-sub-jv-2026-259616': {
+'subasta-sub-jv-2026-259616': {
     propertyType: "Inmueble",
     city: "MÓSTOLES",
     province: "Madrid",
@@ -2340,7 +2790,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.57
   },
-  'subasta-sub-ja-2026-259106': {
+'subasta-sub-ja-2026-259106': {
     propertyType: "Inmueble",
     city: "Santa Pola",
     province: "Alicante/Alacant",
@@ -2369,7 +2819,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.19
   },
-  'subasta-sub-ja-2026-259057': {
+'subasta-sub-ja-2026-259057': {
     propertyType: "Piso",
     city: "L'ALFÀS DEL PI",
     province: "Alicante/Alacant",
@@ -2398,7 +2848,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2026-258486': {
+'subasta-sub-ja-2026-258486': {
     propertyType: "Piso",
     city: "PILAR DE LA HORADADA",
     province: "Alicante/Alacant",
@@ -2427,7 +2877,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.46
   },
-  'subasta-sub-at-2026-26r4686001043': {
+'subasta-sub-at-2026-26r4686001043': {
     propertyType: "Nave",
     city: "ALTEA",
     province: "Alicante/Alacant",
@@ -2456,7 +2906,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258872': {
+'subasta-sub-ja-2026-258872': {
     propertyType: "Inmueble",
     city: "ORIHUELA",
     province: "Alicante/Alacant",
@@ -2485,7 +2935,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.65
   },
-  'subasta-sub-ja-2026-258042': {
+'subasta-sub-ja-2026-258042': {
     propertyType: "Piso",
     city: "EL CAMPELLO",
     province: "Alicante/Alacant",
@@ -2514,7 +2964,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2026-259189': {
+'subasta-sub-ja-2026-259189': {
     propertyType: "Piso",
     city: "Vilafranca del Penedès",
     province: "Barcelona",
@@ -2543,7 +2993,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.4
   },
-  'subasta-sub-ja-2026-259716': {
+'subasta-sub-ja-2026-259716': {
     propertyType: "Piso",
     city: "BARCELONA",
     province: "Barcelona",
@@ -2572,7 +3022,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.46
   },
-  'subasta-sub-ja-2026-259266': {
+'subasta-sub-ja-2026-259266': {
     propertyType: "Inmueble",
     city: "L'Ametlla del Valles",
     province: "Barcelona",
@@ -2601,7 +3051,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.36
   },
-  'subasta-sub-ja-2026-259430': {
+'subasta-sub-ja-2026-259430': {
     propertyType: "Piso",
     city: "L'AMETLLA DEL VALLES",
     province: "Barcelona",
@@ -2630,7 +3080,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.66
   },
-  'subasta-sub-ja-2026-258984': {
+'subasta-sub-ja-2026-258984': {
     propertyType: "Piso",
     city: "VILASSAR DE MAR",
     province: "Barcelona",
@@ -2659,7 +3109,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.77
   },
-  'subasta-sub-ja-2026-258864': {
+'subasta-sub-ja-2026-258864': {
     propertyType: "Piso",
     city: "Barcelona",
     province: "Barcelona",
@@ -2688,7 +3138,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-257893': {
+'subasta-sub-ja-2026-257893': {
     propertyType: "Inmueble",
     city: "BARCELONA",
     province: "Barcelona",
@@ -2717,7 +3167,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-258168': {
+'subasta-sub-ja-2026-258168': {
     propertyType: "Piso",
     city: "SANT BOI DE LLOBREGAT",
     province: "Barcelona",
@@ -2746,7 +3196,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.43
   },
-  'subasta-sub-ja-2026-259614': {
+'subasta-sub-ja-2026-259614': {
     propertyType: "Inmueble",
     city: "Esparreguera",
     province: "Barcelona",
@@ -2775,7 +3225,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.8
   },
-  'subasta-sub-ja-2026-259476': {
+'subasta-sub-ja-2026-259476': {
     propertyType: "Inmueble",
     city: "MARGANELL",
     province: "Barcelona",
@@ -2804,7 +3254,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.23
   },
-  'subasta-sub-ja-2025-256086': {
+'subasta-sub-ja-2025-256086': {
     propertyType: "Nave",
     city: "Vilassar de Dalt",
     province: "Barcelona",
@@ -2833,7 +3283,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.67
   },
-  'subasta-sub-ja-2026-259578': {
+'subasta-sub-ja-2026-259578': {
     propertyType: "Piso",
     city: "barcelona",
     province: "Barcelona",
@@ -2862,7 +3312,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.37
   },
-  'subasta-sub-ja-2026-259422': {
+'subasta-sub-ja-2026-259422': {
     propertyType: "Piso",
     city: "BARCELONA",
     province: "Barcelona",
@@ -2891,7 +3341,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.47
   },
-  'subasta-sub-ja-2026-259310': {
+'subasta-sub-ja-2026-259310': {
     propertyType: "Inmueble",
     city: "BARCELONA",
     province: "Barcelona",
@@ -2920,7 +3370,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.23
   },
-  'subasta-sub-ja-2024-237906': {
+'subasta-sub-ja-2024-237906': {
     propertyType: "Piso",
     city: "Pineda de Mar",
     province: "Barcelona",
@@ -2949,7 +3399,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.74
   },
-  'subasta-sub-ja-2024-228467': {
+'subasta-sub-ja-2024-228467': {
     propertyType: "Piso",
     city: "SANT CEBRIA DE VALLALTA",
     province: "Barcelona",
@@ -2978,7 +3428,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.34
   },
-  'subasta-sub-ja-2026-257445': {
+'subasta-sub-ja-2026-257445': {
     propertyType: "Piso",
     city: "Arganda del Rey",
     province: "Madrid",
@@ -3007,7 +3457,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.46,
   },
-  'subasta-sub-ja-2025-256263': {
+'subasta-sub-ja-2025-256263': {
     propertyType: "Piso",
     city: "ZAMORA",
     province: "Zamora",
@@ -3038,7 +3488,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.31
   },
-  'subasta-sub-ja-2026-258415': {
+'subasta-sub-ja-2026-258415': {
     propertyType: "Piso",
     city: "AVILA",
     province: "Ávila",
@@ -3067,7 +3517,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.49
   },
-  'subasta-sub-ja-2026-257360': {
+'subasta-sub-ja-2026-257360': {
     propertyType: "Piso",
     city: "AVILA",
     province: "Ávila",
@@ -3098,7 +3548,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.47
   },
-  'subasta-sub-ja-2026-258888': {
+'subasta-sub-ja-2026-258888': {
     propertyType: "Inmueble",
     city: "VILLANUEVA DE AVILA",
     province: "Ávila",
@@ -3127,7 +3577,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.31
   },
-  'subasta-sub-ja-2026-258427': {
+'subasta-sub-ja-2026-258427': {
     propertyType: "Piso",
     city: "BEJAR",
     province: "Salamanca",
@@ -3156,7 +3606,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2026-257483': {
+'subasta-sub-ja-2026-257483': {
     propertyType: "Inmueble",
     city: "SALAMANCA",
     province: "Salamanca",
@@ -3185,7 +3635,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.52
   },
-  'subasta-sub-ja-2025-253237': {
+'subasta-sub-ja-2025-253237': {
     propertyType: "Piso",
     city: "Ourense",
     province: "Ourense",
@@ -3214,7 +3664,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.38
   },
-  'subasta-sub-ja-2026-259006': {
+'subasta-sub-ja-2026-259006': {
     propertyType: "Inmueble",
     city: "Cabanillas del Campo",
     province: "Guadalajara",
@@ -3243,7 +3693,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.36
   },
-  'subasta-sub-ja-2026-258771': {
+'subasta-sub-ja-2026-258771': {
     propertyType: "Piso",
     city: "AZUQUECA DE HENARES",
     province: "Guadalajara",
@@ -3272,7 +3722,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.29
   },
-  'subasta-sub-ja-2026-258678': {
+'subasta-sub-ja-2026-258678': {
     propertyType: "Piso",
     city: "MARCHAMALO",
     province: "Guadalajara",
@@ -3301,7 +3751,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-258628': {
+'subasta-sub-ja-2026-258628': {
     propertyType: "Inmueble",
     city: "Foz",
     province: "Lugo",
@@ -3330,7 +3780,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.78
   },
-  'subasta-sub-ja-2026-258513': {
+'subasta-sub-ja-2026-258513': {
     propertyType: "Piso",
     city: "SANTANDER",
     province: "Cantabria",
@@ -3359,7 +3809,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.43
   },
-  'subasta-sub-ja-2025-250616': {
+'subasta-sub-ja-2025-250616': {
     propertyType: "Piso",
     city: "BURGOS",
     province: "Burgos",
@@ -3388,7 +3838,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.31
   },
-  'subasta-sub-ja-2026-259208': {
+'subasta-sub-ja-2026-259208': {
     propertyType: "Inmueble",
     city: "BURGOS",
     province: "Burgos",
@@ -3417,7 +3867,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.7
   },
-  'subasta-sub-at-2026-25r4786001256': {
+'subasta-sub-at-2026-25r4786001256': {
     propertyType: "Piso",
     city: "BURGOS",
     province: "Burgos",
@@ -3446,7 +3896,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2025-253446': {
+'subasta-sub-ja-2025-253446': {
     propertyType: "Piso",
     city: "ILARDUYA, ASPARRENA",
     province: "Araba/Álava",
@@ -3475,7 +3925,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.55
   },
-  'subasta-sub-ja-2026-256676': {
+'subasta-sub-ja-2026-256676': {
     propertyType: "Piso",
     city: "Vitoria-Gasteiz",
     province: "Araba/Álava",
@@ -3504,7 +3954,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.46
   },
-  'subasta-sub-ja-2026-256978': {
+'subasta-sub-ja-2026-256978': {
     propertyType: "Piso",
     city: "Mahón",
     province: "Illes Balears",
@@ -3533,7 +3983,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.73
   },
-  'subasta-sub-ja-2026-258286': {
+'subasta-sub-ja-2026-258286': {
     propertyType: "Inmueble",
     city: "VALLADOLID",
     province: "Valladolid",
@@ -3562,7 +4012,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.53
   },
-  'subasta-sub-at-2026-25r4786001336': {
+'subasta-sub-at-2026-25r4786001336': {
     propertyType: "Piso",
     city: "BOECILLO",
     province: "Valladolid",
@@ -3591,7 +4041,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258327': {
+'subasta-sub-ja-2026-258327': {
     propertyType: "Piso",
     city: "CHICLANA DE LA FRONTERA",
     province: "Cádiz",
@@ -3620,7 +4070,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.26
   },
-  'subasta-sub-ja-2026-258826': {
+'subasta-sub-ja-2026-258826': {
     propertyType: "Piso",
     city: "EL PUERTO DE SANTA MARIA",
     province: "Cádiz",
@@ -3649,7 +4099,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.36
   },
-  'subasta-sub-ja-2025-245415': {
+'subasta-sub-ja-2025-245415': {
     propertyType: "Inmueble",
     city: "SAN FERNADO",
     province: "Cádiz",
@@ -3678,7 +4128,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.47
   },
-  'subasta-sub-ja-2026-258901': {
+'subasta-sub-ja-2026-258901': {
     propertyType: "Piso",
     city: "EL PUERTO DE SANTA MARIA",
     province: "Cádiz",
@@ -3707,7 +4157,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.52
   },
-  'subasta-sub-ja-2025-254120': {
+'subasta-sub-ja-2025-254120': {
     propertyType: "Piso",
     city: "JEREZ DE LA FRONTERA",
     province: "Cádiz",
@@ -3736,7 +4186,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2026-257542': {
+'subasta-sub-ja-2026-257542': {
     propertyType: "Inmueble",
     city: "CASARRUBIOS DEL MONTE",
     province: "Toledo",
@@ -3765,7 +4215,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.36
   },
-  'subasta-sub-ja-2026-258717': {
+'subasta-sub-ja-2026-258717': {
     propertyType: "Piso",
     city: "Villaluenga de la Sagra",
     province: "Toledo",
@@ -3794,7 +4244,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.37
   },
-  'subasta-sub-ja-2025-252337': {
+'subasta-sub-ja-2025-252337': {
     propertyType: "Inmueble",
     city: "LOS NAVALUCILLOS",
     province: "Toledo",
@@ -3823,7 +4273,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.4
   },
-  'subasta-sub-ja-2026-258928': {
+'subasta-sub-ja-2026-258928': {
     propertyType: "Piso",
     city: "PEPINO",
     province: "Toledo",
@@ -3852,7 +4302,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.57
   },
-  'subasta-sub-at-2026-25r2886001713': {
+'subasta-sub-at-2026-25r2886001713': {
     propertyType: "Piso",
     city: "ILLESCAS",
     province: "Toledo",
@@ -3881,7 +4331,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258457': {
+'subasta-sub-ja-2026-258457': {
     propertyType: "Inmueble",
     city: "TELDE",
     province: "Las Palmas",
@@ -3910,7 +4360,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.38
   },
-  'subasta-sub-ja-2025-250986': {
+'subasta-sub-ja-2025-250986': {
     propertyType: "Piso",
     city: "Ribeira",
     province: "A Coruña",
@@ -3939,7 +4389,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.37
   },
-  'subasta-sub-at-2026-25r1586001157': {
+'subasta-sub-at-2026-25r1586001157': {
     propertyType: "Nave",
     city: "CEDEIRA",
     province: "A Coruña",
@@ -3968,7 +4418,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 10,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258546': {
+'subasta-sub-ja-2026-258546': {
     propertyType: "Piso",
     city: "PAMPLONA",
     province: "Navarra",
@@ -3997,7 +4447,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.5
   },
-  'subasta-sub-ja-2025-251003': {
+'subasta-sub-ja-2025-251003': {
     propertyType: "Piso",
     city: "HUELVA",
     province: "Huelva",
@@ -4026,7 +4476,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.45
   },
-  'subasta-sub-ja-2026-258805': {
+'subasta-sub-ja-2026-258805': {
     propertyType: "Nave",
     city: "GALAR",
     province: "Navarra",
@@ -4055,7 +4505,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.79
   },
-  'subasta-sub-ja-2026-258720': {
+'subasta-sub-ja-2026-258720': {
     propertyType: "Inmueble",
     city: "almonte",
     province: "Huelva",
@@ -4084,7 +4534,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.37
   },
-  'subasta-sub-ja-2025-250608': {
+'subasta-sub-ja-2025-250608': {
     propertyType: "Piso",
     city: "ROCIANA DEL CONDADO",
     province: "Huelva",
@@ -4113,7 +4563,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.62
   },
-  'subasta-sub-ja-2026-258814': {
+'subasta-sub-ja-2026-258814': {
     propertyType: "Inmueble",
     city: "HUELVA",
     province: "Huelva",
@@ -4142,7 +4592,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.6
   },
-  'subasta-sub-at-2026-25r4186001807': {
+'subasta-sub-at-2026-25r4186001807': {
     propertyType: "Piso",
     city: "PUNTA UMBRIA",
     province: "Huelva",
@@ -4171,7 +4621,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-259278': {
+'subasta-sub-ja-2026-259278': {
     propertyType: "Piso",
     city: "MARMOLEJO",
     province: "Jaén",
@@ -4200,7 +4650,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.43
   },
-  'subasta-sub-ja-2026-258417': {
+'subasta-sub-ja-2026-258417': {
     propertyType: "Piso",
     city: "LUCENA",
     province: "Córdoba",
@@ -4229,7 +4679,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.22
   },
-  'subasta-sub-ja-2026-257866': {
+'subasta-sub-ja-2026-257866': {
     propertyType: "Piso",
     city: "CORDOBA",
     province: "Córdoba",
@@ -4258,7 +4708,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.5
   },
-  'subasta-sub-nh-2026-1606124': {
+'subasta-sub-nh-2026-1606124': {
     propertyType: "Inmueble",
     city: "Vinaròs",
     province: "Castellón/Castelló",
@@ -4287,7 +4737,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.54
   },
-  'subasta-sub-ja-2025-254125': {
+'subasta-sub-ja-2025-254125': {
     propertyType: "Piso",
     city: "CORDOBA",
     province: "Córdoba",
@@ -4316,7 +4766,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.61
   },
-  'subasta-sub-ja-2026-258935': {
+'subasta-sub-ja-2026-258935': {
     propertyType: "Inmueble",
     city: "CASTELLÓN",
     province: "Castellón/Castelló",
@@ -4345,7 +4795,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.22
   },
-  'subasta-sub-ja-2026-258451': {
+'subasta-sub-ja-2026-258451': {
     propertyType: "Piso",
     city: "OROPESA DEL MAR",
     province: "Castellón/Castelló",
@@ -4374,7 +4824,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2026-257523': {
+'subasta-sub-ja-2026-257523': {
     propertyType: "Inmueble",
     city: "Cirat",
     province: "Castellón/Castelló",
@@ -4403,7 +4853,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.58
   },
-  'subasta-sub-ja-2026-258898': {
+'subasta-sub-ja-2026-258898': {
     propertyType: "Piso",
     city: "Bilbao",
     province: "Vizcaya",
@@ -4432,7 +4882,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-258371': {
+'subasta-sub-ja-2026-258371': {
     propertyType: "Piso",
     city: "Barakaldo",
     province: "Vizcaya",
@@ -4461,7 +4911,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.46
   },
-  'subasta-sub-ja-2026-259185': {
+'subasta-sub-ja-2026-259185': {
     propertyType: "Inmueble",
     city: "BLBAO",
     province: "Vizcaya",
@@ -4490,7 +4940,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.49
   },
-  'subasta-sub-ja-2026-259032': {
+'subasta-sub-ja-2026-259032': {
     propertyType: "Piso",
     city: "BILBAO",
     province: "Vizcaya",
@@ -4519,7 +4969,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.37
   },
-  'subasta-sub-ja-2026-255601': {
+'subasta-sub-ja-2026-255601': {
     propertyType: "Piso",
     city: "DURANGO",
     province: "Vizcaya",
@@ -4548,7 +4998,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.2
   },
-  'subasta-sub-ja-2026-258554': {
+'subasta-sub-ja-2026-258554': {
     propertyType: "Inmueble",
     city: "Arbúcies",
     province: "Girona",
@@ -4577,7 +5027,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.3
   },
-  'subasta-sub-ja-2025-255318': {
+'subasta-sub-ja-2025-255318': {
     propertyType: "Inmueble",
     city: "Salt",
     province: "Girona",
@@ -4606,7 +5056,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.85
   },
-  'subasta-sub-ja-2026-258361': {
+'subasta-sub-ja-2026-258361': {
     propertyType: "Piso",
     city: "Lloret de Mar",
     province: "Girona",
@@ -4635,7 +5085,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.51
   },
-  'subasta-sub-ja-2026-257705': {
+'subasta-sub-ja-2026-257705': {
     propertyType: "Piso",
     city: "Roses",
     province: "Girona",
@@ -4664,7 +5114,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-258723': {
+'subasta-sub-ja-2026-258723': {
     propertyType: "Piso",
     city: "MASSANES",
     province: "Girona",
@@ -4693,7 +5143,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.25
   },
-  'subasta-sub-ja-2026-258722': {
+'subasta-sub-ja-2026-258722': {
     propertyType: "Inmueble",
     city: "Blanes",
     province: "Girona",
@@ -4722,7 +5172,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.84
   },
-  'subasta-sub-ja-2026-240887': {
+'subasta-sub-ja-2026-240887': {
     propertyType: "Inmueble",
     city: "FIGUERES",
     province: "Girona",
@@ -4751,7 +5201,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.47
   },
-  'subasta-sub-ja-2026-258223': {
+'subasta-sub-ja-2026-258223': {
     propertyType: "Nave",
     city: "GUIMARAN",
     province: "Asturias",
@@ -4780,7 +5230,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.35
   },
-  'subasta-sub-ja-2026-259361': {
+'subasta-sub-ja-2026-259361': {
     propertyType: "Piso",
     city: "Lloret de Mar",
     province: "Girona",
@@ -4809,7 +5259,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.62
   },
-  'subasta-sub-at-2026-26r3386001012': {
+'subasta-sub-at-2026-26r3386001012': {
     propertyType: "Nave",
     city: "GIJON",
     province: "Asturias",
@@ -4838,7 +5288,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 10,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-26r3386001013': {
+'subasta-sub-at-2026-26r3386001013': {
     propertyType: "Piso",
     city: "SIERO",
     province: "Asturias",
@@ -4867,7 +5317,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2025-253245': {
+'subasta-sub-ja-2025-253245': {
     propertyType: "Inmueble",
     city: "OVIEDO",
     province: "Asturias",
@@ -4896,7 +5346,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.45
   },
-  'subasta-sub-ja-2026-259103': {
+'subasta-sub-ja-2026-259103': {
     propertyType: "Piso",
     city: "OVIEDO",
     province: "Asturias",
@@ -4925,7 +5375,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.56
   },
-  'subasta-sub-ja-2026-256817': {
+'subasta-sub-ja-2026-256817': {
     propertyType: "Inmueble",
     city: "Pont de Suert (El)",
     province: "Lleida",
@@ -4954,7 +5404,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.26
   },
-  'subasta-sub-ja-2025-255216': {
+'subasta-sub-ja-2025-255216': {
     propertyType: "Piso",
     city: "Alfarras",
     province: "Lleida",
@@ -4983,7 +5433,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-258444': {
+'subasta-sub-ja-2026-258444': {
     propertyType: "Inmueble",
     city: "VILLAMEDIANA DE IREGUA",
     province: "La Rioja",
@@ -5012,7 +5462,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.45
   },
-  'subasta-sub-ja-2025-249504': {
+'subasta-sub-ja-2025-249504': {
     propertyType: "Piso",
     city: "ARNEDO",
     province: "La Rioja",
@@ -5041,7 +5491,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.34
   },
-  'subasta-sub-ja-2026-258638': {
+'subasta-sub-ja-2026-258638': {
     propertyType: "Inmueble",
     city: "LARDERO",
     province: "La Rioja",
@@ -5070,7 +5520,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.38
   },
-  'subasta-sub-ja-2026-257261': {
+'subasta-sub-ja-2026-257261': {
     propertyType: "Piso",
     city: "SOJUELA",
     province: "La Rioja",
@@ -5099,7 +5549,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.51
   },
-  'subasta-sub-ja-2026-258015': {
+'subasta-sub-ja-2026-258015': {
     propertyType: "Piso",
     city: "HERREMELLURI",
     province: "La Rioja",
@@ -5128,7 +5578,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.44
   },
-  'subasta-sub-ja-2026-258614': {
+'subasta-sub-ja-2026-258614': {
     propertyType: "Piso",
     city: "TROBAJO DEL CAMINO",
     province: "León",
@@ -5157,7 +5607,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.45
   },
-  'subasta-sub-ja-2026-256612': {
+'subasta-sub-ja-2026-256612': {
     propertyType: "Piso",
     city: "PONFERRADA",
     province: "León",
@@ -5186,7 +5636,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.5
   },
-  'subasta-sub-at-2026-25r3886001097': {
+'subasta-sub-at-2026-25r3886001097': {
     propertyType: "Piso",
     city: "ROSARIO (EL)",
     province: "Santa Cruz de Tenerife",
@@ -5215,7 +5665,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258724': {
+'subasta-sub-ja-2026-258724': {
     propertyType: "Inmueble",
     city: "Candelaria",
     province: "Santa Cruz de Tenerife",
@@ -5244,7 +5694,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.67
   },
-  'subasta-sub-ja-2026-257920': {
+'subasta-sub-ja-2026-257920': {
     propertyType: "Piso",
     city: "CAJAR",
     province: "Granada",
@@ -5273,7 +5723,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.78
   },
-  'subasta-sub-ja-2026-258407': {
+'subasta-sub-ja-2026-258407': {
     propertyType: "Piso",
     city: "Roquetas de Mar",
     province: "Almería",
@@ -5302,7 +5752,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.68
   },
-  'subasta-sub-ja-2026-258475': {
+'subasta-sub-ja-2026-258475': {
     propertyType: "Piso",
     city: "ROQUETAS DE MAR",
     province: "Almería",
@@ -5331,7 +5781,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.53
   },
-  'subasta-sub-ja-2026-257279': {
+'subasta-sub-ja-2026-257279': {
     propertyType: "Piso",
     city: "EL EJIDO",
     province: "Almería",
@@ -5360,7 +5810,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.83
   },
-  'subasta-sub-ja-2025-248128': {
+'subasta-sub-ja-2025-248128': {
     propertyType: "Inmueble",
     city: "EL PERELLO",
     province: "Tarragona",
@@ -5389,7 +5839,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.4
   },
-  'subasta-sub-ja-2025-254516': {
+'subasta-sub-ja-2025-254516': {
     propertyType: "Inmueble",
     city: "La Pineda / Vila-seca",
     province: "Tarragona",
@@ -5418,7 +5868,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.55
   },
-  'subasta-sub-ja-2026-258897': {
+'subasta-sub-ja-2026-258897': {
     propertyType: "Inmueble",
     city: "Vila-seca",
     province: "Tarragona",
@@ -5447,7 +5897,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.48
   },
-  'subasta-sub-ja-2025-249383': {
+'subasta-sub-ja-2025-249383': {
     propertyType: "Inmueble",
     city: "LA FIGUERA",
     province: "Tarragona",
@@ -5476,7 +5926,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.51
   },
-  'subasta-sub-ja-2026-258836': {
+'subasta-sub-ja-2026-258836': {
     propertyType: "Piso",
     city: "La Pobla de Montornès",
     province: "Tarragona",
@@ -5505,7 +5955,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.32
   },
-  'subasta-sub-ja-2024-230698': {
+'subasta-sub-ja-2024-230698': {
     propertyType: "Piso",
     city: "BENIFALLET",
     province: "Tarragona",
@@ -5534,7 +5984,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0.27
   },
-  'subasta-sub-ja-2025-253044': {
+'subasta-sub-ja-2025-253044': {
     propertyType: "Piso",
     city: "T",
     province: "Tarragona",
@@ -5563,7 +6013,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.5
   },
-  'subasta-sub-ja-2026-257314': {
+'subasta-sub-ja-2026-257314': {
     propertyType: "Piso",
     city: "Alcantarilla",
     province: "Murcia",
@@ -5592,7 +6042,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.22
   },
-  'subasta-sub-ja-2026-249795': {
+'subasta-sub-ja-2026-249795': {
     propertyType: "Piso",
     city: "Murcia",
     province: "Murcia",
@@ -5621,7 +6071,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.18
   },
-  'subasta-sub-ja-2026-256454': {
+'subasta-sub-ja-2026-256454': {
     propertyType: "Piso",
     city: "Murcia",
     province: "Murcia",
@@ -5650,7 +6100,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.35
   },
-  'subasta-sub-ja-2025-248495': {
+'subasta-sub-ja-2025-248495': {
     propertyType: "Piso",
     city: "MAZARRON",
     province: "Murcia",
@@ -5679,7 +6129,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.4
   },
-  'subasta-sub-ja-2026-258949': {
+'subasta-sub-ja-2026-258949': {
     propertyType: "Piso",
     city: "Mazarrón",
     province: "Murcia",
@@ -5708,7 +6158,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.27
   },
-  'subasta-sub-ja-2026-258708': {
+'subasta-sub-ja-2026-258708': {
     propertyType: "Piso",
     city: "MURCIA",
     province: "Murcia",
@@ -5737,7 +6187,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.59
   },
-  'subasta-sub-ja-2026-257315': {
+'subasta-sub-ja-2026-257315': {
     propertyType: "Piso",
     city: "Molina de Segura",
     province: "Murcia",
@@ -5766,7 +6216,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.34
   },
-  'subasta-sub-ja-2026-257102': {
+'subasta-sub-ja-2026-257102': {
     propertyType: "Piso",
     city: "Murcia",
     province: "Murcia",
@@ -5795,7 +6245,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.24
   },
-  'subasta-sub-ja-2026-256889': {
+'subasta-sub-ja-2026-256889': {
     propertyType: "Piso",
     city: "Molina de Segura",
     province: "Murcia",
@@ -5824,7 +6274,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.38
   },
-  'subasta-sub-ja-2025-251609': {
+'subasta-sub-ja-2025-251609': {
     propertyType: "Piso",
     city: "Águilas",
     province: "Murcia",
@@ -5853,7 +6303,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.41
   },
-  'subasta-sub-ja-2026-254127': {
+'subasta-sub-ja-2026-254127': {
     propertyType: "Piso",
     city: "Murcia",
     province: "Murcia",
@@ -5882,7 +6332,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.23
   },
-  'subasta-sub-ja-2026-257818': {
+'subasta-sub-ja-2026-257818': {
     propertyType: "Piso",
     city: "Murcia",
     province: "Murcia",
@@ -5911,7 +6361,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.65
   },
-  'subasta-sub-ja-2026-257623': {
+'subasta-sub-ja-2026-257623': {
     propertyType: "Piso",
     city: "MURCIA",
     province: "Murcia",
@@ -5940,7 +6390,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.51
   },
-  'subasta-sub-ja-2026-257327': {
+'subasta-sub-ja-2026-257327': {
     propertyType: "Piso",
     city: "Murcia",
     province: "Murcia",
@@ -5969,7 +6419,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.44
   },
-  'subasta-sub-ja-2025-247781': {
+'subasta-sub-ja-2025-247781': {
     propertyType: "Piso",
     city: "Zaragoza",
     province: "Zaragoza",
@@ -5998,7 +6448,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.65
   },
-  'subasta-sub-ja-2025-254602': {
+'subasta-sub-ja-2025-254602': {
     propertyType: "Piso",
     city: "ZARAGOZA",
     province: "Zaragoza",
@@ -6027,7 +6477,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.66
   },
-  'subasta-sub-ja-2026-258818': {
+'subasta-sub-ja-2026-258818': {
     propertyType: "Piso",
     city: "VÉLEZ MÁLAGA",
     province: "Málaga",
@@ -6056,7 +6506,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.41
   },
-  'subasta-sub-ja-2026-258172': {
+'subasta-sub-ja-2026-258172': {
     propertyType: "Piso",
     city: "Mijas",
     province: "Málaga",
@@ -6085,7 +6535,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.19
   },
-  'subasta-sub-ja-2026-257723': {
+'subasta-sub-ja-2026-257723': {
     propertyType: "Piso",
     city: "Mijas",
     province: "Málaga",
@@ -6114,7 +6564,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.46
   },
-  'subasta-sub-ja-2026-257242': {
+'subasta-sub-ja-2026-257242': {
     propertyType: "Piso",
     city: "MANILVA",
     province: "Málaga",
@@ -6143,7 +6593,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.18
   },
-  'subasta-sub-ja-2026-259285': {
+'subasta-sub-ja-2026-259285': {
     propertyType: "Piso",
     city: "Marbella",
     province: "Málaga",
@@ -6172,7 +6622,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.24
   },
-  'subasta-sub-ja-2026-259113': {
+'subasta-sub-ja-2026-259113': {
     propertyType: "Piso",
     city: "ESTEPONA",
     province: "Málaga",
@@ -6201,7 +6651,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.51
   },
-  'subasta-sub-ja-2026-259063': {
+'subasta-sub-ja-2026-259063': {
     propertyType: "Piso",
     city: "ANTEQUERA",
     province: "Málaga",
@@ -6230,7 +6680,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.41
   },
-  'subasta-sub-ja-2026-258759': {
+'subasta-sub-ja-2026-258759': {
     propertyType: "Piso",
     city: "VÉLEZ MÁLAGA",
     province: "Málaga",
@@ -6259,7 +6709,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.24
   },
-  'subasta-sub-ja-2026-259407': {
+'subasta-sub-ja-2026-259407': {
     propertyType: "Piso",
     city: "MALAGA",
     province: "Málaga",
@@ -6288,7 +6738,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.33
   },
-  'subasta-sub-ja-2026-258642': {
+'subasta-sub-ja-2026-258642': {
     propertyType: "Piso",
     city: "GANDIA",
     province: "Valencia",
@@ -6317,7 +6767,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.38
   },
-  'subasta-sub-ja-2026-258944': {
+'subasta-sub-ja-2026-258944': {
     propertyType: "Piso",
     city: "Torrent",
     province: "Valencia",
@@ -6346,7 +6796,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.7
   },
-  'subasta-sub-ja-2026-259067': {
+'subasta-sub-ja-2026-259067': {
     propertyType: "Inmueble",
     city: "alicante",
     province: "Alicante/Alacant",
@@ -6375,7 +6825,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.46
   },
-  'subasta-sub-ja-2026-258437': {
+'subasta-sub-ja-2026-258437': {
     propertyType: "Piso",
     city: "ALICANTE",
     province: "Alicante/Alacant",
@@ -6404,7 +6854,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.56
   },
-  'subasta-sub-ja-2026-257587': {
+'subasta-sub-ja-2026-257587': {
     propertyType: "Inmueble",
     city: "ALMORADI",
     province: "Alicante/Alacant",
@@ -6433,7 +6883,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.19
   },
-  'subasta-sub-ja-2026-256593': {
+'subasta-sub-ja-2026-256593': {
     propertyType: "Piso",
     city: "A",
     province: "Alicante/Alacant",
@@ -6462,7 +6912,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.37
   },
-  'subasta-sub-at-2026-25r2886001810': {
+'subasta-sub-at-2026-25r2886001810': {
     propertyType: "Piso",
     city: "CALP",
     province: "Alicante/Alacant",
@@ -6491,7 +6941,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-259327': {
+'subasta-sub-ja-2026-259327': {
     propertyType: "Inmueble",
     city: "DENIA",
     province: "Alicante/Alacant",
@@ -6520,7 +6970,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.2
   },
-  'subasta-sub-ja-2026-258580': {
+'subasta-sub-ja-2026-258580': {
     propertyType: "Piso",
     city: "Torrevieja",
     province: "Alicante/Alacant",
@@ -6549,7 +6999,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.26
   },
-  'subasta-sub-ja-2026-258398': {
+'subasta-sub-ja-2026-258398': {
     propertyType: "Piso",
     city: "Rojales",
     province: "Alicante/Alacant",
@@ -6578,7 +7028,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.32
   },
-  'subasta-sub-ja-2026-258011': {
+'subasta-sub-ja-2026-258011': {
     propertyType: "Inmueble",
     city: "Elda",
     province: "Alicante/Alacant",
@@ -6607,7 +7057,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2025-248197': {
+'subasta-sub-ja-2025-248197': {
     propertyType: "Piso",
     city: "Sevilla",
     province: "Sevilla",
@@ -6636,7 +7086,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.36
   },
-  'subasta-sub-ja-2025-255446': {
+'subasta-sub-ja-2025-255446': {
     propertyType: "Piso",
     city: "Sevilla",
     province: "Sevilla",
@@ -6665,7 +7115,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.32
   },
-  'subasta-sub-ja-2025-245906': {
+'subasta-sub-ja-2025-245906': {
     propertyType: "Inmueble",
     city: "SEVILLA",
     province: "Sevilla",
@@ -6694,7 +7144,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.73
   },
-  'subasta-sub-ja-2026-259051': {
+'subasta-sub-ja-2026-259051': {
     propertyType: "Piso",
     city: "SEVILLA",
     province: "Sevilla",
@@ -6723,7 +7173,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.28
   },
-  'subasta-sub-ja-2026-259174': {
+'subasta-sub-ja-2026-259174': {
     propertyType: "Piso",
     city: "CORNELLA DE LLOBREGAT",
     province: "Barcelona",
@@ -6752,7 +7202,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.5
   },
-  'subasta-sub-ja-2026-258569': {
+'subasta-sub-ja-2026-258569': {
     propertyType: "Piso",
     city: "Sant Pere de Ribes",
     province: "Barcelona",
@@ -6781,7 +7231,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.61
   },
-  'subasta-sub-ja-2026-258521': {
+'subasta-sub-ja-2026-258521': {
     propertyType: "Piso",
     city: "RUBÍ",
     province: "Barcelona",
@@ -6810,7 +7260,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.32
   },
-  'subasta-sub-ja-2026-258537': {
+'subasta-sub-ja-2026-258537': {
     propertyType: "Inmueble",
     city: "Vilanova I la Geltrú",
     province: "Barcelona",
@@ -6839,7 +7289,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.26
   },
-  'subasta-sub-rc-2026-0803800115968': {
+'subasta-sub-rc-2026-0803800115968': {
     propertyType: "Piso",
     city: "MANRESA",
     province: "Barcelona",
@@ -6868,7 +7318,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.57
   },
-  'subasta-sub-ja-2026-257373': {
+'subasta-sub-ja-2026-257373': {
     propertyType: "Inmueble",
     city: "MONTORNES DEL VALLES",
     province: "Barcelona",
@@ -6897,7 +7347,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.4
   },
-  'subasta-sub-ja-2026-259288': {
+'subasta-sub-ja-2026-259288': {
     propertyType: "Piso",
     city: "Sant Pere de Ribes",
     province: "Barcelona",
@@ -6926,7 +7376,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.45
   },
-  'subasta-sub-ja-2026-259215': {
+'subasta-sub-ja-2026-259215': {
     propertyType: "Piso",
     city: "CUBELLES",
     province: "Barcelona",
@@ -6955,7 +7405,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.53
   },
-  'subasta-sub-ja-2026-258660': {
+'subasta-sub-ja-2026-258660': {
     propertyType: "Piso",
     city: "Piera",
     province: "Barcelona",
@@ -6984,7 +7434,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.28
   },
-  'subasta-sub-ja-2026-257731': {
+'subasta-sub-ja-2026-257731': {
     propertyType: "Inmueble",
     city: "SANT FELIU DE CODINES",
     province: "Barcelona",
@@ -7013,7 +7463,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.6
   },
-  'subasta-sub-ja-2025-252052': {
+'subasta-sub-ja-2025-252052': {
     propertyType: "Piso",
     city: "Sabadell",
     province: "Barcelona",
@@ -7042,7 +7492,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.52
   },
-  'subasta-sub-ja-2026-258795': {
+'subasta-sub-ja-2026-258795': {
     propertyType: "Inmueble",
     city: "SANTA MARIA DE PALAUTORDERA",
     province: "Barcelona",
@@ -7071,7 +7521,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.43
   },
-  'subasta-sub-ja-2026-258744': {
+'subasta-sub-ja-2026-258744': {
     propertyType: "Piso",
     city: "Sabadell",
     province: "Barcelona",
@@ -7100,7 +7550,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.44
   },
-  'subasta-sub-ja-2026-257227': {
+'subasta-sub-ja-2026-257227': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -7129,7 +7579,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.26
   },
-  'subasta-sub-ja-2026-258334': {
+'subasta-sub-ja-2026-258334': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -7158,7 +7608,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.25
   },
-  'subasta-sub-ja-2026-258479': {
+'subasta-sub-ja-2026-258479': {
     propertyType: "Piso",
     city: "LEGANÉS",
     province: "Madrid",
@@ -7187,7 +7637,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: -0.03
   },
-  'subasta-sub-ja-2026-258229': {
+'subasta-sub-ja-2026-258229': {
     propertyType: "Inmueble",
     city: "MADR",
     province: "Madrid",
@@ -7216,7 +7666,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0.16
   },
-  'subasta-sub-ja-2026-258108': {
+'subasta-sub-ja-2026-258108': {
     propertyType: "Piso",
     city: "VALDETORRES DE JARAMA",
     province: "Madrid",
@@ -7245,7 +7695,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.75
   },
-  'subasta-sub-ja-2026-257374': {
+'subasta-sub-ja-2026-257374': {
     propertyType: "Inmueble",
     city: "Pozuelo de Alarcón",
     province: "Madrid",
@@ -7274,7 +7724,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.26
   },
-  'subasta-sub-at-2026-25r2886001893': {
+'subasta-sub-at-2026-25r2886001893': {
     propertyType: "Local",
     city: "MADRID",
     province: "Madrid",
@@ -7303,7 +7753,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258835': {
+'subasta-sub-ja-2026-258835': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -7332,7 +7782,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.41
   },
-  'subasta-sub-ja-2026-258921': {
+'subasta-sub-ja-2026-258921': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -7361,7 +7811,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.39
   },
-  'subasta-sub-ja-2026-257426': {
+'subasta-sub-ja-2026-257426': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -7390,7 +7840,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.32
   },
-  'subasta-sub-jv-2026-258768': {
+'subasta-sub-jv-2026-258768': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -7419,7 +7869,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 1
   },
-  'subasta-sub-ja-2025-253449': {
+'subasta-sub-ja-2025-253449': {
     propertyType: "Inmueble",
     city: "Madrid",
     province: "Madrid",
@@ -7448,7 +7898,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.45
   },
-  'subasta-sub-ja-2025-253046': {
+'subasta-sub-ja-2025-253046': {
     propertyType: "Piso",
     city: "CHINCHON",
     province: "Madrid",
@@ -7477,7 +7927,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.54
   },
-  'subasta-sub-jv-2026-258600': {
+'subasta-sub-jv-2026-258600': {
     propertyType: "Inmueble",
     city: "el escorial",
     province: "Madrid",
@@ -7506,7 +7956,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 1
   },
-  'subasta-sub-ja-2024-228471': {
+'subasta-sub-ja-2024-228471': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -7535,7 +7985,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.33
   },
-  'subasta-sub-ja-2026-234448': {
+'subasta-sub-ja-2026-234448': {
     propertyType: "Piso",
     city: "SAN SEBASTIAN DE LOS REYES",
     province: "Madrid",
@@ -7564,7 +8014,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.23
   },
-  'subasta-sub-ja-2026-259076': {
+'subasta-sub-ja-2026-259076': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -7593,7 +8043,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.42
   },
-  'subasta-sub-ja-2026-258419': {
+'subasta-sub-ja-2026-258419': {
     propertyType: "Inmueble",
     city: "MADRID",
     province: "Madrid",
@@ -7622,7 +8072,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.07
   },
-  'subasta-sub-ja-2026-258066': {
+'subasta-sub-ja-2026-258066': {
     propertyType: "Inmueble",
     city: "Pozuelo de Alarcón",
     province: "Madrid",
@@ -7651,7 +8101,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0.05
   },
-  'subasta-sub-nn-2026-1606127': {
+'subasta-sub-nn-2026-1606127': {
     propertyType: "Local",
     city: "Madrid",
     province: "Madrid",
@@ -7680,7 +8130,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0
   },
-  'subasta-sub-jv-2026-257019': {
+'subasta-sub-jv-2026-257019': {
     propertyType: "Piso",
     city: "ALCORCÓN",
     province: "Madrid",
@@ -7709,7 +8159,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 1
   },
-  'subasta-sub-ja-2026-259161': {
+'subasta-sub-ja-2026-259161': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -7738,7 +8188,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.47
   },
-  'subasta-sub-ja-2026-258797': {
+'subasta-sub-ja-2026-258797': {
     propertyType: "Local",
     city: "Ciempozuelos",
     province: "Madrid",
@@ -7767,7 +8217,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.71
   },
-  'subasta-sub-ja-2026-258357': {
+'subasta-sub-ja-2026-258357': {
     propertyType: "Inmueble",
     city: "Arganda del Rey",
     province: "Madrid",
@@ -7796,7 +8246,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.5
   },
-  'subasta-sub-ja-2026-257782': {
+'subasta-sub-ja-2026-257782': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -7825,7 +8275,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.71
   },
-  'subasta-sub-at-2026-26r2886001013': {
+'subasta-sub-at-2026-26r2886001013': {
     propertyType: "Local",
     city: "MADRID",
     province: "Madrid",
@@ -7854,7 +8304,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-25r2886001845': {
+'subasta-sub-at-2026-25r2886001845': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -7883,7 +8333,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258536': {
+'subasta-sub-ja-2026-258536': {
     propertyType: "Inmueble",
     city: "MOSTOLES",
     province: "Madrid",
@@ -7912,7 +8362,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 40,
     opportunityRatio: 0.16
   },
-  'subasta-sub-ja-2026-259261': {
+'subasta-sub-ja-2026-259261': {
     propertyType: "Piso",
     city: "VALDEMORILLO",
     province: "Madrid",
@@ -7941,7 +8391,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.02
   },
-  'subasta-sub-at-2026-25r2886001709': {
+'subasta-sub-at-2026-25r2886001709': {
     propertyType: "Piso",
     city: "RASCAFRIA",
     province: "Madrid",
@@ -7970,7 +8420,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2025-252364': {
+'subasta-sub-ja-2025-252364': {
     propertyType: "Piso",
     city: "Aldea del Fresno",
     province: "Madrid",
@@ -7999,7 +8449,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.48
   },
-  'subasta-sub-at-2026-26r2886001014': {
+'subasta-sub-at-2026-26r2886001014': {
     propertyType: "Piso",
     city: "ROZAS DE MADRID (LAS)",
     province: "Madrid",
@@ -8028,7 +8478,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-26r0886001043': {
+'subasta-sub-at-2026-26r0886001043': {
     propertyType: "Piso",
     city: "FUENLABRADA",
     province: "Madrid",
@@ -8057,7 +8507,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 50,
     opportunityRatio: 0
   },
-  'subasta-sub-at-2026-25r2886001852': {
+'subasta-sub-at-2026-25r2886001852': {
     propertyType: "Piso",
     city: "VILLAVICIOSA DE ODON",
     province: "Madrid",
@@ -8086,7 +8536,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-258798': {
+'subasta-sub-ja-2026-258798': {
     propertyType: "Inmueble",
     city: "COLMENAR VIEJO",
     province: "Madrid",
@@ -8115,7 +8565,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.6
   },
-  'subasta-sub-at-2026-25r2886001818': {
+'subasta-sub-at-2026-25r2886001818': {
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",
@@ -8144,7 +8594,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0
   },
-  'subasta-sub-ja-2026-259025': {
+'subasta-sub-ja-2026-259025': {
     propertyType: "Piso",
     city: "Alcorcón",
     province: "Madrid",
@@ -8173,7 +8623,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.54,
   },
-  'subasta-sub-ja-2024-226924': {
+'subasta-sub-ja-2024-226924': {
     propertyType: "Piso",
     city: "TORREJON DE ARDOZ",
     province: "Madrid",
@@ -8202,7 +8652,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.59,
   },
-  'subasta-sub-ja-2026-258001': {
+'subasta-sub-ja-2026-258001': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -8229,7 +8679,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "0070203VK3607S0040OY", 
     idufir: "28072000167843",
   },
-  'subasta-sub-ja-2026-257184': {
+'subasta-sub-ja-2026-257184': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -8256,7 +8706,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: null, 
     idufir: null,
   },
-  'subasta-sub-at-2026-25r4186001501': {
+'subasta-sub-at-2026-25r4186001501': {
     propertyType: "Piso",
     city: "Sevilla",
     province: "Sevilla",
@@ -8283,7 +8733,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "3849912UG1034N0001WS", 
     idufir: "41009000334044",
   },
-  'subasta-sub-ja-2026-257606': {
+'subasta-sub-ja-2026-257606': {
     propertyType: "Piso",
     city: "Almería",
     province: "Almería",
@@ -8312,7 +8762,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.45,
   },
-  'subasta-sub-ja-2026-258091': {
+'subasta-sub-ja-2026-258091': {
     propertyType: "Piso",
     city: "Tarragona",
     province: "Tarragona",
@@ -8339,7 +8789,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: null, 
     idufir: null,
   },
-  'subasta-sub-ja-2026-258028': {
+'subasta-sub-ja-2026-258028': {
     propertyType: "Piso",
     city: "Tarragona",
     province: "Tarragona",
@@ -8366,7 +8816,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: null, 
     idufir: null,
   },
-  'subasta-sub-ja-2026-257982': {
+'subasta-sub-ja-2026-257982': {
     propertyType: "Piso",
     city: "Tarragona",
     province: "Tarragona",
@@ -8393,7 +8843,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "8755507CF7683N0001PH", 
     idufir: "43028000403190",
   },
-  'subasta-sub-at-2026-24r0886001753': {
+'subasta-sub-at-2026-24r0886001753': {
     propertyType: "Piso",
     city: "Tarragona",
     province: "Tarragona",
@@ -8422,7 +8872,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 30,
     opportunityRatio: 0,
   },
-  'subasta-sub-ja-2026-258847': {
+'subasta-sub-ja-2026-258847': {
     propertyType: "Piso",
     city: "Tarragona",
     province: "Tarragona",
@@ -8451,7 +8901,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.46,
   },
-  'subasta-sub-ja-2026-258969': {
+'subasta-sub-ja-2026-258969': {
     propertyType: "Piso",
     city: "Tarragona",
     province: "Tarragona",
@@ -8480,7 +8930,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0.39,
   },
-  'subasta-sub-ja-2025-255165': {
+'subasta-sub-ja-2025-255165': {
     propertyType: "Piso",
     city: "Tarragona",
     province: "Tarragona",
@@ -8509,7 +8959,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.53,
   },
-  'subasta-sub-at-2026-25r4186001884': {
+'subasta-sub-at-2026-25r4186001884': {
     propertyType: "Inmueble",
     city: "Granada",
     province: "Granada",
@@ -8536,7 +8986,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "9702101VG3290B0001HX", 
     idufir: "18012001093867",
   },
-  'subasta-sub-ja-2026-257956': {
+'subasta-sub-ja-2026-257956': {
     propertyType: "Piso",
     city: "Málaga",
     province: "Málaga",
@@ -8563,7 +9013,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: null, 
     idufir: null,
   },
-  'subasta-sub-ja-2026-258731': {
+'subasta-sub-ja-2026-258731': {
     propertyType: "Piso",
     city: "Málaga",
     province: "Málaga",
@@ -8592,7 +9042,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.67,
   },
-  'subasta-sub-ja-2026-258923': {
+'subasta-sub-ja-2026-258923': {
     propertyType: "Piso",
     city: "Málaga",
     province: "Málaga",
@@ -8621,7 +9071,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.37,
   },
-  'subasta-sub-at-2026-25r0886001717': {
+'subasta-sub-at-2026-25r0886001717': {
     propertyType: "Inmueble",
     city: "Málaga",
     province: "Málaga",
@@ -8650,7 +9100,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0,
   },
-  'subasta-sub-ja-2026-257960': {
+'subasta-sub-ja-2026-257960': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -8679,7 +9129,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "9193903VK5799S0014UL", 
     idufir: null,
   },
-  'subasta-sub-at-2026-25r2886001859': {
+'subasta-sub-at-2026-25r2886001859': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -8708,7 +9158,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "8619504VK4781H0082BD", 
     idufir: "28095000564689",
   },
-  'subasta-sub-at-2026-25r2886001856': {
+'subasta-sub-at-2026-25r2886001856': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -8737,7 +9187,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "7818501VK2871N0159JP", 
     idufir: "28120000099951",
   },
-  'subasta-sub-at-2026-25r2886001854': {
+'subasta-sub-at-2026-25r2886001854': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -8766,7 +9216,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "2401501VK3620S0007SS", 
     idufir: "28081000505425",
   },
-  'subasta-sub-ja-2025-256239': {
+'subasta-sub-ja-2025-256239': {
     propertyType: "Nave",
     city: "Madrid",
     province: "Madrid",
@@ -8795,7 +9245,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: null, 
     idufir: null,
   },
-  'subasta-sub-ja-2026-258904': {
+'subasta-sub-ja-2026-258904': {
     propertyType: "Piso",
     city: "Madrid",
     province: "Madrid",
@@ -8824,7 +9274,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: null, 
     idufir: null,
   },
-  'subasta-sub-ja-2026-258340': {
+'subasta-sub-ja-2026-258340': {
     propertyType: "Piso",
     city: "Valencia",
     province: "Valencia/València",
@@ -8853,7 +9303,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.55,
   },
-  'subasta-sub-at-2026-26r4686001011': {
+'subasta-sub-at-2026-26r4686001011': {
     propertyType: "Inmueble",
     city: "Valencia",
     province: "Valencia/València",
@@ -8882,7 +9332,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0,
   },
-  'subasta-sub-ja-2026-257430': {
+'subasta-sub-ja-2026-257430': {
     propertyType: "Piso",
     city: "Valencia",
     province: "Valencia/València",
@@ -8911,7 +9361,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.48,
   },
-  'subasta-sub-at-2026-26r4686001041': {
+'subasta-sub-at-2026-26r4686001041': {
     propertyType: "Piso",
     city: "Valencia",
     province: "Valencia/València",
@@ -8940,7 +9390,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0,
   },
-  'subasta-sub-at-2026-25r2886001384': {
+'subasta-sub-at-2026-25r2886001384': {
     propertyType: "Inmueble",
     city: "Murcia",
     province: "Murcia",
@@ -8969,7 +9419,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0,
   },
-  'subasta-sub-ja-2026-259132': {
+'subasta-sub-ja-2026-259132': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -8996,7 +9446,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "0151210DG4505S0001FD", 
     idufir: null,
   },
-  'subasta-sub-ja-2026-258832': {
+'subasta-sub-ja-2026-258832': {
     propertyType: "Piso",
     city: "Alicante",
     province: "Alicante/Alacant",
@@ -9025,7 +9475,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.65,
   },
-  'subasta-sub-ja-2026-258892': {
+'subasta-sub-ja-2026-258892': {
     propertyType: "Piso",
     city: "Alicante",
     province: "Alicante/Alacant",
@@ -9054,7 +9504,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.3,
   },
-  'subasta-sub-ja-2026-259002': {
+'subasta-sub-ja-2026-259002': {
     propertyType: "Piso",
     city: "Alicante",
     province: "Alicante/Alacant",
@@ -9083,7 +9533,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.3,
   },
-  'subasta-sub-ja-2025-250658': {
+'subasta-sub-ja-2025-250658': {
     propertyType: "Inmueble",
     city: "Alicante",
     province: "Alicante/Alacant",
@@ -9112,7 +9562,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.82,
   },
-  'subasta-sub-ja-2022-190786': {
+'subasta-sub-ja-2022-190786': {
     propertyType: "Piso",
     city: "Barcelona",
     province: "Barcelona",
@@ -9141,7 +9591,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.26,
   },
-  'subasta-sub-ja-2025-244624': {
+'subasta-sub-ja-2025-244624': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -9170,7 +9620,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.27,
   },
-  'subasta-sub-ja-2025-253882': {
+'subasta-sub-ja-2025-253882': {
     propertyType: "Piso",
     city: "Barcelona",
     province: "Barcelona",
@@ -9199,7 +9649,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.6,
   },
-  'subasta-sub-ja-2025-254676': {
+'subasta-sub-ja-2025-254676': {
     propertyType: "Piso",
     city: "Barcelona",
     province: "Barcelona",
@@ -9224,7 +9674,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: "2170926DF3827A0002ZA", 
     idufir: null,
   },
-  'subasta-sub-ja-2026-258049': {
+'subasta-sub-ja-2026-258049': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -9253,7 +9703,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.54,
   },
-  'subasta-sub-ja-2026-258463': {
+'subasta-sub-ja-2026-258463': {
     propertyType: "Piso",
     city: "Barcelona",
     province: "Barcelona",
@@ -9282,7 +9732,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 90,
     opportunityRatio: 0.42,
   },
-  'subasta-sub-ja-2026-258840': {
+'subasta-sub-ja-2026-258840': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -9311,7 +9761,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.25,
   },
-  'subasta-sub-ja-2026-258987': {
+'subasta-sub-ja-2026-258987': {
     propertyType: "Piso",
     city: "Barcelona",
     province: "Barcelona",
@@ -9340,7 +9790,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 70,
     opportunityRatio: 0.2,
   },
-  'subasta-sub-jv-2026-258825': {
+'subasta-sub-jv-2026-258825': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -9365,7 +9815,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     refCat: null, 
     idufir: null,
   },
-  'subasta-sub-ja-2026-258618': {
+'subasta-sub-ja-2026-258618': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -9394,7 +9844,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 80,
     opportunityRatio: 0.33,
   },
-  'subasta-sub-ja-2026-252144': {
+'subasta-sub-ja-2026-252144': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -9423,7 +9873,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.68,
   },
-  'subasta-sub-at-2026-22r0886001424': {
+'subasta-sub-at-2026-22r0886001424': {
     propertyType: "Piso",
     city: "Barcelona",
     province: "Barcelona",
@@ -9452,7 +9902,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 60,
     opportunityRatio: 0,
   },
-  'subasta-sub-ja-2026-256851': {
+'subasta-sub-ja-2026-256851': {
     propertyType: "Inmueble",
     city: "Barcelona",
     province: "Barcelona",
@@ -9481,7 +9931,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     opportunityScore: 100,
     opportunityRatio: 0.56,
   },
-  'subasta-sub-ja-2025-252897': {
+'subasta-sub-ja-2025-252897': {
     propertyType: "Piso",
     municipality: "Murcia",
     province: "Murcia",
@@ -9505,7 +9955,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "30043000355337",
     discount: 0
   },
-  'subasta-sub-ja-2025-253236': {
+'subasta-sub-ja-2025-253236': {
     propertyType: "Piso",
     municipality: "PREMIÀ DE DALT",
     province: "Barcelona",
@@ -9529,7 +9979,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "08094000348691",
     discount: 0
   },
-  'subasta-sub-ja-2025-253657': {
+'subasta-sub-ja-2025-253657': {
     propertyType: "Piso",
     municipality: "SANT FOST DE CAMPSENTELLES",
     province: "Barcelona",
@@ -9553,7 +10003,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 48
   },
-  'subasta-sub-ja-2025-254653': {
+'subasta-sub-ja-2025-254653': {
     propertyType: "Piso",
     municipality: "ALGEMESI",
     province: "Valencia/València",
@@ -9577,7 +10027,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "46034000077221",
     discount: 66
   },
-  'subasta-sub-ja-2025-254397': {
+'subasta-sub-ja-2025-254397': {
     propertyType: "Piso",
     municipality: "SANT ESTEVE SESROVIRES",
     province: "Barcelona",
@@ -9601,7 +10051,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "08149000205366",
     discount: 32
   },
-  'subasta-sub-ja-2025-254688': {
+'subasta-sub-ja-2025-254688': {
     propertyType: "Piso",
     municipality: "El Vendrell",
     province: "Tarragona",
@@ -9625,7 +10075,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "43028000211085",
     discount: 45
   },
-  'subasta-sub-ja-2025-255272': {
+'subasta-sub-ja-2025-255272': {
     propertyType: "Piso",
     municipality: "ATARFE",
     province: "Granada",
@@ -9649,7 +10099,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2025-255261': {
+'subasta-sub-ja-2025-255261': {
     propertyType: "Piso",
     municipality: "VIGO",
     province: "Pontevedra",
@@ -9673,7 +10123,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2025-255164': {
+'subasta-sub-ja-2025-255164': {
     propertyType: "Piso",
     municipality: "logroño",
     province: "La Rioja",
@@ -9697,7 +10147,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 56
   },
-  'subasta-sub-ja-2025-255453': {
+'subasta-sub-ja-2025-255453': {
     propertyType: "Piso",
     municipality: "VALVERDE DE LEGANES",
     province: "Badajoz",
@@ -9721,7 +10171,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2026-256535': {
+'subasta-sub-ja-2026-256535': {
     propertyType: "Piso",
     municipality: "GRANADA",
     province: "Granada",
@@ -9745,7 +10195,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 39
   },
-  'subasta-sub-ja-2026-256791': {
+'subasta-sub-ja-2026-256791': {
     propertyType: "Piso",
     municipality: "MADRID",
     province: "Madrid",
@@ -9769,7 +10219,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2026-256693': {
+'subasta-sub-ja-2026-256693': {
     propertyType: "Piso",
     municipality: "Madrid",
     province: "Madrid",
@@ -9793,7 +10243,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2026-257425': {
+'subasta-sub-ja-2026-257425': {
     propertyType: "Piso",
     municipality: "LA LLAGOSTA",
     province: "Barcelona",
@@ -9817,7 +10267,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 47
   },
-  'subasta-sub-ja-2026-257504': {
+'subasta-sub-ja-2026-257504': {
     propertyType: "Piso",
     municipality: "Tordera",
     province: "Barcelona",
@@ -9841,7 +10291,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "08098000533811",
     discount: 0
   },
-  'subasta-sub-ja-2026-257495': {
+'subasta-sub-ja-2026-257495': {
     propertyType: "Piso",
     municipality: "SANTIBAÑEZ EL ALTO",
     province: "Cáceres",
@@ -9865,7 +10315,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-jv-2026-257604': {
+'subasta-sub-jv-2026-257604': {
     propertyType: "Piso",
     municipality: "PLATJA D'ARO",
     province: "Girona",
@@ -9889,7 +10339,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "17017000058870",
     discount: 74
   },
-  'subasta-sub-ja-2025-252763': {
+'subasta-sub-ja-2025-252763': {
     propertyType: "Piso",
     municipality: "PEÑISCOLA",
     province: "Castellón/Castelló",
@@ -9913,7 +10363,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2025-246627': {
+'subasta-sub-ja-2025-246627': {
     propertyType: "Piso",
     municipality: "DELTEBRE",
     province: "Tarragona",
@@ -9937,7 +10387,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2025-252321': {
+'subasta-sub-ja-2025-252321': {
     propertyType: "Piso",
     municipality: "ROQUETAS DE MAR",
     province: "Almería",
@@ -9961,7 +10411,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2026-257501': {
+'subasta-sub-ja-2026-257501': {
     propertyType: "Piso",
     municipality: "Madrid",
     province: "Madrid",
@@ -9985,7 +10435,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "28147000896694",
     discount: 0
   },
-  'subasta-sub-ja-2026-257525': {
+'subasta-sub-ja-2026-257525': {
     propertyType: "Piso",
     municipality: "Pareja",
     province: "Guadalajara",
@@ -10009,7 +10459,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: "19008000234034",
     discount: 0
   },
-  'subasta-sub-ja-2026-256969': {
+'subasta-sub-ja-2026-256969': {
     propertyType: "Piso",
     municipality: "CHIPIONA",
     province: "Cádiz",
@@ -10033,7 +10483,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2025-254482': {
+'subasta-sub-ja-2025-254482': {
     propertyType: "Piso",
     municipality: "BEHAHAVIS",
     province: "Málaga",
@@ -10057,25 +10507,4 @@ export const AUCTIONS: Record<string, AuctionData> = {
     idufir: null,
     discount: 0
   },
-  'subasta-sub-ja-2026-257370': {
-    propertyType: "Piso",
-    municipality: "JAEN",
-    province: "Jaén",
-    address: "C/ EDUARDO ARROYO Nº 4 - PLANTA 5ª",
-    appraisalValue: 252000,
-    claimedDebt: 45513.65,
-    valorSubasta: 252000,
-    valorTasacion: 252000,
-    deposito: 12600,
-    surface: undefined,
-    description: "Subasta de Piso ubicada en C/ EDUARDO ARROYO Nº 4 - PLANTA 5ª. Procedimiento gestionado por el BOE. (Referencia SUB-JA-2026-257370)",
-    boeId: "SUB-JA-2026-257370",
-    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2026-257370&idBus=YndSNmI5dWR4THp0MHVEcHRBaHpPQk5ZVWFXOVpwNHVoejRvMEF6aTlleFBqeXJKYWxYaVdud0N3b0wxa1QrS0Z4SzRNaWFrc3BVQVJ6TjRZb3AwMi9hNWg5UW4xQTVuS1hPRlphdXYweTlWMElNTi9NWm15TjJ3ODlnS3pEQyswQm5lMVRwcGUzUFk3Rmd3aDJzK0t4U0wwZ2RTNFpjZ3RmMFRvOG5SaEE0bGRwSFNlWHJtRnR0ZkhqOG51UlZSZHVPS3hZdE5HdTNzOWhvMXA1UWEvSmIyRjFpb2E1UWVjTERrVUpDaDZUSk9NRTF4RlFyNHRnMW9vNFliL2NwcDNGOURmaE1xbC8wSnd0U2NVUVBlL01hU1ZSQUJFT0Zlb0FaVVBjZ21TemNzbVNqR3RObDNoYUR3MUxWcTE2Ukg4dEhWZWJjK1IwVThDSk9PZVh1SkxRPT0,--500",
-    publishedAt: "2026-02-17",
-    startDate: "2026-02-17",
-    auctionDate: "2026-03-09",
-    status: "active",
-    isActive: false,
-    discount: 0
-  }
 };

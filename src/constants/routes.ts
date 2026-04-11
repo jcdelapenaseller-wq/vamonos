@@ -48,6 +48,7 @@ export const ROUTES = {
   NOTICIAS_SUBASTAS: '/noticias-subastas/:slug',
   DISCOVER_REPORT: '/analisis/:slug',
   REPORTS_INDEX: '/reportajes-subastas',
+  VEHICLE_AUCTIONS: '/subastas-vehiculos',
   AUCTION_PAGE: '/subasta/:slug',
   CALCULATOR_SLUG: '/calculadora-subasta/:slug',
   PROVINCE_PROPERTY: '/subastas/:province/:propertyType',

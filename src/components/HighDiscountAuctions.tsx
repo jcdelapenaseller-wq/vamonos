@@ -19,7 +19,7 @@ const HighDiscountAuctions: React.FC = () => {
 
   const highDiscountAuctions = useMemo(() => {
     const filtered = Object.entries(AUCTIONS).filter(([_, data]) => {
-      if (!isAuctionActive(data)) return false;
+      if (!isAuctionActive(data) || data.assetCategory === 'vehiculo') return false;
       const appraisalValue = data.appraisalValue || 0;
       if (data.claimedDebt === undefined || data.claimedDebt === null) return false;
       if (data.claimedDebt === 0) return false;

@@ -26,7 +26,7 @@ const OpportunityAuctions: React.FC = () => {
 
     const filtered = Object.entries(AUCTIONS)
       .filter(([_, data]) => {
-        if (!isAuctionActive(data)) return false;
+        if (!isAuctionActive(data) || data.assetCategory === 'vehiculo') return false;
         const p = normalizeProvince(data.province || data.city);
         if (normalize(p) !== normalizedProvince && !normalize(p).includes(normalizedProvince) && !normalizedProvince.includes(normalize(p))) return false;
         if (!data.appraisalValue || data.claimedDebt === undefined || data.claimedDebt === null) return false;

@@ -34,7 +34,7 @@ const ZoneAuctions: React.FC = () => {
     const normalizedZone = normalize(zone);
 
     const filtered = Object.entries(AUCTIONS).filter(([slug, data]) => {
-      if (!isAuctionActive(data)) return false;
+      if (!isAuctionActive(data) || data.assetCategory === 'vehiculo') return false;
       const p = normalizeProvince(data.province || data.city);
       const provinceMatch = normalize(p) === normalizedProvince || normalize(p).includes(normalizedProvince) || normalizedProvince.includes(normalize(p));
       const dataZoneSlug = normalize(data.zone || '');

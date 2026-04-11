@@ -48,6 +48,7 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({
 
   const filteredAuctions = useMemo(() => {
     return Object.entries(auctions).reduce((acc, [slug, data]) => {
+      if (data.assetCategory === 'vehiculo') return acc;
       if (city && data.city && normalizeText(data.city) !== normalizeText(city)) return acc;
       if (province && data.province?.toLowerCase() !== province.toLowerCase()) return acc;
       if (status) {

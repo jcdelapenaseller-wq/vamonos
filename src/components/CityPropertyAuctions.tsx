@@ -40,7 +40,7 @@ const CityPropertyAuctions: React.FC = () => {
 
   const initialFiltered = useMemo(() => {
     const filtered = Object.entries(AUCTIONS).filter(([_, data]) => {
-      if (!isAuctionActive(data)) return false;
+      if (!isAuctionActive(data) || data.assetCategory === 'vehiculo') return false;
       const p = normalizeProvince(data.province || data.city);
       const provinceMatch = p.toLowerCase() === province.toLowerCase() || p.toLowerCase().includes(province.toLowerCase()) || province.toLowerCase().includes(p.toLowerCase());
       const typeMatch = data.propertyType && normalizePropertyType(data.propertyType) === normalizePropertyType(propertyType);

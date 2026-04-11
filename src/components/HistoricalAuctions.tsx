@@ -8,7 +8,7 @@ import { AuctionCard } from './AuctionCard';
 
 const HistoricalAuctions: React.FC = () => {
   const historicalAuctions = sortAuctions(
-    Object.entries(AUCTIONS).filter(([_, data]) => getComputedStatus(data) === 'closed')
+    Object.entries(AUCTIONS).filter(([_, data]) => getComputedStatus(data) === 'closed' && data.assetCategory !== 'vehiculo')
   );
   const historicalCount = historicalAuctions.length;
 

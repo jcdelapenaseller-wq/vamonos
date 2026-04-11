@@ -7,7 +7,8 @@ import { isAuctionFinished, sortActiveFirst } from '../utils/auctionHelpers';
 
 const AuctionExamplesIndex: React.FC = () => {
   const allAuctions = React.useMemo(() => {
-    return sortActiveFirst(Object.entries(AUCTIONS), (item) => item[1].auctionDate);
+    const filtered = Object.entries(AUCTIONS).filter(([_, data]) => data.assetCategory !== 'vehiculo');
+    return sortActiveFirst(filtered, (item) => item[1].auctionDate);
   }, []);
 
   const activeCount = React.useMemo(() => {
