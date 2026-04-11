@@ -2543,7 +2543,7 @@ const AuctionPage: React.FC = () => {
                           className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors text-[11px] font-bold uppercase tracking-wider py-1"
                         >
                           <HelpCircle size={14} className="text-brand-500" />
-                          ¿Cómo funciona el proceso?
+                          ¿Cómo funciona?
                           <ChevronDown size={14} className={`transition-transform duration-300 ${showHowItWorksCargas ? 'rotate-180' : ''}`} />
                         </button>
                         
@@ -2673,7 +2673,7 @@ const AuctionPage: React.FC = () => {
                           className="flex items-center gap-2 text-slate-500 hover:text-slate-700 transition-colors text-[11px] font-bold uppercase tracking-wider py-1"
                         >
                           <HelpCircle size={14} className="text-brand-500" />
-                          ¿Cómo funciona el proceso?
+                          ¿Cómo funciona?
                           <ChevronDown size={14} className={`transition-transform duration-300 ${showHowItWorksCompleto ? 'rotate-180' : ''}`} />
                         </button>
                         
