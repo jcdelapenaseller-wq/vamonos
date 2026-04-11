@@ -9,7 +9,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const AUCTIONS_FILE = path.join(process.cwd(), 'src/data/auctions.ts');
-const COOKIES_FILE = path.join(__dirname, '../boe-cookies.json');
+const COOKIES_FILE = fs.existsSync(path.join(__dirname, '../boe-cookies.json')) 
+  ? path.join(__dirname, '../boe-cookies.json')
+  : path.join(__dirname, '../boe-cookies-test.json');
 
 async function injectCookies(page: any) {
   if (fs.existsSync(COOKIES_FILE)) {
@@ -138,10 +140,22 @@ async function runCrawler() {
             if (text === 'Información adicional' && elements[i+1]) data.infoAdicional = elements[i+1].textContent?.trim();
           }
           
-          // Images
+          // Images: Extract high-res links from the wrapping <a> tag if available
           data.images = Array.from(document.querySelectorAll('img'))
-            .map(img => img.src)
-            .filter(src => !src.includes('logo') && !src.includes('ayuda') && !src.includes('portal_subastas'));
+            .filter(img => !img.src.includes('logo') && !img.src.includes('ayuda') && !img.src.includes('portal_subastas') && !img.src.includes('favicon'))
+            .map(img => {
+              const parentAnchor = img.closest('a');
+              const highResUrl = parentAnchor?.href;
+              
+              // Log original vs final for debugging (will be visible in console)
+              if (highResUrl && highResUrl.includes('verDocumento.php')) {
+                console.log(`[ImageFix] Original (Thumbnail): ${img.src}`);
+                console.log(`[ImageFix] Final (High-Res): ${highResUrl}`);
+                return highResUrl;
+              }
+              
+              return img.src;
+            });
 
           // Documents (PDFs)
           data.docs = Array.from(document.querySelectorAll('a[href*=".pdf"], a[href*="idDoc="]'))
@@ -180,6 +194,16 @@ async function runCrawler() {
         // Procesar Documentos
         const documents: any[] = [];
         let extractedLocation: any = {};
+
+        // Fix: Extraer ubicación de infoAdicional si existe
+        if (bienesData.infoAdicional) {
+          const match = bienesData.infoAdicional.match(/\(([^)]+)\)/);
+          if (match) {
+            const prov = match[1].trim();
+            extractedLocation.province = prov.charAt(0).toUpperCase() + prov.slice(1).toLowerCase();
+            console.log(`    [LocationFix] Provincia extraída de infoAdicional: ${extractedLocation.province}`);
+          }
+        }
 
         if (bienesData.docs && bienesData.docs.length > 0) {
           // Filtrar duplicados
