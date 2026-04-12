@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Car, Calendar, Gavel, Tag, MapPin, ArrowRight } from 'lucide-react';
 import { AuctionData } from '../data/auctions';
 import { getComputedStatus } from '../utils/auctionHelpers';
@@ -181,9 +182,12 @@ export const VehicleCard: React.FC<VehicleCardProps> = ({ slug, data }) => {
           <div className="text-xs text-slate-500 mb-4 text-center">
             <span className="font-medium">Cierre:</span> {formatDate(data.auctionDate)}
           </div>
-          <button className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
+          <Link 
+            to={`/subasta/${slug}`}
+            className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 px-4 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          >
             Ver subasta <ArrowRight size={18} />
-          </button>
+          </Link>
         </div>
       </div>
     </div>

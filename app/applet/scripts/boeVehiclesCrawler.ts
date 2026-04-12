@@ -297,6 +297,23 @@ async function runCrawler() {
       if (objectStart !== -1) {
         for (const v of newVehicles) {
           const slug = `subasta-${v.id.toLowerCase()}`;
+          
+          // Check if the slug already exists to preserve valid data
+          const regex = new RegExp(`'${slug}':\\s*{[\\s\\S]*?^  },`, 'm');
+          const match = content.match(regex);
+          
+          if (match) {
+            const existingEntry = match[0];
+            const provinceMatch = existingEntry.match(/province:\s*"([^"]+)"/);
+            const existingProvince = provinceMatch ? provinceMatch[1] : null;
+
+            // Evitar sobrescritura de provincias válidas
+            if (existingProvince && existingProvince !== "No Consta" && v.province === "No Consta") {
+              console.log(`  [SkipOverwrite] Preservando provincia: ${existingProvince} para ${slug}`);
+              v.province = existingProvince;
+            }
+          }
+
           const newEntry = `  '${slug}': {
     boeId: "${v.boeId}",
     status: "${v.status}",
@@ -320,9 +337,7 @@ async function runCrawler() {
     documents: ${JSON.stringify(v.documents)}
   },`;
 
-          // Check if the slug already exists
-          const regex = new RegExp(`'${slug}':\\s*{[\\s\\S]*?^  },`, 'm');
-          if (regex.test(content)) {
+          if (match) {
             // Overwrite existing entry
             content = content.replace(regex, newEntry.trim() + ',');
           } else {
