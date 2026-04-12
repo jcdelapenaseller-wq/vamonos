@@ -9,29 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const AUCTIONS_FILE = path.join(process.cwd(), 'src/data/auctions.ts');
-const COOKIES_FILE = fs.existsSync(path.join(__dirname, '../boe-cookies.json')) 
-  ? path.join(__dirname, '../boe-cookies.json')
-  : path.join(__dirname, '../boe-cookies-test.json');
-
-async function injectCookies(page: any) {
-  if (fs.existsSync(COOKIES_FILE)) {
-    try {
-      const cookiesRaw = fs.readFileSync(COOKIES_FILE, 'utf8');
-      const cookies = JSON.parse(cookiesRaw);
-      await page.setCookie(...cookies);
-      console.log('✅ Cookies de sesión inyectadas desde boe-cookies.json');
-      
-      // Generar string de cookies para fetch manual
-      const cookieString = cookies.map((c: any) => `${c.name}=${c.value}`).join('; ');
-      return cookieString;
-    } catch (err) {
-      console.error('❌ Error al cargar boe-cookies.json:', err);
-    }
-  } else {
-    console.log('ℹ️ No se encontró boe-cookies.json. Navegando en modo público (sin imágenes restringidas).');
-  }
-  return null;
-}
+const USER_DATA_DIR = path.join(process.cwd(), 'puppeteer-session');
 
 async function checkSession(page: any) {
   const isAuth = await page.evaluate(() => {
@@ -48,10 +26,12 @@ async function checkSession(page: any) {
 }
 
 async function runCrawler() {
-  console.log('Iniciando crawler de vehículos en modo shadow...');
+  console.log('Iniciando crawler de vehículos con SESIÓN PERSISTENTE...');
+  console.log(`Usando userDataDir: ${USER_DATA_DIR}`);
 
   const browser = await puppeteer.launch({
     headless: true,
+    userDataDir: USER_DATA_DIR,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
@@ -59,15 +39,18 @@ async function runCrawler() {
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 
-    // Inyectar cookies si existen
-    const cookieString = await injectCookies(page);
+    console.log('Verificando sesión persistente...');
+    await page.goto('https://subastas.boe.es/index.php', { waitUntil: 'domcontentloaded' });
+    const isAuth = await checkSession(page);
+
+    if (!isAuth) {
+      console.log('❌ NO hay sesión activa. Por favor, ejecuta primero: npx tsx scripts/boeLogin.ts');
+      await browser.close();
+      return;
+    }
 
     console.log('Navegando a la búsqueda avanzada...');
     await page.goto('https://subastas.boe.es/subastas_ava.php', { waitUntil: 'domcontentloaded', timeout: 60000 });
-
-    if (cookieString) {
-      await checkSession(page);
-    }
 
     // Seleccionar Vehículos (dato[3] = "V") y Celebrándose (dato[2] = "EJ")
     await page.evaluate(() => {
@@ -79,7 +62,7 @@ async function runCrawler() {
     await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 60000 });
 
     const results = await page.evaluate(() => {
-      const items = Array.from(document.querySelectorAll('.resultado-busqueda li')).slice(0, 5); // Check more to find images
+      const items = Array.from(document.querySelectorAll('.resultado-busqueda li'));
       return items.map(li => {
         const anchor = li.querySelector('a[href*="subastas_det.php"]') || li.querySelector('a[href*="idSub="]');
         const href = anchor ? anchor.getAttribute('href') : null;
@@ -157,11 +140,17 @@ async function runCrawler() {
               return img.src;
             });
 
-          // Documents (PDFs)
-          data.docs = Array.from(document.querySelectorAll('a[href*=".pdf"], a[href*="idDoc="]'))
+          // Documents (PDFs and others)
+          data.docs = Array.from(document.querySelectorAll('a'))
+            .filter(a => {
+              const href = (a as HTMLAnchorElement).href;
+              const text = a.textContent?.trim() || '';
+              return href.includes('.pdf') || href.includes('idDoc=') || text.toUpperCase().includes('INFORMACIÓN ADICIONAL');
+            })
             .map(a => {
               const name = a.textContent?.trim() || 'Documento';
               const url = (a as HTMLAnchorElement).href;
+              console.log(`    [Debug] Documento detectado: ${name} -> ${url}`);
               return { name, url };
             });
           
@@ -185,7 +174,11 @@ async function runCrawler() {
         const vehicleId = generalData.id || `V-${Date.now()}`;
         
         console.log(`  -> Subiendo imágenes a Cloudinary (${(bienesData.images || []).length} encontradas)...`);
-        const finalImages = await uploadVehicleImages(bienesData.images || [], vehicleId, cookieString || undefined);
+        // Las cookies para fetch manual se obtienen directamente de la página actual
+        const cookies = await detailPage.cookies();
+        const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+        
+        const finalImages = await uploadVehicleImages(bienesData.images || [], vehicleId, cookieString);
         console.log(`  -> Imágenes subidas: ${finalImages.length}`);
         if (finalImages.length > 0) {
           console.log(`  -> URL CLOUDINARY: ${finalImages[0]}`);
@@ -193,40 +186,68 @@ async function runCrawler() {
 
         // Procesar Documentos
         const documents: any[] = [];
-        let extractedLocation: any = {};
+        let detectedProvince = '';
+        let detectedMunicipality = '';
+        let detectedLocationText = '';
 
         // Fix: Extraer ubicación de infoAdicional si existe
         if (bienesData.infoAdicional) {
           const match = bienesData.infoAdicional.match(/\(([^)]+)\)/);
           if (match) {
             const prov = match[1].trim();
-            extractedLocation.province = prov.charAt(0).toUpperCase() + prov.slice(1).toLowerCase();
-            console.log(`    [LocationFix] Provincia extraída de infoAdicional: ${extractedLocation.province}`);
+            detectedProvince = prov.charAt(0).toUpperCase() + prov.slice(1).toLowerCase();
+            console.log(`    [LocationFix] Provincia detectada en infoAdicional: ${detectedProvince}`);
           }
         }
 
         if (bienesData.docs && bienesData.docs.length > 0) {
-          // Filtrar duplicados
-          const uniqueDocs = bienesData.docs.filter((doc: any, index: number, self: any[]) => 
+          // Filtrar duplicados y priorizar INFORMACIÓN ADICIONAL
+          let targetDocs = bienesData.docs.filter((doc: any, index: number, self: any[]) => 
             index === self.findIndex((t) => t.url === doc.url)
           );
+          
+          const infoAdicionalDoc = targetDocs.find((d: any) => d.name.toUpperCase().includes('INFORMACIÓN ADICIONAL'));
+          const datosVehiculoDoc = targetDocs.find((d: any) => d.name.toUpperCase().includes('DATOS VEHÍCULO'));
+          
+          if (infoAdicionalDoc) {
+            targetDocs = [infoAdicionalDoc];
+          } else if (datosVehiculoDoc) {
+            targetDocs = [datosVehiculoDoc];
+          } else {
+            // Si no hay ninguno de los dos, procesamos solo el primero que sea PDF
+            const firstPdf = targetDocs.find((d: any) => d.url.toLowerCase().includes('.pdf'));
+            targetDocs = firstPdf ? [firstPdf] : [];
+          }
 
-          console.log(`  -> Procesando ${uniqueDocs.length} documentos únicos...`);
-          for (const doc of uniqueDocs) {
+          console.log(`  -> Procesando ${targetDocs.length} documentos clave...`);
+          for (const doc of targetDocs) {
             try {
               // Delay para evitar rate limit (BOE es sensible)
-              await new Promise(resolve => setTimeout(resolve, 3000));
+              await new Promise(resolve => setTimeout(resolve, 2000));
 
-              const result = await processBoeDocument(doc.url, vehicleId, doc.name, cookieString || undefined);
+              const cookies = await detailPage.cookies();
+              const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+
+              const result = await processBoeDocument(doc.url, vehicleId, doc.name, cookieString);
               documents.push(result.doc);
-              // Mezclar info extraída (priorizando la más completa)
-              extractedLocation = { ...extractedLocation, ...result.info };
+              
+              // SIEMPRE sobrescribir si hay dato válido detectado
+              if (result.info.province) {
+                detectedProvince = result.info.province;
+                console.log(`    [DocFix] Provincia detectada en PDF: ${detectedProvince}`);
+              }
+              if (result.info.municipality) detectedMunicipality = result.info.municipality;
+              if (result.info.locationText) detectedLocationText = result.info.locationText;
             } catch (err) {
-              // No logueamos el error completo aquí para no ensuciar, ya lo hace processBoeDocument
               console.log(`     ! Error con documento ${doc.name}`);
             }
           }
         }
+
+        // Aplicar lógica crítica de asignación
+        const finalProvince = detectedProvince || 'No Consta';
+        const finalCity = detectedMunicipality || 'No Consta';
+        console.log(`  -> Provincia final: ${finalProvince}`);
 
         const vehicle = {
           id: vehicleId,
@@ -236,8 +257,8 @@ async function runCrawler() {
           status: 'active',
           value: parseNumber(generalData.valor) || 0,
           appraisal: parseNumber(generalData.tasacion) || 0,
-          province: extractedLocation.province || 'Desconocida',
-          city: extractedLocation.municipality || 'Desconocida',
+          province: finalProvince,
+          city: finalCity,
           publishedAt: new Date().toISOString(),
           auctionDate: generalData.fechaConclusion ? generalData.fechaConclusion.split(' ')[0] : undefined,
           boeUrl: generalUrl,
@@ -249,9 +270,9 @@ async function runCrawler() {
           vin: bienesData.bastidor,
           images: finalImages,
           // Nuevos campos
-          municipality: extractedLocation.municipality,
-          pickupLocation: extractedLocation.pickupLocation,
-          locationText: extractedLocation.locationText,
+          municipality: detectedMunicipality,
+          pickupLocation: detectedMunicipality, // Usamos municipio como base si no hay más
+          locationText: detectedLocationText,
           documents: documents
         };
 
@@ -274,13 +295,9 @@ async function runCrawler() {
       // Find the object
       const objectStart = content.indexOf('export const AUCTIONS: Record<string, AuctionData> = {');
       if (objectStart !== -1) {
-        const insertPos = content.indexOf('{', objectStart) + 1;
-        
-        let newEntries = '';
         for (const v of newVehicles) {
           const slug = `subasta-${v.id.toLowerCase()}`;
-          newEntries += `
-  '${slug}': {
+          const newEntry = `  '${slug}': {
     boeId: "${v.boeId}",
     status: "${v.status}",
     valorSubasta: ${v.value},
@@ -302,9 +319,19 @@ async function runCrawler() {
     locationText: ${v.locationText ? `"${v.locationText}"` : 'undefined'},
     documents: ${JSON.stringify(v.documents)}
   },`;
+
+          // Check if the slug already exists
+          const regex = new RegExp(`'${slug}':\\s*{[\\s\\S]*?^  },`, 'm');
+          if (regex.test(content)) {
+            // Overwrite existing entry
+            content = content.replace(regex, newEntry.trim() + ',');
+          } else {
+            // Insert at the beginning
+            const insertPos = content.indexOf('{', objectStart) + 1;
+            content = content.slice(0, insertPos) + '\n' + newEntry + content.slice(insertPos);
+          }
         }
         
-        content = content.slice(0, insertPos) + newEntries + content.slice(insertPos);
         fs.writeFileSync(AUCTIONS_FILE, content);
         console.log('Dataset actualizado con los nuevos vehículos en modo shadow.');
       }

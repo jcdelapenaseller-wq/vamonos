@@ -116,20 +116,45 @@ export async function processBoeDocument(
     const pdfData = await parser.getText();
     const text = pdfData.text;
 
+    console.log(`\n--- TEXTO EXTRAÍDO DEL PDF (${docName}) ---\n${text.substring(0, 800)}...\n------------------------------\n`);
+
     // 3. Extraer información usando regex simples (mejorable con LLM)
     const info: ExtractedInfo = {};
     
     // Ejemplo de extracción de Provincia/Municipio
     const provinceMatch = text.match(/Provincia:\s*([^\n\r]+)/i);
-    if (provinceMatch) info.province = provinceMatch[1].trim();
+    if (provinceMatch && provinceMatch[1]) info.province = provinceMatch[1].trim();
 
-    const municipalityMatch = text.match(/Localidad|Municipio:\s*([^\n\r]+)/i);
-    if (municipalityMatch) info.municipality = municipalityMatch[1].trim();
+    const municipalityMatch = text.match(/(?:Localidad|Municipio):\s*([^\n\r]+)/i);
+    if (municipalityMatch && municipalityMatch[1]) info.municipality = municipalityMatch[1].trim();
 
-    const pickupMatch = text.match(/Lugar de depósito|Dirección:\s*([^\n\r]+)/i);
-    if (pickupMatch) info.pickupLocation = pickupMatch[1].trim();
+    const pickupMatch = text.match(/(?:Lugar de depósito|Dirección):\s*([^\n\r]+)/i);
+    if (pickupMatch && pickupMatch[1]) info.pickupLocation = pickupMatch[1].trim();
+
+    // Fallback: Buscar provincias conocidas en el texto
+    if (!info.province) {
+      const PROVINCIAS_ESPANIA = [
+        "ALAVA", "ALBACETE", "ALICANTE", "ALMERIA", "ASTURIAS", "AVILA", "BADAJOZ", "BARCELONA", "BURGOS", "CACERES",
+        "CADIZ", "CANTABRIA", "CASTELLON", "CIUDAD REAL", "CORDOBA", "A CORUÑA", "LA CORUÑA", "CUENCA", "GIRONA", "GERONA", "GRANADA", "GUADALAJARA",
+        "GIPUZKOA", "GUIPUZCOA", "HUELVA", "HUESCA", "ISLAS BALEARES", "BALEARES", "JAEN", "LEON", "LLEIDA", "LERIDA", "LUGO", "MADRID", "MALAGA", "MURCIA", "NAVARRA",
+        "OURENSE", "ORENSE", "PALENCIA", "LAS PALMAS", "PONTEVEDRA", "LA RIOJA", "SALAMANCA", "SEGOVIA", "SEVILLA", "SORIA", "TARRAGONA",
+        "SANTA CRUZ DE TENERIFE", "TENERIFE", "TERUEL", "TOLEDO", "VALENCIA", "VALLADOLID", "BIZKAIA", "VIZCAYA", "ZAMORA", "ZARAGOZA", "CEUTA", "MELILLA"
+      ];
+      
+      const upperText = text.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      for (const prov of PROVINCIAS_ESPANIA) {
+        // Buscar la provincia como palabra completa
+        const regex = new RegExp(`\\b${prov}\\b`);
+        if (regex.test(upperText)) {
+          info.province = prov.charAt(0).toUpperCase() + prov.slice(1).toLowerCase();
+          console.log(`[DocProcessor] Provincia detectada por diccionario: ${info.province}`);
+          break;
+        }
+      }
+    }
 
     info.locationText = text.substring(0, 500).replace(/\n/g, ' '); // Primeros 500 caracteres como contexto
+
 
     return {
       doc: { name: docName, url: cloudinaryUrl },
