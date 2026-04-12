@@ -7,4 +7,9 @@ typings/
 
 # Node.js dependency directory
 node_modules/
+
+# Local env files
 *.local
+
+# Puppeteer session (CRÍTICO ignorar)
+puppeteer-session/
