@@ -2,16 +2,16 @@ import puppeteer from 'puppeteer';
 import path from 'path';
 
 async function boeLogin() {
-  const userDataDir = path.join(process.cwd(), 'puppeteer-session');
+  const sessionPath = path.resolve(process.cwd(), "puppeteer-session");
   
   console.log('--- INICIANDO NAVEGADOR PARA LOGIN MANUAL ---');
-  console.log(`Usando directorio de sesión: ${userDataDir}`);
+  console.log("Session path:", sessionPath);
   console.log('IMPORTANTE: Se abrirá una ventana del navegador. Por favor, inicia sesión en el BOE.');
   console.log('Una vez hayas iniciado sesión y veas tu nombre de usuario, puedes cerrar el navegador o presionar Ctrl+C en esta terminal.');
 
   const browser = await puppeteer.launch({
     headless: false, // Abrir navegador visible
-    userDataDir: userDataDir,
+    userDataDir: sessionPath,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',

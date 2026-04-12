@@ -13,11 +13,18 @@ const COOKIES_FILE = fs.existsSync(path.join(__dirname, '../boe-cookies.json'))
   : path.join(__dirname, '../boe-cookies-test.json');
 
 async function run() {
+  const sessionPath = path.resolve(process.cwd(), "puppeteer-session");
+  console.log("Session path:", sessionPath);
+
   const subId = 'SUB-AT-2026-25R4186002113';
   const url = `https://subastas.boe.es/reg/detalleSubasta.php?idSub=${subId}&ver=3`;
   
   console.log(`Navegando a: ${url}`);
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({ 
+    headless: false, 
+    userDataDir: sessionPath,
+    args: ['--no-sandbox', '--disable-setuid-sandbox'] 
+  });
   const page = await browser.newPage();
   await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
 

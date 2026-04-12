@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const AUCTIONS_FILE = path.join(process.cwd(), 'src/data/auctions.ts');
-const USER_DATA_DIR = path.join(process.cwd(), 'puppeteer-session');
+const sessionPath = path.resolve(process.cwd(), "puppeteer-session");
 
 async function checkSession(page: any) {
   const isAuth = await page.evaluate(() => {
@@ -27,11 +27,11 @@ async function checkSession(page: any) {
 
 async function runCrawler() {
   console.log('Iniciando crawler de vehículos con SESIÓN PERSISTENTE...');
-  console.log(`Usando userDataDir: ${USER_DATA_DIR}`);
+  console.log("Session path:", sessionPath);
 
   const browser = await puppeteer.launch({
-    headless: true,
-    userDataDir: USER_DATA_DIR,
+    headless: false,
+    userDataDir: sessionPath,
     args: ['--no-sandbox', '--disable-setuid-sandbox']
   });
 
