@@ -25,6 +25,16 @@
         "viewedAt": { "type": "string", "format": "date-time" }
       },
       "required": ["auctionId", "title", "viewedAt"]
+    },
+    "AuctionValuation": {
+      "title": "Auction Valuation Cache",
+      "description": "Cached valuation data for an auction.",
+      "type": "object",
+      "properties": {
+        "boeId": { "type": "string" },
+        "valuation": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "firestore": {
@@ -35,6 +45,10 @@
     "/users/{userId}/viewHistory/{auctionId}": {
       "schema": "ViewHistory",
       "description": "Individual auction view record."
+    },
+    "/auctions/{auctionId}/valuations/latest": {
+      "schema": "AuctionValuation",
+      "description": "Latest valuation cache for an auction."
     }
   }
 }

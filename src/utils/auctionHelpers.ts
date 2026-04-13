@@ -231,3 +231,60 @@ export function sortActiveFirst<T>(
     return 0;
   });
 }
+
+/**
+ * Extrae planta y puerta de un string de dirección del BOE.
+ * Implementa lógica de seguridad para evitar falsos positivos con números de calle.
+ */
+export function extractFloorFromAddress(address?: string | null): string | null {
+  if (!address) return null;
+
+  const upper = address.toUpperCase();
+  const hasStrongContext = 
+    upper.includes("PLANTA") || 
+    upper.includes("PISO") || 
+    upper.includes("BAJO") || 
+    upper.includes("ATICO") || 
+    upper.includes("ENTRESUELO");
+
+  if (!address.includes(',') && !hasStrongContext) return null;
+
+  const parts = address.split(',');
+  const firstSegment = parts[0];
+  // Si hay coma, buscamos en segmentos extra. Si no, buscamos en todo el string (contexto fuerte).
+  const searchContext = address.includes(',') ? parts.slice(1).join(',').toUpperCase() : address.toUpperCase();
+
+  // Extraer número de calle del primer segmento para validación (último número antes de la coma)
+  const streetNumberMatch = firstSegment.match(/\s(\d+)[^\d]*$/);
+  const streetNumber = streetNumberMatch ? streetNumberMatch[1] : null;
+
+  // 1. Patrón "PLANTA X" (Alta prioridad)
+  // Captura: PLANTA 3, PLANTA BAJA, PLANTA 1-612
+  const plantaMatch = searchContext.match(/PLANTA\s*([A-Z0-9ªº-]+)/i);
+  if (plantaMatch) return plantaMatch[0].trim();
+
+  // 2. Patrón Ordinal "4º 2ª", "1ºB", "3ª"
+  const ordinalMatch = searchContext.match(/(\d{1,2}\s?[ºª])(\s?[A-Z0-9ªº]*)/i);
+  if (ordinalMatch) {
+    const fullMatch = ordinalMatch[0].trim();
+    const floorNumber = ordinalMatch[1].replace(/[^\d]/g, '');
+    const hasDoor = ordinalMatch[2] && ordinalMatch[2].trim() !== "";
+
+    // SEGURIDAD: Solo descartar si es número simple (sin puerta) y coincide con número de calle
+    if (!hasDoor && floorNumber === streetNumber) {
+      // Continuar buscando otros patrones
+    } else {
+      return fullMatch;
+    }
+  }
+
+  // 3. Keywords exactas
+  const keywords = ["BAJO", "ENTREPLANTA", "ENTRESUELO", "ATICO", "SOTANO"];
+  for (const word of keywords) {
+    if (searchContext.includes(word)) {
+      return word;
+    }
+  }
+
+  return null;
+}

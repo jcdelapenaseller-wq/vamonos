@@ -12,7 +12,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import { AUCTIONS } from '../data/auctions';
 import { AUCTION_RESULTS } from '../data/auctionResults';
-import { getFilteredAuctions, isAuctionFinished, getAuctionType, getProcedureType } from '../utils/auctionHelpers';
+import { getFilteredAuctions, isAuctionFinished, getAuctionType, getProcedureType, extractFloorFromAddress } from '../utils/auctionHelpers';
 import { ROUTES } from '../constants/routes';
 import { normalizePropertyType, normalizeCity, normalizeLocationLabel, normalizeProvince, formatAddress } from '../utils/auctionNormalizer';
 import { trackConversion } from '../utils/tracking';
@@ -168,10 +168,17 @@ const AuctionPage: React.FC = () => {
 
   const formatFloor = (floor?: string): string => {
     if (!floor) return "—";
-    const raw = floor.trim().toUpperCase();
+    const raw = floor.trim();
+    
+    // Si ya parece formateado (contiene º, ª, o palabras clave), lo devolvemos tal cual
+    if (raw.includes('º') || raw.includes('ª') || /PLANTA|BAJO|ATICO|SOTANO|ENTREPLANTA|ENTRESUELO/i.test(raw)) {
+      return raw;
+    }
+
+    const upper = raw.toUpperCase();
     
     // Si tiene espacios (ej: "02 01"), nos quedamos con la primera parte
-    const firstPart = raw.split(/\s+/)[0];
+    const firstPart = upper.split(/\s+/)[0];
 
     const mapping: Record<string, string> = {
       "00": "Bajo",
@@ -2067,7 +2074,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  analysisResult?.yearBuilt || analysisResult?.metadata?.yearBuilt || valuationResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
+                  valuationResult?.metadata?.yearBuilt || analysisResult?.yearBuilt || analysisResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
                 )}
               </p>
             </div>
@@ -2077,7 +2084,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  formatFloor(analysisResult?.floor || analysisResult?.metadata?.floor || valuationResult?.metadata?.floor)
+                  formatFloor(valuationResult?.metadata?.floor || extractFloorFromAddress(auction.address) || analysisResult?.floor || analysisResult?.metadata?.floor)
                 )}
               </p>
             </div>

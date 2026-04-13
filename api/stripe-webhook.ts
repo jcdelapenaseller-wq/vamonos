@@ -20,9 +20,14 @@ export const config = {
 // Lazy initialization of Firebase Admin
 const initAdmin = () => {
   if (admin.apps.length === 0) {
-    admin.initializeApp({
-      projectId: process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID
-    });
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+    if (projectId) {
+      admin.initializeApp({
+        projectId: projectId
+      });
+    } else {
+      admin.initializeApp();
+    }
   }
   return admin.firestore();
 };
