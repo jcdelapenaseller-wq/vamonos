@@ -109,12 +109,6 @@ const Header: React.FC = () => {
           >
             Recientes
           </Link>
-          <Link 
-            to={ROUTES.VEHICLE_AUCTIONS} 
-            className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.VEHICLE_AUCTIONS ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
-          >
-            Vehículos
-          </Link>
 
           {/* Tools Dropdown */}
           <div className="relative group">
@@ -407,16 +401,6 @@ const Header: React.FC = () => {
               }}
             >
               Subastas Recientes
-            </Link>
-            <Link 
-              to={ROUTES.VEHICLE_AUCTIONS} 
-              className="text-lg font-bold text-slate-900 py-3 px-2 hover:bg-slate-50 rounded-lg transition-colors"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                window.scrollTo(0, 0);
-              }}
-            >
-              Subastas de Vehículos
             </Link>
 
             <div className="border-b border-slate-100 pb-2 mb-2">
