@@ -134,6 +134,9 @@ export function extractFinalPrice(pujasText?: string): number | null {
   return null;
 }
 
+// ⚠️ IMPORTANTE:
+// No introducir condiciones hardcodeadas por fecha (debug)
+// Esta función se usa en producción para determinar estado real
 export function isAuctionFinished(auctionDate?: string | null): boolean {
   if (!auctionDate || auctionDate === 'null') return false;
   
@@ -142,10 +145,6 @@ export function isAuctionFinished(auctionDate?: string | null): boolean {
   if (isNaN(endDate.getTime())) return false; // Invalid date
 
   const now = new Date();
-  // DEBUG: Para desarrollo, permitimos ver subastas de marzo 2026 como si no hubieran terminado
-  if (endDate.getFullYear() === 2026 && endDate.getMonth() === 2) { // Marzo es 2
-    return false;
-  }
   
   return now.getTime() > endDate.getTime();
 }
