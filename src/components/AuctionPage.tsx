@@ -2084,7 +2084,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  formatFloor(valuationResult?.metadata?.floor || extractFloorFromAddress(auction.address) || analysisResult?.floor || analysisResult?.metadata?.floor)
+                  formatFloor(valuationResult?.metadata?.floor || extractFloorFromAddress(`${auction.address || ''} ${auction.description || ''}`) || analysisResult?.floor || analysisResult?.metadata?.floor)
                 )}
               </p>
             </div>

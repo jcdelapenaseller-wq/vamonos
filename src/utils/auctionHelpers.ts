@@ -245,7 +245,11 @@ export function extractFloorFromAddress(address?: string | null): string | null 
     upper.includes("PISO") || 
     upper.includes("BAJO") || 
     upper.includes("ATICO") || 
-    upper.includes("ENTRESUELO");
+    upper.includes("ÁTICO") ||
+    upper.includes("ENTRESUELO") ||
+    upper.includes("PUERTA") ||
+    upper.includes("DERECHA") ||
+    upper.includes("IZQUIERDA");
 
   if (!address.includes(',') && !hasStrongContext) return null;
 
@@ -258,33 +262,75 @@ export function extractFloorFromAddress(address?: string | null): string | null 
   const streetNumberMatch = firstSegment.match(/\s(\d+)[^\d]*$/);
   const streetNumber = streetNumberMatch ? streetNumberMatch[1] : null;
 
-  // 1. Patrón "PLANTA X" (Alta prioridad)
-  // Captura: PLANTA 3, PLANTA BAJA, PLANTA 1-612
-  const plantaMatch = searchContext.match(/PLANTA\s*([A-Z0-9ªº-]+)/i);
-  if (plantaMatch) return plantaMatch[0].trim();
+  const ordinalMap: Record<string, string> = {
+    "PRIMERA": "1ª", "SEGUNDA": "2ª", "TERCERA": "3ª", "CUARTA": "4ª", "QUINTA": "5ª",
+    "SEXTA": "6ª", "SEPTIMA": "7ª", "SÉPTIMA": "7ª", "OCTAVA": "8ª", "NOVENA": "9ª", "DECIMA": "10ª", "DÉCIMA": "10ª"
+  };
 
-  // 2. Patrón Ordinal "4º 2ª", "1ºB", "3ª"
-  const ordinalMatch = searchContext.match(/(\d{1,2}\s?[ºª])(\s?[A-Z0-9ªº]*)/i);
-  if (ordinalMatch) {
-    const fullMatch = ordinalMatch[0].trim();
-    const floorNumber = ordinalMatch[1].replace(/[^\d]/g, '');
-    const hasDoor = ordinalMatch[2] && ordinalMatch[2].trim() !== "";
+  // 1. Buscar Planta (Obligatoria para este helper)
+  let planta: string | null = null;
+  
+  // A) Planta narrativa
+  const plantaNarrativeRegex = /(?:PLANTA|PISO)\s+(BAJA|PRIMERA|SEGUNDA|TERCERA|CUARTA|QUINTA|SEXTA|S[EÉ]PTIMA|OCTAVA|NOVENA|D[EÉ]CIMA|BAJO-CUBIERTA|S[OÓ]TANO|[AÁ]TICO|ENTRESUELO|ENTREPLANTA)/i;
+  const plantaNarrativeMatch = searchContext.match(plantaNarrativeRegex);
+  
+  if (plantaNarrativeMatch) {
+    const val = plantaNarrativeMatch[1].toUpperCase();
+    if (val === "BAJA") planta = "Bajo";
+    else if (val === "BAJO-CUBIERTA") planta = "Bajo cubierta";
+    else if (ordinalMap[val]) planta = ordinalMap[val];
+    else planta = val.charAt(0) + val.slice(1).toLowerCase();
+  }
 
-    // SEGURIDAD: Solo descartar si es número simple (sin puerta) y coincide con número de calle
-    if (!hasDoor && floorNumber === streetNumber) {
-      // Continuar buscando otros patrones
-    } else {
-      return fullMatch;
+  // B) Planta formato corto (PLANTA 3, PLANTA 3ª)
+  if (!planta) {
+    const plantaShortRegex = /PLANTA\s*([A-Z0-9ªº°-]+)/i;
+    const plantaShortMatch = searchContext.match(plantaShortRegex);
+    if (plantaShortMatch) {
+      planta = plantaShortMatch[1].trim();
     }
   }
 
-  // 3. Keywords exactas
-  const keywords = ["BAJO", "ENTREPLANTA", "ENTRESUELO", "ATICO", "SOTANO"];
-  for (const word of keywords) {
-    if (searchContext.includes(word)) {
-      return word;
+  // C) Planta formato ordinal directo (1º, 2ª) - Solo si no es número de calle
+  if (!planta) {
+    const ordinalMatch = searchContext.match(/(\d{1,2}\s?[ºª°])(\s?[A-Z0-9ªº°-]*)/i);
+    if (ordinalMatch) {
+      const floorNumber = ordinalMatch[1].replace(/[^\d]/g, '');
+      const hasDoor = ordinalMatch[2] && ordinalMatch[2].trim() !== "";
+      if (hasDoor || floorNumber !== streetNumber) {
+        planta = ordinalMatch[1].trim();
+      }
     }
   }
 
-  return null;
+  // Si no hay planta, abortamos (según requerimiento: planta obligatoria)
+  if (!planta) return null;
+
+  // 2. Buscar Puerta (Opcional, solo si hay planta)
+  let puerta: string | null = null;
+
+  // A) Puerta narrativa
+  const puertaNarrativeRegex = /(?:PUERTA\s+(PRIMERA|SEGUNDA|TERCERA|CUARTA|QUINTA|SEXTA|S[EÉ]PTIMA|OCTAVA|NOVENA|D[EÉ]CIMA|[A-Z0-9]+)|A LA (DERECHA|IZQUIERDA)|AL (CENTRO))/i;
+  const puertaNarrativeMatch = searchContext.match(puertaNarrativeRegex);
+  
+  if (puertaNarrativeMatch) {
+    if (puertaNarrativeMatch[1]) {
+      const val = puertaNarrativeMatch[1].toUpperCase();
+      puerta = ordinalMap[val] || val;
+    } else if (puertaNarrativeMatch[2]) {
+      puerta = puertaNarrativeMatch[2].toLowerCase();
+    } else if (puertaNarrativeMatch[3]) {
+      puerta = puertaNarrativeMatch[3].toLowerCase();
+    }
+  }
+
+  // B) Puerta desde el match ordinal (si existía)
+  if (!puerta) {
+    const ordinalMatch = searchContext.match(/(\d{1,2}\s?[ºª°])\s?([A-Z0-9ªº°]+)/i);
+    if (ordinalMatch && ordinalMatch[2]) {
+      puerta = ordinalMatch[2].trim().toLowerCase();
+    }
+  }
+
+  return puerta ? `${planta} ${puerta}` : planta;
 }
