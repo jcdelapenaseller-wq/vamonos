@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp } from 'lucide-react';
+import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
 
@@ -851,6 +851,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
             {/* Coste total estimado */}
             {analysisType === 'completo' && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
+              <>
               <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Calculator size={20} className="text-brand-400" /> Coste total estimado
@@ -862,11 +863,18 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                       {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue || 0)}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center text-slate-400 text-sm">
-                    <span>Cargas que subsisten</span>
-                    <span className="font-medium text-amber-400">
-                      + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total)}
-                    </span>
+                  <div className="flex flex-col">
+                    <div className="flex justify-between items-center text-slate-400 text-sm">
+                      <span>Cargas que subsisten</span>
+                      <span className="font-medium text-amber-400">
+                        + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total)}
+                      </span>
+                    </div>
+                    {(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total) === 0 ? (
+                      <span className="text-xs text-emerald-400 mt-1">✔️ No asumes deudas tras la subasta</span>
+                    ) : (
+                      <span className="text-xs text-rose-400 mt-1">⚠️ Estas cargas SÍ las asume el comprador</span>
+                    )}
                   </div>
                   <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
                     <span className="font-bold text-slate-200">Coste total estimado</span>
@@ -879,6 +887,38 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   * Este cálculo asume una puja igual al valor de tasación. El coste final dependerá de tu puja real en el portal del BOE.
                 </p>
               </div>
+              
+              {/* Nuevo bloque: Qué pagarías realmente */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mt-4">
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  💰 Qué pagarías realmente
+                </h3>
+                { (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total) === 0 ? (
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Solo pagas tu puja</li>
+                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> La deuda se cancela con la subasta</li>
+                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> No asumes cargas adicionales</li>
+                  </ul>
+                ) : (
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Pagas tu puja</li>
+                    <li className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-500"/> + cargas que subsisten</li>
+                    <li className="flex items-center gap-2 font-bold text-slate-900 mt-2 pt-2 border-t border-slate-100">
+                      Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total))}
+                    </li>
+                  </ul>
+                )}
+                
+                <details className="mt-4 group">
+                  <summary className="text-sm font-bold text-brand-600 cursor-pointer list-none flex items-center gap-1 hover:text-brand-700 transition-colors">
+                    <HelpCircle size={16} /> ¿Por qué no pago la deuda?
+                  </summary>
+                  <div className="mt-2 p-3 bg-slate-50 rounded-lg text-sm text-slate-600 border border-slate-100">
+                    La deuda corresponde a la hipoteca ejecutada. Se cancela con la adjudicación del inmueble. El comprador no la asume directamente.
+                  </div>
+                </details>
+              </div>
+              </>
             )}
 
             {/* Decisión de inversión - Bloque Agrupado */}
@@ -1230,6 +1270,11 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                 <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Peor Escenario Registral</h3>
                 <p className="text-3xl font-black">{resultData.peor_escenario.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</p>
                 <p className="text-xs opacity-80 mt-1 font-medium">Impacto: {resultData.impacto_economico.nivel}</p>
+                {resultData.peor_escenario.total === 0 ? (
+                  <p className="text-xs text-emerald-700 mt-2 font-medium">✔️ Incluso en el peor caso, no asumirías cargas económicas</p>
+                ) : (
+                  <p className="text-xs text-rose-700 mt-2 font-medium">⚠️ En el peor escenario, podrías asumir hasta {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.total)} adicionales</p>
+                )}
               </div>
             </div>
 
