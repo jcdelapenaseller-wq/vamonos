@@ -1,5 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import multer from 'multer';
+import { AUCTIONS } from '../src/data/auctions.ts';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -30,6 +31,23 @@ export default async function handler(req: any, res: any) {
       const { type, auctionId } = req.body;
       console.log("analysis type:", type);
       console.log("auctionId:", auctionId);
+
+      // Obtener datos de la subasta si existen
+      const auction = auctionId ? AUCTIONS[auctionId] : null;
+      const claimedDebt = auction?.claimedDebt;
+
+      let claimedDebtContext = "";
+      if (claimedDebt) {
+        claimedDebtContext = `
+DATO OFICIAL DEL BOE (PRIORITARIO):
+La cantidad reclamada (deuda del procedimiento) es de ${claimedDebt.toLocaleString('es-ES')} EUR.
+DEBES usar este valor exacto en el bloque "### 💰 Deuda del procedimiento" y mencionarlo en el resumen.
+`;
+      } else {
+        claimedDebtContext = `
+Si no detectas la cantidad reclamada en los documentos, indica: "No se especifica en la documentación analizada".
+`;
+      }
 
       let analysisMode = "cargas";
       if (type === "completo") {
@@ -108,8 +126,9 @@ Explica en 4-5 líneas:
 - qué riesgo real tiene el comprador
 
 ### 💰 Deuda del procedimiento
-- importe reclamado
-- explicación clara de qué significa
+- importe reclamado (Si el dato oficial es ${claimedDebt ? claimedDebt.toLocaleString('es-ES') + ' EUR' : 'desconocido'}, úsalo).
+- explicación clara de qué significa.
+- AÑADE SIEMPRE ESTA FRASE EXACTA: "Este importe corresponde a la deuda del procedimiento y no es asumido directamente por el comprador, ya que se cancela con la adjudicación del inmueble."
 
 ### ⚖️ Qué paga el comprador
 - explicar claramente:
@@ -118,6 +137,8 @@ Explica en 4-5 líneas:
   - si hay cargas adicionales o no
 
 ---
+
+${claimedDebtContext}
 
 ARQUITECTURA MULTI-DOCUMENTO Y PRIORIDAD JURÍDICA (NUEVO):
 

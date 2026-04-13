@@ -357,138 +357,267 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
       }
     };
 
-    // Título Principal
-    doc.setFontSize(22);
+    const cleanText = (text: string | undefined | null): string => {
+      if (!text) return "";
+      return text
+        .replace(/#+\s?/g, "")        // elimina ###
+        .replace(/\*\*/g, "")         // elimina **
+        .replace(/\*/g, "")           // elimina *
+        .replace(/Ø|Ý|à|Ü|°|þ/g, "")  // limpia caracteres corruptos comunes
+        .replace(/\n\s*\n/g, "\n")    // limpia saltos dobles
+        .trim();
+    };
+
+    const formatCurrencyPDF = (value: number | undefined | null): string => {
+      if (!value) return "0 EUR";
+      return `${Math.round(value).toLocaleString("es-ES")} EUR`;
+    };
+
+    // --- CONFIGURACIÓN VISUAL ---
+    const colors = {
+      primary: [15, 23, 42],    // Slate 900
+      secondary: [71, 85, 105], // Slate 600
+      accent: [2, 132, 199],    // Sky 600
+      bg: [248, 250, 252],      // Slate 50
+      border: [226, 232, 240],  // Slate 200
+      white: [255, 255, 255]
+    };
+
+    const margin = 15;
+    const contentWidth = pageWidth - (margin * 2);
+
+    const drawHeader = (pdf: typeof doc, title: string) => {
+      pdf.setFontSize(18);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+      pdf.text(title, margin, y);
+      y += 6;
+      pdf.setDrawColor(colors.accent[0], colors.accent[1], colors.accent[2]);
+      pdf.setLineWidth(0.8);
+      pdf.line(margin, y, margin + 20, y);
+      y += 10;
+    };
+
+    const drawSectionBox = (pdf: typeof doc, title: string, content: string[], bgColor: number[] = colors.bg) => {
+      const boxPadding = 8;
+      const lineHeight = 6;
+      const boxHeight = (content.length * lineHeight) + (boxPadding * 2) + 10;
+      
+      checkPageBreak(boxHeight + 10);
+      
+      // Fondo
+      pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+      pdf.roundedRect(margin, y, contentWidth, boxHeight, 3, 3, "F");
+      
+      let boxY = y + boxPadding + 4;
+      
+      // Título del bloque
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+      pdf.text(title.toUpperCase(), margin + boxPadding, boxY);
+      boxY += 8;
+      
+      // Contenido
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+      
+      content.forEach(line => {
+        pdf.text(line, margin + boxPadding, boxY);
+        boxY += lineHeight;
+      });
+      
+      y += boxHeight + 10;
+    };
+
+    // --- PORTADA ---
+    // Fondo decorativo lateral
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.rect(0, 0, 5, pageHeight, "F");
+
+    y = 40;
+    doc.setFontSize(28);
     doc.setFont("helvetica", "bold");
-    doc.setTextColor(15, 23, 42); // slate-900
-    doc.text("Informe de análisis de subasta", 10, y);
+    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.text("DOSSIER DE", margin, y);
+    y += 12;
+    doc.text("ANÁLISIS JURÍDICO", margin, y);
+    
+    y += 15;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    doc.text("Informe profesional de cargas y riesgos de subasta", margin, y);
+
+    y += 30;
+    // Bloque de datos rápidos en portada
+    doc.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 15;
+
+    const dateStr = new Date().toLocaleDateString('es-ES', { 
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("IDENTIFICADOR:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(boeId || "N/A", margin + 40, y);
     y += 8;
 
-    // Subtítulo de Portada
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(71, 85, 105); // slate-600
-    doc.text("Informe generado por sistema de análisis jurídico especializado en subastas BOE", 10, y);
-    y += 12;
-
-    // Metadatos
-    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("FECHA INFORME:", margin, y);
     doc.setFont("helvetica", "normal");
-    doc.setTextColor(100);
-    const dateStr = new Date().toLocaleDateString('es-ES', { 
-      year: 'numeric', month: 'long', day: 'numeric',
-      hour: '2-digit', minute: '2-digit'
-    });
-    doc.text(`Fecha: ${dateStr}`, 10, y);
-    y += 6;
-    if (boeId) {
-      doc.text(`Identificador: ${boeId}`, 10, y);
-      y += 6;
-    }
-    doc.setTextColor(0);
-    y += 4;
+    doc.text(dateStr, margin + 40, y);
+    y += 8;
 
-    // Línea separadora
-    doc.setDrawColor(200);
-    doc.line(10, y, pageWidth - 10, y);
-    y += 12;
+    doc.setFont("helvetica", "bold");
+    doc.text("RIESGO GLOBAL:", margin, y);
+    doc.setFont("helvetica", "bold");
+    const riskColor = resultData?.riesgo_global === 'ALTO' ? [185, 28, 28] : resultData?.riesgo_global === 'MEDIO' ? [180, 83, 9] : [21, 128, 61];
+    doc.setTextColor(riskColor[0], riskColor[1], riskColor[2]);
+    doc.text(resultData?.riesgo_global || "PENDIENTE", margin + 40, y);
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    y += 20;
+
+    // Resumen económico rápido en portada
+    const importeCargas = resultData?.peor_escenario?.importe_total ?? resultData?.peor_escenario?.total ?? 0;
+    const totalCost = (appraisalValue || 0) + importeCargas;
+
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.roundedRect(margin, y, contentWidth, 35, 2, 2, "F");
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text("ESTIMACIÓN DE COSTE TOTAL (PUJA + CARGAS)", margin + 10, y + 12);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text(appraisalValue ? formatCurrencyPDF(totalCost) : "PUJA + " + formatCurrencyPDF(importeCargas), margin + 10, y + 25);
+    
+    y += 45;
+
+    // --- BLOQUE: VEREDICTO DE INVERSIÓN ---
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.text("VEREDICTO DE INVERSIÓN:", margin, y);
+    y += 10;
+
+    let veredictoText = "";
+    let veredictoColor = [15, 23, 42];
+
+    if (resultData?.riesgo_global === 'ALTO') {
+      veredictoText = "X ALTO RIESGO JURÍDICO";
+      veredictoColor = [185, 28, 28]; // Rojo
+    } else if (resultData?.riesgo_global === 'MEDIO' || importeCargas > 0) {
+      veredictoText = "! REVISAR EN DETALLE";
+      veredictoColor = [180, 83, 9]; // Ámbar
+    } else {
+      veredictoText = "V OPERACIÓN LIMPIA (SIN CARGAS)";
+      veredictoColor = [21, 128, 61]; // Verde
+    }
+
+    doc.setFillColor(veredictoColor[0], veredictoColor[1], veredictoColor[2], 0.1);
+    doc.setDrawColor(veredictoColor[0], veredictoColor[1], veredictoColor[2]);
+    doc.roundedRect(margin, y, contentWidth, 20, 1, 1, "FD");
+    
+    doc.setTextColor(veredictoColor[0], veredictoColor[1], veredictoColor[2]);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(veredictoText, margin + 10, y + 13);
+
+    y = pageHeight - 40;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    doc.text("Este documento contiene información técnica procesada mediante inteligencia", margin, y);
+    doc.text("artificial y revisión jurídica. Consulte siempre con un profesional.", margin, y + 5);
+
+    // --- PÁGINA 2: CONTENIDO ---
+    doc.addPage();
+    // Fondo decorativo lateral
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.rect(0, 0, 5, pageHeight, "F");
+    y = 25;
 
     // Sección: Resumen claro
     if (resultData?.recomendacion) {
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Resumen claro", 10, y);
-      y += 8;
-      doc.setFontSize(11);
+      drawHeader(doc, "Decisión rápida");
+      const cleanedRec = cleanText(resultData.recomendacion);
+      const recLines = doc.splitTextToSize(cleanedRec, contentWidth - 10);
+      
+      doc.setFontSize(10);
       doc.setFont("helvetica", "normal");
-      const recLines = doc.splitTextToSize(resultData.recomendacion, pageWidth - 20);
-      checkPageBreak(recLines.length * 6);
-      doc.text(recLines, 10, y);
-      y += (recLines.length * 6) + 10;
-
-      // Línea separadora
-      checkPageBreak(12);
-      doc.line(10, y, pageWidth - 10, y);
-      y += 12;
+      doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+      
+      recLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, y);
+        y += 6;
+      });
+      y += 10;
     }
 
     // Sección: Qué pagarías realmente
     if (resultData?.peor_escenario) {
-      const importeCargas = resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total;
-      if (importeCargas !== undefined) {
-        checkPageBreak(30);
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text("Qué pagarías realmente", 10, y);
-        y += 8;
-        doc.setFontSize(11);
-        doc.setFont("helvetica", "normal");
-        
-        if (!importeCargas) {
-          doc.text("- Solo pagas tu puja", 15, y); y += 6;
-          doc.text("- La deuda se cancela con la subasta", 15, y); y += 6;
-          doc.text("- No asumes deudas tras la subasta", 15, y); y += 6;
-        } else {
-          doc.text("- Pagas tu puja", 15, y); y += 6;
-          doc.text("- + cargas que subsisten", 15, y); y += 6;
-          if (appraisalValue) {
-            const totalCost = appraisalValue + importeCargas;
-            const formattedTotal = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalCost);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Coste total estimado: ${formattedTotal}`, 15, y); 
-          } else {
-            const formattedCargas = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(importeCargas);
-            doc.setFont("helvetica", "bold");
-            doc.text(`Cargas a asumir: ${formattedCargas} (más tu puja)`, 15, y); 
-          }
-          doc.setFont("helvetica", "normal");
-          y += 6;
+      const infoLines = [];
+      if (!importeCargas) {
+        infoLines.push("- Solo pagas el importe de tu puja adjudicada.");
+        infoLines.push("- No existen cargas preferentes que subsistan tras la subasta.");
+        infoLines.push("- La deuda que motiva la subasta se cancela con el remate.");
+      } else {
+        infoLines.push(`- Cargas que subsisten: ${formatCurrencyPDF(importeCargas)}`);
+        infoLines.push("- Estas cargas deben ser liquidadas por el adjudicatario.");
+        if (appraisalValue) {
+          infoLines.push(`- Coste total estimado (Puja + Cargas): ${formatCurrencyPDF(totalCost)}`);
         }
-        y += 6;
-
-        // Línea separadora
-        checkPageBreak(12);
-        doc.line(10, y, pageWidth - 10, y);
-        y += 12;
       }
+      
+      drawSectionBox(doc, "Impacto económico real", infoLines, [240, 253, 244]); // Emerald 50
     }
 
     // Sección: Análisis jurídico
     if (resultData?.razonamiento_juridico) {
-      checkPageBreak(20);
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "bold");
-      doc.text("Análisis jurídico", 10, y);
-      y += 8;
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      const textLines = doc.splitTextToSize(resultData.razonamiento_juridico, pageWidth - 20);
+      drawHeader(doc, "Análisis Jurídico Detallado");
+      const cleanedReasoning = cleanText(resultData.razonamiento_juridico);
+      const textLines = doc.splitTextToSize(cleanedReasoning, contentWidth);
       
-      // Handle multi-page text for reasoning
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+      
       for (let i = 0; i < textLines.length; i++) {
         checkPageBreak(6);
-        doc.text(textLines[i], 10, y);
-        y += 6;
+        doc.text(textLines[i], margin, y);
+        y += 5.5;
       }
-      y += 10;
+      y += 15;
     }
 
     // Límite de responsabilidad
-    checkPageBreak(30);
-    y += 10;
-    doc.setDrawColor(240);
-    doc.setFillColor(250, 250, 250);
-    doc.rect(10, y, pageWidth - 20, 25, "F");
+    checkPageBreak(35);
+    doc.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
+    doc.setFillColor(252, 252, 253);
+    doc.roundedRect(margin, y, contentWidth, 25, 2, 2, "FD");
     
     y += 8;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(71, 85, 105);
-    doc.text("Límite de responsabilidad", 15, y);
-    y += 6;
     doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.text("AVISO LEGAL Y RESPONSABILIDAD", margin + 5, y);
+    y += 6;
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.text("Este informe es orientativo y no sustituye asesoramiento jurídico profesional", 15, y);
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    const disclaimer = "Este informe es una herramienta de apoyo basada en el análisis de documentos aportados. No constituye asesoramiento legal vinculante. Activos Off-Market no se hace responsable de decisiones de inversión basadas exclusivamente en este informe.";
+    const disclaimerLines = doc.splitTextToSize(disclaimer, contentWidth - 10);
+    disclaimerLines.forEach((line: string) => {
+      doc.text(line, margin + 5, y);
+      y += 4;
+    });
 
     // Añadir footer a todas las páginas
     addFooter(doc);
