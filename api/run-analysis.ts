@@ -85,9 +85,9 @@ El resultado debe ser comprensible por un usuario no experto.
 
 ${analysisMode === 'cargas' ? `
 ENFOQUE DEL ANÁLISIS (MODO CARGAS):
-- Solo análisis jurídico de cargas.
-- Identificación de riesgos.
-- Resumen de la situación registral.
+- Análisis jurídico detallado y pedagógico.
+- Identificación clara de riesgos y situación registral.
+- Recomendación orientada a entender qué cargas subsisten y sus implicaciones legales.
 ` : `
 ENFOQUE DEL ANÁLISIS (MODO COMPLETO):
 - Análisis jurídico detallado.

@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp, Check } from 'lucide-react';
+import { jsPDF } from "jspdf";
+import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp, Check, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
 
@@ -327,6 +328,172 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     if (e.target.files && e.target.files.length > 0) {
       setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
     }
+  };
+
+  const handleDownloadPDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let y = 20;
+
+    const addFooter = (pdf: typeof doc) => {
+      const totalPages = pdf.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(150);
+        pdf.setDrawColor(230);
+        pdf.line(10, pageHeight - 15, pageWidth - 10, pageHeight - 15);
+        pdf.text("Activos Off-Market · Análisis profesional de subastas", 10, pageHeight - 10);
+        pdf.text("www.activosoffmarket.es", pageWidth - 10, pageHeight - 10, { align: "right" });
+      }
+    };
+
+    const checkPageBreak = (neededHeight: number) => {
+      if (y + neededHeight > pageHeight - 25) {
+        doc.addPage();
+        y = 20;
+      }
+    };
+
+    // Título Principal
+    doc.setFontSize(22);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42); // slate-900
+    doc.text("Informe de análisis de subasta", 10, y);
+    y += 8;
+
+    // Subtítulo de Portada
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(71, 85, 105); // slate-600
+    doc.text("Informe generado por sistema de análisis jurídico especializado en subastas BOE", 10, y);
+    y += 12;
+
+    // Metadatos
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(100);
+    const dateStr = new Date().toLocaleDateString('es-ES', { 
+      year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+    doc.text(`Fecha: ${dateStr}`, 10, y);
+    y += 6;
+    if (boeId) {
+      doc.text(`Identificador: ${boeId}`, 10, y);
+      y += 6;
+    }
+    doc.setTextColor(0);
+    y += 4;
+
+    // Línea separadora
+    doc.setDrawColor(200);
+    doc.line(10, y, pageWidth - 10, y);
+    y += 12;
+
+    // Sección: Resumen claro
+    if (resultData?.recomendacion) {
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Resumen claro", 10, y);
+      y += 8;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      const recLines = doc.splitTextToSize(resultData.recomendacion, pageWidth - 20);
+      checkPageBreak(recLines.length * 6);
+      doc.text(recLines, 10, y);
+      y += (recLines.length * 6) + 10;
+
+      // Línea separadora
+      checkPageBreak(12);
+      doc.line(10, y, pageWidth - 10, y);
+      y += 12;
+    }
+
+    // Sección: Qué pagarías realmente
+    if (resultData?.peor_escenario) {
+      const importeCargas = resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total;
+      if (importeCargas !== undefined) {
+        checkPageBreak(30);
+        doc.setFontSize(14);
+        doc.setFont("helvetica", "bold");
+        doc.text("Qué pagarías realmente", 10, y);
+        y += 8;
+        doc.setFontSize(11);
+        doc.setFont("helvetica", "normal");
+        
+        if (!importeCargas) {
+          doc.text("- Solo pagas tu puja", 15, y); y += 6;
+          doc.text("- La deuda se cancela con la subasta", 15, y); y += 6;
+          doc.text("- No asumes deudas tras la subasta", 15, y); y += 6;
+        } else {
+          doc.text("- Pagas tu puja", 15, y); y += 6;
+          doc.text("- + cargas que subsisten", 15, y); y += 6;
+          if (appraisalValue) {
+            const totalCost = appraisalValue + importeCargas;
+            const formattedTotal = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalCost);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Coste total estimado: ${formattedTotal}`, 15, y); 
+          } else {
+            const formattedCargas = new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(importeCargas);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Cargas a asumir: ${formattedCargas} (más tu puja)`, 15, y); 
+          }
+          doc.setFont("helvetica", "normal");
+          y += 6;
+        }
+        y += 6;
+
+        // Línea separadora
+        checkPageBreak(12);
+        doc.line(10, y, pageWidth - 10, y);
+        y += 12;
+      }
+    }
+
+    // Sección: Análisis jurídico
+    if (resultData?.razonamiento_juridico) {
+      checkPageBreak(20);
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text("Análisis jurídico", 10, y);
+      y += 8;
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      const textLines = doc.splitTextToSize(resultData.razonamiento_juridico, pageWidth - 20);
+      
+      // Handle multi-page text for reasoning
+      for (let i = 0; i < textLines.length; i++) {
+        checkPageBreak(6);
+        doc.text(textLines[i], 10, y);
+        y += 6;
+      }
+      y += 10;
+    }
+
+    // Límite de responsabilidad
+    checkPageBreak(30);
+    y += 10;
+    doc.setDrawColor(240);
+    doc.setFillColor(250, 250, 250);
+    doc.rect(10, y, pageWidth - 20, 25, "F");
+    
+    y += 8;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(71, 85, 105);
+    doc.text("Límite de responsabilidad", 15, y);
+    y += 6;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.text("Este informe es orientativo y no sustituye asesoramiento jurídico profesional", 15, y);
+
+    // Añadir footer a todas las páginas
+    addFooter(doc);
+
+    doc.save(`informe-subasta-${boeId || 'analisis'}.pdf`);
   };
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -808,6 +975,57 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               </div>
             )}
 
+            {/* Resumen Claro (Recomendación IA) */}
+            {resultData.recomendacion && (
+              <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-brand-900 mb-4 flex items-center gap-2">
+                  <Info size={20} className="text-brand-600" /> Resumen claro
+                </h3>
+                <p className="text-brand-800 text-sm leading-relaxed whitespace-pre-line">
+                  {resultData.recomendacion}
+                </p>
+              </div>
+            )}
+
+            {/* Qué pagarías realmente */}
+            {(resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
+                  💰 Qué pagarías realmente
+                </h3>
+                { !(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total) ? (
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Solo pagas tu puja</li>
+                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> La deuda se cancela con la subasta</li>
+                    <li className="flex items-center gap-2 font-bold text-emerald-700 mt-2 pt-2 border-t border-slate-100">
+                      ✔️ No asumes deudas tras la subasta
+                    </li>
+                  </ul>
+                ) : (
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Pagas tu puja</li>
+                    <li className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-500"/> + cargas que subsisten</li>
+                    <li className="flex items-center gap-2 font-bold text-slate-900 mt-2 pt-2 border-t border-slate-100">
+                      {appraisalValue ? (
+                        <>Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue + (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total))}</>
+                      ) : (
+                        <>Cargas a asumir: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total)} (más tu puja)</>
+                      )}
+                    </li>
+                  </ul>
+                )}
+                
+                <details className="mt-4 group">
+                  <summary className="text-sm font-bold text-brand-600 cursor-pointer list-none flex items-center gap-1 hover:text-brand-700 transition-colors">
+                    <HelpCircle size={16} /> ¿Por qué no pago la deuda?
+                  </summary>
+                  <div className="mt-2 p-3 bg-slate-50 rounded-lg text-sm text-slate-600 border border-slate-100">
+                    La deuda corresponde a la hipoteca ejecutada. Se cancela con la adjudicación del inmueble. El comprador no la asume directamente.
+                  </div>
+                </details>
+              </div>
+            )}
+
             {/* Resumen Inversión */}
             {analysisType === 'completo' && canCalculateFinancials && (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
@@ -851,7 +1069,6 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
             {/* Coste total estimado */}
             {analysisType === 'completo' && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
-              <>
               <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Calculator size={20} className="text-brand-400" /> Coste total estimado
@@ -887,38 +1104,6 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   * Este cálculo asume una puja igual al valor de tasación. El coste final dependerá de tu puja real en el portal del BOE.
                 </p>
               </div>
-              
-              {/* Nuevo bloque: Qué pagarías realmente */}
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm mt-4">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  💰 Qué pagarías realmente
-                </h3>
-                { (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total) === 0 ? (
-                  <ul className="space-y-2 text-sm text-slate-700">
-                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Solo pagas tu puja</li>
-                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> La deuda se cancela con la subasta</li>
-                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> No asumes cargas adicionales</li>
-                  </ul>
-                ) : (
-                  <ul className="space-y-2 text-sm text-slate-700">
-                    <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Pagas tu puja</li>
-                    <li className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-500"/> + cargas que subsisten</li>
-                    <li className="flex items-center gap-2 font-bold text-slate-900 mt-2 pt-2 border-t border-slate-100">
-                      Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total))}
-                    </li>
-                  </ul>
-                )}
-                
-                <details className="mt-4 group">
-                  <summary className="text-sm font-bold text-brand-600 cursor-pointer list-none flex items-center gap-1 hover:text-brand-700 transition-colors">
-                    <HelpCircle size={16} /> ¿Por qué no pago la deuda?
-                  </summary>
-                  <div className="mt-2 p-3 bg-slate-50 rounded-lg text-sm text-slate-600 border border-slate-100">
-                    La deuda corresponde a la hipoteca ejecutada. Se cancela con la adjudicación del inmueble. El comprador no la asume directamente.
-                  </div>
-                </details>
-              </div>
-              </>
             )}
 
             {/* Decisión de inversión - Bloque Agrupado */}
@@ -1236,15 +1421,20 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
             {/* Razonamiento Jurídico (Chain of Thought) */}
             {resultData.razonamiento_juridico && (
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <Info size={20} className="text-slate-600" />
-                  <h4 className="font-bold text-slate-900">Razonamiento Jurídico (IA)</h4>
-                </div>
-                <div className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
+              <details className="group">
+                <summary className="list-none cursor-pointer">
+                  <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl flex items-center justify-between hover:bg-slate-100 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🔍</span>
+                      <h4 className="font-bold text-slate-900">Ver análisis jurídico completo</h4>
+                    </div>
+                    <ChevronDown size={20} className="text-slate-400 group-open:rotate-180 transition-transform" />
+                  </div>
+                </summary>
+                <div className="bg-white border-x border-b border-slate-200 p-6 rounded-b-xl -mt-2 text-sm text-slate-700 whitespace-pre-line leading-relaxed shadow-inner">
                   {resultData.razonamiento_juridico}
                 </div>
-              </div>
+              </details>
             )}
 
             {/* Semaphore Header */}
@@ -1499,39 +1689,29 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               </div>
             )}
 
-            {/* Alerts & Recommendation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {resultData.alertas.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                  <h4 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
-                    <AlertTriangle size={20} /> Advertencias Jurídicas
-                  </h4>
-                  <ul className="space-y-3">
-                    {resultData.alertas.map((adv, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-amber-800 text-sm leading-relaxed">
-                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                        <span>{adv}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {resultData.recomendacion && (
-                <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6">
-                  <h4 className="font-bold text-brand-900 mb-4 flex items-center gap-2">
-                    <Info size={20} /> Recomendación del Analista IA
-                  </h4>
-                  <p className="text-brand-800 text-sm leading-relaxed italic border-l-2 border-brand-300 pl-4 whitespace-pre-line">
-                    "{resultData.recomendacion}"
-                  </p>
-                </div>
-              )}
-            </div>
+            {/* Alerts */}
+            {resultData.alertas.length > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
+                <h4 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
+                  <AlertTriangle size={20} /> Advertencias Jurídicas
+                </h4>
+                <ul className="space-y-3">
+                  {resultData.alertas.map((adv, idx) => (
+                    <li key={idx} className="flex items-start gap-3 text-amber-800 text-sm leading-relaxed">
+                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                      <span>{adv}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             {/* Download Action */}
             <div className="flex justify-center pt-4">
-              <button className="bg-slate-900 text-white font-bold py-3 px-8 rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2">
+              <button 
+                onClick={handleDownloadPDF}
+                className="bg-slate-900 text-white font-bold py-3 px-8 rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2"
+              >
                 <Download size={20} /> Descargar Informe PDF
               </button>
             </div>
