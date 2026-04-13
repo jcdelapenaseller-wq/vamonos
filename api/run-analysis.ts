@@ -57,10 +57,31 @@ export default async function handler(req: any, res: any) {
       console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI (${files.length} archivos) ---`);
 
       const prompt = `
-Actúa como un experto en derecho hipotecario español, ejecuciones judiciales y análisis de subastas inmobiliarias.
+Actúa como jurista especialista en subastas judiciales inmobiliarias en España.
 FECHA ACTUAL DEL SISTEMA: ${currentDate} (Usa esta fecha para calcular la antigüedad de los documentos).
 
-Tu función es analizar documentos registrales (nota simple, certificación de cargas o edicto BOE) y determinar con precisión jurídica el impacto real de las cargas para un inversor.
+IMPORTANTE:
+Tu objetivo no es solo analizar que ya haces muy bien, sino EXPLICAR de forma clara para un inversor o comprador no experto.
+
+Debes diferenciar SIEMPRE:
+1. Deuda del procedimiento (cantidad reclamada)
+2. Cargas registrales (hipotecas, embargos, etc.)
+3. Qué cargas se cancelan en subasta
+4. Qué cargas subsisten (si existen)
+5. Qué paga realmente el comprador
+
+REGLAS CLAVE:
+- Nunca digas solo "no hay cargas" sin explicar contexto
+- Si una hipoteca es la ejecutada: explica que se cancela con la subasta
+- Si hay deuda: explica que NO la paga el comprador directamente
+- Usa lenguaje claro, frases cortas
+
+PROHIBIDO:
+- lenguaje excesivamente técnico
+- frases largas tipo BOE
+- usar solo términos como "se purga" sin explicación
+
+El resultado debe ser comprensible por un usuario no experto.
 
 ${analysisMode === 'cargas' ? `
 ENFOQUE DEL ANÁLISIS (MODO CARGAS):
@@ -75,6 +96,26 @@ ENFOQUE DEL ANÁLISIS (MODO COMPLETO):
 `}
 
 Debes aplicar estrictamente la Ley de Enjuiciamiento Civil (especialmente art. 674 LEC), la legislación hipotecaria y el principio de prioridad registral.
+
+---
+
+ESTRUCTURA OBLIGATORIA PARA EL CAMPO "recomendacion" (DEBE INCLUIR ESTAS 3 SECCIONES EXACTAMENTE):
+
+### 🧠 Resumen claro
+Explica en 4-5 líneas:
+- qué deuda hay
+- si el inmueble queda limpio o no
+- qué riesgo real tiene el comprador
+
+### 💰 Deuda del procedimiento
+- importe reclamado
+- explicación clara de qué significa
+
+### ⚖️ Qué paga el comprador
+- explicar claramente:
+  - paga su puja
+  - no paga la deuda ejecutada
+  - si hay cargas adicionales o no
 
 ---
 
@@ -121,7 +162,7 @@ REGLA DE REDUCCIÓN: Si el documento principal tiene > 6 meses de antigüedad, r
 
 7. AVISOS OBLIGATORIOS Y TONO PRUDENTE:
 - Mantén siempre un tono neutral, profesional y no alarmista. Evita palabras como "crítico", "grave", "muy peligroso". Siempre acompaña una advertencia con una posible solución.
-- Si el nivel de confianza es "MUY BAJA" (solo Edicto), el campo "recomendacion" DEBE empezar obligatoriamente por: "Análisis basado únicamente en el Edicto. Al carecer de información registral completa, se recomienda extremar la prudencia al evaluar cargas."
+- Si el nivel de confianza es "MUY BAJA" (solo Edicto), el campo "recomendacion" DEBE empezar obligatoriamente (antes de la estructura obligatoria) por: "Análisis basado únicamente en el Edicto. Al carecer de información registral completa, se recomienda extremar la prudencia al evaluar cargas."
 - Si NO hay Certificación de Cargas, añade a "alertas": "Para una confirmación exacta, suele ser recomendable solicitar la Certificación de Cargas al juzgado."
 - DISCLAIMER JURÍDICO FINAL OBLIGATORIO: Al final del texto del campo "recomendacion", añade siempre esta frase exacta: "El análisis se basa exclusivamente en los documentos aportados y puede no reflejar modificaciones registrales posteriores."
 
@@ -339,7 +380,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
                 type: Type.ARRAY,
                 items: { type: Type.STRING }
               },
-              recomendacion: { type: Type.STRING, description: "Recomendación accionable sobre cómo ajustar la puja" },
+              recomendacion: { type: Type.STRING, description: "Recomendación accionable y explicación clara siguiendo estrictamente la ESTRUCTURA OBLIGATORIA (Resumen claro, Deuda del procedimiento, Qué paga el comprador)" },
               // Datos de mercado opcionales
               refCat: { type: Type.STRING, description: "Referencia catastral de 20 caracteres o null si no consta" },
               ciudad: { type: Type.STRING, description: "Localidad del inmueble o null si no consta" },
