@@ -1622,6 +1622,7 @@ const AuctionPage: React.FC = () => {
               noMargin={true}
               analysisType={postPaymentState.type as 'cargas' | 'completo'}
               auctionId={auction.id}
+              appraisalValue={auction.appraisalValue}
             />
           </React.Suspense>
         </main>
@@ -2473,6 +2474,7 @@ const AuctionPage: React.FC = () => {
                 initialStep="upload"
                 isPaid={analysisPaid || cargasPaid}
                 noMargin={true}
+                appraisalValue={auction.appraisalValue}
               />
             </div>
           )}
