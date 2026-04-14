@@ -87,6 +87,9 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
       }
 
       const ai = getAI();
+      console.log("AI instance:", Object.keys(ai));
+      console.log("AI models:", (ai as any).models ? Object.keys((ai as any).models) : "no models");
+      console.log("typeof ai.generateContent:", typeof (ai as any).generateContent);
       const currentDate = new Date().toISOString().split('T')[0];
 
       const pdfParts = files.map((file) => {
@@ -342,8 +345,8 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 6. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
 `;
 
-      const modelName = "gemini-1.5-flash";
-      console.log("Using model:", modelName);
+      const modelName = "gemini-1.5-flash-latest";
+      console.log("Model used:", modelName);
 
       const response = await ai.models.generateContent({
         model: modelName,
