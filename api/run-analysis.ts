@@ -315,7 +315,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 `;
 
       const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
+        model: "gemini-1.5-pro",
         contents: {
           parts: [
             ...pdfParts,
@@ -418,12 +418,15 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
         }
       });
 
-      if (response.text) {
-        const result = JSON.parse(response.text);
-        console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
-        return res.status(200).json(result);
+      const text = response.text || (response as any).response?.text?.();
+
+      if (!text) {
+        throw new Error("No se recibió respuesta de la IA.");
       }
-      throw new Error("No se recibió respuesta de la IA.");
+
+      const result = JSON.parse(text);
+      console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
+      return res.status(200).json(result);
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
