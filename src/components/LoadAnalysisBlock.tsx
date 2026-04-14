@@ -636,6 +636,28 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
   };
 
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const cloudName = "dmw71xf7z"; // Encontrado en el proyecto
+    const uploadPreset = "ml_default"; // Ajustar si es necesario
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
+      method: "POST",
+      body: formData
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error?.message || "Error al subir a Cloudinary");
+    }
+    
+    const data = await response.json();
+    return data.secure_url;
+  };
+
   const handleAnalyze = async () => {
     if (files.length === 0) return;
     
@@ -651,21 +673,21 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     setStep('loading');
     
     try {
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-      formData.append('type', analysisType);
-      if (auctionId) {
-        formData.append('auctionId', auctionId);
-      }
-
-      console.log("FILES ENVIADOS:", formData);
-      console.log("Files array length:", files.length);
+      // Subir a Cloudinary
+      console.log("Subiendo archivo a Cloudinary...");
+      const pdfUrl = await uploadToCloudinary(files[0]);
+      console.log("PDF subido a Cloudinary:", pdfUrl);
 
       const response = await fetch('/api/run-analysis', {
         method: 'POST',
-        body: formData
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          pdfUrl,
+          type: analysisType,
+          auctionId
+        })
       });
 
       if (!response.ok) {

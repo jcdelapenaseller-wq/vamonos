@@ -1,91 +1,68 @@
-import multer from 'multer';
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 2 * 1024 * 1024 // 2MB máximo
-  }
-});
-
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-export default function handler(req: any, res: any) {
+export default async function handler(req: any, res: any) {
   console.log("START handler");
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  upload.array('files')(req, res, async (err: any) => {
-    if (err) {
-      console.error("Multer error:", err);
-      return res.status(400).json({ error: 'Error uploading files' });
+  try {
+    const { pdfUrl, type, auctionId } = req.body;
+    console.log("pdfUrl received:", pdfUrl);
+    console.log("analysis type:", type);
+    console.log("auctionId:", auctionId);
+
+    if (!pdfUrl) {
+      return res.status(400).json({ error: "No pdfUrl provided" });
     }
 
-    console.log("FILES:", req.files);
-
-    try {
-      const files = req.files as Express.Multer.File[];
-
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: "No files uploaded" });
+    // Descargar PDF
+    console.log("[Backend] Descargando PDF desde:", pdfUrl);
+    const responseFile = await fetch(pdfUrl);
+    if (!responseFile.ok) {
+      throw new Error(`Error al descargar el PDF: ${responseFile.statusText}`);
     }
+    const fileBuffer = await responseFile.arrayBuffer();
+    const base64 = Buffer.from(fileBuffer).toString("base64");
 
-    if (files.some(f => f.size > 2 * 1024 * 1024)) {
-      return res.status(400).json({ error: "Archivo demasiado grande" });
-    }
+    // Obtener datos de la subasta si existen
+    // const auction = auctionId ? (auctions as any)[auctionId] : null;
+    // const claimedDebt = auction?.claimedDebt;
+    const claimedDebt: any = null;
 
-    const { type, auctionId } = req.body;
-      console.log("analysis type:", type);
-      console.log("auctionId:", auctionId);
-
-      // Obtener datos de la subasta si existen
-      // const auction = auctionId ? (auctions as any)[auctionId] : null;
-      // const claimedDebt = auction?.claimedDebt;
-      const claimedDebt: any = null;
-
-      let claimedDebtContext = "";
-      /*
-      if (claimedDebt) {
-        claimedDebtContext = `
+    let claimedDebtContext = "";
+    /*
+    if (claimedDebt) {
+      claimedDebtContext = `
 DATO OFICIAL DEL BOE (PRIORITARIO):
 La cantidad reclamada (deuda del procedimiento) es de ${claimedDebt.toLocaleString('es-ES')} EUR.
 DEBES usar este valor exacto en el bloque "### 💰 Deuda del procedimiento" y mencionarlo en el resumen.
 `;
-      } else {
-        claimedDebtContext = `
+    } else {
+      claimedDebtContext = `
 Si no detectas la cantidad reclamada en los documentos, indica: "No se especifica en la documentación analizada".
 `;
-      }
-      */
+    }
+    */
 
-      let analysisMode = "cargas";
-      if (type === "completo") {
-        analysisMode = "completo";
-      }
+    let analysisMode = "cargas";
+    if (type === "completo") {
+      analysisMode = "completo";
+    }
 
-      const currentDate = new Date().toISOString().split('T')[0];
+    const currentDate = new Date().toISOString().split('T')[0];
 
-      const pdfParts = files.map((file) => {
-        let base64EncodeString = file.buffer.toString('base64');
-        if (base64EncodeString.startsWith("data:application/pdf;base64,")) {
-          base64EncodeString = base64EncodeString.replace("data:application/pdf;base64,", "");
+    const pdfParts = [
+      {
+        inlineData: {
+          mimeType: "application/pdf",
+          data: base64
         }
-        console.log(`[Backend] Preparando archivo: ${file.originalname} (${file.size} bytes)`);
-        return {
-          inlineData: {
-            mimeType: "application/pdf",
-            data: base64EncodeString
-          }
-        };
-      });
+      }
+    ];
 
-      console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI (${files.length} archivos) ---`);
+    console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI ---`);
 
       const prompt = `
 Actúa como jurista especialista en subastas judiciales inmobiliarias en España.
@@ -332,7 +309,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: {
@@ -369,9 +346,6 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
         return res.status(500).json({ error: data.error.message });
       }
 
-      // Comentamos el parseo para diagnóstico puro
-      /*
-      const data = JSON.parse(rawText);
       console.log("Gemini RAW:", data);
 
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -391,13 +365,8 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       const result = JSON.parse(jsonMatch[0]);
       console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
       return res.status(200).json(result);
-      */
-      
-      // Devolvemos el raw para ver qué pasa en el cliente o simplemente fallamos controlado
-      return res.status(200).json({ diagnostic: "Check logs for RAW TEXT", status: response.status });
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
     }
-  });
 }
