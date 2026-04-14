@@ -64,6 +64,7 @@ export default async function handler(req: any, res: any) {
       // Obtener datos de la subasta si existen
       // const auction = auctionId ? (auctions as any)[auctionId] : null;
       // const claimedDebt = auction?.claimedDebt;
+      const claimedDebt: any = null;
 
       let claimedDebtContext = "";
       /*
