@@ -1,4 +1,3 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import multer from 'multer';
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
@@ -8,17 +7,6 @@ const upload = multer({
     fileSize: 2 * 1024 * 1024 // 2MB máximo
   }
 });
-
-let aiInstance: GoogleGenAI | null = null;
-
-const getAI = () => {
-  if (!aiInstance) {
-    aiInstance = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY as string
-    });
-  }
-  return aiInstance;
-};
 
 export const config = {
   api: {
@@ -86,10 +74,6 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
         analysisMode = "completo";
       }
 
-      const ai = getAI();
-      console.log("AI instance:", Object.keys(ai));
-      console.log("AI models:", (ai as any).models ? Object.keys((ai as any).models) : "no models");
-      console.log("typeof ai.generateContent:", typeof (ai as any).generateContent);
       const currentDate = new Date().toISOString().split('T')[0];
 
       const pdfParts = files.map((file) => {
@@ -348,114 +332,125 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       const modelName = "gemini-1.5-flash-latest";
       console.log("Model used:", modelName);
 
-      const response = await ai.models.generateContent({
-        model: modelName,
-        contents: {
-          parts: [
-            ...pdfParts,
-            {
-              text: prompt
-            }
-          ]
-        },
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              razonamiento_juridico: { type: Type.STRING, description: "Explicación paso a paso de la enumeración, extracción, identificación de ejecutante, purga y validaciones (cobertura y numérica)." },
-              documentos_detectados: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "Tipos de documentos detectados (ej. 'Edicto', 'Nota Simple', 'Certificación de Cargas')"
-              },
-              cargas_detectadas_regex: { 
-                type: Type.ARRAY, 
-                items: { type: Type.STRING },
-                description: "Índice determinista de identificadores extraídos literalmente del texto (Fase 1)."
-              },
-              fuente_documento: { type: Type.STRING, description: "Resumen de las fuentes (ej. 'Certificación + Edicto', 'Solo Nota Simple')" },
-              nivel_confianza_global: { type: Type.STRING, description: "MUY ALTA, ALTA, MEDIA, BAJA, MUY BAJA (según reglas de documentos presentes)" },
-              riesgo_global: { type: Type.STRING, description: "Riesgo global de la operación (BAJO, MEDIO, ALTO)" },
-              cargas_detectadas: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    identificador_registral: { type: Type.STRING, description: "Ej: 'Inscripción 2ª' o 'Anotación Letra A'" },
-                    tipo: { type: Type.STRING },
-                    fuente_textual: { type: Type.STRING, description: "Fragmento literal exacto del documento de donde se extrae esta carga." },
-                    desglose: {
-                      type: Type.OBJECT,
-                      properties: {
-                        principal: { type: Type.NUMBER },
-                        intereses: { type: Type.NUMBER },
-                        costas: { type: Type.NUMBER },
-                        total: { type: Type.NUMBER }
-                      },
-                      required: ["principal", "intereses", "costas", "total"]
-                    },
-                    titular: { type: Type.STRING },
-                    rango: { type: Type.STRING },
-                    resultado: { type: Type.STRING, description: "SUBSISTE, SE PURGA, DESCONOCIDO, REEMPLAZADA o CANCELADA" },
-                    estado_carga: { type: Type.STRING, description: "CANCELADA_REGISTRAL, SE_CANCELA_EN_SUBASTA, SUBSISTE o DESCONOCIDO" },
-                    vigente: { type: Type.BOOLEAN, description: "false si la carga está cancelada o caducada, true en caso contrario" },
-                    confianza: { type: Type.STRING, description: "ALTA, MEDIA o BAJA" }
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  ...pdfParts,
+                  { text: prompt }
+                ]
+              }
+            ],
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseSchema: {
+                type: "OBJECT",
+                properties: {
+                  razonamiento_juridico: { type: "STRING", description: "Explicación paso a paso de la enumeración, extracción, identificación de ejecutante, purga y validaciones (cobertura y numérica)." },
+                  documentos_detectados: {
+                    type: "ARRAY",
+                    items: { type: "STRING" },
+                    description: "Tipos de documentos detectados (ej. 'Edicto', 'Nota Simple', 'Certificación de Cargas')"
                   },
-                  required: ["identificador_registral", "tipo", "fuente_textual", "desglose", "titular", "rango", "resultado", "estado_carga", "vigente", "confianza"]
-                }
-              },
-              incoherencias_detectadas: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "Discrepancias entre BOE y Registro, importes contradictorios, etc."
-              },
-              ocupacion_detectada: { type: Type.BOOLEAN, description: "true si hay indicios de ocupación, false en caso contrario" },
-              nivel_riesgo_ocupacion: { type: Type.STRING, description: "ALTO, MEDIO o BAJO" },
-              peor_escenario: {
-                type: Type.OBJECT,
-                properties: {
-                  principal: { type: Type.NUMBER },
-                  intereses: { type: Type.NUMBER },
-                  costas: { type: Type.NUMBER },
-                  total: { type: Type.NUMBER }
+                  cargas_detectadas_regex: { 
+                    type: "ARRAY", 
+                    items: { type: "STRING" },
+                    description: "Índice determinista de identificadores extraídos literalmente del texto (Fase 1)."
+                  },
+                  fuente_documento: { type: "STRING", description: "Resumen de las fuentes (ej. 'Certificación + Edicto', 'Solo Nota Simple')" },
+                  nivel_confianza_global: { type: "STRING", description: "MUY ALTA, ALTA, MEDIA, BAJA, MUY BAJA (según reglas de documentos presentes)" },
+                  riesgo_global: { type: "STRING", description: "Riesgo global de la operación (BAJO, MEDIO, ALTO)" },
+                  cargas_detectadas: {
+                    type: "ARRAY",
+                    items: {
+                      type: "OBJECT",
+                      properties: {
+                        identificador_registral: { type: "STRING", description: "Ej: 'Inscripción 2ª' o 'Anotación Letra A'" },
+                        tipo: { type: "STRING" },
+                        fuente_textual: { type: "STRING", description: "Fragmento literal exacto del documento de donde se extrae esta carga." },
+                        desglose: {
+                          type: "OBJECT",
+                          properties: {
+                            principal: { type: "NUMBER" },
+                            intereses: { type: "NUMBER" },
+                            costas: { type: "NUMBER" },
+                            total: { type: "NUMBER" }
+                          },
+                          required: ["principal", "intereses", "costas", "total"]
+                        },
+                        titular: { type: "STRING" },
+                        rango: { type: "STRING" },
+                        resultado: { type: "STRING", description: "SUBSISTE, SE PURGA, DESCONOCIDO, REEMPLAZADA o CANCELADA" },
+                        estado_carga: { type: "STRING", description: "CANCELADA_REGISTRAL, SE_CANCELA_EN_SUBASTA, SUBSISTE o DESCONOCIDO" },
+                        vigente: { type: "BOOLEAN", description: "false si la carga está cancelada o caducada, true en caso contrario" },
+                        confianza: { type: "STRING", description: "ALTA, MEDIA o BAJA" }
+                      },
+                      required: ["identificador_registral", "tipo", "fuente_textual", "desglose", "titular", "rango", "resultado", "estado_carga", "vigente", "confianza"]
+                    }
+                  },
+                  incoherencias_detectadas: {
+                    type: "ARRAY",
+                    items: { type: "STRING" },
+                    description: "Discrepancias entre BOE y Registro, importes contradictorios, etc."
+                  },
+                  ocupacion_detectada: { type: "BOOLEAN", description: "true si hay indicios de ocupación, false en caso contrario" },
+                  nivel_riesgo_ocupacion: { type: "STRING", description: "ALTO, MEDIO o BAJO" },
+                  peor_escenario: {
+                    type: "OBJECT",
+                    properties: {
+                      principal: { type: "NUMBER" },
+                      intereses: { type: "NUMBER" },
+                      costas: { type: "NUMBER" },
+                      total: { type: "NUMBER" }
+                    },
+                    required: ["principal", "intereses", "costas", "total"],
+                    description: "Suma SOLO de las cargas que SUBSISTEN"
+                  },
+                  impacto_economico: {
+                    type: "OBJECT",
+                    properties: {
+                      coste_estimado: { type: "NUMBER" },
+                      nivel: { type: "STRING" }
+                    },
+                    required: ["coste_estimado", "nivel"]
+                  },
+                  alertas: {
+                    type: "ARRAY",
+                    items: { type: "STRING" }
+                  },
+                  recomendacion: { type: "STRING", description: "Recomendación accionable y explicación clara siguiendo estrictamente la ESTRUCTURA OBLIGATORIA (Resumen claro, Deuda del procedimiento, Qué paga el comprador)" },
+                  // Datos de mercado opcionales
+                  refCat: { type: "STRING", description: "Referencia catastral de 20 caracteres o null si no consta" },
+                  ciudad: { type: "STRING", description: "Localidad del inmueble o null si no consta" },
+                  codigo_postal: { type: "STRING", description: "Código postal o null si no consta" },
+                  superficie_m2: { type: "NUMBER", description: "Superficie en m2 o null si no consta" },
+                  valor_subasta: { type: "NUMBER", description: "Valor de subasta o null si no consta" },
+                  valor_tasacion: { type: "NUMBER", description: "Valor de tasación o null si no consta" },
+                  tipo_inmueble: { type: "STRING", description: "Tipo de inmueble (vivienda/piso) o null si no consta" },
+                  yearBuilt: { type: "NUMBER", description: "Año de construcción o null si no consta" },
+                  floor: { type: "STRING", description: "Planta/piso o null si no consta" }
                 },
-                required: ["principal", "intereses", "costas", "total"],
-                description: "Suma SOLO de las cargas que SUBSISTEN"
-              },
-              impacto_economico: {
-                type: Type.OBJECT,
-                properties: {
-                  coste_estimado: { type: Type.NUMBER },
-                  nivel: { type: Type.STRING }
-                },
-                required: ["coste_estimado", "nivel"]
-              },
-              alertas: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING }
-              },
-              recomendacion: { type: Type.STRING, description: "Recomendación accionable y explicación clara siguiendo estrictamente la ESTRUCTURA OBLIGATORIA (Resumen claro, Deuda del procedimiento, Qué paga el comprador)" },
-              // Datos de mercado opcionales
-              refCat: { type: Type.STRING, description: "Referencia catastral de 20 caracteres o null si no consta" },
-              ciudad: { type: Type.STRING, description: "Localidad del inmueble o null si no consta" },
-              codigo_postal: { type: Type.STRING, description: "Código postal o null si no consta" },
-              superficie_m2: { type: Type.NUMBER, description: "Superficie en m2 o null si no consta" },
-              valor_subasta: { type: Type.NUMBER, description: "Valor de subasta o null si no consta" },
-              valor_tasacion: { type: Type.NUMBER, description: "Valor de tasación o null si no consta" },
-              tipo_inmueble: { type: Type.STRING, description: "Tipo de inmueble (vivienda/piso) o null si no consta" },
-              yearBuilt: { type: Type.NUMBER, description: "Año de construcción o null si no consta" },
-              floor: { type: Type.STRING, description: "Planta/piso o null si no consta" }
-            },
-            required: ["razonamiento_juridico", "documentos_detectados", "cargas_detectadas_regex", "fuente_documento", "nivel_confianza_global", "riesgo_global", "cargas_detectadas", "incoherencias_detectadas", "ocupacion_detectada", "nivel_riesgo_ocupacion", "peor_escenario", "impacto_economico", "alertas", "recomendacion"]
-          }
+                required: ["razonamiento_juridico", "documentos_detectados", "cargas_detectadas_regex", "fuente_documento", "nivel_confianza_global", "riesgo_global", "cargas_detectadas", "incoherencias_detectadas", "ocupacion_detectada", "nivel_riesgo_ocupacion", "peor_escenario", "impacto_economico", "alertas", "recomendacion"]
+              }
+            }
+          })
         }
-      });
+      );
 
-      const text = response.text || (response as any).response?.text?.();
+      const data = await response.json();
+      console.log("Gemini RAW:", data);
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
       if (!text) {
-        throw new Error("No se recibió respuesta de la IA.");
+        throw new Error("No response from Gemini");
       }
 
       console.log("TEXT RAW:", text);
