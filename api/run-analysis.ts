@@ -14,28 +14,23 @@ export const config = {
   },
 };
 
-export default async function handler(req: any, res: any) {
+export default function handler(req: any, res: any) {
   console.log("START handler");
-  console.log("FILES:", req.files);
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    await new Promise((resolve, reject) => {
-      upload.array('files')(req, res, (err: any) => {
-        if (err) return reject(err);
-        resolve(true);
-      });
-    });
-  } catch (err: any) {
-    console.error("Multer error:", err);
-    return res.status(400).json({ error: 'Error uploading files' });
-  }
+  upload.array('files')(req, res, async (err: any) => {
+    if (err) {
+      console.error("Multer error:", err);
+      return res.status(400).json({ error: 'Error uploading files' });
+    }
 
-  try {
-    const files = req.files as Express.Multer.File[];
+    console.log("FILES:", req.files);
+
+    try {
+      const files = req.files as Express.Multer.File[];
 
     if (!files || files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
@@ -77,12 +72,15 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
       const currentDate = new Date().toISOString().split('T')[0];
 
       const pdfParts = files.map((file) => {
-        const base64EncodeString = file.buffer.toString('base64');
+        let base64EncodeString = file.buffer.toString('base64');
+        if (base64EncodeString.startsWith("data:application/pdf;base64,")) {
+          base64EncodeString = base64EncodeString.replace("data:application/pdf;base64,", "");
+        }
         console.log(`[Backend] Preparando archivo: ${file.originalname} (${file.size} bytes)`);
         return {
           inlineData: {
-            data: base64EncodeString,
-            mimeType: "application/pdf"
+            mimeType: "application/pdf",
+            data: base64EncodeString
           }
         };
       });
@@ -331,6 +329,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 
       const modelName = "gemini-1.5-flash";
       console.log("Model used:", modelName);
+      console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -342,104 +341,13 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
           body: JSON.stringify({
             contents: [
               {
+                role: "user",
                 parts: [
-                  ...pdfParts,
-                  { text: prompt }
+                  { text: prompt },
+                  ...pdfParts
                 ]
               }
-            ],
-            generationConfig: {
-              responseMimeType: "application/json",
-              responseSchema: {
-                type: "OBJECT",
-                properties: {
-                  razonamiento_juridico: { type: "STRING", description: "Explicación paso a paso de la enumeración, extracción, identificación de ejecutante, purga y validaciones (cobertura y numérica)." },
-                  documentos_detectados: {
-                    type: "ARRAY",
-                    items: { type: "STRING" },
-                    description: "Tipos de documentos detectados (ej. 'Edicto', 'Nota Simple', 'Certificación de Cargas')"
-                  },
-                  cargas_detectadas_regex: { 
-                    type: "ARRAY", 
-                    items: { type: "STRING" },
-                    description: "Índice determinista de identificadores extraídos literalmente del texto (Fase 1)."
-                  },
-                  fuente_documento: { type: "STRING", description: "Resumen de las fuentes (ej. 'Certificación + Edicto', 'Solo Nota Simple')" },
-                  nivel_confianza_global: { type: "STRING", description: "MUY ALTA, ALTA, MEDIA, BAJA, MUY BAJA (según reglas de documentos presentes)" },
-                  riesgo_global: { type: "STRING", description: "Riesgo global de la operación (BAJO, MEDIO, ALTO)" },
-                  cargas_detectadas: {
-                    type: "ARRAY",
-                    items: {
-                      type: "OBJECT",
-                      properties: {
-                        identificador_registral: { type: "STRING", description: "Ej: 'Inscripción 2ª' o 'Anotación Letra A'" },
-                        tipo: { type: "STRING" },
-                        fuente_textual: { type: "STRING", description: "Fragmento literal exacto del documento de donde se extrae esta carga." },
-                        desglose: {
-                          type: "OBJECT",
-                          properties: {
-                            principal: { type: "NUMBER" },
-                            intereses: { type: "NUMBER" },
-                            costas: { type: "NUMBER" },
-                            total: { type: "NUMBER" }
-                          },
-                          required: ["principal", "intereses", "costas", "total"]
-                        },
-                        titular: { type: "STRING" },
-                        rango: { type: "STRING" },
-                        resultado: { type: "STRING", description: "SUBSISTE, SE PURGA, DESCONOCIDO, REEMPLAZADA o CANCELADA" },
-                        estado_carga: { type: "STRING", description: "CANCELADA_REGISTRAL, SE_CANCELA_EN_SUBASTA, SUBSISTE o DESCONOCIDO" },
-                        vigente: { type: "BOOLEAN", description: "false si la carga está cancelada o caducada, true en caso contrario" },
-                        confianza: { type: "STRING", description: "ALTA, MEDIA o BAJA" }
-                      },
-                      required: ["identificador_registral", "tipo", "fuente_textual", "desglose", "titular", "rango", "resultado", "estado_carga", "vigente", "confianza"]
-                    }
-                  },
-                  incoherencias_detectadas: {
-                    type: "ARRAY",
-                    items: { type: "STRING" },
-                    description: "Discrepancias entre BOE y Registro, importes contradictorios, etc."
-                  },
-                  ocupacion_detectada: { type: "BOOLEAN", description: "true si hay indicios de ocupación, false en caso contrario" },
-                  nivel_riesgo_ocupacion: { type: "STRING", description: "ALTO, MEDIO o BAJO" },
-                  peor_escenario: {
-                    type: "OBJECT",
-                    properties: {
-                      principal: { type: "NUMBER" },
-                      intereses: { type: "NUMBER" },
-                      costas: { type: "NUMBER" },
-                      total: { type: "NUMBER" }
-                    },
-                    required: ["principal", "intereses", "costas", "total"],
-                    description: "Suma SOLO de las cargas que SUBSISTEN"
-                  },
-                  impacto_economico: {
-                    type: "OBJECT",
-                    properties: {
-                      coste_estimado: { type: "NUMBER" },
-                      nivel: { type: "STRING" }
-                    },
-                    required: ["coste_estimado", "nivel"]
-                  },
-                  alertas: {
-                    type: "ARRAY",
-                    items: { type: "STRING" }
-                  },
-                  recomendacion: { type: "STRING", description: "Recomendación accionable y explicación clara siguiendo estrictamente la ESTRUCTURA OBLIGATORIA (Resumen claro, Deuda del procedimiento, Qué paga el comprador)" },
-                  // Datos de mercado opcionales
-                  refCat: { type: "STRING", description: "Referencia catastral de 20 caracteres o null si no consta" },
-                  ciudad: { type: "STRING", description: "Localidad del inmueble o null si no consta" },
-                  codigo_postal: { type: "STRING", description: "Código postal o null si no consta" },
-                  superficie_m2: { type: "NUMBER", description: "Superficie en m2 o null si no consta" },
-                  valor_subasta: { type: "NUMBER", description: "Valor de subasta o null si no consta" },
-                  valor_tasacion: { type: "NUMBER", description: "Valor de tasación o null si no consta" },
-                  tipo_inmueble: { type: "STRING", description: "Tipo de inmueble (vivienda/piso) o null si no consta" },
-                  yearBuilt: { type: "NUMBER", description: "Año de construcción o null si no consta" },
-                  floor: { type: "STRING", description: "Planta/piso o null si no consta" }
-                },
-                required: ["razonamiento_juridico", "documentos_detectados", "cargas_detectadas_regex", "fuente_documento", "nivel_confianza_global", "riesgo_global", "cargas_detectadas", "incoherencias_detectadas", "ocupacion_detectada", "nivel_riesgo_ocupacion", "peor_escenario", "impacto_economico", "alertas", "recomendacion"]
-              }
-            }
+            ]
           })
         }
       );
@@ -448,6 +356,18 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       console.log("HEADERS:", Object.fromEntries(response.headers.entries()));
       const rawText = await response.text();
       console.log("RAW TEXT:", rawText);
+
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (e) {
+        console.error("Failed to parse raw text as JSON", e);
+      }
+
+      if (data && data.error) {
+        console.error("GEMINI ERROR:", data.error);
+        return res.status(500).json({ error: data.error.message });
+      }
 
       // Comentamos el parseo para diagnóstico puro
       /*
@@ -479,4 +399,5 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
     }
+  });
 }

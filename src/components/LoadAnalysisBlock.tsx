@@ -660,6 +660,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
         formData.append('auctionId', auctionId);
       }
 
+      console.log("FILES ENVIADOS:", formData);
+      console.log("Files array length:", files.length);
+
       const response = await fetch('/api/run-analysis', {
         method: 'POST',
         body: formData
