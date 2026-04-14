@@ -436,7 +436,15 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
         throw new Error("No se recibió respuesta de la IA.");
       }
 
-      const result = JSON.parse(text);
+      console.log("TEXT RAW:", text);
+
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+
+      if (!jsonMatch) {
+        throw new Error("No se pudo extraer JSON válido");
+      }
+
+      const result = JSON.parse(jsonMatch[0]);
       console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
       return res.status(200).json(result);
     } catch (error: any) {
