@@ -444,7 +444,14 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
         }
       );
 
-      const data = await response.json();
+      console.log("STATUS:", response.status);
+      console.log("HEADERS:", Object.fromEntries(response.headers.entries()));
+      const rawText = await response.text();
+      console.log("RAW TEXT:", rawText);
+
+      // Comentamos el parseo para diagnóstico puro
+      /*
+      const data = JSON.parse(rawText);
       console.log("Gemini RAW:", data);
 
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -464,6 +471,10 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       const result = JSON.parse(jsonMatch[0]);
       console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
       return res.status(200).json(result);
+      */
+      
+      // Devolvemos el raw para ver qué pasa en el cliente o simplemente fallamos controlado
+      return res.status(200).json({ diagnostic: "Check logs for RAW TEXT", status: response.status });
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
