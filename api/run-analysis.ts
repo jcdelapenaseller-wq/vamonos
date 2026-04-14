@@ -15,19 +15,31 @@ const getAI = () => {
   return aiInstance;
 };
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  upload.array('files')(req, res, async (err: any) => {
-    if (err) {
-      console.error("Multer error:", err);
-      return res.status(400).json({ error: 'Error uploading files' });
-    }
+  try {
+    await new Promise((resolve, reject) => {
+      upload.array('files')(req, res, (err: any) => {
+        if (err) return reject(err);
+        resolve(true);
+      });
+    });
+  } catch (err: any) {
+    console.error("Multer error:", err);
+    return res.status(400).json({ error: 'Error uploading files' });
+  }
 
-    try {
-      const files = req.files as Express.Multer.File[];
+  try {
+    const files = req.files as Express.Multer.File[];
       const { type, auctionId } = req.body;
       console.log("analysis type:", type);
       console.log("auctionId:", auctionId);
@@ -431,5 +443,4 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
     }
-  });
 }
