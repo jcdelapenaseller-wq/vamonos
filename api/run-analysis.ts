@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import multer from 'multer';
-import auctions from '../src/data/auctions.json' assert { type: 'json' };
+// import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -62,10 +62,11 @@ export default async function handler(req: any, res: any) {
       console.log("auctionId:", auctionId);
 
       // Obtener datos de la subasta si existen
-      const auction = auctionId ? (auctions as any)[auctionId] : null;
-      const claimedDebt = auction?.claimedDebt;
+      // const auction = auctionId ? (auctions as any)[auctionId] : null;
+      // const claimedDebt = auction?.claimedDebt;
 
       let claimedDebtContext = "";
+      /*
       if (claimedDebt) {
         claimedDebtContext = `
 DATO OFICIAL DEL BOE (PRIORITARIO):
@@ -77,6 +78,7 @@ DEBES usar este valor exacto en el bloque "### 💰 Deuda del procedimiento" y m
 Si no detectas la cantidad reclamada en los documentos, indica: "No se especifica en la documentación analizada".
 `;
       }
+      */
 
       let analysisMode = "cargas";
       if (type === "completo") {
