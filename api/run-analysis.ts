@@ -1,8 +1,13 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import multer from 'multer';
-import { AUCTIONS } from '../src/data/auctions.ts';
+import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 2 * 1024 * 1024 // 2MB máximo
+  }
+});
 
 let aiInstance: GoogleGenAI | null = null;
 
@@ -22,6 +27,9 @@ export const config = {
 };
 
 export default async function handler(req: any, res: any) {
+  console.log("START handler");
+  console.log("FILES:", req.files);
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -40,12 +48,21 @@ export default async function handler(req: any, res: any) {
 
   try {
     const files = req.files as Express.Multer.File[];
-      const { type, auctionId } = req.body;
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: "No files uploaded" });
+    }
+
+    if (files.some(f => f.size > 2 * 1024 * 1024)) {
+      return res.status(400).json({ error: "Archivo demasiado grande" });
+    }
+
+    const { type, auctionId } = req.body;
       console.log("analysis type:", type);
       console.log("auctionId:", auctionId);
 
       // Obtener datos de la subasta si existen
-      const auction = auctionId ? AUCTIONS[auctionId] : null;
+      const auction = auctionId ? (auctions as any)[auctionId] : null;
       const claimedDebt = auction?.claimedDebt;
 
       let claimedDebtContext = "";
@@ -64,10 +81,6 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
       let analysisMode = "cargas";
       if (type === "completo") {
         analysisMode = "completo";
-      }
-
-      if (!files || files.length === 0) {
-        return res.status(400).json({ error: "No se han proporcionado archivos para analizar." });
       }
 
       const ai = getAI();
