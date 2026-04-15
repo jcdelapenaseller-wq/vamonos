@@ -638,7 +638,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   const uploadToCloudinary = async (file: File): Promise<string> => {
     const cloudName = "dmw71xf7z"; // Encontrado en el proyecto
-    const uploadPreset = "ml_default"; // Ajustar si es necesario
+    const uploadPreset = "unsigned_pdf"; // Ajustar si es necesario
     
     const formData = new FormData();
     formData.append("file", file);
