@@ -927,7 +927,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     </div>
                     
                     <div className={`w-full max-w-md space-y-2 ${isIntegrated ? 'mb-4' : 'mb-6'}`}>
-                      {files.map((f, idx) => (
+                      {files?.map((f, idx) => (
                         <motion.div 
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -948,7 +948,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                             </button>
                           </div>
                         </motion.div>
-                      ))}
+                      )) || []}
                     </div>
 
                     <button 
@@ -1491,14 +1491,12 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               </button>
 
               {(() => {
-                const hasSubsistingCharges = resultData.cargas_detectadas.some(c => c.estado_carga === 'SUBSISTE');
-                const isLowConfidence = resultData.nivel_confianza_global.includes('BAJA');
-                const isHighRisk = resultData.riesgo_global === 'ALTO';
-                const hasOccupancy = resultData.ocupacion_detectada;
-                const uniqueProperties = new Set(resultData.cargas_detectadas.map(c => c.identificador_registral)).size;
-                const hasMultipleProperties = uniqueProperties > 1;
-                
-                const shouldShowConsultingCta = hasOccupancy || hasSubsistingCharges || isLowConfidence || isHighRisk || hasMultipleProperties;
+                const hasSubsistingCharges = resultData?.cargas_detectadas?.some(c => c.estado_carga === 'SUBSISTE') || false;
+                const isLowConfidence = resultData?.nivel_confianza_global?.includes('BAJA') || false;
+                const isHighRisk = resultData?.riesgo_global === 'ALTO';
+                const hasOccupancy = resultData?.ocupacion_detectada;
+                const uniqueProperties = new Set(resultData?.cargas_detectadas?.map(c => c.identificador_registral) || []).size;
+                const shouldShowConsultingCta = hasOccupancy || hasSubsistingCharges || isLowConfidence || isHighRisk || (uniqueProperties > 1);
 
                 if (!shouldShowConsultingCta) return null;
 
@@ -1545,12 +1543,12 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   <h4 className="font-bold text-amber-900">Discrepancias en la documentación</h4>
                 </div>
                 <ul className="space-y-2">
-                  {resultData.incoherencias_detectadas.map((incoherencia, idx) => (
+                  {resultData?.incoherencias_detectadas?.map((incoherencia, idx) => (
                     <li key={idx} className="text-sm text-amber-800 flex items-start gap-2">
                       <span className="mt-1 text-amber-500">•</span>
                       <span>{incoherencia}</span>
                     </li>
-                  ))}
+                  )) || []}
                 </ul>
               </div>
             )}
@@ -1636,9 +1634,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   <h4 className="font-bold text-amber-900">Cargas que SUBSISTEN</h4>
                 </div>
                 <div className="p-6">
-                  {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SUBSISTE').length > 0 ? (
+                  {(resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SUBSISTE').map((carga, idx) => (
+                      {resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1691,7 +1689,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                             "{carga.fuente_textual}"
                           </div>
                         </li>
-                      ))}
+                      )) || []}
                     </ul>
                   ) : (
                     <p className="text-slate-500 italic">No se han detectado cargas subsistentes.</p>
@@ -1706,9 +1704,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   <h4 className="font-bold text-emerald-900">Cargas que se PURGAN, REEMPLAZAN o CANCELAN</h4>
                 </div>
                 <div className="p-6">
-                  {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA').length > 0 ? (
+                  {(resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA').map((carga, idx) => (
+                      {resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1771,7 +1769,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                             "{carga.fuente_textual}"
                           </div>
                         </li>
-                      ))}
+                      )) || []}
                     </ul>
                   ) : (
                     <p className="text-slate-500 italic">No se han detectado cargas a purgar.</p>
@@ -1779,18 +1777,17 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                 </div>
               </div>
             </div>
-
             {/* Unknown Charges (Critical) */}
-            {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO').length > 0 && (
+            {(resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.length || 0) > 0 && (
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mt-8">
-                <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
-                  <AlertTriangle className="text-amber-600" size={20} />
-                  <h4 className="font-bold text-amber-900">Cargas de Estado DESCONOCIDO (Requieren Revisión Manual)</h4>
-                </div>
-                <div className="p-6">
-                  <ul className="space-y-6">
-                    {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO').map((carga, idx) => (
-                      <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
+                      <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
+                        <AlertTriangle className="text-amber-600" size={20} />
+                        <h4 className="font-bold text-amber-900">Cargas de Estado DESCONOCIDO (Requieren Revisión Manual)</h4>
+                      </div>
+                      <div className="p-6">
+                        <ul className="space-y-6">
+                          {resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.map((carga, idx) => (
+                            <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-3">
                           <div>
                             <p className="font-bold text-slate-900">{carga.identificador_registral} - {carga.tipo}</p>
@@ -1849,18 +1846,18 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             )}
 
             {/* Alerts */}
-            {resultData.alertas.length > 0 && (
+            {(resultData?.alertas?.length || 0) > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                 <h4 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
                   <AlertTriangle size={20} /> Advertencias Jurídicas
                 </h4>
                 <ul className="space-y-3">
-                  {resultData.alertas.map((adv, idx) => (
+                  {resultData?.alertas?.map((adv, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-amber-800 text-sm leading-relaxed">
                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
                       <span>{adv}</span>
                     </li>
-                  ))}
+                  )) || []}
                 </ul>
               </div>
             )}
