@@ -651,10 +651,14 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     
     if (!response.ok) {
       const error = await response.json();
+      console.error("[Frontend] Cloudinary Upload Error:", error);
       throw new Error(error.error?.message || "Error al subir a Cloudinary");
     }
     
     const data = await response.json();
+    console.log("[Frontend] Cloudinary Upload Success Data:", data);
+    console.log("[Frontend] Secure URL:", data.secure_url);
+    console.log("[Frontend] Resource Type:", data.resource_type);
     return data.secure_url;
   };
 

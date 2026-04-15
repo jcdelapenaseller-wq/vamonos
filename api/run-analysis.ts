@@ -18,10 +18,16 @@ export default async function handler(req: any, res: any) {
     }
 
     // Descargar PDF
-    console.log("[Backend] Descargando PDF desde:", pdfUrl);
+    console.log("[Backend] Intentando descargar PDF desde URL:", pdfUrl);
     const responseFile = await fetch(pdfUrl);
+    
+    console.log("[Backend] Cloudinary Response Status:", responseFile.status);
+    console.log("[Backend] Cloudinary Response StatusText:", responseFile.statusText);
+    
     if (!responseFile.ok) {
-      throw new Error(`Error al descargar el PDF: ${responseFile.statusText}`);
+      const errorText = await responseFile.text();
+      console.error("[Backend] Error body from Cloudinary:", errorText);
+      throw new Error(`Error al descargar el PDF (${responseFile.status}): ${errorText || responseFile.statusText}`);
     }
     const fileBuffer = await responseFile.arrayBuffer();
     const base64 = Buffer.from(fileBuffer).toString("base64");
@@ -304,8 +310,9 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 6. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
 `;
 
-      const modelName = "gemini-1.5-flash";
+      const modelName = "gemini-1.5-flash-002";
       console.log("Model used:", modelName);
+      console.log("MODEL FINAL:", "gemini-1.5-flash-002");
       console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
 
       const response = await fetch(
