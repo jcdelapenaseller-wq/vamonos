@@ -70,7 +70,16 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
 
     console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI ---`);
 
-      const prompt = `
+    // Diagnóstico de modelos disponibles
+    try {
+      const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+      const modelsData = await modelsResponse.json();
+      console.log("MODELOS DISPONIBLES:", JSON.stringify(modelsData, null, 2));
+    } catch (err) {
+      console.error("Error al listar modelos:", err);
+    }
+
+    const prompt = `
 Actúa como jurista especialista en subastas judiciales inmobiliarias en España.
 FECHA ACTUAL DEL SISTEMA: ${currentDate} (Usa esta fecha para calcular la antigüedad de los documentos).
 
