@@ -319,9 +319,9 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 6. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
 `;
 
-      const modelName = "gemini-2.0-flash";
+      const modelName = "gemini-2.5-flash";
       console.log("Model used:", modelName);
-      console.log("Gemini funcionando con v1 + gemini-2.0-flash");
+      console.log("MODEL OK:", "gemini-2.5-flash");
       console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
 
       const response = await fetch(
