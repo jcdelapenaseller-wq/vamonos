@@ -643,6 +643,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", uploadPreset);
+    formData.append("resource_type", "raw");
     
     const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
       method: "POST",

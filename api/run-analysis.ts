@@ -319,13 +319,13 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 6. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
 `;
 
-      const modelName = "gemini-1.5-flash-002";
+      const modelName = "gemini-2.0-flash";
       console.log("Model used:", modelName);
-      console.log("MODEL FINAL:", "gemini-1.5-flash-002");
+      console.log("Gemini funcionando con v1 + gemini-2.0-flash");
       console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
 
       const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
         {
           method: "POST",
           headers: {
