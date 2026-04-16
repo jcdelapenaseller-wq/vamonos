@@ -342,10 +342,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
                   ...pdfParts
                 ]
               }
-            ],
-            generationConfig: {
-              response_mime_type: "application/json"
-            }
+            ]
           })
         }
       );
