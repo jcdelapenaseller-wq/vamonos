@@ -194,24 +194,6 @@ REGLA DE REDUCCIÓN: Si el documento principal tiene > 6 meses de antigüedad, r
 
 ---
 
-ARQUITECTURA DE EXTRACCIÓN DETERMINISTA (REGLA CRÍTICA Y FUENTE ÚNICA DE VERDAD):
-
-Para garantizar cero invenciones y cero omisiones, debes operar en dos fases estrictas:
-
-FASE 1: ÍNDICE REGEX SIMULADO (PASO 0)
-- Escanea el documento y extrae ÚNICAMENTE los identificadores literales de las cargas (ej. "Inscripción 2ª", "Anotación Letra A", "Anotación Letra C").
-- Guarda esta lista exacta de strings en el array "cargas_detectadas_regex".
-- ESTE ARRAY ES TU ÚNICA FUENTE DE VERDAD.
-- PROHIBIDO inventar letras o números. PROHIBIDO asumir continuidad alfabética.
-
-FASE 2: MAPEO ESTRICTO 1:1 POR ID
-- Para CADA elemento en "cargas_detectadas_regex", debe existir EXACTAMENTE UN objeto en el array "cargas_detectadas".
-- El campo "identificador_registral" de cada carga DEBE coincidir exactamente con un string de "cargas_detectadas_regex".
-- REGLA DE ELIMINACIÓN: Si generas una carga en "cargas_detectadas" que NO está en "cargas_detectadas_regex", ELIMÍNALA AUTOMÁTICAMENTE.
-- VALIDACIÓN OBLIGATORIA ANTES DE DEVOLVER JSON: Compara los IDs de ambos arrays. Si hay alguna diferencia (falta una o sobra una) -> ERROR -> REGENERA TU RESPUESTA internamente antes de emitir el JSON final.
-
----
-
 REGLAS JURÍDICAS OBLIGATORIAS Y PROHIBICIONES ESTRICTAS:
 
 1. EXTRACCIÓN DE IMPORTES (CERO ESTIMACIONES):
@@ -311,12 +293,10 @@ C) OCUPACIÓN DEL INMUEBLE:
 INSTRUCCIONES DE ANÁLISIS (CHAIN OF THOUGHT):
 Antes de generar el JSON final, debes realizar un razonamiento jurídico interno (campo "razonamiento_juridico").
 En este razonamiento debes documentar explícitamente los siguientes pasos:
-1. FASE 1 (REGEX): Listar literalmente todas las letras de anotaciones y números de inscripciones encontradas en el texto.
-2. FASE 2 (MAPEO): Confirmar que vas a procesar exactamente esa lista, ni una más, ni una menos.
-3. EJECUTANTE: Identificar explícitamente cuál es la carga que se ejecuta citando el texto que lo demuestra ("EXPEDICIÓN DE CERTIFICACIÓN DE CARGAS", etc.). Si no se encuentra, declarar que todas las cargas son DESCONOCIDO.
-4. PURGA: Aplicar la regla de purga (art. 674 LEC) basándote en la carga ejecutante identificada.
-5. VALIDACIÓN DE COBERTURA: Confirmar que el número de cargas listadas en la Fase 1 es igual al número de cargas clasificadas en el JSON.
-6. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
+1. IDENTIFICACIÓN: Listar las cargas encontradas en el texto.
+2. EJECUTANTE: Identificar explícitamente cuál es la carga que se ejecuta citando el texto que lo demuestra ("EXPEDICIÓN DE CERTIFICACIÓN DE CARGAS", etc.). Si no se encuentra, declarar que todas las cargas son DESCONOCIDO.
+3. PURGA: Aplicar la regla de purga (art. 674 LEC) basándote en la carga ejecutante identificada.
+4. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
 
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
@@ -376,9 +356,22 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       console.log(text);
       console.log("=== GEMINI RAW END ===");
 
-      // const result = JSON.parse(text);
+      const cleanText = text
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      let result;
+      try {
+        result = JSON.parse(cleanText);
+      } catch (e) {
+        console.error("JSON PARSE ERROR:", cleanText);
+        return res.status(500).json({ error: "Error parseando respuesta IA" });
+      }
+
       console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
-      return res.status(200).json({ raw: text });
+      return res.status(200).json(result);
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
