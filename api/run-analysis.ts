@@ -1,5 +1,3 @@
-// @ts-ignore
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 export default async function handler(req: any, res: any) {
@@ -32,22 +30,7 @@ export default async function handler(req: any, res: any) {
       throw new Error(`Error al descargar el PDF (${responseFile.status}): ${errorText || responseFile.statusText}`);
     }
     const fileBuffer = await responseFile.arrayBuffer();
-    
-    const loadingTask = pdfjsLib.getDocument({ data: fileBuffer });
-    const pdf = await loadingTask.promise;
-
-    let extractedText = "";
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      const strings = content.items.map((item: any) => item.str);
-      extractedText += strings.join(" ") + "\n";
-    }
-
-    if (!extractedText || extractedText.trim().length === 0) {
-      throw new Error("Error al extraer texto del PDF");
-    }
+    const base64 = Buffer.from(fileBuffer).toString("base64");
 
     // Obtener datos de la subasta si existen
     // const auction = auctionId ? (auctions as any)[auctionId] : null;
@@ -75,6 +58,15 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
     }
 
     const currentDate = new Date().toISOString().split('T')[0];
+
+    const pdfParts = [
+      {
+        inlineData: {
+          mimeType: "application/pdf",
+          data: base64
+        }
+      }
+    ];
 
     console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI ---`);
 
@@ -331,8 +323,8 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 
       const modelName = "gemini-2.5-flash";
       console.log("Model used:", modelName);
-      console.log("MODEL OK:", "gemini-2.5-flash");
-      console.log("PDF TEXT LENGTH:", extractedText.length);
+      console.log("MODEL OK:", modelName);
+      console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -347,7 +339,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
                 role: "user",
                 parts: [
                   { text: prompt },
-                  { text: extractedText }
+                  ...pdfParts
                 ]
               }
             ]
@@ -380,13 +372,12 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         throw new Error("No response from Gemini");
       }
 
-      console.log("=== GEMINI RAW START ===");
-      console.log(text);
-      console.log("=== GEMINI RAW END ===");
+      console.log("TEXT RAW:", text);
+      console.log("RAW GEMINI RESPONSE:", text);
 
-      // const result = JSON.parse(text);
+      const result = JSON.parse(text);
       console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
-      return res.status(200).json({ raw: text });
+      return res.status(200).json(result);
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
