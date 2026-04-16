@@ -8,29 +8,37 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const { pdfUrl, type, auctionId } = req.body;
+    const type = req.body?.type;
+    const auctionId = req.body?.auctionId;
+    const pdfUrl = req.body?.pdfUrl || null;
+    
     console.log("pdfUrl received:", pdfUrl);
     console.log("analysis type:", type);
     console.log("auctionId:", auctionId);
 
-    if (!pdfUrl) {
-      return res.status(400).json({ error: "No pdfUrl provided" });
-    }
+    let base64 = "";
 
-    // Descargar PDF
-    console.log("[Backend] Intentando descargar PDF desde URL:", pdfUrl);
-    const responseFile = await fetch(pdfUrl);
-    
-    console.log("[Backend] Cloudinary Response Status:", responseFile.status);
-    console.log("[Backend] Cloudinary Response StatusText:", responseFile.statusText);
-    
-    if (!responseFile.ok) {
-      const errorText = await responseFile.text();
-      console.error("[Backend] Error body from Cloudinary:", errorText);
-      throw new Error(`Error al descargar el PDF (${responseFile.status}): ${errorText || responseFile.statusText}`);
+    if (pdfUrl) {
+      // Descargar PDF
+      console.log("[Backend] Intentando descargar PDF desde URL:", pdfUrl);
+      const responseFile = await fetch(pdfUrl);
+      
+      console.log("[Backend] Cloudinary Response Status:", responseFile.status);
+      console.log("[Backend] Cloudinary Response StatusText:", responseFile.statusText);
+      
+      if (!responseFile.ok) {
+        const errorText = await responseFile.text();
+        console.error("[Backend] Error body from Cloudinary:", errorText);
+        throw new Error(`Error al descargar el PDF (${responseFile.status}): ${errorText || responseFile.statusText}`);
+      }
+      const fileBuffer = await responseFile.arrayBuffer();
+      base64 = Buffer.from(fileBuffer).toString("base64");
+    } else if (req.files && req.files.length > 0) {
+      // Fallback a req.files si no hay pdfUrl
+      base64 = req.files[0].buffer.toString("base64");
+    } else {
+      return res.status(400).json({ error: "No pdfUrl or files provided" });
     }
-    const fileBuffer = await responseFile.arrayBuffer();
-    const base64 = Buffer.from(fileBuffer).toString("base64");
 
     // Obtener datos de la subasta si existen
     // const auction = auctionId ? (auctions as any)[auctionId] : null;
