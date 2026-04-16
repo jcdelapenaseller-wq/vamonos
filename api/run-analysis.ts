@@ -2,7 +2,10 @@
 
 import multer from 'multer';
 import { createRequire } from 'module';
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+
 const require = createRequire(import.meta.url);
+pdfjsLib.GlobalWorkerOptions.workerSrc = require("pdfjs-dist/legacy/build/pdf.worker.mjs");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -43,14 +46,20 @@ export default async function handler(req: any, res: any) {
     console.log("FILES LENGTH:", files?.length);
     console.log("FILE SIZE:", files?.[0]?.size);
 
-    const pdfParseReq = require('pdf-parse');
-    const pdfData = new Uint8Array(files[0].buffer);
-    const parser = new pdfParseReq.PDFParse(pdfData);
-    const pdfExtractedText = await parser.getText();
-    const parsed = { text: pdfExtractedText };
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(files[0].buffer) });
+    const pdf = await loadingTask.promise;
 
-    console.log("TEXT LENGTH:", parsed.text.length);
-    console.log("TEXT PREVIEW:", parsed.text.substring(0, 300));
+    let extractedText = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const strings = content.items.map((item: any) => item.str);
+        extractedText += strings.join(" ") + "\n";
+    }
+
+    console.log("TEXT LENGTH:", extractedText.length);
+    console.log("TEXT PREVIEW:", extractedText.substring(0, 300));
 
     console.log("pdfUrl received:", pdfUrl);
     console.log("analysis type:", type);
@@ -204,10 +213,9 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
-      const modelName = "gemini-2.5-flash";
+      const modelName = "gemini-1.5-flash";
       console.log("Model used:", modelName);
       console.log("MODEL OK:", modelName);
-      console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -221,8 +229,8 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
               {
                 role: "user",
                 parts: [
-                  { text: prompt },
-                  ...pdfParts
+                  { text: extractedText },
+                  { text: prompt }
                 ]
               }
             ]
