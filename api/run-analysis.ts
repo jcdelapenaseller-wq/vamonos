@@ -317,6 +317,8 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 4. PURGA: Aplicar la regla de purga (art. 674 LEC) basándote en la carga ejecutante identificada.
 5. VALIDACIÓN DE COBERTURA: Confirmar que el número de cargas listadas en la Fase 1 es igual al número de cargas clasificadas en el JSON.
 6. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
+
+Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
       const modelName = "gemini-2.5-flash";
@@ -340,7 +342,10 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
                   ...pdfParts
                 ]
               }
-            ]
+            ],
+            generationConfig: {
+              response_mime_type: "application/json"
+            }
           })
         }
       );
@@ -371,14 +376,9 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
       }
 
       console.log("TEXT RAW:", text);
+      console.log("RAW GEMINI RESPONSE:", text);
 
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-
-      if (!jsonMatch) {
-        throw new Error("No se pudo extraer JSON válido");
-      }
-
-      const result = JSON.parse(jsonMatch[0]);
+      const result = JSON.parse(text);
       console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
       return res.status(200).json(result);
     } catch (error: any) {
