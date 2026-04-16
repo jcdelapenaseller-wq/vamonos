@@ -109,6 +109,26 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   const [files, setFiles] = useState<File[]>([]);
   const [resultData, setResultData] = useState<AnalysisResult | null>(initialData);
+
+  const safeResult = resultData ? {
+    ...resultData,
+    cargas_detectadas: resultData.cargas_detectadas || [],
+    incoherencias_detectadas: resultData.incoherencias_detectadas || [],
+    alertas: resultData.alertas || [],
+    peor_escenario: {
+      ...resultData.peor_escenario,
+      total: resultData.peor_escenario?.total ?? 0,
+      importe_total: resultData.peor_escenario?.importe_total ?? 0,
+    },
+    impacto_economico: {
+      ...resultData.impacto_economico,
+      nivel: resultData.impacto_economico?.nivel || "DESCONOCIDO",
+    },
+    nivel_confianza_global: resultData.nivel_confianza_global || "DESCONOCIDO",
+    riesgo_global: resultData.riesgo_global || "DESCONOCIDO",
+    fuente_documento: resultData.fuente_documento || "Desconocida",
+  } : null;
+
   const [showHowToModal, setShowHowToModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -134,26 +154,26 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   // Redirect to dedicated page when analysis is done in integrated mode
   useEffect(() => {
-    if (isIntegrated && step === 'result' && resultData) {
+    if (isIntegrated && step === 'result' && safeResult) {
       console.log('🔍 [DIAGNOSTIC] LoadAnalysisBlock boeId value:', boeId);
       console.log('🔍 [DIAGNOSTIC] LoadAnalysisBlock boeId type:', typeof boeId);
       
       // Save to session storage to prevent data loss on reload
       try {
-        sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(resultData));
+        sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(safeResult));
       } catch (e) {
         console.error('🔍 [DIAGNOSTIC] Crash at line 105 (sessionStorage):', e);
       }
       
       try {
         navigate(`/analisis-cargas?id=${boeId}&report=ready`, { 
-          state: { analysisResult: resultData } 
+          state: { analysisResult: safeResult } 
         });
       } catch (e) {
         console.error('🔍 [DIAGNOSTIC] Crash at line 107 (navigate):', e);
       }
     }
-  }, [step, resultData, isIntegrated, navigate, boeId]);
+  }, [step, safeResult, isIntegrated, navigate, boeId]);
   
   const usage = user?.analysisUsed || 0;
 
@@ -477,14 +497,14 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     doc.setFont("helvetica", "bold");
     doc.text("RIESGO GLOBAL:", margin, y);
     doc.setFont("helvetica", "bold");
-    const riskColor = resultData?.riesgo_global === 'ALTO' ? [185, 28, 28] : resultData?.riesgo_global === 'MEDIO' ? [180, 83, 9] : [21, 128, 61];
+    const riskColor = safeResult?.riesgo_global === 'ALTO' ? [185, 28, 28] : safeResult?.riesgo_global === 'MEDIO' ? [180, 83, 9] : [21, 128, 61];
     doc.setTextColor(riskColor[0], riskColor[1], riskColor[2]);
-    doc.text(resultData?.riesgo_global || "PENDIENTE", margin + 40, y);
+    doc.text(safeResult?.riesgo_global || "PENDIENTE", margin + 40, y);
     doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
     y += 20;
 
     // Resumen económico rápido en portada
-    const importeCargas = resultData?.peor_escenario?.importe_total ?? resultData?.peor_escenario?.total ?? 0;
+    const importeCargas = safeResult?.peor_escenario?.importe_total ?? safeResult?.peor_escenario?.total ?? 0;
     const totalCost = (appraisalValue || 0) + importeCargas;
 
     doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
@@ -509,10 +529,10 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     let veredictoText = "";
     let veredictoColor = [15, 23, 42];
 
-    if (resultData?.riesgo_global === 'ALTO') {
+    if (safeResult?.riesgo_global === 'ALTO') {
       veredictoText = "X ALTO RIESGO JURÍDICO";
       veredictoColor = [185, 28, 28]; // Rojo
-    } else if (resultData?.riesgo_global === 'MEDIO' || importeCargas > 0) {
+    } else if (safeResult?.riesgo_global === 'MEDIO' || importeCargas > 0) {
       veredictoText = "! REVISAR EN DETALLE";
       veredictoColor = [180, 83, 9]; // Ámbar
     } else {
@@ -544,9 +564,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     y = 25;
 
     // Sección: Resumen claro
-    if (resultData?.recomendacion) {
+    if (safeResult?.recomendacion) {
       drawHeader(doc, "Decisión rápida");
-      const cleanedRec = cleanText(resultData.recomendacion);
+      const cleanedRec = cleanText(safeResult.recomendacion);
       const recLines = doc.splitTextToSize(cleanedRec, contentWidth - 10);
       
       doc.setFontSize(10);
@@ -562,7 +582,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     }
 
     // Sección: Qué pagarías realmente
-    if (resultData?.peor_escenario) {
+    if (safeResult?.peor_escenario) {
       const infoLines = [];
       if (!importeCargas) {
         infoLines.push("- Solo pagas el importe de tu puja adjudicada.");
@@ -580,9 +600,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     }
 
     // Sección: Análisis jurídico
-    if (resultData?.razonamiento_juridico) {
+    if (safeResult?.razonamiento_juridico) {
       drawHeader(doc, "Análisis Jurídico Detallado");
-      const cleanedReasoning = cleanText(resultData.razonamiento_juridico);
+      const cleanedReasoning = cleanText(safeResult.razonamiento_juridico);
       const textLines = doc.splitTextToSize(cleanedReasoning, contentWidth);
       
       doc.setFontSize(10);
@@ -1084,7 +1104,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
           </div>
         )}
 
-        {step === 'result' && resultData && (
+        {step === 'result' && safeResult && (
           <div className="space-y-8">
             {/* Barra de confianza superior */}
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl shadow-sm">
@@ -1135,24 +1155,24 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             )}
 
             {/* Resumen Claro (Recomendación IA) */}
-            {resultData.recomendacion && (
+            {safeResult.recomendacion && (
               <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-brand-900 mb-4 flex items-center gap-2">
                   <Info size={20} className="text-brand-600" /> Resumen claro
                 </h3>
                 <p className="text-brand-800 text-sm leading-relaxed whitespace-pre-line">
-                  {resultData.recomendacion}
+                  {safeResult.recomendacion}
                 </p>
               </div>
             )}
 
             {/* Qué pagarías realmente */}
-            {(resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
+            {(safeResult.peor_escenario?.total !== undefined || safeResult.peor_escenario?.importe_total !== undefined) && (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                   💰 Qué pagarías realmente
                 </h3>
-                { !(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total) ? (
+                { !(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total) ? (
                   <ul className="space-y-2 text-sm text-slate-700">
                     <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Solo pagas tu puja</li>
                     <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> La deuda se cancela con la subasta</li>
@@ -1166,9 +1186,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     <li className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-500"/> + cargas que subsisten</li>
                     <li className="flex items-center gap-2 font-bold text-slate-900 mt-2 pt-2 border-t border-slate-100">
                       {appraisalValue ? (
-                        <>Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue + (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total))}</>
+                        <>Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue + (safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total))}</>
                       ) : (
-                        <>Cargas a asumir: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total)} (más tu puja)</>
+                        <>Cargas a asumir: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total)} (más tu puja)</>
                       )}
                     </li>
                   </ul>
@@ -1227,7 +1247,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             )}
 
             {/* Coste total estimado */}
-            {analysisType === 'completo' && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
+            {analysisType === 'completo' && (safeResult.peor_escenario?.total !== undefined || safeResult.peor_escenario?.importe_total !== undefined) && (
               <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Calculator size={20} className="text-brand-400" /> Coste total estimado
@@ -1243,10 +1263,10 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     <div className="flex justify-between items-center text-slate-400 text-sm">
                       <span>Cargas que subsisten</span>
                       <span className="font-medium text-amber-400">
-                        + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total)}
+                        + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total)}
                       </span>
                     </div>
-                    {(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total) === 0 ? (
+                    {(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total) === 0 ? (
                       <span className="text-xs text-emerald-400 mt-1">✔️ No asumes deudas tras la subasta</span>
                     ) : (
                       <span className="text-xs text-rose-400 mt-1">⚠️ Estas cargas SÍ las asume el comprador</span>
@@ -1255,7 +1275,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
                     <span className="font-bold text-slate-200">Coste total estimado</span>
                     <span className="text-2xl font-black text-brand-400">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total))}
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + (safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total))}
                     </span>
                   </div>
                 </div>
@@ -1266,7 +1286,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             )}
 
             {/* Decisión de inversión - Bloque Agrupado */}
-            {analysisType === 'completo' && canCalculateFinancials && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
+            {analysisType === 'completo' && canCalculateFinancials && (safeResult.peor_escenario?.total !== undefined || safeResult.peor_escenario?.importe_total !== undefined) && (
               <div className="bg-slate-50/50 border border-slate-200 rounded-3xl p-8 shadow-sm space-y-10">
                 <div className="text-center space-y-2">
                   <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 justify-center uppercase tracking-widest">
@@ -1279,7 +1299,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
                 {(() => {
                   const valorMercadoEstimado = surface! * marketPriceM2!;
-                  const importeCargas = resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total;
+                  const importeCargas = safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total;
                   const costeTotal = (appraisalValue || 0) + importeCargas;
                   const margenSeguridad = valorMercadoEstimado - costeTotal;
                   const margenPorcentaje = (margenSeguridad / valorMercadoEstimado) * 100;
@@ -1491,11 +1511,11 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               </button>
 
               {(() => {
-                const hasSubsistingCharges = resultData?.cargas_detectadas?.some(c => c.estado_carga === 'SUBSISTE') || false;
-                const isLowConfidence = resultData?.nivel_confianza_global?.includes('BAJA') || false;
-                const isHighRisk = resultData?.riesgo_global === 'ALTO';
-                const hasOccupancy = resultData?.ocupacion_detectada;
-                const uniqueProperties = new Set(resultData?.cargas_detectadas?.map(c => c.identificador_registral) || []).size;
+                const hasSubsistingCharges = safeResult?.cargas_detectadas?.some(c => c.estado_carga === 'SUBSISTE') || false;
+                const isLowConfidence = safeResult?.nivel_confianza_global?.includes('BAJA') || false;
+                const isHighRisk = safeResult?.riesgo_global === 'ALTO';
+                const hasOccupancy = safeResult?.ocupacion_detectada;
+                const uniqueProperties = new Set(safeResult?.cargas_detectadas?.map(c => c.identificador_registral) || []).size;
                 const shouldShowConsultingCta = hasOccupancy || hasSubsistingCharges || isLowConfidence || isHighRisk || (uniqueProperties > 1);
 
                 if (!shouldShowConsultingCta) return null;
@@ -1521,29 +1541,29 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             <div id="analisis-juridico" className="flex flex-wrap gap-4 items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
               <div className="flex items-center gap-2 text-sm text-slate-600">
                 <FileText size={16} className="text-slate-400" />
-                <span>Fuente: <strong className="text-slate-900">{resultData.fuente_documento}</strong></span>
+                <span>Fuente: <strong className="text-slate-900">{safeResult.fuente_documento}</strong></span>
               </div>
               <div className="flex items-center gap-2 text-sm text-slate-600 group relative">
-                <ShieldCheck size={16} className={resultData.nivel_confianza_global.includes('ALTA') ? 'text-emerald-500' : resultData.nivel_confianza_global.includes('MEDIA') ? 'text-amber-500' : 'text-orange-500'} />
+                <ShieldCheck size={16} className={safeResult.nivel_confianza_global.includes('ALTA') ? 'text-emerald-500' : safeResult.nivel_confianza_global.includes('MEDIA') ? 'text-amber-500' : 'text-orange-500'} />
                 <span className="cursor-help border-b border-dashed border-slate-400">
-                  Confianza IA: <strong className="text-slate-900">{resultData.nivel_confianza_global}</strong>
+                  Confianza IA: <strong className="text-slate-900">{safeResult.nivel_confianza_global}</strong>
                 </span>
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none">
-                  {getConfianzaExplanation(resultData.nivel_confianza_global)}
+                  {getConfianzaExplanation(safeResult.nivel_confianza_global)}
                   <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
                 </div>
               </div>
             </div>
 
             {/* Incoherencias Críticas */}
-            {resultData.incoherencias_detectadas && resultData.incoherencias_detectadas.length > 0 && (
+            {safeResult.incoherencias_detectadas && safeResult.incoherencias_detectadas.length > 0 && (
               <div className="bg-amber-50 border border-amber-200 p-5 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <AlertTriangle size={20} className="text-amber-600" />
                   <h4 className="font-bold text-amber-900">Discrepancias en la documentación</h4>
                 </div>
                 <ul className="space-y-2">
-                  {resultData?.incoherencias_detectadas?.map((incoherencia, idx) => (
+                  {safeResult?.incoherencias_detectadas?.map((incoherencia, idx) => (
                     <li key={idx} className="text-sm text-amber-800 flex items-start gap-2">
                       <span className="mt-1 text-amber-500">•</span>
                       <span>{incoherencia}</span>
@@ -1554,7 +1574,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             )}
 
             {/* Ocupación del Inmueble */}
-            {resultData.ocupacion_detectada && (
+            {safeResult.ocupacion_detectada && (
               <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl">
                 <div className="flex items-center gap-2 mb-3">
                   <Info size={20} className="text-slate-600" />
@@ -1566,18 +1586,18 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-xs font-bold text-slate-500 uppercase">Nivel de Riesgo:</span>
                   <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                    resultData.nivel_riesgo_ocupacion === 'ALTO' ? 'bg-amber-100 text-amber-700' :
-                    resultData.nivel_riesgo_ocupacion === 'MEDIO' ? 'bg-slate-200 text-slate-700' :
+                    safeResult.nivel_riesgo_ocupacion === 'ALTO' ? 'bg-amber-100 text-amber-700' :
+                    safeResult.nivel_riesgo_ocupacion === 'MEDIO' ? 'bg-slate-200 text-slate-700' :
                     'bg-slate-100 text-slate-600'
                   }`}>
-                    {resultData.nivel_riesgo_ocupacion}
+                    {safeResult.nivel_riesgo_ocupacion}
                   </span>
                 </div>
               </div>
             )}
 
             {/* Razonamiento Jurídico (Chain of Thought) */}
-            {resultData.razonamiento_juridico && (
+            {safeResult.razonamiento_juridico && (
               <details className="group">
                 <summary className="list-none cursor-pointer">
                   <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl flex items-center justify-between hover:bg-slate-100 transition-colors">
@@ -1589,38 +1609,38 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   </div>
                 </summary>
                 <div className="bg-white border-x border-b border-slate-200 p-6 rounded-b-xl -mt-2 text-sm text-slate-700 whitespace-pre-line leading-relaxed shadow-inner">
-                  {resultData.razonamiento_juridico}
+                  {safeResult.razonamiento_juridico}
                 </div>
               </details>
             )}
 
             {/* Semaphore Header */}
             <div className={`p-6 rounded-2xl border flex flex-col md:flex-row items-center gap-6 ${
-              resultData.riesgo_global === 'ALTO' ? 'bg-orange-50 border-orange-200 text-orange-900' :
-              resultData.riesgo_global === 'MEDIO' ? 'bg-amber-50 border-amber-200 text-amber-900' :
+              safeResult.riesgo_global === 'ALTO' ? 'bg-orange-50 border-orange-200 text-orange-900' :
+              safeResult.riesgo_global === 'MEDIO' ? 'bg-amber-50 border-amber-200 text-amber-900' :
               'bg-emerald-50 border-emerald-200 text-emerald-900'
             }`}>
               <div className={`p-4 rounded-full ${
-                resultData.riesgo_global === 'ALTO' ? 'bg-orange-100 text-orange-600' :
-                resultData.riesgo_global === 'MEDIO' ? 'bg-amber-100 text-amber-600' :
+                safeResult.riesgo_global === 'ALTO' ? 'bg-orange-100 text-orange-600' :
+                safeResult.riesgo_global === 'MEDIO' ? 'bg-amber-100 text-amber-600' :
                 'bg-emerald-100 text-emerald-600'
               }`}>
-                {resultData.riesgo_global === 'ALTO' ? <ShieldAlert size={32} /> :
-                 resultData.riesgo_global === 'MEDIO' ? <AlertTriangle size={32} /> :
+                {safeResult.riesgo_global === 'ALTO' ? <ShieldAlert size={32} /> :
+                 safeResult.riesgo_global === 'MEDIO' ? <AlertTriangle size={32} /> :
                  <ShieldCheck size={32} />}
               </div>
               <div className="text-center md:text-left">
                 <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Riesgo Global de la Operación</h3>
-                <p className="text-3xl font-black">{resultData.riesgo_global}</p>
+                <p className="text-3xl font-black">{safeResult.riesgo_global}</p>
               </div>
               <div className="md:ml-auto text-center md:text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-current/20 pt-4 md:pt-0 md:pl-6 mt-2 md:mt-0">
                 <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Peor Escenario Registral</h3>
-                <p className="text-3xl font-black">{resultData.peor_escenario.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</p>
-                <p className="text-xs opacity-80 mt-1 font-medium">Impacto: {resultData.impacto_economico.nivel}</p>
-                {resultData.peor_escenario.total === 0 ? (
+                <p className="text-3xl font-black">{safeResult.peor_escenario?.total ? safeResult.peor_escenario.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</p>
+                <p className="text-xs opacity-80 mt-1 font-medium">Impacto: {safeResult.impacto_economico.nivel}</p>
+                {safeResult.peor_escenario.total === 0 ? (
                   <p className="text-xs text-emerald-700 mt-2 font-medium">✔️ Incluso en el peor caso, no asumirías cargas económicas</p>
                 ) : (
-                  <p className="text-xs text-rose-700 mt-2 font-medium">⚠️ En el peor escenario, podrías asumir hasta {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.total)} adicionales</p>
+                  <p className="text-xs text-rose-700 mt-2 font-medium">⚠️ En el peor escenario, podrías asumir hasta {safeResult.peor_escenario?.total ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(safeResult.peor_escenario.total) : "—"} adicionales</p>
                 )}
               </div>
             </div>
@@ -1634,9 +1654,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   <h4 className="font-bold text-amber-900">Cargas que SUBSISTEN</h4>
                 </div>
                 <div className="p-6">
-                  {(resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1665,22 +1685,22 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                                 )}
                               </div>
                             </div>
-                            <span className="font-black text-lg text-amber-700">{carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                            <span className="font-black text-lg text-amber-700">{carga.desglose?.total ? carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                           </div>
                           
                           {/* Desglose */}
                           <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100">
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Principal:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                              <span className="font-medium text-slate-700">{carga.desglose?.principal ? carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Intereses (est.):</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                              <span className="font-medium text-slate-700">{carga.desglose?.intereses ? carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Costas:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                              <span className="font-medium text-slate-700">{carga.desglose?.costas ? carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                             </div>
                           </div>
                           
@@ -1704,9 +1724,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   <h4 className="font-bold text-emerald-900">Cargas que se PURGAN, REEMPLAZAN o CANCELAN</h4>
                 </div>
                 <div className="p-6">
-                  {(resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1745,22 +1765,22 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                                 )}
                               </div>
                             </div>
-                            <span className="font-bold text-slate-400 line-through">{carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                            <span className="font-bold text-slate-400 line-through">{carga.desglose?.total ? carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                           </div>
                           
                           {/* Desglose */}
                           <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100 opacity-60">
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Principal:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                              <span className="font-medium text-slate-700">{carga.desglose?.principal ? carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Intereses (est.):</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                              <span className="font-medium text-slate-700">{carga.desglose?.intereses ? carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Costas:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                              <span className="font-medium text-slate-700">{carga.desglose?.costas ? carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                             </div>
                           </div>
                           
@@ -1778,7 +1798,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
               </div>
             </div>
             {/* Unknown Charges (Critical) */}
-            {(resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.length || 0) > 0 && (
+            {(safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.length || 0) > 0 && (
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mt-8">
                       <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
                         <AlertTriangle className="text-amber-600" size={20} />
@@ -1786,7 +1806,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                       </div>
                       <div className="p-6">
                         <ul className="space-y-6">
-                          {resultData?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.map((carga, idx) => (
+                          {safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.map((carga, idx) => (
                             <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -1815,22 +1835,22 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                               )}
                             </div>
                           </div>
-                          <span className="font-black text-lg text-amber-600">{carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                          <span className="font-black text-lg text-amber-600">{carga.desglose?.total ? carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                         </div>
                         
                         {/* Desglose */}
                         <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100">
                           <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                             <span className="text-slate-500">Principal:</span>
-                            <span className="font-medium text-slate-700">{carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                            <span className="font-medium text-slate-700">{carga.desglose?.principal ? carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                             <span className="text-slate-500">Intereses (est.):</span>
-                            <span className="font-medium text-slate-700">{carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                            <span className="font-medium text-slate-700">{carga.desglose?.intereses ? carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                             <span className="text-slate-500">Costas:</span>
-                            <span className="font-medium text-slate-700">{carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
+                            <span className="font-medium text-slate-700">{carga.desglose?.costas ? carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
                           </div>
                         </div>
                         
@@ -1846,13 +1866,13 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             )}
 
             {/* Alerts */}
-            {(resultData?.alertas?.length || 0) > 0 && (
+            {(safeResult?.alertas?.length || 0) > 0 && (
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
                 <h4 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
                   <AlertTriangle size={20} /> Advertencias Jurídicas
                 </h4>
                 <ul className="space-y-3">
-                  {resultData?.alertas?.map((adv, idx) => (
+                  {safeResult?.alertas?.map((adv, idx) => (
                     <li key={idx} className="flex items-start gap-3 text-amber-800 text-sm leading-relaxed">
                       <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
                       <span>{adv}</span>
