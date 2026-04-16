@@ -191,7 +191,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
-      const modelName = "gemini-3.1-pro";
+      const modelName = "gemini-2.5-flash";
       console.log("Model used:", modelName);
       console.log("MODEL OK:", modelName);
 
