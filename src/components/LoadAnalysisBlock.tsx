@@ -755,6 +755,12 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     return 'Evaluación basada en los documentos aportados.';
   };
 
+  const razonamiento = safeResult?.razonamiento_juridico
+    ? (typeof safeResult.razonamiento_juridico === "string"
+        ? safeResult.razonamiento_juridico
+        : JSON.stringify(safeResult.razonamiento_juridico, null, 2))
+    : "";
+
   return (
     <div ref={blockRef} className={`${isIntegrated ? 'w-full' : `${noMargin ? '' : 'my-8 md:my-12'} bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden`}`}>
         {!isIntegrated && (
@@ -1609,7 +1615,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                   </div>
                 </summary>
                 <div className="bg-white border-x border-b border-slate-200 p-6 rounded-b-xl -mt-2 text-sm text-slate-700 whitespace-pre-line leading-relaxed shadow-inner">
-                  {safeResult.razonamiento_juridico}
+                  {razonamiento}
                 </div>
               </details>
             )}
