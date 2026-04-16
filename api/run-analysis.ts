@@ -1,3 +1,4 @@
+import pdf from "pdf-parse";
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 export default async function handler(req: any, res: any) {
@@ -30,7 +31,13 @@ export default async function handler(req: any, res: any) {
       throw new Error(`Error al descargar el PDF (${responseFile.status}): ${errorText || responseFile.statusText}`);
     }
     const fileBuffer = await responseFile.arrayBuffer();
-    const base64 = Buffer.from(fileBuffer).toString("base64");
+    
+    const dataPdf = await pdf(Buffer.from(fileBuffer));
+    const extractedText = dataPdf.text;
+
+    if (!extractedText || extractedText.trim() === "") {
+      throw new Error("Error al extraer texto del PDF");
+    }
 
     // Obtener datos de la subasta si existen
     // const auction = auctionId ? (auctions as any)[auctionId] : null;
@@ -58,15 +65,6 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
     }
 
     const currentDate = new Date().toISOString().split('T')[0];
-
-    const pdfParts = [
-      {
-        inlineData: {
-          mimeType: "application/pdf",
-          data: base64
-        }
-      }
-    ];
 
     console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI ---`);
 
@@ -324,7 +322,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       const modelName = "gemini-2.5-flash";
       console.log("Model used:", modelName);
       console.log("MODEL OK:", "gemini-2.5-flash");
-      console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
+      console.log("PDF TEXT LENGTH:", extractedText.length);
 
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
@@ -339,7 +337,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
                 role: "user",
                 parts: [
                   { text: prompt },
-                  ...pdfParts
+                  { text: extractedText }
                 ]
               }
             ]
