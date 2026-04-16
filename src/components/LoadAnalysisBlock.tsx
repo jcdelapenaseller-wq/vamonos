@@ -712,21 +712,32 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
     setStep('loading');
     
     try {
-      // Subir a Cloudinary
-      console.log("Subiendo archivo a Cloudinary...");
-      const pdfUrl = await uploadToCloudinary(files[0]);
-      console.log("PDF subido a Cloudinary:", pdfUrl);
+      // Subir a Cloudinary (Comentado para usar envío directo)
+      // console.log("Subiendo archivo a Cloudinary...");
+      // const pdfUrl = await uploadToCloudinary(files[0]);
+      // console.log("PDF subido a Cloudinary:", pdfUrl);
+
+      const selectedFile = files[0];
+      console.log("Enviando archivo a backend:", selectedFile?.name, selectedFile?.size);
+
+      const formData = new FormData();
+      formData.append("files", selectedFile); // clave exacta
+      formData.append("type", analysisType);
+      if (auctionId) {
+        formData.append("auctionId", auctionId);
+      }
 
       const response = await fetch('/api/run-analysis', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          pdfUrl,
-          type: analysisType,
-          auctionId
-        })
+        // headers: {
+        //   'Content-Type': 'application/json'
+        // },
+        // body: JSON.stringify({
+        //   pdfUrl,
+        //   type: analysisType,
+        //   auctionId
+        // })
+        body: formData
       });
 
       if (!response.ok) {
