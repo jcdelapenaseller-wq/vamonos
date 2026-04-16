@@ -1,5 +1,20 @@
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
+import multer from 'multer';
+
+const upload = multer({ storage: multer.memoryStorage() });
+
+function runMiddleware(req: any, res: any, fn: any) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
+
 export const config = {
   api: {
     bodyParser: false,
@@ -7,6 +22,9 @@ export const config = {
 };
 
 export default async function handler(req: any, res: any) {
+  // Parse multipart/form-data
+  await runMiddleware(req, res, upload.single('files'));
+
   console.log("START handler");
 
   if (req.method !== 'POST') {
@@ -18,6 +36,9 @@ export default async function handler(req: any, res: any) {
     const auctionId = req.body?.auctionId;
     const pdfUrl = req.body?.pdfUrl || null;
     
+    const file = req.file;
+    console.log("FILE:", file);
+
     console.log("pdfUrl received:", pdfUrl);
     console.log("analysis type:", type);
     console.log("auctionId:", auctionId);
@@ -39,9 +60,9 @@ export default async function handler(req: any, res: any) {
       }
       const fileBuffer = await responseFile.arrayBuffer();
       base64 = Buffer.from(fileBuffer).toString("base64");
-    } else if (req.files && req.files.length > 0) {
-      // Fallback a req.files si no hay pdfUrl
-      base64 = req.files[0].buffer.toString("base64");
+    } else if (file) {
+      // Fallback a req.file si no hay pdfUrl
+      base64 = file.buffer.toString("base64");
     } else {
       return res.status(400).json({ error: "No pdfUrl or files provided" });
     }
