@@ -321,7 +321,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
-      const modelName = "gemini-2.0-flash";
+      const modelName = "gemini-2.5-flash";
       console.log("Model used:", modelName);
       console.log("MODEL OK:", "gemini-2.5-flash");
       console.log("PDF PARTS:", pdfParts.map(p => ({ inlineData: { mimeType: p.inlineData.mimeType, data: p.inlineData.data.substring(0, 50) + "..." } })));
