@@ -1,4 +1,5 @@
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
+// @ts-ignore
+import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.js";
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 export default async function handler(req: any, res: any) {
@@ -32,10 +33,19 @@ export default async function handler(req: any, res: any) {
     }
     const fileBuffer = await responseFile.arrayBuffer();
     
-    const dataPdf = await pdfParse(Buffer.from(fileBuffer));
-    const extractedText = dataPdf.text;
+    const loadingTask = pdfjsLib.getDocument({ data: fileBuffer });
+    const pdf = await loadingTask.promise;
 
-    if (!extractedText || extractedText.trim() === "") {
+    let extractedText = "";
+
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      const content = await page.getTextContent();
+      const strings = content.items.map((item: any) => item.str);
+      extractedText += strings.join(" ") + "\n";
+    }
+
+    if (!extractedText || extractedText.trim().length === 0) {
       throw new Error("Error al extraer texto del PDF");
     }
 
