@@ -677,7 +677,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
     formData.append("upload_preset", uploadPreset);
     formData.append("resource_type", "raw");
     
-    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
       method: "POST",
       body: formData
     });
@@ -692,6 +692,8 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
     console.log("[Frontend] Cloudinary Upload Success Data:", data);
     console.log("[Frontend] Secure URL:", data.secure_url);
     console.log("[Frontend] Resource Type:", data.resource_type);
+    console.log("FINAL resource_type:", data.resource_type);
+    console.log("FINAL URL:", data.secure_url);
     return data.secure_url;
   };
 
