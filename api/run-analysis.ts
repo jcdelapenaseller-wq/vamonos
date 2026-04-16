@@ -1,6 +1,8 @@
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 import multer from 'multer';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -37,7 +39,18 @@ export default async function handler(req: any, res: any) {
     const pdfUrl = req.body?.pdfUrl || null;
     
     const file = req.file;
-    console.log("FILE:", file);
+    const files = file ? [file] : [];
+    console.log("FILES LENGTH:", files?.length);
+    console.log("FILE SIZE:", files?.[0]?.size);
+
+    const pdfParseReq = require('pdf-parse');
+    const pdfData = new Uint8Array(files[0].buffer);
+    const parser = new pdfParseReq.PDFParse(pdfData);
+    const pdfExtractedText = await parser.getText();
+    const parsed = { text: pdfExtractedText };
+
+    console.log("TEXT LENGTH:", parsed.text.length);
+    console.log("TEXT PREVIEW:", parsed.text.substring(0, 300));
 
     console.log("pdfUrl received:", pdfUrl);
     console.log("analysis type:", type);
