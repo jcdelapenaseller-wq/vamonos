@@ -254,6 +254,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       let result;
       try {
         result = JSON.parse(cleanText);
+        console.log("RESULT KEYS:", Object.keys(result));
       } catch (e) {
         console.error("JSON PARSE ERROR:", cleanText);
         return res.status(500).json({ error: "Error parseando respuesta IA" });
