@@ -1,11 +1,6 @@
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 import multer from 'multer';
-import { createRequire } from 'module';
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
-
-const require = createRequire(import.meta.url);
-pdfjsLib.GlobalWorkerOptions.workerSrc = require("pdfjs-dist/legacy/build/pdf.worker.mjs");
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -45,21 +40,6 @@ export default async function handler(req: any, res: any) {
     const files = file ? [file] : [];
     console.log("FILES LENGTH:", files?.length);
     console.log("FILE SIZE:", files?.[0]?.size);
-
-    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(files[0].buffer) });
-    const pdf = await loadingTask.promise;
-
-    let extractedText = "";
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-        const page = await pdf.getPage(i);
-        const content = await page.getTextContent();
-        const strings = content.items.map((item: any) => item.str);
-        extractedText += strings.join(" ") + "\n";
-    }
-
-    console.log("TEXT LENGTH:", extractedText.length);
-    console.log("TEXT PREVIEW:", extractedText.substring(0, 300));
 
     console.log("pdfUrl received:", pdfUrl);
     console.log("analysis type:", type);
@@ -116,14 +96,12 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
 
     const currentDate = new Date().toISOString().split('T')[0];
 
-    const pdfParts = [
-      {
-        inlineData: {
-          mimeType: "application/pdf",
-          data: base64
-        }
+    const pdfParts = files.map((file) => ({
+      inlineData: {
+        data: file.buffer.toString("base64"),
+        mimeType: "application/pdf"
       }
-    ];
+    }));
 
     console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI ---`);
 
@@ -213,7 +191,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
-      const modelName = "gemini-1.5-flash";
+      const modelName = "gemini-1.5-pro";
       console.log("Model used:", modelName);
       console.log("MODEL OK:", modelName);
 
@@ -229,7 +207,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
               {
                 role: "user",
                 parts: [
-                  { text: extractedText },
+                  ...pdfParts,
                   { text: prompt }
                 ]
               }
