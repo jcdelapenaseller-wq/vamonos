@@ -129,6 +129,18 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     fuente_documento: resultData.fuente_documento || "Desconocida",
   } : null;
 
+  const recomendacionText = safeResult?.recomendacion
+    ? typeof safeResult.recomendacion === "string"
+      ? safeResult.recomendacion
+      : `
+${(safeResult.recomendacion as any).resumen_claro || ""}
+
+${(safeResult.recomendacion as any).deuda_del_procedimiento || ""}
+
+${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
+`.trim()
+    : "";
+
   const [showHowToModal, setShowHowToModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -564,9 +576,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     y = 25;
 
     // Sección: Resumen claro
-    if (safeResult?.recomendacion) {
+    if (recomendacionText) {
       drawHeader(doc, "Decisión rápida");
-      const cleanedRec = cleanText(safeResult.recomendacion);
+      const cleanedRec = cleanText(recomendacionText);
       const recLines = doc.splitTextToSize(cleanedRec, contentWidth - 10);
       
       doc.setFontSize(10);
@@ -1161,13 +1173,13 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
             )}
 
             {/* Resumen Claro (Recomendación IA) */}
-            {safeResult.recomendacion && (
+            {recomendacionText && (
               <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-brand-900 mb-4 flex items-center gap-2">
                   <Info size={20} className="text-brand-600" /> Resumen claro
                 </h3>
                 <p className="text-brand-800 text-sm leading-relaxed whitespace-pre-line">
-                  {safeResult.recomendacion}
+                  {recomendacionText}
                 </p>
               </div>
             )}
