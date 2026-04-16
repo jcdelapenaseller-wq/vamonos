@@ -375,12 +375,13 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         throw new Error("No response from Gemini");
       }
 
-      console.log("TEXT RAW:", text);
-      console.log("RAW GEMINI RESPONSE:", text);
+      console.log("=== GEMINI RAW START ===");
+      console.log(text);
+      console.log("=== GEMINI RAW END ===");
 
-      const result = JSON.parse(text);
+      // const result = JSON.parse(text);
       console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
-      return res.status(200).json(result);
+      return res.status(200).json({ raw: text });
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
