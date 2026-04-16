@@ -1,4 +1,4 @@
-import * as pdf from "pdf-parse";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 export default async function handler(req: any, res: any) {
@@ -32,7 +32,7 @@ export default async function handler(req: any, res: any) {
     }
     const fileBuffer = await responseFile.arrayBuffer();
     
-    const dataPdf = await pdf.default(Buffer.from(fileBuffer));
+    const dataPdf = await pdfParse(Buffer.from(fileBuffer));
     const extractedText = dataPdf.text;
 
     if (!extractedText || extractedText.trim() === "") {
