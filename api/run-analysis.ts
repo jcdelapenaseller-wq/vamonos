@@ -284,11 +284,10 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
             titular: "",
             rango: "",
             resultado: (() => {
-              const estado = (c.estado_subasta || c.estado_en_subasta || "").toUpperCase();
+              const raw = JSON.stringify(c).toUpperCase();
 
-              if (estado.includes("SUBSISTE")) return "SUBSISTE";
-              if (estado.includes("CANCELA")) return "SE PURGA";
-              if (estado.includes("PURGA")) return "SE PURGA";
+              if (raw.includes("SUBSISTE")) return "SUBSISTE";
+              if (raw.includes("CANCELA") || raw.includes("PURGA")) return "SE PURGA";
 
               return "DESCONOCIDO";
             })(),
