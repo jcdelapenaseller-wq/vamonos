@@ -21,6 +21,19 @@ export const config = {
   },
 };
 
+function extractNumber(text: string) {
+  if (!text) return 0;
+
+  const matches = text
+    .replace(/\./g, '')
+    .replace(/,/g, '.')
+    .match(/\d+(\.\d+)?/g);
+
+  if (!matches) return 0;
+
+  return Math.max(...matches.map(n => parseFloat(n)));
+}
+
 export default async function handler(req: any, res: any) {
   // Parse multipart/form-data
   await runMiddleware(req, res, upload.single('files'));
@@ -255,13 +268,28 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       try {
         result = JSON.parse(cleanText);
         console.log("RESULT KEYS:", Object.keys(result));
+
+        const mappedResult = {
+          cargas_detectadas: result.analisis_juridico?.cargas_y_gravamenes || [],
+          peor_escenario: {
+            total: extractNumber(result.analisis_juridico?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes),
+            principal: 0,
+            intereses: 0,
+            costas: 0
+          },
+          alertas: result.valoracion_general?.riesgo_juridico || "",
+          recomendacion: result.recomendacion || {},
+          resumen_juridico: result.analisis_juridico || {},
+          valoracion: result.valoracion_general || {},
+          raw: result
+        };
+
+        console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
+        return res.status(200).json(mappedResult);
       } catch (e) {
         console.error("JSON PARSE ERROR:", cleanText);
         return res.status(500).json({ error: "Error parseando respuesta IA" });
       }
-
-      console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
-      return res.status(200).json(result);
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
       return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
