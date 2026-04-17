@@ -268,30 +268,36 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       try {
         result = JSON.parse(cleanText);
         console.log("RESULT KEYS:", Object.keys(result));
+        console.log("CARGAS RAW:", result.analisis_juridico);
+
+        const cargas = 
+          result.analisis_juridico?.cargas_y_gravamenes || 
+          result.analisis_juridico?.cargas_registrales || 
+          [];
+
+        console.log("CARGAS MAP:", cargas);
 
         const mappedResult = {
-          cargas_detectadas: (result.analisis_juridico?.cargas_y_gravamenes || []).map((c: any) => {
-            const estado = (c.estado_subasta || "").toUpperCase();
+          cargas_detectadas: cargas.map((c: any) => ({
+            identificador_registral: "",
+            tipo: c.tipo || "",
+            titular: "",
+            rango: "",
+            resultado: (() => {
+              const estado = (c.estado_subasta || c.estado_en_subasta || "").toUpperCase();
 
-            let resultado = "DESCONOCIDO";
+              if (estado.includes("SUBSISTE")) return "SUBSISTE";
+              if (estado.includes("CANCELA")) return "SE PURGA";
+              if (estado.includes("PURGA")) return "SE PURGA";
 
-            if (estado.includes("SUBSISTE")) {
-              resultado = "SUBSISTE";
-            } else if (estado.includes("CANCELA") || estado.includes("PURGA")) {
-              resultado = "SE PURGA";
-            }
-
-            return {
-              identificador_registral: "",
-              tipo: c.tipo || "",
-              titular: "",
-              rango: "",
-              resultado,
-              estado_carga: c.descripcion || "",
-              vigente: resultado === "SUBSISTE",
-              confianza: "MEDIA"
-            };
-          }),
+              return "DESCONOCIDO";
+            })(),
+            estado_carga: c.descripcion || "",
+            vigente: (c.estado_subasta || c.estado_en_subasta || "")
+              .toUpperCase()
+              .includes("SUBSISTE"),
+            confianza: "MEDIA"
+          })),
           peor_escenario: {
             total: extractNumber(result.analisis_juridico?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes),
             principal: 0,
