@@ -270,7 +270,28 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("RESULT KEYS:", Object.keys(result));
 
         const mappedResult = {
-          cargas_detectadas: result.analisis_juridico?.cargas_y_gravamenes || [],
+          cargas_detectadas: (result.analisis_juridico?.cargas_y_gravamenes || []).map((c: any) => {
+            const estado = (c.estado_subasta || "").toUpperCase();
+
+            let resultado = "DESCONOCIDO";
+
+            if (estado.includes("SUBSISTE")) {
+              resultado = "SUBSISTE";
+            } else if (estado.includes("CANCELA") || estado.includes("PURGA")) {
+              resultado = "SE PURGA";
+            }
+
+            return {
+              identificador_registral: "",
+              tipo: c.tipo || "",
+              titular: "",
+              rango: "",
+              resultado,
+              estado_carga: c.descripcion || "",
+              vigente: resultado === "SUBSISTE",
+              confianza: "MEDIA"
+            };
+          }),
           peor_escenario: {
             total: extractNumber(result.analisis_juridico?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes),
             principal: 0,

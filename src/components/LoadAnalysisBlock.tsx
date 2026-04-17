@@ -129,6 +129,11 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     fuente_documento: resultData.fuente_documento || "Desconocida",
   } : null;
 
+  if (resultData) {
+    console.log("FRONT CARGAS RAW:", resultData);
+    console.log("FRONT CARGAS PROCESADAS:", safeResult?.cargas_detectadas);
+  }
+
   const recomendacionText = safeResult?.recomendacion
     ? typeof safeResult.recomendacion === "string"
       ? safeResult.recomendacion
