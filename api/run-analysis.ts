@@ -317,20 +317,6 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
             ? result.cargas_detectadas
             : result.cargas || result.cargas_registrales || cargas,
           analisis: result.razonamiento_juridico || {},
-          cargas_detectadas: cargas.map((c: any) => ({
-            identificador_registral: "",
-            tipo: c.tipo || "",
-            titular: "",
-            rango: "",
-            resultado: c.subsiste === true 
-              ? "SUBSISTE" 
-              : c.subsiste === false 
-                ? "SE PURGA" 
-                : "DESCONOCIDO",
-            estado_carga: c.observaciones || "",
-            vigente: c.subsiste === true,
-            confianza: "ALTA"
-          })),
           peor_escenario: {
             total: result?.razonamiento_juridico?.["4_validacion_numerica_peor_escenario"]?.total_estimado_cargas_dinerarias_subsistentes || 0,
             principal: 0,

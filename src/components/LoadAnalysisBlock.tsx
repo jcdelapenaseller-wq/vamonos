@@ -125,23 +125,25 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   const safeResult = resultData ? {
     ...resultData,
-    cargas_detectadas: resultData.cargas_detectadas?.length ? resultData.cargas_detectadas : (resultData.cargas || []).map((c: any) => ({
-      identificador_registral: c.referencia_registral || c.tipo || "",
-      tipo: c.tipo || "Carga",
-      fuente_textual: c.descripcion || c.tipo || "",
-      desglose: {
-        principal: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0,
-        intereses: 0,
-        costas: 0,
-        total: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0
-      },
-      titular: c.beneficiario || "",
-      rango: c.fecha_inscripcion || "",
-      resultado: c.estado_en_subasta || "",
-      estado_carga: c.estado_en_subasta || "",
-      vigente: String(c.estado_en_subasta || "").toUpperCase().trim() === 'SUBSISTE',
-      confianza: 'MEDIA'
-    })),
+    cargas_detectadas: (resultData.cargas?.length) 
+      ? resultData.cargas.map((c: any) => ({
+          identificador_registral: c.referencia_registral || c.tipo || "",
+          tipo: c.tipo || "Carga",
+          fuente_textual: c.descripcion || c.tipo || "",
+          desglose: {
+            principal: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0,
+            intereses: 0,
+            costas: 0,
+            total: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0
+          },
+          titular: c.beneficiario || "",
+          rango: c.fecha_inscripcion || "",
+          resultado: c.estado_en_subasta || "",
+          estado_carga: c.estado_en_subasta || "",
+          vigente: String(c.estado_en_subasta || "").toUpperCase().trim() === 'SUBSISTE',
+          confianza: 'MEDIA'
+        }))
+      : (resultData.cargas_detectadas || []),
     incoherencias_detectadas: resultData.incoherencias_detectadas || [],
     alertas: resultData.alertas || [],
     peor_escenario: {
