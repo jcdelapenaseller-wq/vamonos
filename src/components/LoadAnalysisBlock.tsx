@@ -1212,14 +1212,14 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
             )}
 
             {/* Resumen Claro (Recomendación IA) */}
-            {recomendacionText && (
+            {resultData && (
               <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-brand-900 mb-4 flex items-center gap-2">
                   <Info size={20} className="text-brand-600" /> Resumen claro
                 </h3>
-                <p className="text-brand-800 text-sm leading-relaxed whitespace-pre-line">
-                  {recomendacionText}
-                </p>
+                <div className="text-brand-800 text-sm leading-relaxed whitespace-pre-line overflow-auto max-h-96">
+                  <pre>{JSON.stringify(resultData, null, 2)}</pre>
+                </div>
               </div>
             )}
 
