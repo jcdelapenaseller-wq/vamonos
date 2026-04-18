@@ -262,15 +262,24 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       console.log(text);
       console.log("=== GEMINI RAW END ===");
 
-      const cleanText = text
-        .replace(/^```json\s*/i, "")
-        .replace(/^```\s*/i, "")
-        .replace(/\s*```$/i, "")
+      let clean = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
         .trim();
+
+      // extra: aislar solo el JSON por seguridad
+      const firstBrace = clean.indexOf("{");
+      const lastBrace = clean.lastIndexOf("}");
+
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        clean = clean.substring(firstBrace, lastBrace + 1);
+      }
+
+      console.log("CLEAN JSON FINAL:", clean);
 
       let result;
       try {
-        const parsedJson = JSON.parse(cleanText);
+        const parsedJson = JSON.parse(clean);
         const data = parsedJson?.informe_subasta_inmueble || parsedJson; // Asegura que todo usa data
         
         result = data;
@@ -321,7 +330,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
         return res.status(200).json(mappedResult);
       } catch (e) {
-        console.error("JSON PARSE ERROR:", cleanText);
+        console.error("JSON PARSE ERROR:", clean);
         return res.status(500).json({ error: "Error parseando respuesta IA" });
       }
     } catch (error: any) {
