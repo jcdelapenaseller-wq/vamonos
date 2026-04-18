@@ -716,6 +716,11 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
     setStep('loading');
     
+    // 🔥 LIMPIAR CACHE antes de iniciar nuevo análisis
+    if (boeId) {
+      sessionStorage.removeItem(`analysisResult_${boeId}`);
+    }
+    
     try {
       // Subir a Cloudinary (Comentado para usar envío directo)
       // console.log("Subiendo archivo a Cloudinary...");

@@ -157,10 +157,12 @@ const AuctionPage: React.FC = () => {
   useEffect(() => {
     if (!auction?.boeId) return;
     try {
+      /*
       const savedResult = sessionStorage.getItem(`analysisResult_${auction.boeId}`);
       if (savedResult && !analysisResult) {
         setAnalysisResult(JSON.parse(savedResult));
       }
+      */
     } catch (e) {
       console.warn("Error loading analysis result from sessionStorage:", e);
     }
@@ -1615,25 +1617,13 @@ const AuctionPage: React.FC = () => {
   }
 
   if (postPaymentState.active && auction) {
+    // Redirigimos forzando recarga para resetear estados y arrancar el render principal
+    // con el ?analysis=unlocked (que activará isUnlocked = true y el bloque sano).
+    window.location.href = `${window.location.pathname}?analysis=unlocked`;
     return (
-      <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
-        <Header />
-        <main className="max-w-4xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
-          <React.Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div></div>}>
-            <LoadAnalysisBlock 
-              boeId={auction.boeId} 
-              boeUrl={auction.boeUrl}
-              isIntegrated={false}
-              initialStep="upload"
-              isPaid={true}
-              noMargin={true}
-              analysisType={postPaymentState.type as 'cargas' | 'completo'}
-              auctionId={cleanSlug}
-              appraisalValue={auction.appraisalValue}
-            />
-          </React.Suspense>
-        </main>
-        <Footer />
+      <div className="bg-slate-50 min-h-screen flex items-center justify-center flex-col">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mb-4"></div>
+        <p className="text-slate-600 font-bold">Generando y cargando informes...</p>
       </div>
     );
   }

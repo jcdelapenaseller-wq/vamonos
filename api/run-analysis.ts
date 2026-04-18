@@ -51,7 +51,8 @@ export default async function handler(req: any, res: any) {
     
     const file = req.file;
     const files = file ? [file] : [];
-    console.log("FILES LENGTH:", files?.length);
+    console.log("FILES RECEIVED:", files);
+    console.log("FILE NAME:", files?.[0]?.originalname);
     console.log("FILE SIZE:", files?.[0]?.size);
 
     console.log("pdfUrl received:", pdfUrl);
@@ -117,6 +118,7 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
     }));
 
     console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI ---`);
+    console.log("CONTENT SENT TO AI (Base64 sample):", pdfParts[0]?.inlineData.data.slice(0, 500));
 
     // Diagnóstico de modelos disponibles
     try {
@@ -203,6 +205,8 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
+
+      console.log("FULL PROMPT TEXT SENT:", prompt.slice(0, 500) + "...");
 
       const modelName = "gemini-2.5-flash";
       console.log("Model used:", modelName);
