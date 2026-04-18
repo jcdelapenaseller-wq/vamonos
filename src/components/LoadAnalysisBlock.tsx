@@ -29,6 +29,7 @@ interface AnalysisResult {
   fuente_documento: string;
   nivel_confianza_global: string;
   riesgo_global: 'BAJO' | 'MEDIO' | 'ALTO' | string;
+  cargas?: any[]; // Fallback field de legacy raw model
   cargas_detectadas: CargaDetectada[];
   incoherencias_detectadas: string[];
   ocupacion_detectada: boolean;
@@ -121,7 +122,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   const safeResult = resultData ? {
     ...resultData,
-    cargas_detectadas: resultData.cargas_detectadas || [],
+    cargas_detectadas: resultData.cargas_detectadas || resultData.cargas || [],
     incoherencias_detectadas: resultData.incoherencias_detectadas || [],
     alertas: resultData.alertas || [],
     peor_escenario: {
