@@ -113,6 +113,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   
   const session_id = boeId; // alias explicitly
   
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+
   useEffect(() => {
     if (!initialData) {
       console.log("RESET STATE FOR SESSION:", session_id);
@@ -124,13 +127,13 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     ...resultData,
     cargas_detectadas: resultData.cargas_detectadas?.length ? resultData.cargas_detectadas : (resultData.cargas || []).map((c: any) => ({
       identificador_registral: c.referencia_registral || c.tipo || "",
-      tipo: c.tipo || "",
-      fuente_textual: c.tipo || "",
+      tipo: c.tipo || "Carga",
+      fuente_textual: c.descripcion || c.tipo || "",
       desglose: {
-        principal: 0,
+        principal: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0,
         intereses: 0,
         costas: 0,
-        total: typeof c.importe === 'number' ? c.importe : parseFloat(String(c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0
+        total: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0
       },
       titular: c.beneficiario || "",
       rango: c.fecha_inscripcion || "",
@@ -1761,22 +1764,38 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                                 )}
                               </div>
                             </div>
-                            <span className="font-black text-lg text-amber-700">{carga.desglose?.total ? carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                            <span className="font-black text-lg text-amber-700">
+                              {carga.desglose?.total !== undefined && carga.desglose?.total !== null
+                                ? formatCurrency(carga.desglose.total)
+                                : '—'}
+                            </span>
                           </div>
                           
                           {/* Desglose */}
                           <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100">
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Principal:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose?.principal ? carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                              <span className="font-medium text-slate-700">
+                                {carga.desglose?.principal !== undefined && carga.desglose?.principal !== null
+                                  ? formatCurrency(carga.desglose.principal)
+                                  : '—'}
+                              </span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Intereses (est.):</span>
-                              <span className="font-medium text-slate-700">{carga.desglose?.intereses ? carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                              <span className="font-medium text-slate-700">
+                                {carga.desglose?.intereses !== undefined && carga.desglose?.intereses !== null
+                                  ? formatCurrency(carga.desglose.intereses)
+                                  : '—'}
+                              </span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Costas:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose?.costas ? carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                              <span className="font-medium text-slate-700">
+                                {carga.desglose?.costas !== undefined && carga.desglose?.costas !== null
+                                  ? formatCurrency(carga.desglose.costas)
+                                  : '—'}
+                              </span>
                             </div>
                           </div>
                           
@@ -1841,22 +1860,38 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                                 )}
                               </div>
                             </div>
-                            <span className="font-bold text-slate-400 line-through">{carga.desglose?.total ? carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                            <span className="font-bold text-slate-400 line-through">
+                              {carga.desglose?.total !== undefined && carga.desglose?.total !== null
+                                ? formatCurrency(carga.desglose.total)
+                                : '—'}
+                            </span>
                           </div>
                           
                           {/* Desglose */}
                           <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100 opacity-60">
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Principal:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose?.principal ? carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                              <span className="font-medium text-slate-700">
+                                {carga.desglose?.principal !== undefined && carga.desglose?.principal !== null
+                                  ? formatCurrency(carga.desglose.principal)
+                                  : '—'}
+                              </span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Intereses (est.):</span>
-                              <span className="font-medium text-slate-700">{carga.desglose?.intereses ? carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                              <span className="font-medium text-slate-700">
+                                {carga.desglose?.intereses !== undefined && carga.desglose?.intereses !== null
+                                  ? formatCurrency(carga.desglose.intereses)
+                                  : '—'}
+                              </span>
                             </div>
                             <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                               <span className="text-slate-500">Costas:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose?.costas ? carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                              <span className="font-medium text-slate-700">
+                                {carga.desglose?.costas !== undefined && carga.desglose?.costas !== null
+                                  ? formatCurrency(carga.desglose.costas)
+                                  : '—'}
+                              </span>
                             </div>
                           </div>
                           
@@ -1911,22 +1946,38 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                               )}
                             </div>
                           </div>
-                          <span className="font-black text-lg text-amber-600">{carga.desglose?.total ? carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                          <span className="font-black text-lg text-amber-600">
+                            {carga.desglose?.total !== undefined && carga.desglose?.total !== null
+                              ? formatCurrency(carga.desglose.total)
+                              : '—'}
+                          </span>
                         </div>
                         
                         {/* Desglose */}
                         <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100">
                           <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                             <span className="text-slate-500">Principal:</span>
-                            <span className="font-medium text-slate-700">{carga.desglose?.principal ? carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                            <span className="font-medium text-slate-700">
+                              {carga.desglose?.principal !== undefined && carga.desglose?.principal !== null
+                                ? formatCurrency(carga.desglose.principal)
+                                : '—'}
+                            </span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                             <span className="text-slate-500">Intereses (est.):</span>
-                            <span className="font-medium text-slate-700">{carga.desglose?.intereses ? carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                            <span className="font-medium text-slate-700">
+                              {carga.desglose?.intereses !== undefined && carga.desglose?.intereses !== null
+                                ? formatCurrency(carga.desglose.intereses)
+                                : '—'}
+                            </span>
                           </div>
                           <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
                             <span className="text-slate-500">Costas:</span>
-                            <span className="font-medium text-slate-700">{carga.desglose?.costas ? carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</span>
+                            <span className="font-medium text-slate-700">
+                              {carga.desglose?.costas !== undefined && carga.desglose?.costas !== null
+                                ? formatCurrency(carga.desglose.costas)
+                                : '—'}
+                            </span>
                           </div>
                         </div>
                         
