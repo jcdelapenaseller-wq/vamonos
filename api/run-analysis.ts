@@ -290,13 +290,13 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
             titular: "",
             rango: "",
             resultado: (() => {
-              const raw = JSON.stringify(c).toUpperCase();
+              const estado = (c.estado_en_subasta || "").toUpperCase().trim();
 
-              if (raw.includes("SUBSISTE")) return "SUBSISTE";
-              if (raw.includes("CANCELA") || raw.includes("PURGA")) return "SE PURGA";
+              if (estado === "SUBSISTE") return "SUBSISTE";
+              if (estado.includes("CANCELA")) return "SE PURGA";
 
               return "DESCONOCIDO";
-            })().trim(),
+            })(),
             estado_carga: c.descripcion || "",
             vigente: (() => {
               const raw = JSON.stringify(c).toUpperCase();
