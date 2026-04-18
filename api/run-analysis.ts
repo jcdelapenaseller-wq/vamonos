@@ -280,13 +280,16 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       let result;
       try {
         const parsedJson = JSON.parse(clean);
+        console.log("GEMINI CARGAS RAW:", parsedJson.cargas);
         const data = parsedJson?.informe_subasta_inmueble || parsedJson; // Asegura que todo usa data
         
         result = data;
 
         console.log("DATA ROOT:", data);
         
-        const cargas = data?.cargas_registrales || [];
+        const cargas = data?.cargas_detectadas?.length
+          ? data.cargas_detectadas
+          : data?.cargas || data?.cargas_registrales || [];
         console.log("CARGAS EXTRAIDAS FIX:", cargas);
 
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
@@ -297,7 +300,9 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("CARGAS MAP:", cargas);
 
         const mappedResult = {
-          cargas: result.cargas_registrales || cargas,
+          cargas: result.cargas_detectadas?.length
+            ? result.cargas_detectadas
+            : result.cargas || result.cargas_registrales || cargas,
           analisis: result.razonamiento_juridico || {},
           cargas_detectadas: cargas.map((c: any) => ({
             identificador_registral: "",
@@ -326,6 +331,8 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
           valoracion: result.valoracion_general || {},
           raw: result
         };
+
+        console.log("FINAL RESPONSE CARGAS:", mappedResult.cargas);
 
         console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
         return res.status(200).json(mappedResult);
