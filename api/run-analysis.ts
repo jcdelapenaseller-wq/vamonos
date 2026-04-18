@@ -267,14 +267,20 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       let result;
       try {
         result = JSON.parse(cleanText);
-        console.log("RESULT KEYS:", Object.keys(result));
-        console.log("CARGAS RAW:", result.analisis_juridico);
-
-        const cargas = 
-          result.analisis_juridico?.cargas_y_gravamenes || 
-          result.analisis_juridico?.cargas_registrales || 
+        console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
+        console.log("ANALISIS JURIDICO:", JSON.stringify(result?.analisis_juridico, null, 2));
+        
+        const cargas =
+          result?.analisis_juridico?.cargas_y_gravamenes ??
+          result?.analisis_juridico?.cargas_registrales ??
+          result?.cargas_y_gravamenes ??
+          result?.cargas_registrales ??
+          result?.cargas_detectadas ??
+          result?.analisis_juridico?.cargas ??
           [];
 
+        console.log("CARGAS EXTRAIDAS:", JSON.stringify(cargas, null, 2));
+        console.log("BACKEND CARGAS FINAL:", cargas);
         console.log("CARGAS MAP:", cargas);
 
         const mappedResult = {
