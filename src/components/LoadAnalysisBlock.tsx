@@ -1695,9 +1695,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   <h4 className="font-bold text-amber-900">Cargas que SUBSISTEN</h4>
                 </div>
                 <div className="p-6">
-                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE' || c.estado_carga === 'SUBSISTE')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE' || c.estado_carga === 'SUBSISTE')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1765,9 +1765,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   <h4 className="font-bold text-emerald-900">Cargas que se PURGAN, REEMPLAZAN o CANCELAN</h4>
                 </div>
                 <div className="p-6">
-                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA' || c.estado_carga === 'SE_CANCELA_EN_SUBASTA')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA' || c.estado_carga === 'SE_CANCELA_EN_SUBASTA')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
