@@ -270,12 +270,19 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 
       let result;
       try {
-        result = JSON.parse(cleanText);
+        const parsedJson = JSON.parse(cleanText);
+        const data = parsedJson?.informe_subasta_inmueble || parsedJson; // Asegura que todo usa data
+        
+        result = data;
+
+        console.log("DATA ROOT:", data);
+        
+        const cargas = data?.cargas_registrales || [];
+        console.log("CARGAS EXTRAIDAS FIX:", cargas);
+
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
         console.log("ANALISIS JURIDICO:", JSON.stringify(result?.razonamiento_juridico, null, 2));
         
-        const cargas = result.cargas_registrales || [];
-
         console.log("CARGAS EXTRAIDAS:", JSON.stringify(cargas, null, 2));
         console.log("BACKEND CARGAS FINAL:", cargas);
         console.log("CARGAS MAP:", cargas);
