@@ -206,7 +206,7 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
-      console.log("FULL PROMPT TEXT SENT:", prompt.slice(0, 500) + "...");
+      console.log("TEXTO BRUTO ENVIADO AL MODELO:", prompt);
 
       const modelName = "gemini-2.5-flash";
       console.log("Model used:", modelName);
@@ -250,7 +250,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         return res.status(500).json({ error: data.error.message });
       }
 
-      console.log("Gemini RAW:", data);
+      console.log("DATA COMPLETO GEMINI (ANTES MAPPING):", JSON.stringify(data, null, 2));
 
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -261,6 +261,10 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       console.log("=== GEMINI RAW START ===");
       console.log(text);
       console.log("=== GEMINI RAW END ===");
+      
+      console.log("¿CONTIENE CARGAS EN TEXTO BRUTO?:", 
+        (text || "").includes("cargas") || (text || "").includes("CARGAS") || (text || "").includes("cargas_registrales")
+      );
 
       let clean = text
         .replace(/```json/g, "")
@@ -289,7 +293,11 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         
         const cargas = data?.cargas_detectadas?.length
           ? data.cargas_detectadas
-          : data?.cargas || data?.cargas_registrales || [];
+          : data?.cargas
+          || data?.cargas_registrales
+          || data?.razonamiento_juridico?.["1_identificacion_cargas"]
+          || data?.cargas_subsistentes
+          || [];
         console.log("CARGAS EXTRAIDAS FIX:", cargas);
 
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
