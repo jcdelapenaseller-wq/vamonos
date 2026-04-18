@@ -132,6 +132,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   if (resultData) {
     console.log("FRONT CARGAS RAW:", resultData);
     console.log("FRONT CARGAS PROCESADAS:", safeResult?.cargas_detectadas);
+    console.log("SAFE RESULT:", safeResult);
   }
 
   const recomendacionText = safeResult?.recomendacion
@@ -756,6 +757,8 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
       }
 
       const result = await response.json();
+      console.log("RAW RESPONSE:", response);
+      console.log("RESPONSE.DATA:", result);
       
       // Incrementar contador solo cuando análisis se ejecuta correctamente
       let success = true;
@@ -770,6 +773,8 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
       }
 
       setResultData(result);
+      console.log("FINAL RESULT DATA FRONT:", result);
+      console.log("STATE SET:", result);
       // Also save to session storage for the current page if needed
       sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(result));
       setStep('result');

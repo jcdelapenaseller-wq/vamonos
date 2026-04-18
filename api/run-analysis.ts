@@ -274,13 +274,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
         console.log("ANALISIS JURIDICO:", JSON.stringify(result?.razonamiento_juridico, null, 2));
         
-        const cargas =
-          result?.razonamiento_juridico?.cargas_y_gravamenes ??
-          result?.razonamiento_juridico?.cargas_registrales ??
-          result?.cargas_y_gravamenes ??
-          result?.cargas_registrales ??
-          result?.razonamiento_juridico?.cargas ??
-          [];
+        const cargas = result.cargas_registrales || [];
 
         console.log("CARGAS EXTRAIDAS:", JSON.stringify(cargas, null, 2));
         console.log("BACKEND CARGAS FINAL:", cargas);
@@ -294,23 +288,17 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
             tipo: c.tipo || "",
             titular: "",
             rango: "",
-            resultado: (() => {
-              const estado = (c.estado_en_subasta || "").toUpperCase().trim();
-
-              if (estado === "SUBSISTE") return "SUBSISTE";
-              if (estado.includes("CANCELA")) return "SE PURGA";
-
-              return "DESCONOCIDO";
-            })(),
-            estado_carga: c.descripcion || "",
-            vigente: (() => {
-              const raw = JSON.stringify(c).toUpperCase();
-              return raw.includes("SUBSISTE");
-            })(),
-            confianza: "MEDIA"
+            resultado: c.subsiste === true 
+              ? "SUBSISTE" 
+              : c.subsiste === false 
+                ? "SE PURGA" 
+                : "DESCONOCIDO",
+            estado_carga: c.observaciones || "",
+            vigente: c.subsiste === true,
+            confianza: "ALTA"
           })),
           peor_escenario: {
-            total: extractNumber(result?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes) || extractNumber(result.analisis_juridico?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes),
+            total: result?.razonamiento_juridico?.["4_validacion_numerica_peor_escenario"]?.total_estimado_cargas_dinerarias_subsistentes || 0,
             principal: 0,
             intereses: 0,
             costas: 0
