@@ -1617,9 +1617,6 @@ const AuctionPage: React.FC = () => {
   }
 
   if (postPaymentState.active && auction) {
-    // Redirigimos forzando recarga para resetear estados y arrancar el render principal
-    // con el ?analysis=unlocked (que activará isUnlocked = true y el bloque sano).
-    window.location.href = `${window.location.pathname}?analysis=unlocked`;
     return (
       <div className="bg-slate-50 min-h-screen flex items-center justify-center flex-col">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mb-4"></div>
