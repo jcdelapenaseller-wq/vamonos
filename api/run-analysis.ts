@@ -291,13 +291,18 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 
         console.log("DATA ROOT:", data);
         
-        const cargas = data?.cargas_detectadas?.length
+        const cargas =
+          (data?.cargas_detectadas && data.cargas_detectadas.length > 0)
           ? data.cargas_detectadas
-          : data?.cargas
-          || data?.cargas_registrales
-          || data?.razonamiento_juridico?.["1_identificacion_cargas"]
-          || data?.cargas_subsistentes
-          || [];
+          : (data?.cargas && data.cargas.length > 0)
+          ? data.cargas
+          : (data?.cargas_registrales && data.cargas_registrales.length > 0)
+          ? data.cargas_registrales
+          : (data?.razonamiento_juridico?.["1_identificacion_cargas"]?.length > 0)
+          ? data.razonamiento_juridico["1_identificacion_cargas"]
+          : (data?.cargas_subsistentes && data.cargas_subsistentes.length > 0)
+          ? data.cargas_subsistentes
+          : [];
         console.log("CARGAS EXTRAIDAS FIX:", cargas);
 
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
