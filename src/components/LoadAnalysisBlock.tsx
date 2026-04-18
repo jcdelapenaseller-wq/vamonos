@@ -791,6 +791,11 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
         : JSON.stringify(safeResult.razonamiento_juridico, null, 2))
     : "";
 
+  console.log("FRONT RESULT DATA:", resultData);
+  if (safeResult) {
+    console.log("FRONT FINAL CARGAS:", safeResult.cargas_detectadas);
+  }
+
   return (
     <div ref={blockRef} className={`${isIntegrated ? 'w-full' : `${noMargin ? '' : 'my-8 md:my-12'} bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden`}`}>
         {!isIntegrated && (
@@ -1690,9 +1695,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   <h4 className="font-bold text-amber-900">Cargas que SUBSISTEN</h4>
                 </div>
                 <div className="p-6">
-                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SUBSISTE')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1760,9 +1765,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   <h4 className="font-bold text-emerald-900">Cargas que se PURGAN, REEMPLAZAN o CANCELAN</h4>
                 </div>
                 <div className="p-6">
-                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA')?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA')?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1834,7 +1839,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
               </div>
             </div>
             {/* Unknown Charges (Critical) */}
-            {(safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.length || 0) > 0 && (
+            {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'DESCONOCIDO')?.length || 0) > 0 && (
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mt-8">
                       <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
                         <AlertTriangle className="text-amber-600" size={20} />
@@ -1842,7 +1847,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                       </div>
                       <div className="p-6">
                         <ul className="space-y-6">
-                          {safeResult?.cargas_detectadas?.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO')?.map((carga, idx) => (
+                          {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'DESCONOCIDO')?.map((carga, idx) => (
                             <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-3">
                           <div>

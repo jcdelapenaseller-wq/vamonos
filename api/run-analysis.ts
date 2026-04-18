@@ -290,11 +290,12 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
               if (raw.includes("CANCELA") || raw.includes("PURGA")) return "SE PURGA";
 
               return "DESCONOCIDO";
-            })(),
+            })().trim(),
             estado_carga: c.descripcion || "",
-            vigente: (c.estado_subasta || c.estado_en_subasta || "")
-              .toUpperCase()
-              .includes("SUBSISTE"),
+            vigente: (() => {
+              const raw = JSON.stringify(c).toUpperCase();
+              return raw.includes("SUBSISTE");
+            })(),
             confianza: "MEDIA"
           })),
           peor_escenario: {
