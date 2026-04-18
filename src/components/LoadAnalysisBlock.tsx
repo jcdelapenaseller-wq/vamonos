@@ -116,6 +116,16 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
 
+  const esSubsiste = (c: any) =>
+    (c.resultado || c.estado_carga || "").toUpperCase().includes("SUBSISTE");
+
+  const esPurga = (c: any) => {
+    const s = (c.resultado || c.estado_carga || "").toUpperCase();
+    return s.includes("PURGA") || s.includes("CANCELA") || s.includes("REEMPLAZA");
+  };
+
+  const esDesconocido = (c: any) => !esSubsiste(c) && !esPurga(c);
+
   useEffect(() => {
     if (!initialData) {
       console.log("RESET STATE FOR SESSION:", session_id);
@@ -1735,9 +1745,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   <h4 className="font-bold text-amber-900">Cargas que SUBSISTEN</h4>
                 </div>
                 <div className="p-6">
-                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE' || c.estado_carga === 'SUBSISTE')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(esSubsiste)?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SUBSISTE' || c.estado_carga === 'SUBSISTE')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(esSubsiste)?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1756,10 +1766,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                                 </span>
                                 {carga.estado_carga && (
                                   <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                    carga.estado_carga === 'SUBSISTE' ? 'bg-amber-100 text-amber-700' :
-                                    carga.estado_carga === 'SE_CANCELA_EN_SUBASTA' ? 'bg-emerald-100 text-emerald-700' :
-                                    carga.estado_carga === 'CANCELADA_REGISTRAL' ? 'bg-slate-200 text-slate-600' :
-                                    'bg-amber-100 text-amber-700'
+                                    esSubsiste(carga) ? 'bg-amber-100 text-amber-700' :
+                                    esPurga(carga) ? 'bg-emerald-100 text-emerald-700' :
+                                    'bg-slate-200 text-slate-600'
                                   }`}>
                                     {carga.estado_carga.replace(/_/g, ' ')}
                                   </span>
@@ -1821,9 +1830,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   <h4 className="font-bold text-emerald-900">Cargas que se PURGAN, REEMPLAZAN o CANCELAN</h4>
                 </div>
                 <div className="p-6">
-                  {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA' || c.estado_carga === 'SE_CANCELA_EN_SUBASTA')?.length || 0) > 0 ? (
+                  {(safeResult?.cargas_detectadas?.filter(esPurga)?.length || 0) > 0 ? (
                     <ul className="space-y-6">
-                      {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'SE PURGA' || c.estado_carga === 'SE_CANCELA_EN_SUBASTA')?.map((carga, idx) => (
+                      {safeResult?.cargas_detectadas?.filter(esPurga)?.map((carga, idx) => (
                         <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                           <div className="flex justify-between items-start mb-3">
                             <div>
@@ -1842,10 +1851,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                                 </span>
                                 {carga.estado_carga && (
                                   <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                    carga.estado_carga === 'SUBSISTE' ? 'bg-amber-100 text-amber-700' :
-                                    carga.estado_carga === 'SE_CANCELA_EN_SUBASTA' ? 'bg-emerald-100 text-emerald-700' :
-                                    carga.estado_carga === 'CANCELADA_REGISTRAL' ? 'bg-slate-200 text-slate-600' :
-                                    'bg-amber-100 text-amber-700'
+                                    esSubsiste(carga) ? 'bg-amber-100 text-amber-700' :
+                                    esPurga(carga) ? 'bg-emerald-100 text-emerald-700' :
+                                    'bg-slate-200 text-slate-600'
                                   }`}>
                                     {carga.estado_carga.replace(/_/g, ' ')}
                                   </span>
@@ -1911,7 +1919,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
               </div>
             </div>
             {/* Unknown Charges (Critical) */}
-            {(safeResult?.cargas_detectadas?.filter(c => c.resultado === 'DESCONOCIDO')?.length || 0) > 0 && (
+            {(safeResult?.cargas_detectadas?.filter(esDesconocido)?.length || 0) > 0 && (
               <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mt-8">
                       <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
                         <AlertTriangle className="text-amber-600" size={20} />
@@ -1919,7 +1927,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                       </div>
                       <div className="p-6">
                         <ul className="space-y-6">
-                          {safeResult?.cargas_detectadas?.filter(c => c.resultado === 'DESCONOCIDO')?.map((carga, idx) => (
+                          {safeResult?.cargas_detectadas?.filter(esDesconocido)?.map((carga, idx) => (
                             <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
                         <div className="flex justify-between items-start mb-3">
                           <div>
@@ -1934,14 +1942,13 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                                 carga.confianza === 'MEDIA' ? 'bg-amber-100 text-amber-700' :
                                 'bg-orange-100 text-orange-700'
                               }`}>
-                                Confianza: {carga.confianza}
+                              Confianza: {carga.confianza}
                               </span>
                               {carga.estado_carga && (
                                 <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                  carga.estado_carga === 'SUBSISTE' ? 'bg-amber-100 text-amber-700' :
-                                  carga.estado_carga === 'SE_CANCELA_EN_SUBASTA' ? 'bg-emerald-100 text-emerald-700' :
-                                  carga.estado_carga === 'CANCELADA_REGISTRAL' ? 'bg-slate-200 text-slate-600' :
-                                  'bg-amber-100 text-amber-700'
+                                  esSubsiste(carga) ? 'bg-amber-100 text-amber-700' :
+                                  esPurga(carga) ? 'bg-emerald-100 text-emerald-700' :
+                                  'bg-slate-200 text-slate-600'
                                 }`}>
                                   {carga.estado_carga.replace(/_/g, ' ')}
                                 </span>
