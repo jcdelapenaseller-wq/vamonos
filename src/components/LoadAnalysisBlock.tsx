@@ -109,6 +109,13 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   const [files, setFiles] = useState<File[]>([]);
   const [resultData, setResultData] = useState<AnalysisResult | null>(initialData);
+  
+  const session_id = boeId; // alias explicitly
+  
+  useEffect(() => {
+    console.log("RESET STATE FOR SESSION:", session_id);
+    setResultData(null);
+  }, [session_id]);
 
   const safeResult = resultData ? {
     ...resultData,
@@ -130,9 +137,9 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   } : null;
 
   if (resultData) {
-    console.log("FRONT CARGAS RAW:", resultData);
-    console.log("FRONT CARGAS PROCESADAS:", safeResult?.cargas_detectadas);
-    console.log("SAFE RESULT:", safeResult);
+    console.log("2. STATE resultData:", resultData);
+    console.log("3. SAFE RESULT:", safeResult);
+    console.log("4. UI cargas:", safeResult?.cargas_detectadas);
   }
 
   const recomendacionText = safeResult?.recomendacion
@@ -757,8 +764,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
       }
 
       const result = await response.json();
-      console.log("RAW RESPONSE:", response);
-      console.log("RESPONSE.DATA:", result);
+      console.log("1. RAW RESULT:", result);
       
       // Incrementar contador solo cuando análisis se ejecuta correctamente
       let success = true;
