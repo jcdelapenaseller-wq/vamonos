@@ -272,15 +272,14 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       try {
         result = JSON.parse(cleanText);
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
-        console.log("ANALISIS JURIDICO:", JSON.stringify(result?.analisis_juridico, null, 2));
+        console.log("ANALISIS JURIDICO:", JSON.stringify(result?.razonamiento_juridico, null, 2));
         
         const cargas =
-          result?.analisis_juridico?.cargas_y_gravamenes ??
-          result?.analisis_juridico?.cargas_registrales ??
+          result?.razonamiento_juridico?.cargas_y_gravamenes ??
+          result?.razonamiento_juridico?.cargas_registrales ??
           result?.cargas_y_gravamenes ??
           result?.cargas_registrales ??
-          result?.cargas_detectadas ??
-          result?.analisis_juridico?.cargas ??
+          result?.razonamiento_juridico?.cargas ??
           [];
 
         console.log("CARGAS EXTRAIDAS:", JSON.stringify(cargas, null, 2));
@@ -288,6 +287,8 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("CARGAS MAP:", cargas);
 
         const mappedResult = {
+          cargas: result.cargas_registrales || cargas,
+          analisis: result.razonamiento_juridico || {},
           cargas_detectadas: cargas.map((c: any) => ({
             identificador_registral: "",
             tipo: c.tipo || "",
@@ -309,14 +310,15 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
             confianza: "MEDIA"
           })),
           peor_escenario: {
-            total: extractNumber(result.analisis_juridico?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes),
+            total: extractNumber(result?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes) || extractNumber(result.analisis_juridico?.razonamiento_juridico?.validacion_numerica_cargas_subsistentes),
             principal: 0,
             intereses: 0,
             costas: 0
           },
           alertas: result.valoracion_general?.riesgo_juridico || "",
           recomendacion: result.recomendacion || {},
-          resumen_juridico: result.analisis_juridico || {},
+          resumen_juridico: result.razonamiento_juridico || {},
+          razonamiento_juridico: result.razonamiento_juridico || {},
           valoracion: result.valoracion_general || {},
           raw: result
         };
