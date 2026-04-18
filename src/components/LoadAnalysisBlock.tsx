@@ -113,9 +113,11 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   const session_id = boeId; // alias explicitly
   
   useEffect(() => {
-    console.log("RESET STATE FOR SESSION:", session_id);
-    setResultData(null);
-  }, [session_id]);
+    if (!initialData) {
+      console.log("RESET STATE FOR SESSION:", session_id);
+      setResultData(null);
+    }
+  }, [session_id, initialData]);
 
   const safeResult = resultData ? {
     ...resultData,
