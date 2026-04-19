@@ -1224,365 +1224,85 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
         {step === 'result' && safeResult && (
           <div className="space-y-8">
-            {/* Barra de confianza superior */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                <ShieldCheck size={14} className="text-brand-600" />
-                <span>Análisis IA jurídico</span>
-              </div>
-              <div className="hidden md:block w-px h-4 bg-slate-300"></div>
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                <FileText size={14} className="text-brand-600" />
-                <span>{isStandalone ? 'Documentos registrales' : 'Datos BOE oficiales'}</span>
-              </div>
-              <div className="hidden md:block w-px h-4 bg-slate-300"></div>
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                <TrendingUp size={14} className="text-brand-600" />
-                <span>{isStandalone ? 'Análisis de riesgos' : 'Estimación mercado'}</span>
-              </div>
-            </div>
+            {/* BLOQUE 1: RESUMEN CLARO (HUMANO) */}
+            {(() => {
+              const subsisten = safeResult.cargas_detectadas?.filter(esSubsiste) || [];
+              const cancelan = safeResult.cargas_detectadas?.filter(esPurga) || [];
 
-            {/* Contador de créditos */}
-            {user && (
-              <div className="flex flex-col items-center -mt-4">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full shadow-sm">
-                  <div className={`w-2 h-2 rounded-full ${planLimit - usage > 0 ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></div>
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                    {planLimit - usage <= 0 
-                      ? "Has alcanzado el límite mensual" 
-                      : currentPlan === 'free' 
-                        ? `Te queda ${planLimit - usage} análisis gratis` 
-                        : `Te quedan ${planLimit - usage} análisis este mes`
-                    }
-                  </span>
-                </div>
-                
-                {user.lastAnalysisReset && currentPlan !== 'free' && (
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">
-                    {(() => {
-                      const lastReset = user.lastAnalysisReset.toDate ? user.lastAnalysisReset.toDate() : new Date(user.lastAnalysisReset);
-                      const resetDate = new Date(lastReset);
-                      resetDate.setMonth(resetDate.getMonth() + 1);
-                      const day = resetDate.getDate();
-                      const month = resetDate.toLocaleString('es-ES', { month: 'long' });
-                      return `Se reinician el ${day} ${month}`;
-                    })()}
+              return (
+                <div className="bg-white p-4 rounded-xl border text-sm leading-relaxed shadow-sm">
+                  <p>
+                    Se han detectado <b>{safeResult.cargas_detectadas?.length || 0} cargas</b> en el inmueble.
                   </p>
-                )}
-              </div>
-            )}
 
-            {/* Resumen Claro (Recomendación IA) */}
-            {resultData && (
-              <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-brand-900 mb-4 flex items-center gap-2">
-                  <Info size={20} className="text-brand-600" /> Resumen claro
-                </h3>
-                <div className="text-brand-800 text-sm leading-relaxed whitespace-pre-line overflow-auto max-h-96">
-                  <pre>{JSON.stringify(resultData, null, 2)}</pre>
-                </div>
-              </div>
-            )}
-
-            {/* Qué pagarías realmente eliminado */}
-
-            {/* Resumen Inversión */}
-            {analysisType === 'completo' && canCalculateFinancials && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <TrendingUp size={20} className="text-brand-600" /> Resumen inversión
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">Valor mercado estimado</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(surface! * marketPriceM2!)}
+                  {subsisten.length > 0 && (
+                    <p className="mt-2 text-amber-800">
+                      Existe al menos una carga que <b>subsiste tras la subasta</b>, por lo que el comprador deberá asumirla.
                     </p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">Tasación</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue!)}
-                    </p>
-                  </div>
-                  <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                    <p className="text-xs text-emerald-600 font-medium mb-1">Descuento estimado</p>
-                    <p className="text-lg font-bold text-emerald-700">
-                      {new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: 1 }).format(((surface! * marketPriceM2!) - appraisalValue!) / (surface! * marketPriceM2!))}
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">Superficie</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(surface!)} m²
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">€/m² mercado</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(marketPriceM2!)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Coste total estimado eliminado */}
-
-            {/* Decisión de inversión eliminado */}
-
-
-            {/* CTAs Section */}
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={() => alert("Abriendo calculadora de puja máxima...")}
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex items-center justify-center gap-3 text-lg"
-              >
-                <Calculator size={24} />
-                Calcular puja máxima segura
-              </button>
-
-              {(() => {
-                const hasSubsistingCharges = safeResult?.cargas_detectadas?.some(c => c.estado_carga === 'SUBSISTE') || false;
-                const isLowConfidence = safeResult?.nivel_confianza_global?.includes('BAJA') || false;
-                const isHighRisk = safeResult?.riesgo_global === 'ALTO';
-                const hasOccupancy = safeResult?.ocupacion_detectada;
-                const uniqueProperties = new Set(safeResult?.cargas_detectadas?.map(c => c.identificador_registral) || []).size;
-                const shouldShowConsultingCta = hasOccupancy || hasSubsistingCharges || isLowConfidence || isHighRisk || (uniqueProperties > 1);
-
-                if (!shouldShowConsultingCta) return null;
-
-                return (
-                  <a 
-                    href="https://calendly.com/activosoffmarket" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-semibold py-3 px-6 rounded-xl transition-colors flex flex-col items-center justify-center gap-1"
-                  >
-                    <div className="flex items-center gap-2 text-base">
-                      <Calendar size={20} className="text-brand-600" />
-                      Analizar esta subasta conmigo
-                    </div>
-                    <span className="text-xs text-slate-500 font-normal">Revisión jurídica y estrategia de puja</span>
-                  </a>
-                );
-              })()}
-            </div>
-
-            {/* Context Header */}
-            <div id="analisis-juridico" className="flex flex-wrap gap-4 items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <FileText size={16} className="text-slate-400" />
-                <span>Fuente: <strong className="text-slate-900">{safeResult.fuente_documento}</strong></span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-slate-600 group relative">
-                <ShieldCheck size={16} className={safeResult.nivel_confianza_global.includes('ALTA') ? 'text-emerald-500' : safeResult.nivel_confianza_global.includes('MEDIA') ? 'text-amber-500' : 'text-orange-500'} />
-                <span className="cursor-help border-b border-dashed border-slate-400">
-                  Confianza IA: <strong className="text-slate-900">{safeResult.nivel_confianza_global}</strong>
-                </span>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none">
-                  {getConfianzaExplanation(safeResult.nivel_confianza_global)}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-                </div>
-              </div>
-            </div>
-
-            {/* Incoherencias Críticas */}
-            {safeResult.incoherencias_detectadas && safeResult.incoherencias_detectadas.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 p-5 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle size={20} className="text-amber-600" />
-                  <h4 className="font-bold text-amber-900">Discrepancias en la documentación</h4>
-                </div>
-                <ul className="space-y-2">
-                  {safeResult?.incoherencias_detectadas?.map((incoherencia, idx) => (
-                    <li key={idx} className="text-sm text-amber-800 flex items-start gap-2">
-                      <span className="mt-1 text-amber-500">•</span>
-                      <span>{incoherencia}</span>
-                    </li>
-                  )) || []}
-                </ul>
-              </div>
-            )}
-
-            {/* Ocupación del Inmueble */}
-            {safeResult.ocupacion_detectada && (
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <Info size={20} className="text-slate-600" />
-                  <h4 className="font-bold text-slate-900">Situación de posesión a revisar</h4>
-                </div>
-                <p className="text-sm text-slate-700 mb-2">
-                  Se han encontrado indicios en la documentación de que el inmueble podría estar ocupado. En estos casos puede ser necesario gestionar la posesión tras la adjudicación.
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Nivel de Riesgo:</span>
-                  <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                    safeResult.nivel_riesgo_ocupacion === 'ALTO' ? 'bg-amber-100 text-amber-700' :
-                    safeResult.nivel_riesgo_ocupacion === 'MEDIO' ? 'bg-slate-200 text-slate-700' :
-                    'bg-slate-100 text-slate-600'
-                  }`}>
-                    {safeResult.nivel_riesgo_ocupacion}
-                  </span>
-                </div>
-              </div>
-            )}
-
-            {/* Razonamiento Jurídico (Chain of Thought) */}
-            {safeResult.razonamiento_juridico && (
-              <details className="group">
-                <summary className="list-none cursor-pointer">
-                  <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl flex items-center justify-between hover:bg-slate-100 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">🔍</span>
-                      <h4 className="font-bold text-slate-900">Ver análisis jurídico completo</h4>
-                    </div>
-                    <ChevronDown size={20} className="text-slate-400 group-open:rotate-180 transition-transform" />
-                  </div>
-                </summary>
-                <div className="bg-white border-x border-b border-slate-200 p-6 rounded-b-xl -mt-2 text-sm text-slate-700 whitespace-pre-line leading-relaxed shadow-inner">
-                  {razonamiento}
-                </div>
-              </details>
-            )}
-
-            {/* Riesgo global eliminado */}
-
-            {/* Nuevo Bloque Constante de Riesgo */}
-            {safeResult && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-4">
-                  {totalSubsistente > 100000 && (
-                    <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
-                      <ShieldAlert size={24} />
-                    </div>
                   )}
-                  {totalSubsistente > 0 && totalSubsistente <= 100000 && (
-                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
-                      <AlertTriangle size={24} />
-                    </div>
-                  )}
-                  {totalSubsistente === 0 && (
-                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
-                      <ShieldCheck size={24} />
-                    </div>
-                  )}
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Diagnóstico de Cargas</h3>
-                    <div className="font-black text-xl">
-                      {totalSubsistente > 100000 && <span className="text-rose-600">Alto Riesgo</span>}
-                      {totalSubsistente > 0 && totalSubsistente <= 100000 && <span className="text-amber-600">Revisión Necesaria</span>}
-                      {totalSubsistente === 0 && <span className="text-emerald-600">Sin cargas limitantes</span>}
-                    </div>
-                  </div>
-                </div>
-                <div className="text-center md:text-right border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
-                  <p className="text-sm uppercase tracking-wider font-bold text-slate-500 mb-1">Total cargas que subsisten</p>
-                  <p className="text-3xl font-black text-slate-900">{formatCurrency(totalSubsistente)}</p>
-                </div>
-              </div>
-            )}
 
-            {/* Subsisten y Purgan eliminados */}
-            {/* Unknown Charges (Critical) */}
-            {(safeResult?.cargas_detectadas?.filter(esDesconocido)?.length || 0) > 0 && (
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mt-8">
-                      <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
-                        <AlertTriangle className="text-amber-600" size={20} />
-                        <h4 className="font-bold text-amber-900">Cargas de Estado DESCONOCIDO (Requieren Revisión Manual)</h4>
+                  {cancelan.length > 0 && (
+                    <p className="mt-2 text-emerald-800">
+                      Algunas cargas serán <b>canceladas con la adjudicación</b>, por lo que no afectan al coste final.
+                    </p>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* BLOQUE 2: CARGAS VISUALES (CLAVE) */}
+            {safeResult.cargas_detectadas && safeResult.cargas_detectadas.length > 0 && (
+              <div className="space-y-3">
+                {safeResult.cargas_detectadas.map((c: any, i: number) => {
+                  const subsiste = esSubsiste(c);
+
+                  return (
+                    <div key={i} className="p-4 border rounded-xl bg-white flex justify-between shadow-sm">
+                      <div>
+                        <div className="font-semibold text-slate-900">{c.tipo || "Carga"}</div>
+                        <div className="text-sm text-gray-500 max-w-[200px] md:max-w-md truncate" title={c.fuente_textual}>{c.fuente_textual}</div>
                       </div>
-                      <div className="p-6">
-                        <ul className="space-y-6">
-                          {safeResult?.cargas_detectadas?.filter(esDesconocido)?.map((carga, idx) => (
-                            <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="font-bold text-slate-900">{carga.identificador_registral} - {carga.tipo}</p>
-                            <p className="text-sm text-slate-500">{carga.titular}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
-                                Rango: {carga.rango}
-                              </span>
-                              <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                carga.confianza === 'ALTA' ? 'bg-emerald-100 text-emerald-700' :
-                                carga.confianza === 'MEDIA' ? 'bg-amber-100 text-amber-700' :
-                                'bg-orange-100 text-orange-700'
-                              }`}>
-                              Confianza: {carga.confianza}
-                              </span>
-                              {carga.estado_carga && (
-                                <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                  esSubsiste(carga) ? 'bg-amber-100 text-amber-700' :
-                                  esPurga(carga) ? 'bg-emerald-100 text-emerald-700' :
-                                  'bg-slate-200 text-slate-600'
-                                }`}>
-                                  {carga.estado_carga.replace(/_/g, ' ')}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <span className="font-black text-lg text-amber-600">
-                            {carga.desglose?.total !== undefined && carga.desglose?.total !== null
-                              ? formatCurrency(carga.desglose.total)
-                              : '—'}
-                          </span>
+
+                      <div className="text-right">
+                        <div className={`font-bold text-lg ${subsiste ? 'text-rose-600' : 'text-slate-900'}`}>
+                          {formatCurrency(c.desglose?.principal || c.importe || 0)}
                         </div>
-                        
-                        {/* Desglose */}
-                        <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100">
-                          <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                            <span className="text-slate-500">Principal:</span>
-                            <span className="font-medium text-slate-700">
-                              {carga.desglose?.principal !== undefined && carga.desglose?.principal !== null
-                                ? formatCurrency(carga.desglose.principal)
-                                : '—'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                            <span className="text-slate-500">Intereses (est.):</span>
-                            <span className="font-medium text-slate-700">
-                              {carga.desglose?.intereses !== undefined && carga.desglose?.intereses !== null
-                                ? formatCurrency(carga.desglose.intereses)
-                                : '—'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                            <span className="text-slate-500">Costas:</span>
-                            <span className="font-medium text-slate-700">
-                              {carga.desglose?.costas !== undefined && carga.desglose?.costas !== null
-                                ? formatCurrency(carga.desglose.costas)
-                                : '—'}
-                            </span>
-                          </div>
+
+                        <div className={`text-xs mt-1 font-bold tracking-wider uppercase ${subsiste ? "text-rose-600 bg-rose-50 inline-block px-2 py-0.5 rounded" : "text-emerald-600 bg-emerald-50 inline-block px-2 py-0.5 rounded"}`}>
+                          {subsiste ? "SUBSISTE" : "SE CANCELA"}
                         </div>
-                        
-                        {/* Fuente Textual */}
-                        <div className="mt-3 bg-amber-50/50 rounded p-2 text-[10px] text-amber-700 italic border-l-2 border-amber-300">
-                          "{carga.fuente_textual}"
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            {/* Alerts */}
-            {(safeResult?.alertas?.length || 0) > 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                <h4 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
-                  <AlertTriangle size={20} /> Advertencias Jurídicas
-                </h4>
-                <ul className="space-y-3">
-                  {safeResult?.alertas?.map((adv, idx) => (
-                    <li key={idx} className="flex items-start gap-3 text-amber-800 text-sm leading-relaxed">
-                      <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                      <span>{adv}</span>
-                    </li>
-                  )) || []}
-                </ul>
-              </div>
-            )}
+            {/* BLOQUE 3: COSTE REAL (SÚPER IMPORTANTE) */}
+            {(() => {
+              const totalSubsiste = safeResult.cargas_detectadas
+                ? safeResult.cargas_detectadas
+                    .filter(esSubsiste)
+                    .reduce((sum: number, c: any) => sum + (c.desglose?.principal || c.importe || 0), 0)
+                : 0;
+
+              return (
+                <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-md">
+                  <div className="text-sm text-slate-400 font-medium uppercase tracking-wider mb-1">Coste adicional estimado</div>
+                  <div className="text-4xl font-black">{formatCurrency(totalSubsiste)}</div>
+
+                  {totalSubsiste > 0 ? (
+                    <div className="text-sm mt-2 text-rose-300 font-medium flex items-center gap-2">
+                      <AlertTriangle size={16} /> Deudas que deberás asumir tras la subasta
+                    </div>
+                  ) : (
+                    <div className="text-sm mt-2 text-emerald-300 font-medium flex items-center gap-2">
+                       <ShieldCheck size={16} /> No se detectan cargas económicas relevantes
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Download Action */}
             <div className="flex justify-center pt-4">
