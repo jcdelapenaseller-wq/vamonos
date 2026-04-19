@@ -1240,6 +1240,25 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
         {step === 'result' && safeResult && (
           <div className="space-y-8">
+            {/* Error Fallback Alert */}
+            {(safeResult as any)?.error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm">
+                <p className="font-medium">No hemos podido procesar este documento con suficiente precisión.</p>
+                <p className="mt-1">Este tipo de documento requiere revisión jurídica manual para detectar correctamente las cargas y riesgos reales.</p>
+                
+                <div className="mt-3">
+                  <a 
+                    href="https://calendly.com/activosoffmarket"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-medium"
+                  >
+                    Solicitar revisión jurídica experta →
+                  </a>
+                </div>
+              </div>
+            )}
+
             {/* Ficha Técnica */}
             <div className="bg-white border rounded-xl p-4 space-y-3">
               <div className="text-sm font-semibold">

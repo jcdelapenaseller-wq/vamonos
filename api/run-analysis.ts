@@ -34,6 +34,45 @@ function extractNumber(text: string) {
   return Math.max(...matches.map(n => parseFloat(n)));
 }
 
+function extractJson(text: string) {
+  const start = text.indexOf('{');
+  if (start === -1) throw new Error("No JSON found in AI response");
+
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    if (text[i] === '}') depth--;
+
+    if (depth === 0) {
+      return text.slice(start, i + 1);
+    }
+  }
+
+  throw new Error("No complete JSON found");
+}
+
+function validateAnalysis(data: any) {
+  if (!data) throw new Error("Empty response");
+
+  if (!Array.isArray(data.cargas)) {
+    throw new Error("cargas must be array");
+  }
+
+  data.cargas.forEach((c: any, i: number) => {
+    if (!c.tipo) throw new Error(`carga ${i} missing tipo`);
+    if (typeof c.importe !== "number") throw new Error(`carga ${i} importe must be number`);
+    if (!["SUBSISTE", "CANCELA"].includes(c.estado)) {
+      throw new Error(`carga ${i} estado inválido`);
+    }
+  });
+
+  if (!data.recomendacion) {
+    throw new Error("missing recomendacion");
+  }
+
+  return data;
+}
+
 export default async function handler(req: any, res: any) {
   // Parse multipart/form-data
   await runMiddleware(req, res, upload.single('files'));
@@ -297,12 +336,10 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         .replace(/```/g, "")
         .trim();
 
-      // extra: aislar solo el JSON por seguridad
-      const firstBrace = clean.indexOf("{");
-      const lastBrace = clean.lastIndexOf("}");
-
-      if (firstBrace !== -1 && lastBrace !== -1) {
-        clean = clean.substring(firstBrace, lastBrace + 1);
+      try {
+        clean = extractJson(clean);
+      } catch (err: any) {
+        throw new Error(err.message || "Failed to extract JSON");
       }
 
       console.log("CLEAN JSON FINAL:", clean);
@@ -310,8 +347,9 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       let result;
       try {
         const parsedJson = JSON.parse(clean);
-        console.log("GEMINI CARGAS RAW:", parsedJson.cargas);
-        const data = parsedJson?.informe_subasta_inmueble || parsedJson; // Asegura que todo usa data
+        const data = validateAnalysis(parsedJson?.informe_subasta_inmueble || parsedJson);
+        
+        console.log("GEMINI CARGAS RAW:", data.cargas);
         
         result = data;
 
@@ -380,11 +418,27 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
         return res.status(200).json(mappedResult);
       } catch (e) {
-        console.error("JSON PARSE ERROR:", clean);
-        return res.status(500).json({ error: "Error parseando respuesta IA" });
+        console.error("VALIDATION ERROR:", e);
+        return res.status(200).json({
+          cargas: [],
+          recomendacion: {
+            "### 🧠 Resumen claro": "No se ha podido analizar correctamente el documento.",
+            "### 💰 Deuda del procedimiento": "Información no disponible.",
+            "### ⚖️ Qué paga el comprador": "Se recomienda revisión manual del documento."
+          },
+          error: true
+        });
       }
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
-      return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
+      return res.status(200).json({
+        cargas: [],
+        recomendacion: {
+          "### 🧠 Resumen claro": "No se ha podido analizar correctamente el documento.",
+          "### 💰 Deuda del procedimiento": "Información no disponible.",
+          "### ⚖️ Qué paga el comprador": "Se recomienda revisión manual del documento."
+        },
+        error: true
+      });
     }
 }

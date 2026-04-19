@@ -333,11 +333,42 @@ DOCUMENTO(S) A ANALIZAR:
     });
 
     if (response.text) {
-      const result = JSON.parse(response.text);
+      const rawText = response.text;
+      let parsed;
+      
+      try {
+        // Intento de parseo directo
+        parsed = JSON.parse(rawText);
+      } catch (e) {
+        console.warn("[GeminiService] Error en parseo directo, intentando limpieza robusta...", e);
+        
+        const cleaned = rawText
+          .replace(/```json/g, "")
+          .replace(/```/g, "")
+          .trim();
+
+        // Extraer TODOS los posibles JSON
+        const matches = cleaned.match(/\{[\s\S]*?\}/g);
+
+        if (!matches) {
+          throw new Error("No se ha encontrado un JSON válido en la respuesta de la IA.");
+        }
+
+        // Elegir el JSON más completo (más largo)
+        const bestJson = matches.sort((a, b) => b.length - a.length)[0];
+        
+        try {
+          parsed = JSON.parse(bestJson);
+        } catch (innerError) {
+          console.error("[GeminiService] Fallo crítico al parsear el mejor JSON extraído:", innerError);
+          throw new Error("La respuesta de la IA no tiene un formato procesable.");
+        }
+      }
+
       console.log("[GeminiService] --- ANÁLISIS COMPLETADO ---");
-      console.log("[GeminiService] Documentos detectados por IA:", result.documentos_detectados);
-      console.log("[GeminiService] Nivel de confianza:", result.nivel_confianza_global);
-      return result;
+      console.log("[GeminiService] Documentos detectados por IA:", parsed.documentos_detectados);
+      console.log("[GeminiService] Nivel de confianza:", parsed.nivel_confianza_global);
+      return parsed;
     }
     throw new Error("No se recibió respuesta de la IA.");
   } catch (error: any) {
