@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
 import { jsPDF } from "jspdf";
+import { calculateOpportunityScore } from "../lib/scoreUtils";
 import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp, Check, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
@@ -1224,6 +1225,27 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
         {step === 'result' && safeResult && (
           <div className="space-y-8">
+            {/* Puntuación de Oportunidad */}
+            {(() => {
+              const valorMercadoFinal = surface && marketPriceM2 ? surface * marketPriceM2 : 0;
+              const score = calculateOpportunityScore({
+                cargas_detectadas: safeResult.cargas_detectadas || [],
+                valorMercado: valorMercadoFinal,
+                valorSubasta: appraisalValue || 0,
+                pujaEstimada: appraisalValue || 0,
+                ocupacion_detectada: safeResult?.ocupacion_detectada || false,
+              });
+
+              if (score?.scoreTotal === null) return null;
+
+              return (
+                <div className="bg-white border rounded-xl p-4">
+                  <div className="text-sm text-gray-500">Puntuación de oportunidad</div>
+                  <div className="text-2xl font-bold">{score.scoreTotal} / 10</div>
+                </div>
+              );
+            })()}
+
             {/* BLOQUE 1: RESUMEN CLARO (HUMANO) */}
             {(() => {
               const total = safeResult.cargas_detectadas?.length || 0;
