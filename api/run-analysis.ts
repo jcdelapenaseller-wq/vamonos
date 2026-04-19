@@ -330,9 +330,24 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
           ? data.cargas_subsistentes
           : [];
 
+        const normalizarEstado = (c: any) => {
+          const tipo = (c.tipo || "").toUpperCase();
+
+          // 🔴 REGLA JURÍDICA CLAVE
+          if (tipo.includes("SERVIDUMBRE")) {
+            return "SUBSISTE";
+          }
+
+          return c.estado || "DESCONOCIDO";
+        };
+
         const cargasFinales =
           Array.isArray(cargas) && cargas.length > 0
-            ? cargas
+            ? cargas.map((c: any) => ({
+                ...c,
+                estado: normalizarEstado(c),
+                estado_carga: normalizarEstado(c)
+              }))
             : [];
         console.log("CARGAS EXTRAIDAS FIX:", cargasFinales);
 
