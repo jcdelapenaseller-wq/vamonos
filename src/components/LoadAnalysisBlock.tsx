@@ -170,6 +170,26 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     fuente_documento: resultData.fuente_documento || "Desconocida",
   } : null;
 
+  const totalSubsistenteManual = safeResult?.cargas_detectadas
+    ? safeResult.cargas_detectadas
+        .filter(esSubsiste)
+        .reduce((acc: number, c: any) => acc + (c.desglose?.total || 0), 0)
+    : 0;
+
+  const peorEscenarioFinal =
+    (safeResult?.peor_escenario?.total && safeResult.peor_escenario.total > 0)
+      ? safeResult.peor_escenario.total
+      : totalSubsistenteManual;
+
+  const riesgoGlobalFinal =
+    (safeResult?.riesgo_global && safeResult.riesgo_global !== "DESCONOCIDO")
+      ? safeResult.riesgo_global
+      : (totalSubsistenteManual > 100000
+          ? "ALTO"
+          : totalSubsistenteManual > 0
+          ? "MEDIO"
+          : "BAJO");
+
   if (resultData) {
     console.log("2. STATE resultData:", resultData);
     console.log("3. SAFE RESULT:", safeResult);
@@ -1258,12 +1278,12 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
             )}
 
             {/* Qué pagarías realmente */}
-            {(safeResult.peor_escenario?.total !== undefined || safeResult.peor_escenario?.importe_total !== undefined) && (
+            {(peorEscenarioFinal !== undefined) && (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                   💰 Qué pagarías realmente
                 </h3>
-                { !(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total) ? (
+                { !peorEscenarioFinal ? (
                   <ul className="space-y-2 text-sm text-slate-700">
                     <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> Solo pagas tu puja</li>
                     <li className="flex items-center gap-2"><Check size={16} className="text-emerald-500"/> La deuda se cancela con la subasta</li>
@@ -1277,9 +1297,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                     <li className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-500"/> + cargas que subsisten</li>
                     <li className="flex items-center gap-2 font-bold text-slate-900 mt-2 pt-2 border-t border-slate-100">
                       {appraisalValue ? (
-                        <>Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue + (safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total))}</>
+                        <>Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue + peorEscenarioFinal)}</>
                       ) : (
-                        <>Cargas a asumir: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total)} (más tu puja)</>
+                        <>Cargas a asumir: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(peorEscenarioFinal)} (más tu puja)</>
                       )}
                     </li>
                   </ul>
@@ -1338,7 +1358,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
             )}
 
             {/* Coste total estimado */}
-            {analysisType === 'completo' && (safeResult.peor_escenario?.total !== undefined || safeResult.peor_escenario?.importe_total !== undefined) && (
+            {analysisType === 'completo' && (peorEscenarioFinal !== undefined) && (
               <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Calculator size={20} className="text-brand-400" /> Coste total estimado
@@ -1354,10 +1374,10 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                     <div className="flex justify-between items-center text-slate-400 text-sm">
                       <span>Cargas que subsisten</span>
                       <span className="font-medium text-amber-400">
-                        + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total)}
+                        + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(peorEscenarioFinal)}
                       </span>
                     </div>
-                    {(safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total) === 0 ? (
+                    {peorEscenarioFinal === 0 ? (
                       <span className="text-xs text-emerald-400 mt-1">✔️ No asumes deudas tras la subasta</span>
                     ) : (
                       <span className="text-xs text-rose-400 mt-1">⚠️ Estas cargas SÍ las asume el comprador</span>
@@ -1366,7 +1386,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
                     <span className="font-bold text-slate-200">Coste total estimado</span>
                     <span className="text-2xl font-black text-brand-400">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + (safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total))}
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + peorEscenarioFinal)}
                     </span>
                   </div>
                 </div>
@@ -1390,7 +1410,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
                 {(() => {
                   const valorMercadoEstimado = surface! * marketPriceM2!;
-                  const importeCargas = safeResult.peor_escenario.importe_total ?? safeResult.peor_escenario.total;
+                  const importeCargas = peorEscenarioFinal;
                   const costeTotal = (appraisalValue || 0) + importeCargas;
                   const margenSeguridad = valorMercadoEstimado - costeTotal;
                   const margenPorcentaje = (margenSeguridad / valorMercadoEstimado) * 100;
@@ -1707,31 +1727,31 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
             {/* Semaphore Header */}
             <div className={`p-6 rounded-2xl border flex flex-col md:flex-row items-center gap-6 ${
-              safeResult.riesgo_global === 'ALTO' ? 'bg-orange-50 border-orange-200 text-orange-900' :
-              safeResult.riesgo_global === 'MEDIO' ? 'bg-amber-50 border-amber-200 text-amber-900' :
+              riesgoGlobalFinal === 'ALTO' ? 'bg-orange-50 border-orange-200 text-orange-900' :
+              riesgoGlobalFinal === 'MEDIO' ? 'bg-amber-50 border-amber-200 text-amber-900' :
               'bg-emerald-50 border-emerald-200 text-emerald-900'
             }`}>
               <div className={`p-4 rounded-full ${
-                safeResult.riesgo_global === 'ALTO' ? 'bg-orange-100 text-orange-600' :
-                safeResult.riesgo_global === 'MEDIO' ? 'bg-amber-100 text-amber-600' :
+                riesgoGlobalFinal === 'ALTO' ? 'bg-orange-100 text-orange-600' :
+                riesgoGlobalFinal === 'MEDIO' ? 'bg-amber-100 text-amber-600' :
                 'bg-emerald-100 text-emerald-600'
               }`}>
-                {safeResult.riesgo_global === 'ALTO' ? <ShieldAlert size={32} /> :
-                 safeResult.riesgo_global === 'MEDIO' ? <AlertTriangle size={32} /> :
+                {riesgoGlobalFinal === 'ALTO' ? <ShieldAlert size={32} /> :
+                 riesgoGlobalFinal === 'MEDIO' ? <AlertTriangle size={32} /> :
                  <ShieldCheck size={32} />}
               </div>
               <div className="text-center md:text-left">
                 <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Riesgo Global de la Operación</h3>
-                <p className="text-3xl font-black">{safeResult.riesgo_global}</p>
+                <p className="text-3xl font-black">{riesgoGlobalFinal}</p>
               </div>
               <div className="md:ml-auto text-center md:text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-current/20 pt-4 md:pt-0 md:pl-6 mt-2 md:mt-0">
                 <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Peor Escenario Registral</h3>
-                <p className="text-3xl font-black">{safeResult.peor_escenario?.total ? safeResult.peor_escenario.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</p>
+                <p className="text-3xl font-black">{peorEscenarioFinal !== undefined ? peorEscenarioFinal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</p>
                 <p className="text-xs opacity-80 mt-1 font-medium">Impacto: {safeResult.impacto_economico.nivel}</p>
-                {safeResult.peor_escenario.total === 0 ? (
+                {peorEscenarioFinal === 0 ? (
                   <p className="text-xs text-emerald-700 mt-2 font-medium">✔️ Incluso en el peor caso, no asumirías cargas económicas</p>
                 ) : (
-                  <p className="text-xs text-rose-700 mt-2 font-medium">⚠️ En el peor escenario, podrías asumir hasta {safeResult.peor_escenario?.total ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(safeResult.peor_escenario.total) : "—"} adicionales</p>
+                  <p className="text-xs text-rose-700 mt-2 font-medium">⚠️ En el peor escenario, podrías asumir hasta {peorEscenarioFinal ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(peorEscenarioFinal) : "—"} adicionales</p>
                 )}
               </div>
             </div>
