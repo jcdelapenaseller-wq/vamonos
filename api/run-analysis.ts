@@ -313,9 +313,14 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("CARGAS MAP:", cargas);
 
         const mappedResult = {
-          cargas: result.cargas_detectadas?.length
-            ? result.cargas_detectadas
-            : result.cargas || result.cargas_registrales || cargas,
+          cargas:
+            (Array.isArray(result.cargas_detectadas) && result.cargas_detectadas.length > 0)
+              ? result.cargas_detectadas
+              : (Array.isArray(result.cargas) && result.cargas.length > 0)
+              ? result.cargas
+              : (Array.isArray(result.cargas_registrales) && result.cargas_registrales.length > 0)
+              ? result.cargas_registrales
+              : cargas,
           analisis: result.razonamiento_juridico || {},
           peor_escenario: {
             total: result?.razonamiento_juridico?.["4_validacion_numerica_peor_escenario"]?.total_estimado_cargas_dinerarias_subsistentes || 0,
