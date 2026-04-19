@@ -291,7 +291,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 
         console.log("DATA ROOT:", data);
         
-        const cargas =
+        let cargas =
           (data?.cargas_detectadas && data.cargas_detectadas.length > 0)
           ? data.cargas_detectadas
           : (data?.cargas && data.cargas.length > 0)
@@ -303,6 +303,33 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
           : (data?.cargas_subsistentes && data.cargas_subsistentes.length > 0)
           ? data.cargas_subsistentes
           : [];
+
+        if (!Array.isArray(cargas) || cargas.length === 0) {
+          const texto = JSON.stringify(data);
+
+          const matches = texto.match(/(HIPOTECA|EMBARGO|SERVIDUMBRE)[^\.]+/gi) || [];
+
+          const cargasFallback = matches.map((m: string) => {
+            const importeMatch = m.match(/[\d\.,]+\s?€?/);
+            
+            return {
+              tipo: m.includes("HIPOTECA")
+                ? "HIPOTECA"
+                : m.includes("EMBARGO")
+                ? "EMBARGO"
+                : "SERVIDUMBRE",
+              descripcion: m.trim(),
+              importe: importeMatch
+                ? parseFloat(importeMatch[0].replace(/\./g, "").replace(",", "."))
+                : 0,
+              estado: "DESCONOCIDO",
+            };
+          });
+
+          if (cargasFallback.length > 0) {
+            cargas = cargasFallback;
+          }
+        }
         console.log("CARGAS EXTRAIDAS FIX:", cargas);
 
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
