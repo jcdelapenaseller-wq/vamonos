@@ -1226,26 +1226,21 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
           <div className="space-y-8">
             {/* BLOQUE 1: RESUMEN CLARO (HUMANO) */}
             {(() => {
-              const subsisten = safeResult.cargas_detectadas?.filter(esSubsiste) || [];
-              const cancelan = safeResult.cargas_detectadas?.filter(esPurga) || [];
+              const total = safeResult.cargas_detectadas?.length || 0;
+              const subsisten = safeResult.cargas_detectadas?.filter((c: any) => esSubsiste(c)) || [];
+
+              let resumenHumano = "";
+              if (total === 0) {
+                resumenHumano = "No se han detectado cargas relevantes en la documentación analizada.";
+              } else if (subsisten.length === 0) {
+                resumenHumano = `Se han detectado ${total} cargas, pero todas se cancelan con la adjudicación.`;
+              } else {
+                resumenHumano = `Se han detectado ${total} cargas. Algunas subsisten, por lo que el comprador deberá asumir ciertas obligaciones.`;
+              }
 
               return (
-                <div className="bg-white p-4 rounded-xl border text-sm leading-relaxed shadow-sm">
-                  <p>
-                    Se han detectado <b>{safeResult.cargas_detectadas?.length || 0} cargas</b> en el inmueble.
-                  </p>
-
-                  {subsisten.length > 0 && (
-                    <p className="mt-2 text-amber-800">
-                      Existe al menos una carga que <b>subsiste tras la subasta</b>, por lo que el comprador deberá asumirla.
-                    </p>
-                  )}
-
-                  {cancelan.length > 0 && (
-                    <p className="mt-2 text-emerald-800">
-                      Algunas cargas serán <b>canceladas con la adjudicación</b>, por lo que no afectan al coste final.
-                    </p>
-                  )}
+                <div className="bg-white border rounded-xl p-4 text-sm shadow-sm">
+                  {resumenHumano}
                 </div>
               );
             })()}
