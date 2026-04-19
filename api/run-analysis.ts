@@ -70,6 +70,10 @@ function validateAnalysis(data: any) {
     throw new Error("missing recomendacion");
   }
 
+  if (!data.resumen_ejecutivo) {
+    throw new Error("missing resumen_ejecutivo");
+  }
+
   return data;
 }
 
@@ -231,6 +235,40 @@ Explica en 4-5 líneas:
   - paga su puja
   - no paga la deuda ejecutada
   - si hay cargas adicionales o no
+
+---
+
+### 📊 RESUMEN EJECUTIVO (OBLIGATORIO)
+
+Debes generar un resumen claro de entre 7 y 10 líneas orientado a un inversor.
+
+Debe incluir:
+- tipo de subasta (judicial o administrativa)
+- ubicación del inmueble
+- valor de subasta y deuda reclamada
+- si existe o no puja mínima
+- cargas relevantes detectadas
+- si alguna carga subsiste (clave)
+- coherencia o incoherencia entre valor de subasta y valor de mercado
+- principal riesgo de la operación
+
+IMPORTANTE:
+- lenguaje claro, no técnico
+- no repetir el bloque recomendacion
+- no usar listas ni bullets
+- redactar en párrafos fluidos
+- evitar frases genéricas
+
+Si falta algún dato:
+→ usar la mejor inferencia posible del documento
+
+Formato obligatorio:
+
+{
+  "cargas": [ ... ],
+  "recomendacion": "...",
+  "resumen_ejecutivo": "texto largo aquí"
+}
 
 ---
 
@@ -407,6 +445,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
           },
           alertas: result.valoracion_general?.riesgo_juridico || "",
           recomendacion: result.recomendacion || {},
+          resumen_ejecutivo: result.resumen_ejecutivo || "",
           resumen_juridico: result.razonamiento_juridico || {},
           razonamiento_juridico: result.razonamiento_juridico || {},
           valoracion: result.valoracion_general || {},
@@ -426,6 +465,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
             "### 💰 Deuda del procedimiento": "Información no disponible.",
             "### ⚖️ Qué paga el comprador": "Se recomienda revisión manual del documento."
           },
+          resumen_ejecutivo: "No se ha podido generar el resumen automático.",
           error: true
         });
       }

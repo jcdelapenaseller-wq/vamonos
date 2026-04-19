@@ -10,6 +10,7 @@ import { useUser } from '../contexts/UserContext';
 interface CargaDetectada {
   identificador_registral: string;
   tipo: string;
+  descripcion: string;
   fuente_textual: string;
   desglose: {
     principal: number;
@@ -48,6 +49,7 @@ interface AnalysisResult {
   };
   alertas: string[];
   recomendacion: string;
+  resumen_ejecutivo?: string;
   // Datos de mercado opcionales
   refCat?: string | null;
   ciudad?: string | null;
@@ -80,6 +82,11 @@ interface LoadAnalysisBlockProps {
   isStandalone?: boolean;
   auction?: any;
 }
+
+const getFichaValue = (pdfValue: any, auctionValue: any) => {
+  if (pdfValue && pdfValue !== "" && pdfValue !== "—") return pdfValue;
+  return auctionValue || "—";
+};
 
 const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({ 
   boeId, 
@@ -142,6 +149,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
       ? resultData.cargas.map((c: any) => ({
           identificador_registral: c.referencia_registral || c.tipo || "",
           tipo: c.tipo || "Carga",
+          descripcion: c.descripcion || "",
           fuente_textual: c.descripcion || c.tipo || "",
           desglose: {
             principal: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0,
@@ -871,7 +879,13 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
         : JSON.stringify(safeResult.razonamiento_juridico, null, 2))
     : "";
 
-  const valorMercadoGlobal = surface && marketPriceM2 ? surface * marketPriceM2 : 0;
+  const surfaceSafe = (safeResult as any)?.informacion_general?.superficie || auction?.surface || surface || null;
+  const surfaceParsed = typeof surfaceSafe === "string"
+    ? parseFloat(surfaceSafe.replace(",", "."))
+    : surfaceSafe;
+
+  const valorMercadoGlobal = surfaceParsed && marketPriceM2 ? surfaceParsed * marketPriceM2 : 0;
+  
   const totalCargasGlobal = safeResult?.cargas_detectadas
     ?.filter(esSubsiste)
     ?.reduce((sum: number, c: any) => sum + (c.desglose?.principal || 0), 0) || 0;
@@ -887,6 +901,15 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
   console.log("FRONT RESULT DATA:", resultData);
   if (safeResult) {
     console.log("FRONT FINAL CARGAS:", safeResult.cargas_detectadas);
+    console.log("FICHA DEBUG:", {
+      superficiePDF: (safeResult as any)?.informacion_general?.superficie,
+      superficieAuction: auction?.surface,
+    });
+    console.log("MARKET DEBUG:", {
+      surfacePDF: (safeResult as any)?.informacion_general?.superficie,
+      surfaceParsed,
+      marketPriceM2,
+    });
   }
 
   return (
@@ -1274,16 +1297,17 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                 <div>{auction?.auctionType || "—"}</div>
 
                 <div className="text-gray-500">Ubicación</div>
-                <div>{auction?.address || city || "—"}</div>
+                <div>{getFichaValue((safeResult as any)?.informacion_general?.direccion, auction?.address || city)}</div>
 
                 <div className="text-gray-500">Tipo de inmueble</div>
-                <div>{auction?.propertyType || propertyType || "—"}</div>
+                <div>{getFichaValue((safeResult as any)?.informacion_general?.tipo_inmueble, auction?.propertyType || propertyType)}</div>
 
                 <div className="text-gray-500">Superficie</div>
                 <div>
-                  {auction?.surface 
-                    ? `${auction.surface} m²` 
-                    : "—"}
+                  {(() => {
+                    const val = getFichaValue((safeResult as any)?.informacion_general?.superficie, auction?.surface);
+                    return val !== "—" ? `${val}${typeof val === 'number' ? ' m²' : ''}` : "—";
+                  })()}
                 </div>
 
                 <div className="text-gray-500">Habitaciones / baño</div>
@@ -1395,6 +1419,39 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                       )}
                     </div>
                   </div>
+                  
+                  {/* Resumen Ejecutivo */}
+                  {safeResult?.resumen_ejecutivo && (
+                    <div className="bg-white border rounded-xl p-5 text-sm leading-relaxed">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Análisis de la subasta
+                        </span>
+                      </div>
+
+                      <p className="text-gray-800 whitespace-pre-wrap">
+                        {safeResult.resumen_ejecutivo}
+                      </p>
+
+                      <p className="text-xs text-gray-500 mt-3 italic border-t border-gray-100 pt-2">
+                        Interpretación basada en la nota simple registral aportada.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Fallback segura si hay error */}
+                  {(safeResult as any)?.error && (
+                    <div className="bg-white border rounded-xl p-5 text-sm leading-relaxed">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Análisis de la subasta
+                        </span>
+                      </div>
+                      <p className="text-gray-500">
+                        No se ha podido generar el resumen automático.
+                      </p>
+                    </div>
+                  )}
 
                   {/* CTAs Premium */}
                   <div className="grid md:grid-cols-2 gap-4">
@@ -1470,29 +1527,6 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                       </div>
                     </div>
                   </details>
-
-                  {/* Bloque 2 — Conclusión Final */}
-                  <div className="bg-black text-white rounded-xl p-5 space-y-3">
-                    <div className="text-sm opacity-70">
-                      Conclusión
-                    </div>
-
-                    <div className="text-base font-semibold">
-                      {score?.scoreTotal !== undefined && score.scoreTotal !== null && (
-                        <>
-                          {score.scoreTotal >= 8 && "Operación muy interesante con buen equilibrio entre riesgo y rentabilidad."}
-                          {score.scoreTotal >= 5 && score.scoreTotal < 8 && "Operación viable, pero requiere prudencia en la puja."}
-                          {score.scoreTotal < 5 && "Operación con riesgo elevado. Solo recomendable para perfiles expertos."}
-                        </>
-                      )}
-                    </div>
-
-                    <div className="text-sm opacity-80">
-                      {totalCargasGlobal > 0
-                        ? `El comprador deberá considerar cargas por ${formatCurrency(totalCargasGlobal)} en el coste final.`
-                        : "No se detectan cargas económicas relevantes en el expediente."}
-                    </div>
-                  </div>
                 </>
               );
             })()}
@@ -1600,7 +1634,9 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                     <div key={i} className="p-4 border rounded-xl bg-white flex justify-between shadow-sm">
                       <div>
                         <div className="font-semibold text-slate-900">{c.tipo || "Carga"}</div>
-                        <div className="text-sm text-gray-500 max-w-[200px] md:max-w-md truncate" title={c.fuente_textual}>{c.fuente_textual}</div>
+                        <p className="text-xs text-gray-600 mt-1 leading-relaxed break-words">
+                          {c.descripcion || c.fuente_textual}
+                        </p>
                       </div>
 
                       <div className="text-right">
@@ -1627,7 +1663,8 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                 : 0;
 
               return (
-                <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-md">
+                <>
+                  <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-md">
                   <div className="text-sm text-slate-400 font-medium uppercase tracking-wider mb-1">Coste adicional estimado</div>
                   <div className="text-4xl font-black">{formatCurrency(totalSubsiste)}</div>
 
@@ -1640,9 +1677,63 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                        <ShieldCheck size={16} /> No se detectan cargas económicas relevantes
                     </div>
                   )}
+
+                  <p className="text-xs text-slate-400 mt-4 leading-relaxed border-t border-slate-800 pt-3">
+                    {totalCargasGlobal === 0
+                      ? "No existen cargas económicas que subsistan tras la subasta. Las deudas detectadas se cancelan con la adjudicación (art. 674 LEC)."
+                      : "Existen cargas anteriores que subsistan tras la subasta y deberán ser asumidas por el comprador."}
+                  </p>
                 </div>
-              );
-            })()}
+
+                {totalCargasGlobal > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-3 text-sm">
+                    <p className="font-medium text-amber-800">
+                      Impacto real en la inversión
+                    </p>
+
+                    <p className="text-amber-700 mt-2 leading-relaxed">
+                      Este inmueble no queda completamente libre de cargas. 
+                      Existen deudas anteriores que subsistan tras la subasta, 
+                      por lo que el coste real para el comprador no es solo la puja.
+                    </p>
+
+                    <p className="text-amber-700 mt-2 leading-relaxed">
+                      En la práctica, el precio total de adquisición será:
+                    </p>
+
+                    <p className="font-semibold text-amber-900 mt-2 text-base">
+                      Puja + {formatCurrency(totalCargasGlobal)}
+                    </p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
+          {/* CONCLUSIÓN MOVIDA AL FINAL */}
+          <div className="mt-6">
+            <div className="bg-black text-white rounded-xl p-5 space-y-3">
+              <div className="text-sm opacity-70">
+                Conclusión
+              </div>
+
+              <div className="text-base font-semibold">
+                {globalOpportunityScore?.scoreTotal !== undefined && globalOpportunityScore.scoreTotal !== null && (
+                  <>
+                    {globalOpportunityScore.scoreTotal >= 8 && "Operación muy interesante con buen equilibrio entre riesgo y rentabilidad."}
+                    {globalOpportunityScore.scoreTotal >= 5 && globalOpportunityScore.scoreTotal < 8 && "Operación viable, pero requiere prudencia en la puja."}
+                    {globalOpportunityScore.scoreTotal < 5 && "Operación con riesgo elevado. Solo recomendable para perfiles expertos."}
+                  </>
+                )}
+              </div>
+
+              <div className="text-sm opacity-80">
+                {totalCargasGlobal > 0
+                  ? `El comprador deberá considerar cargas por ${formatCurrency(totalCargasGlobal)} en el coste final.`
+                  : "No se detectan cargas económicas relevantes en el expediente."}
+              </div>
+            </div>
+          </div>
 
             {/* Download Action */}
             <div className="flex justify-center pt-4">
