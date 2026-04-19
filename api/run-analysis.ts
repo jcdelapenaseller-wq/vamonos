@@ -304,50 +304,21 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
           ? data.cargas_subsistentes
           : [];
 
-        if (!Array.isArray(cargas) || cargas.length === 0) {
-          const texto = JSON.stringify(data);
-
-          const matches = texto.match(/(HIPOTECA|EMBARGO|SERVIDUMBRE)[^\.]+/gi) || [];
-
-          const cargasFallback = matches.map((m: string) => {
-            const importeMatch = m.match(/[\d\.,]+\s?€?/);
-            
-            return {
-              tipo: m.includes("HIPOTECA")
-                ? "HIPOTECA"
-                : m.includes("EMBARGO")
-                ? "EMBARGO"
-                : "SERVIDUMBRE",
-              descripcion: m.trim(),
-              importe: importeMatch
-                ? parseFloat(importeMatch[0].replace(/\./g, "").replace(",", "."))
-                : 0,
-              estado: "DESCONOCIDO",
-            };
-          });
-
-          if (cargasFallback.length > 0) {
-            cargas = cargasFallback;
-          }
-        }
-        console.log("CARGAS EXTRAIDAS FIX:", cargas);
+        const cargasFinales =
+          Array.isArray(cargas) && cargas.length > 0
+            ? cargas
+            : [];
+        console.log("CARGAS EXTRAIDAS FIX:", cargasFinales);
 
         console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
         console.log("ANALISIS JURIDICO:", JSON.stringify(result?.razonamiento_juridico, null, 2));
         
-        console.log("CARGAS EXTRAIDAS:", JSON.stringify(cargas, null, 2));
-        console.log("BACKEND CARGAS FINAL:", cargas);
-        console.log("CARGAS MAP:", cargas);
+        console.log("CARGAS EXTRAIDAS:", JSON.stringify(cargasFinales, null, 2));
+        console.log("BACKEND CARGAS FINAL:", cargasFinales);
+        console.log("CARGAS MAP:", cargasFinales);
 
         const mappedResult = {
-          cargas:
-            (Array.isArray(result.cargas_detectadas) && result.cargas_detectadas.length > 0)
-              ? result.cargas_detectadas
-              : (Array.isArray(result.cargas) && result.cargas.length > 0)
-              ? result.cargas
-              : (Array.isArray(result.cargas_registrales) && result.cargas_registrales.length > 0)
-              ? result.cargas_registrales
-              : cargas,
+          cargas: cargasFinales,
           analisis: result.razonamiento_juridico || {},
           peor_escenario: {
             total: result?.razonamiento_juridico?.["4_validacion_numerica_peor_escenario"]?.total_estimado_cargas_dinerarias_subsistentes || 0,
