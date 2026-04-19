@@ -1239,9 +1239,34 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
               if (score?.scoreTotal === null) return null;
 
               return (
-                <div className="bg-white border rounded-xl p-4">
-                  <div className="text-sm text-gray-500">Puntuación de oportunidad</div>
-                  <div className="text-2xl font-bold">{score.scoreTotal} / 10</div>
+                <div className="bg-white border rounded-xl p-4 space-y-2">
+                  
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-500">Puntuación de oportunidad</span>
+                    <span className="text-lg font-semibold">{score.scoreTotal} / 10</span>
+                  </div>
+
+                  {/* Barra */}
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${
+                        score.scoreTotal >= 8
+                          ? "bg-green-500"
+                          : score.scoreTotal >= 5
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                      }`}
+                      style={{ width: `${score.scoreTotal * 10}%` }}
+                    />
+                  </div>
+
+                  {/* Explicación */}
+                  <div className="text-xs text-gray-600 space-y-1">
+                    {score.explicacion?.map((e: string, i: number) => (
+                      <div key={i}>• {e}</div>
+                    ))}
+                  </div>
+
                 </div>
               );
             })()}
