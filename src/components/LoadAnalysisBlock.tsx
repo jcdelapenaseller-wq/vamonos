@@ -170,6 +170,13 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     fuente_documento: resultData.fuente_documento || "Desconocida",
   } : null;
 
+  const totalSubsistente = safeResult?.cargas_detectadas
+    ? safeResult.cargas_detectadas
+        .filter(esSubsiste)
+        .reduce((sum: number, c: any) => sum + (c.desglose?.principal || 0), 0)
+    : 0;
+
+  // Mantenemos estas variables por si otros bloques las usan, aunque ocultemos la UI principal
   const totalSubsistenteManual = safeResult?.cargas_detectadas
     ? safeResult.cargas_detectadas
         .filter(esSubsiste)
@@ -1278,7 +1285,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
             )}
 
             {/* Qué pagarías realmente */}
-            {(peorEscenarioFinal !== undefined) && (
+            {false && (peorEscenarioFinal !== undefined) && (
               <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                 <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
                   💰 Qué pagarías realmente
@@ -1297,7 +1304,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                     <li className="flex items-center gap-2"><AlertTriangle size={16} className="text-amber-500"/> + cargas que subsisten</li>
                     <li className="flex items-center gap-2 font-bold text-slate-900 mt-2 pt-2 border-t border-slate-100">
                       {appraisalValue ? (
-                        <>Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue + peorEscenarioFinal)}</>
+                        <>Coste total estimado: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + peorEscenarioFinal)}</>
                       ) : (
                         <>Cargas a asumir: {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(peorEscenarioFinal)} (más tu puja)</>
                       )}
@@ -1358,7 +1365,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
             )}
 
             {/* Coste total estimado */}
-            {analysisType === 'completo' && (peorEscenarioFinal !== undefined) && (
+            {false && analysisType === 'completo' && (peorEscenarioFinal !== undefined) && (
               <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
                 <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
                   <Calculator size={20} className="text-brand-400" /> Coste total estimado
@@ -1397,7 +1404,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
             )}
 
             {/* Decisión de inversión - Bloque Agrupado */}
-            {analysisType === 'completo' && canCalculateFinancials && (safeResult.peor_escenario?.total !== undefined || safeResult.peor_escenario?.importe_total !== undefined) && (
+            {false && analysisType === 'completo' && canCalculateFinancials && (safeResult?.peor_escenario?.total !== undefined || safeResult?.peor_escenario?.importe_total !== undefined) && (
               <div className="bg-slate-50/50 border border-slate-200 rounded-3xl p-8 shadow-sm space-y-10">
                 <div className="text-center space-y-2">
                   <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 justify-center uppercase tracking-widest">
@@ -1726,6 +1733,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
             )}
 
             {/* Semaphore Header */}
+            {false && (
             <div className={`p-6 rounded-2xl border flex flex-col md:flex-row items-center gap-6 ${
               riesgoGlobalFinal === 'ALTO' ? 'bg-orange-50 border-orange-200 text-orange-900' :
               riesgoGlobalFinal === 'MEDIO' ? 'bg-amber-50 border-amber-200 text-amber-900' :
@@ -1747,7 +1755,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
               <div className="md:ml-auto text-center md:text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-current/20 pt-4 md:pt-0 md:pl-6 mt-2 md:mt-0">
                 <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Peor Escenario Registral</h3>
                 <p className="text-3xl font-black">{peorEscenarioFinal !== undefined ? peorEscenarioFinal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'}) : "—"}</p>
-                <p className="text-xs opacity-80 mt-1 font-medium">Impacto: {safeResult.impacto_economico.nivel}</p>
+                <p className="text-xs opacity-80 mt-1 font-medium">Impacto: {safeResult?.impacto_economico?.nivel}</p>
                 {peorEscenarioFinal === 0 ? (
                   <p className="text-xs text-emerald-700 mt-2 font-medium">✔️ Incluso en el peor caso, no asumirías cargas económicas</p>
                 ) : (
@@ -1755,6 +1763,42 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                 )}
               </div>
             </div>
+            )}
+
+            {/* Nuevo Bloque Constante de Riesgo */}
+            {safeResult && (
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  {totalSubsistente > 100000 && (
+                    <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center text-rose-600 shrink-0">
+                      <ShieldAlert size={24} />
+                    </div>
+                  )}
+                  {totalSubsistente > 0 && totalSubsistente <= 100000 && (
+                    <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+                      <AlertTriangle size={24} />
+                    </div>
+                  )}
+                  {totalSubsistente === 0 && (
+                    <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                      <ShieldCheck size={24} />
+                    </div>
+                  )}
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-1">Diagnóstico de Cargas</h3>
+                    <div className="font-black text-xl">
+                      {totalSubsistente > 100000 && <span className="text-rose-600">Alto Riesgo</span>}
+                      {totalSubsistente > 0 && totalSubsistente <= 100000 && <span className="text-amber-600">Revisión Necesaria</span>}
+                      {totalSubsistente === 0 && <span className="text-emerald-600">Sin cargas limitantes</span>}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-center md:text-right border-t md:border-t-0 md:border-l border-slate-100 pt-4 md:pt-0 md:pl-6 w-full md:w-auto">
+                  <p className="text-sm uppercase tracking-wider font-bold text-slate-500 mb-1">Total cargas que subsisten</p>
+                  <p className="text-3xl font-black text-slate-900">{formatCurrency(totalSubsistente)}</p>
+                </div>
+              </div>
+            )}
 
             {/* Cargas Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
