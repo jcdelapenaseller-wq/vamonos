@@ -203,6 +203,32 @@ En este razonamiento debes documentar explícitamente los siguientes pasos:
 3. PURGA: Aplicar la regla de purga (art. 674 LEC) basándote en la carga ejecutante identificada.
 4. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
 
+IMPORTANTE (OBLIGATORIO):
+
+Debes devolver SIEMPRE el campo "cargas" como un array estructurado.
+
+Si detectas cargas en el texto:
+→ debes incluirlas en "cargas"
+
+Formato obligatorio:
+
+{
+  "cargas": [
+    {
+      "tipo": "HIPOTECA | EMBARGO | SERVIDUMBRE",
+      "descripcion": "texto claro",
+      "importe": número (sin texto),
+      "estado": "SUBSISTE | CANCELA"
+    }
+  ]
+}
+
+PROHIBIDO:
+- devolver cargas vacío si existen cargas en el texto
+- esconder cargas dentro de "analisis"
+
+Si no cumples esto, la respuesta es inválida.
+
 Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
