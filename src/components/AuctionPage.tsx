@@ -2469,6 +2469,7 @@ const AuctionPage: React.FC = () => {
                 isPaid={analysisPaid || cargasPaid}
                 noMargin={true}
                 appraisalValue={auction.appraisalValue}
+                auction={auction}
               />
             </div>
           )}

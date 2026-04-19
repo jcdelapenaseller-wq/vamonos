@@ -78,6 +78,7 @@ interface LoadAnalysisBlockProps {
   city?: string;
   propertyType?: string;
   isStandalone?: boolean;
+  auction?: any;
 }
 
 const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({ 
@@ -96,7 +97,8 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   appraisalValue,
   city,
   propertyType,
-  isStandalone = false
+  isStandalone = false,
+  auction
 }) => {
   const [step, setStep] = useState<'locked' | 'upload' | 'loading' | 'result'>(initialData ? 'result' : initialStep);
 
@@ -869,6 +871,19 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
         : JSON.stringify(safeResult.razonamiento_juridico, null, 2))
     : "";
 
+  const valorMercadoGlobal = surface && marketPriceM2 ? surface * marketPriceM2 : 0;
+  const totalCargasGlobal = safeResult?.cargas_detectadas
+    ?.filter(esSubsiste)
+    ?.reduce((sum: number, c: any) => sum + (c.desglose?.principal || 0), 0) || 0;
+
+  const globalOpportunityScore = safeResult ? calculateOpportunityScore({
+    cargas_detectadas: safeResult.cargas_detectadas || [],
+    valorMercado: valorMercadoGlobal,
+    valorSubasta: appraisalValue || 0,
+    pujaEstimada: appraisalValue || 0,
+    ocupacion_detectada: safeResult?.ocupacion_detectada || false,
+  }) : null;
+
   console.log("FRONT RESULT DATA:", resultData);
   if (safeResult) {
     console.log("FRONT FINAL CARGAS:", safeResult.cargas_detectadas);
@@ -1225,48 +1240,312 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
         {step === 'result' && safeResult && (
           <div className="space-y-8">
+            {/* Ficha Técnica */}
+            <div className="bg-white border rounded-xl p-4 space-y-3">
+              <div className="text-sm font-semibold">
+                Ficha técnica de la subasta
+              </div>
+
+              <div className="grid grid-cols-2 gap-y-2 text-sm break-words">
+
+                <div className="text-gray-500">Identificador</div>
+                <div>{auction?.id || boeId || "—"}</div>
+
+                <div className="text-gray-500">Tipo de subasta</div>
+                <div>{auction?.auctionType || "—"}</div>
+
+                <div className="text-gray-500">Ubicación</div>
+                <div>{auction?.address || city || "—"}</div>
+
+                <div className="text-gray-500">Tipo de inmueble</div>
+                <div>{auction?.propertyType || propertyType || "—"}</div>
+
+                <div className="text-gray-500">Superficie</div>
+                <div>
+                  {auction?.surface 
+                    ? `${auction.surface} m²` 
+                    : "—"}
+                </div>
+
+                <div className="text-gray-500">Habitaciones / baño</div>
+                <div>
+                  {auction?.rooms && auction?.bathrooms
+                    ? `${auction.rooms} hab · ${auction.bathrooms} baño`
+                    : "—"}
+                </div>
+
+                <div className="text-gray-500">Año / ascensor</div>
+                <div>
+                  {auction?.yearBuilt
+                    ? `${auction.yearBuilt}${auction?.hasElevator ? " · con ascensor" : ""}`
+                    : "—"}
+                </div>
+
+                <div className="text-gray-500">Valor subasta</div>
+                <div>{auction?.valorSubasta || appraisalValue ? formatCurrency(auction?.valorSubasta || appraisalValue || 0) : "—"}</div>
+
+                <div className="text-gray-500">Cantidad reclamada</div>
+                <div>{auction?.claimedAmount || auction?.claimedDebt ? formatCurrency(auction?.claimedAmount || auction?.claimedDebt || 0) : "—"}</div>
+
+                <div className="text-gray-500">Puja mínima</div>
+                <div>{auction?.minBid ? formatCurrency(auction?.minBid) : "—"}</div>
+
+                <div className="text-gray-500">Depósito</div>
+                <div>{auction?.deposit || auction?.depositAmount ? formatCurrency(auction?.deposit || auction?.depositAmount || 0) : "—"}</div>
+
+                <div className="text-gray-500">Fecha fin</div>
+                <div>{auction?.auctionEndDate || "—"}</div>
+
+                {(safeResult as any)?.informacion_general?.fecha_documento && (
+                  <>
+                    <div className="text-gray-500">Fecha documento</div>
+                    <div>{(safeResult as any).informacion_general.fecha_documento}</div>
+                  </>
+                )}
+
+              </div>
+            </div>
+
             {/* Puntuación de Oportunidad */}
             {(() => {
-              const valorMercadoFinal = surface && marketPriceM2 ? surface * marketPriceM2 : 0;
-              const score = calculateOpportunityScore({
-                cargas_detectadas: safeResult.cargas_detectadas || [],
-                valorMercado: valorMercadoFinal,
-                valorSubasta: appraisalValue || 0,
-                pujaEstimada: appraisalValue || 0,
-                ocupacion_detectada: safeResult?.ocupacion_detectada || false,
-              });
+              const score = globalOpportunityScore;
 
-              if (score?.scoreTotal === null) return null;
+              if (score?.scoreTotal === null || score?.scoreTotal === undefined) return null;
 
               return (
-                <div className="bg-white border rounded-xl p-4 space-y-2">
-                  
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-500">Puntuación de oportunidad</span>
-                    <span className="text-lg font-semibold">{score.scoreTotal} / 10</span>
+                <>
+                  <div className="bg-white border rounded-xl p-4 space-y-2">
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Puntuación de oportunidad</span>
+                      <span className="text-lg font-semibold">{score.scoreTotal} / 10</span>
+                    </div>
+
+                    {/* Barra */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${
+                          score.scoreTotal >= 8
+                            ? "bg-green-500"
+                            : score.scoreTotal >= 5
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                        style={{ width: `${score.scoreTotal * 10}%` }}
+                      />
+                    </div>
+
+                    {/* Explicación */}
+                    <div className="text-xs text-gray-600 space-y-1">
+                      {score.explicacion?.map((e: string, i: number) => (
+                        <div key={i}>• {e}</div>
+                      ))}
+                    </div>
+
                   </div>
 
-                  {/* Barra */}
-                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${
-                        score.scoreTotal >= 8
-                          ? "bg-green-500"
-                          : score.scoreTotal >= 5
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
-                      }`}
-                      style={{ width: `${score.scoreTotal * 10}%` }}
-                    />
+                  {/* Claves de esta subasta */}
+                  <div className="bg-white border rounded-xl p-4 space-y-2">
+                    <div className="text-sm font-semibold">
+                      Claves de esta subasta
+                    </div>
+
+                    <div className="text-sm text-gray-700 space-y-1">
+                      {score.scoreTotal >= 8 && (
+                        <>
+                          <div>• Buen margen frente al valor de mercado</div>
+                          <div>• Riesgo jurídico bajo</div>
+                          <div>• Operación interesante</div>
+                        </>
+                      )}
+
+                      {score.scoreTotal >= 5 && score.scoreTotal < 8 && (
+                        <>
+                          <div>• Margen ajustado</div>
+                          <div>• Requiere analizar cargas y estrategia</div>
+                          <div>• Puede ser interesante con buena puja</div>
+                        </>
+                      )}
+
+                      {score.scoreTotal < 5 && (
+                        <>
+                          <div>• Riesgo elevado o baja rentabilidad</div>
+                          <div>• Cargas o incertidumbres relevantes</div>
+                          <div>• Solo recomendable para perfiles expertos</div>
+                        </>
+                      )}
+                    </div>
                   </div>
 
-                  {/* Explicación */}
-                  <div className="text-xs text-gray-600 space-y-1">
-                    {score.explicacion?.map((e: string, i: number) => (
-                      <div key={i}>• {e}</div>
-                    ))}
+                  {/* CTAs Premium */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* CTA 1 — CONSULTORÍA */}
+                    <a
+                      href="https://calendly.com/activosoffmarket"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group border rounded-xl p-5 bg-white hover:shadow-md transition"
+                    >
+                      <div className="text-sm text-gray-500 mb-1">
+                        Revisión profesional
+                      </div>
+                      <div className="text-lg font-semibold mb-2">
+                        Revisión jurídica experta
+                      </div>
+                      <div className="text-sm text-gray-600 mb-4">
+                        Analizamos contigo esta subasta concreta, riesgos reales y hasta dónde pujar sin perder dinero.
+                      </div>
+                      <div className="text-sm font-medium text-black group-hover:underline">
+                        Reservar asesoría →
+                      </div>
+                    </a>
+
+                    {/* CTA 2 — CALCULADORA */}
+                    <a
+                      href="/calculadora-subastas"
+                      className="group border rounded-xl p-5 bg-black text-white hover:opacity-90 transition"
+                    >
+                      <div className="text-sm text-gray-300 mb-1">
+                        Herramienta
+                      </div>
+                      <div className="text-lg font-semibold mb-2">
+                        Calcular puja máxima
+                      </div>
+                      <div className="text-sm text-gray-300 mb-4">
+                        Calcula ahora mismo tu puja máxima segura según mercado y cargas detectadas.
+                      </div>
+                      <div className="text-sm font-medium group-hover:underline">
+                        Ir a la calculadora →
+                      </div>
+                    </a>
                   </div>
 
+                  {/* Bloque 1 — Análisis Jurídico (Desplegable) */}
+                  <details className="bg-white border rounded-xl p-4">
+                    <summary className="cursor-pointer font-medium text-sm">
+                      Ver análisis jurídico detallado
+                    </summary>
+
+                    <div className="mt-4 text-sm text-gray-700 space-y-4">
+                      <div>
+                        <strong>Situación registral</strong>
+                        <div>
+                          {(safeResult?.razonamiento_juridico as any)?.situacion || "Información no disponible"}
+                        </div>
+                      </div>
+
+                      <div>
+                        <strong>Cargas identificadas</strong>
+                        <div>
+                          {safeResult?.cargas_detectadas?.length
+                            ? `Se han identificado ${safeResult.cargas_detectadas.length} cargas en el expediente.`
+                            : "No se han detectado cargas relevantes."}
+                        </div>
+                      </div>
+
+                      <div>
+                        <strong>Implicación para el comprador</strong>
+                        <div>
+                          {(safeResult as any)?.analisis?.implicacion || "Revisar documentación para determinar impacto real."}
+                        </div>
+                      </div>
+                    </div>
+                  </details>
+
+                  {/* Bloque 2 — Conclusión Final */}
+                  <div className="bg-black text-white rounded-xl p-5 space-y-3">
+                    <div className="text-sm opacity-70">
+                      Conclusión
+                    </div>
+
+                    <div className="text-base font-semibold">
+                      {score?.scoreTotal !== undefined && score.scoreTotal !== null && (
+                        <>
+                          {score.scoreTotal >= 8 && "Operación muy interesante con buen equilibrio entre riesgo y rentabilidad."}
+                          {score.scoreTotal >= 5 && score.scoreTotal < 8 && "Operación viable, pero requiere prudencia en la puja."}
+                          {score.scoreTotal < 5 && "Operación con riesgo elevado. Solo recomendable para perfiles expertos."}
+                        </>
+                      )}
+                    </div>
+
+                    <div className="text-sm opacity-80">
+                      {totalCargasGlobal > 0
+                        ? `El comprador deberá considerar cargas por ${formatCurrency(totalCargasGlobal)} en el coste final.`
+                        : "No se detectan cargas económicas relevantes en el expediente."}
+                    </div>
+                  </div>
+                </>
+              );
+            })()}
+
+            {/* Valoración de la oportunidad */}
+            <div className="bg-white border rounded-xl p-4 space-y-3">
+              <div className="text-sm font-semibold">
+                Valoración de la oportunidad
+              </div>
+
+              {/* VALOR MERCADO */}
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Valor estimado mercado</span>
+                <span>
+                  {auction?.marketPriceM2 && auction?.surface
+                    ? formatCurrency(auction.marketPriceM2 * auction.surface)
+                    : "—"}
+                </span>
+              </div>
+
+              {/* VALOR SUBASTA */}
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Valor subasta</span>
+                <span>{auction?.valorSubasta ? formatCurrency(auction.valorSubasta) : "—"}</span>
+              </div>
+
+              {/* DIFERENCIA */}
+              <div className="flex justify-between text-sm font-medium">
+                <span>Diferencia estimada</span>
+                <span>
+                  {auction?.marketPriceM2 && auction?.surface && auction?.valorSubasta
+                    ? formatCurrency(
+                        (auction.marketPriceM2 * auction.surface) - auction.valorSubasta
+                      )
+                    : "—"}
+                </span>
+              </div>
+            </div>
+
+            {/* Estrategia de puja orientativa */}
+            {(() => {
+              const valorMercado = auction?.marketPriceM2 && auction?.surface 
+                ? auction.marketPriceM2 * auction.surface 
+                : 0;
+
+              const totalCargas = totalCargasGlobal;
+
+              const score = globalOpportunityScore;
+
+              let factor = 0.7;
+              if (score?.scoreTotal !== null && score?.scoreTotal !== undefined) {
+                if (score.scoreTotal >= 8) factor = 0.75;
+                else if (score.scoreTotal >= 5) factor = 0.7;
+                else factor = 0.6;
+              }
+
+              const pujaBase = valorMercado * factor;
+              const pujaAjustada = pujaBase - totalCargas;
+
+              return (
+                <div className="bg-black text-white rounded-xl p-4 space-y-2">
+                  <div className="text-sm font-semibold">
+                    Estrategia de puja orientativa
+                  </div>
+
+                  <div className="text-lg font-bold">
+                    {valorMercado ? formatCurrency(Math.max(pujaAjustada, 0)) : "—"}
+                  </div>
+
+                  <div className="text-xs text-gray-300">
+                    Estimación ajustada considerando cargas detectadas. Revisar antes de pujar.
+                  </div>
                 </div>
               );
             })()}
