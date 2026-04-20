@@ -1678,7 +1678,9 @@ const AuctionPage: React.FC = () => {
     return <Navigate to={ROUTES.HOME} replace />;
   }
 
-  if (postPaymentState.active && auction) {
+  const isTestMode = new URLSearchParams(window.location.search).get("session_id") === "test";
+
+  if (postPaymentState.active && auction && !isTestMode) {
     return (
       <div className="bg-slate-50 min-h-screen flex items-center justify-center flex-col">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mb-4"></div>
@@ -1687,7 +1689,14 @@ const AuctionPage: React.FC = () => {
     );
   }
 
-  const isTestMode = new URLSearchParams(window.location.search).get("session_id") === "test";
+  console.log("RENDER GATE", {
+    isGenerating,
+    isUnlocked,
+    analysisPaid,
+    cargasPaid,
+    isTestMode: new URLSearchParams(window.location.search).get("session_id") === "test",
+    postPaymentStateActive: postPaymentState.active
+  });
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
