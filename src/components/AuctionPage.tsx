@@ -267,10 +267,12 @@ const AuctionPage: React.FC = () => {
   }, [note, cleanSlug]);
 
   const generateAnalysis = async (type: string, sessionId: string) => {
+    console.log("[generateAnalysis] 1. INICIO - type:", type, "sessionId:", sessionId);
     setIsGenerating(true);
     setShowPaymentModal(false);
     setShowPremiumModal(false);
     try {
+      console.log("[generateAnalysis] 2. Ejecutando fetch a /api/generate-analysis...");
       const response = await fetch(`/api/generate-analysis?session_id=${sessionId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -279,24 +281,45 @@ const AuctionPage: React.FC = () => {
           type: type
         })
       });
+      console.log("[generateAnalysis] 3. Fetch completado - status:", response.status, "ok:", response.ok);
 
       if (response.status === 403) {
         toast.error("El pago no pudo validarse. Contacta soporte.");
-        setIsGenerating(false);
+        console.log("[generateAnalysis] 3b. Abortando por 403 (return prematuro)");
         return;
       }
 
-      const data = await response.json();
+      console.log("[generateAnalysis] 4. Ejecutando response.json()...");
+      let data;
+      try {
+        data = await response.json();
+        console.log("[generateAnalysis] 5. JSON parseado correctamente data.ok:", data?.ok);
+      } catch (e) {
+        console.error("JSON PARSE ERROR", e);
+        data = {
+          error: true,
+          recomendacion: "No se ha podido procesar el informe automáticamente. Puedes solicitar revisión manual."
+        };
+      }
       
-      if (data.ok) {
+      if (data?.ok) {
         toast.success("Pago confirmado. Generando informe...");
         setPostPaymentState({ active: true, type: type });
       } else {
-        setAnalysisResult(data);
-        setIsGenerating(false);
+        if (!data || data.error) {
+          setAnalysisResult({
+            error: true,
+            cargas: [],
+            recomendacion: data?.recomendacion || "Error en el análisis"
+          });
+        } else {
+          setAnalysisResult(data);
+        }
       }
     } catch (error) {
-      console.error('Error generating analysis:', error);
+      console.error('[generateAnalysis] ERROR capturado:', error);
+    } finally {
+      console.log("[generateAnalysis] 6. Ejecutando finally -> setIsGenerating(false)");
       setIsGenerating(false);
     }
   };
@@ -311,12 +334,35 @@ const AuctionPage: React.FC = () => {
       const cargasParam = params.get('cargas');
       const sessionIdParam = params.get('session_id');
 
+      if (isTestMode) {
+        console.log("[TEST] forcing unlocked state");
+        setAnalysisPaid(true);
+        setCargasPaid(true);
+        setShowPaymentModal(false);
+        setShowPremiumModal(false);
+      }
+
+      console.log("[DIAG] === useEffect start ===");
+      console.log("[DIAG] Vars:", {
+        analysisParam, 
+        sessionIdParam, 
+        isTestMode, 
+        analysisPaid, 
+        cargasPaid, 
+        isGenerating, 
+        analysisResult: !!analysisResult 
+      });
+
+      console.log("[DIAG] BEFORE IF 1 (Test Mode)");
       if (isTestMode && !analysisResult && !isGenerating) {
+        console.log("[DIAG] INSIDE IF 1 (Test Mode)");
         console.log("TEST MODE: forcing analysis");
         generateAnalysis("completo", "test");
       }
 
-      if (analysisParam && sessionIdParam && !isGenerating && !analysisResult) {
+      console.log("[DIAG] BEFORE IF 2 (Generate)");
+      if (!isTestMode && analysisParam && sessionIdParam && !isGenerating && !analysisResult) {
+        console.log("[DIAG] INSIDE IF 2 (Generate)");
         generateAnalysis(analysisParam, sessionIdParam);
       }
       
@@ -324,7 +370,9 @@ const AuctionPage: React.FC = () => {
       let shouldScrollToAnalysis = false;
       let shouldScrollToCargas = false;
 
+      console.log("[DIAG] BEFORE IF 3 (Unlock Analysis)");
       if (analysisParam === 'unlocked' || analysisParam === 'paid') {
+        console.log("[DIAG] INSIDE IF 3 (Unlock Analysis)");
         sessionStorage.setItem(`analysisPaid_${auctionId}`, 'true');
         sessionStorage.setItem(`analysisPaid_${auctionId}_time`, Date.now().toString());
         setAnalysisPaid(true);
@@ -338,7 +386,9 @@ const AuctionPage: React.FC = () => {
         window.history.replaceState({}, document.title, newUrl);
       }
 
+      console.log("[DIAG] BEFORE IF 4 (Unlock Cargas)");
       if (cargasParam === 'unlocked' || cargasParam === 'paid') {
+        console.log("[DIAG] INSIDE IF 4 (Unlock Cargas)");
         sessionStorage.setItem(`cargasPaid_${auctionId}`, 'true');
         sessionStorage.setItem(`cargasPaid_${auctionId}_time`, Date.now().toString());
         setCargasPaid(true);
@@ -351,7 +401,9 @@ const AuctionPage: React.FC = () => {
         window.history.replaceState({}, document.title, newUrl);
       }
 
+      console.log("[DIAG] BEFORE IF 5 (Open Boe)");
       if (params.get('openBoe') === 'true' && user?.id && auction) {
+        console.log("[DIAG] INSIDE IF 5 (Open Boe)");
         const boeUrl = auction.boeUrl || `https://subastas.boe.es/detalle_subasta.php?idSub=${auction.boeId}`;
         window.open(boeUrl, '_blank');
         
@@ -360,7 +412,9 @@ const AuctionPage: React.FC = () => {
         window.history.replaceState({}, document.title, newUrl);
       }
 
+      console.log("[DIAG] BEFORE IF 6 (Scroll)");
       if (shouldScrollToAnalysis || analysisPaid || shouldScrollToCargas || cargasPaid) {
+        console.log("[DIAG] INSIDE IF 6 (Scroll)");
         setTimeout(() => {
           const element = document.getElementById('analisis-tecnico');
           if (element) {
@@ -492,7 +546,7 @@ const AuctionPage: React.FC = () => {
         const result = await getAuctionValuation(auction);
         setValuationResult(result);
       } catch (e) {
-        console.error('Error loading valuation:', e);
+        console.warn("Valuation failed, continuing", e);
       }
     };
     loadValuation();
