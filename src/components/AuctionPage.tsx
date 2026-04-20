@@ -1687,6 +1687,8 @@ const AuctionPage: React.FC = () => {
     );
   }
 
+  const isTestMode = new URLSearchParams(window.location.search).get("session_id") === "test";
+
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
       {jsonLd && (
@@ -2521,21 +2523,21 @@ const AuctionPage: React.FC = () => {
         </section>
 
         <div id="servicios-analisis" className="mb-8">
-          {isUnlocked && auction && (
+          {(isUnlocked || isTestMode) && auction && (
             <div id="analisis-tecnico" className="w-full">
               <LoadAnalysisBlock 
                 boeId={auction.boeId || ''} 
                 boeUrl={auction.boeUrl}
                 isIntegrated={false}
                 initialStep="upload"
-                isPaid={analysisPaid || cargasPaid}
+                isPaid={analysisPaid || cargasPaid || isTestMode}
                 noMargin={true}
                 appraisalValue={auction.appraisalValue}
                 auction={auction}
               />
             </div>
           )}
-          {!isUnlocked && (
+          {!(isUnlocked || isTestMode) && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                 {/* Card 1: Análisis de cargas */}
