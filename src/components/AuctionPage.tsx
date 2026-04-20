@@ -305,8 +305,11 @@ const AuctionPage: React.FC = () => {
       }
       
       if (data?.ok) {
-        toast.success("Pago confirmado. Generando informe...");
-        setPostPaymentState({ active: true, type: type });
+        const isTestMode = sessionId === "test";
+        if (!isTestMode) {
+          toast.success("Pago confirmado. Generando informe...");
+          setPostPaymentState({ active: true, type: type });
+        }
       } else {
         if (!data || data.error) {
           setAnalysisResult({
