@@ -371,7 +371,7 @@ const AuctionPage: React.FC = () => {
     } catch (e) {
       console.error("Error handling analysis unlock logic:", e);
     }
-  }, [auctionId, analysisPaid, cargasPaid, user, auction]);
+  }, [auctionId, analysisPaid, cargasPaid, user, auction, analysisResult, isGenerating]);
 
   const approximateCoords = useMemo(() => {
     if (!auction?.lat || !auction?.lng) return null;
