@@ -306,9 +306,15 @@ const AuctionPage: React.FC = () => {
 
     try {
       const params = new URLSearchParams(window.location.search);
+      const isTestMode = params.get("session_id") === "test";
       const analysisParam = params.get('analysis');
       const cargasParam = params.get('cargas');
       const sessionIdParam = params.get('session_id');
+
+      if (isTestMode && !analysisResult && !isGenerating) {
+        console.log("TEST MODE: forcing analysis");
+        generateAnalysis("completo", "test");
+      }
 
       if (analysisParam && sessionIdParam && !isGenerating && !analysisResult) {
         generateAnalysis(analysisParam, sessionIdParam);
