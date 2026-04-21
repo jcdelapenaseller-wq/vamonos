@@ -1295,7 +1295,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                 <div>{auction?.id || boeId || "—"}</div>
 
                 <div className="text-gray-500">Tipo de subasta</div>
-                <div>{auction?.auctionType || "—"}</div>
+                <div>{auction?.procedureType ?? auction?.auctionType ?? "—"}</div>
 
                 <div className="text-gray-500">Ubicación</div>
                 <div>{getFichaValue((safeResult as any)?.informacion_general?.direccion, auction?.address || city)}</div>
@@ -1332,13 +1332,13 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                 <div>{auction?.claimedAmount || auction?.claimedDebt ? formatCurrency(auction?.claimedAmount || auction?.claimedDebt || 0) : "—"}</div>
 
                 <div className="text-gray-500">Puja mínima</div>
-                <div>{auction?.minBid ? formatCurrency(auction?.minBid) : "—"}</div>
+                <div>{auction?.minBid != null ? formatCurrency(auction.minBid) : "—"}</div>
 
                 <div className="text-gray-500">Depósito</div>
-                <div>{auction?.deposit || auction?.depositAmount ? formatCurrency(auction?.deposit || auction?.depositAmount || 0) : "—"}</div>
+                <div>{(auction?.deposito ?? auction?.deposit ?? auction?.depositAmount) != null ? formatCurrency(auction?.deposito ?? auction?.deposit ?? auction?.depositAmount) : "—"}</div>
 
                 <div className="text-gray-500">Fecha fin</div>
-                <div>{auction?.auctionEndDate || "—"}</div>
+                <div>{auction?.auctionDate ?? auction?.auctionEndDate ?? "—"}</div>
 
                 {(safeResult as any)?.informacion_general?.fecha_documento && (
                   <>

@@ -274,7 +274,8 @@ Formato obligatorio:
 {
   "cargas": [ ... ],
   "recomendacion": "...",
-  "resumen_ejecutivo": "texto largo aquí"
+  "resumen_ejecutivo": "texto largo aquí",
+  "informacion_general": { ... }
 }
 
 ---
@@ -304,8 +305,18 @@ Formato obligatorio:
       "importe": número (sin texto),
       "estado": "SUBSISTE | CANCELA"
     }
-  ]
+  ],
+  "informacion_general": {
+    "superficie": "number | null (en m² si aparece)",
+    "habitaciones": "number | null (número)",
+    "banos": "number | null (número)",
+    "ano_construccion": "number | null (año si aparece)",
+    "ascensor": "boolean | null (true/false si se puede inferir)"
+  }
 }
+
+Devuelve también un objeto adicional llamado "informacion_general" con los campos extraídos del documento si están disponibles.
+Si no se encuentra un dato, devolver null. No inventar valores.
 
 PROHIBIDO:
 - devolver cargas vacío si existen cargas en el texto
@@ -455,6 +466,7 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
           alertas: result.valoracion_general?.riesgo_juridico || "",
           recomendacion: result.recomendacion || {},
           resumen_ejecutivo: result.resumen_ejecutivo || "",
+          informacion_general: result.informacion_general || {},
           resumen_juridico: result.razonamiento_juridico || {},
           razonamiento_juridico: result.razonamiento_juridico || {},
           valoracion: result.valoracion_general || {},
