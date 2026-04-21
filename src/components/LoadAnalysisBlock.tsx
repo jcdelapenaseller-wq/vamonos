@@ -209,6 +209,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
           : "BAJO");
 
   if (resultData) {
+    console.log("INFO GENERAL:", safeResult?.informacion_general);
     console.log("2. STATE resultData:", resultData);
     console.log("3. SAFE RESULT:", safeResult);
     console.log("4. UI cargas:", safeResult?.cargas_detectadas);
