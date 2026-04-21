@@ -78,6 +78,11 @@ function validateAnalysis(data: any) {
 }
 
 export default async function handler(req: any, res: any) {
+  console.log("RUN-ANALYSIS START");
+  console.log("HEADERS:", req.headers);
+  console.log("BODY TYPE:", typeof req.body);
+  console.log("FILE:", req.file);
+
   // Parse multipart/form-data
   await runMiddleware(req, res, upload.single('files'));
 

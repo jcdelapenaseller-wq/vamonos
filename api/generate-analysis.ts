@@ -17,7 +17,22 @@ export default async function handler(req: any, res: any) {
     }
 
     if (session_id === 'test') {
-      return res.status(200).json({ ok: true, test: true });
+      console.log("TEST MODE: forwarding to run-analysis");
+
+      // Reenviar la request al endpoint real de análisis
+      // Aseguramos JSON.stringify y un fallback de URL para no romper el fetch nativo de Node
+      const response = await fetch(`${process.env.BASE_URL || process.env.APP_URL || 'http://localhost:3000'}/api/run-analysis`, {
+        method: 'POST',
+        body: JSON.stringify(req.body),
+        headers: {
+          ...req.headers,
+          'content-type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      return res.status(200).json(data);
     }
 
     if (usedSessions.has(session_id as string)) {
