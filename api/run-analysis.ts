@@ -60,7 +60,7 @@ function validateAnalysis(data: any) {
 
   data.cargas.forEach((c: any, i: number) => {
     if (!c.tipo) throw new Error(`carga ${i} missing tipo`);
-    if (typeof c.importe !== "number") throw new Error(`carga ${i} importe must be number`);
+    if (c.importe !== null && typeof c.importe !== "number") throw new Error(`carga ${i} importe must be number`);
     if (!["SUBSISTE", "CANCELA"].includes(c.estado)) {
       throw new Error(`carga ${i} estado inválido`);
     }
