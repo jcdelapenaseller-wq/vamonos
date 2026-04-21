@@ -52,13 +52,20 @@ function extractJson(text: string) {
 }
 
 function validateAnalysis(data: any) {
-  if (!data) throw new Error("Empty response");
+  if (!data || typeof data !== "object") {
+    return {
+      cargas: [],
+      recomendacion: {},
+      resumen_ejecutivo: ""
+    };
+  }
 
   if (!Array.isArray(data.cargas)) {
     throw new Error("cargas must be array");
   }
 
   data.cargas.forEach((c: any, i: number) => {
+    console.log("VALIDATING CARGA:", c);
     if (!c.tipo) throw new Error(`carga ${i} missing tipo`);
     if (c.importe !== null && typeof c.importe !== "number") throw new Error(`carga ${i} importe must be number`);
     if (!["SUBSISTE", "CANCELA"].includes(c.estado)) {
@@ -66,13 +73,8 @@ function validateAnalysis(data: any) {
     }
   });
 
-  if (!data.recomendacion) {
-    throw new Error("missing recomendacion");
-  }
-
-  if (!data.resumen_ejecutivo) {
-    throw new Error("missing resumen_ejecutivo");
-  }
+  data.recomendacion = data.recomendacion || {};
+  data.resumen_ejecutivo = data.resumen_ejecutivo || "";
 
   return data;
 }
@@ -390,7 +392,9 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
       let result;
       try {
         const parsedJson = JSON.parse(clean);
-        const data = validateAnalysis(parsedJson?.informe_subasta_inmueble || parsedJson);
+        const cleanJson = parsedJson?.informe_subasta_inmueble || parsedJson;
+        console.log("JSON BEFORE VALIDATION:", cleanJson);
+        const data = validateAnalysis(cleanJson);
         
         console.log("GEMINI CARGAS RAW:", data.cargas);
         
@@ -462,7 +466,8 @@ Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
         console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
         return res.status(200).json(mappedResult);
       } catch (e) {
-        console.error("VALIDATION ERROR:", e);
+        console.error("VALIDATION ERROR EXACT:", e);
+        console.error("FALLBACK CAUSE:", e);
         return res.status(200).json({
           cargas: [],
           recomendacion: {
