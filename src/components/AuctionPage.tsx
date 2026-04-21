@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo, useContext } from 'react';
+import React, { useEffect, useState, useMemo, useContext, useRef } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
@@ -152,6 +152,7 @@ const AuctionPage: React.FC = () => {
   }, [auctionId]);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [analysisResult, setAnalysisResult] = React.useState<any>(null);
+  const hasTriggeredAnalysisRef = useRef(false);
 
   // Load analysis result from sessionStorage if available
   useEffect(() => {
@@ -359,7 +360,8 @@ const AuctionPage: React.FC = () => {
       });
 
       console.log("[DIAG] BEFORE IF 1 (Test Mode)");
-      if (isTestMode && !analysisResult && !isGenerating) {
+      if (isTestMode && !hasTriggeredAnalysisRef.current) {
+        hasTriggeredAnalysisRef.current = true;
         console.log("[DIAG] INSIDE IF 1 (Test Mode)");
         console.log("TEST MODE: forcing analysis");
         generateAnalysis("completo", "test");
