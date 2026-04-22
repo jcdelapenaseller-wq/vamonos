@@ -1,7 +1,6 @@
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 import multer from 'multer';
-import { AUCTIONS } from '../src/data/auctions';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -135,7 +134,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // Obtener datos de la subasta si existen
-    const auction = auctionId ? (AUCTIONS as any)[auctionId] : null;
+    const auction = null;
     const claimedDebt = auction?.claimedDebt;
 
     let auctionContext = "";
