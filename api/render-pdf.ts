@@ -290,7 +290,7 @@ export default async function handler(req: any, res: any) {
 
     res.setHeader('Content-Type', 'application/pdf');
     const filenameId = auction?.id || auction?.boeId || 'subasta';
-    res.setHeader('Content-Disposition', \`attachment; filename="informe-\${filenameId}.pdf"\`);
+    res.setHeader('Content-Disposition', `attachment; filename="informe-${filenameId}.pdf"`);
     return res.send(Buffer.from(pdfBuffer));
   } catch (error: any) {
     console.error('Error generating PDF with Puppeteer:', error);
