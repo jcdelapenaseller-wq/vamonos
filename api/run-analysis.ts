@@ -134,7 +134,7 @@ export default async function handler(req: any, res: any) {
     }
 
     // Obtener datos de la subasta si existen
-    const auction = null;
+    const auction: any = null;
     const claimedDebt = auction?.claimedDebt;
 
     let auctionContext = "";
