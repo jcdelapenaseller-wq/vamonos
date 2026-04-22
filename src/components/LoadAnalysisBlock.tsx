@@ -123,6 +123,10 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   
   const session_id = boeId; // alias explicitly
   
+  const fullLocation = [auction?.address, auction?.city, auction?.province]
+    .filter(Boolean)
+    .join(", ");
+  
   const formatCurrency = (val: number) => 
     new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
 
@@ -1298,7 +1302,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                 <div>{auction?.procedureType ?? auction?.auctionType ?? "—"}</div>
 
                 <div className="text-gray-500">Ubicación</div>
-                <div>{getFichaValue((safeResult as any)?.informacion_general?.direccion, auction?.address || city)}</div>
+                <div>{fullLocation || "—"}</div>
 
                 <div className="text-gray-500">Tipo de inmueble</div>
                 <div>{getFichaValue((safeResult as any)?.informacion_general?.tipo_inmueble, auction?.propertyType || propertyType)}</div>
@@ -1311,19 +1315,29 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                   })()}
                 </div>
 
-                <div className="text-gray-500">Habitaciones / baño</div>
-                <div>
-                  {auction?.rooms && auction?.bathrooms
-                    ? `${auction.rooms} hab · ${auction.bathrooms} baño`
-                    : "—"}
-                </div>
+                {(auction?.rooms != null || auction?.bathrooms != null) && (
+                  <>
+                    <div className="text-gray-500">Habitaciones / baño</div>
+                    <div>
+                      {[
+                        auction?.rooms != null ? `${auction.rooms} hab` : null,
+                        auction?.bathrooms != null ? `${auction.bathrooms} baño` : null
+                      ].filter(x => x !== null).join(' · ')}
+                    </div>
+                  </>
+                )}
 
-                <div className="text-gray-500">Año / ascensor</div>
-                <div>
-                  {auction?.yearBuilt
-                    ? `${auction.yearBuilt}${auction?.hasElevator ? " · con ascensor" : ""}`
-                    : "—"}
-                </div>
+                {(auction?.yearBuilt != null || auction?.hasElevator != null) && (
+                  <>
+                    <div className="text-gray-500">Año / ascensor</div>
+                    <div>
+                      {[
+                        auction?.yearBuilt != null ? auction.yearBuilt : null,
+                        auction?.hasElevator != null ? (auction.hasElevator ? "con ascensor" : "sin ascensor") : null
+                      ].filter(x => x !== null).join(' · ')}
+                    </div>
+                  </>
+                )}
 
                 <div className="text-gray-500">Valor subasta</div>
                 <div>{auction?.valorSubasta || appraisalValue ? formatCurrency(auction?.valorSubasta || appraisalValue || 0) : "—"}</div>
@@ -1332,7 +1346,7 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                 <div>{auction?.claimedAmount || auction?.claimedDebt ? formatCurrency(auction?.claimedAmount || auction?.claimedDebt || 0) : "—"}</div>
 
                 <div className="text-gray-500">Puja mínima</div>
-                <div>{auction?.minBid != null ? formatCurrency(auction.minBid) : "—"}</div>
+                <div>{(auction?.minBid ?? auction?.minimumBid ?? auction?.pujaMinima ?? auction?.valorMinimoPuja) != null ? formatCurrency(auction?.minBid ?? auction?.minimumBid ?? auction?.pujaMinima ?? auction?.valorMinimoPuja) : "—"}</div>
 
                 <div className="text-gray-500">Depósito</div>
                 <div>{(auction?.deposito ?? auction?.deposit ?? auction?.depositAmount) != null ? formatCurrency(auction?.deposito ?? auction?.deposit ?? auction?.depositAmount) : "—"}</div>
@@ -1539,14 +1553,28 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
               </div>
 
               {/* VALOR MERCADO */}
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Valor estimado mercado</span>
-                <span>
-                  {auction?.marketPriceM2 && auction?.surface
-                    ? formatCurrency(auction.marketPriceM2 * auction.surface)
-                    : "—"}
-                </span>
-              </div>
+              {(() => {
+                const surfaceToUse = (safeResult as any)?.informacion_general?.superficie || surface || auction?.surface;
+                if (!surfaceToUse) return null;
+
+                const cityForTable = (city || auction?.city || "").toLowerCase();
+                let tablePrice = 1800;
+                if (cityForTable.includes("madrid")) tablePrice = 3200;
+                else if (cityForTable.includes("barcelona")) tablePrice = 3500;
+                else if (cityForTable.includes("valencia")) tablePrice = 1800;
+                else if (cityForTable.includes("sevilla")) tablePrice = 1700;
+
+                // @ts-ignore
+                const vValue = typeof valuationResult !== 'undefined' ? valuationResult?.marketValue : null;
+                const finalMarketValue = vValue || (surfaceToUse * tablePrice);
+
+                return (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Valor estimado mercado</span>
+                    <span>{formatCurrency(finalMarketValue)}</span>
+                  </div>
+                );
+              })()}
 
               {/* VALOR SUBASTA */}
               <div className="flex justify-between text-sm">
@@ -1555,16 +1583,30 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
               </div>
 
               {/* DIFERENCIA */}
-              <div className="flex justify-between text-sm font-medium">
-                <span>Diferencia estimada</span>
-                <span>
-                  {auction?.marketPriceM2 && auction?.surface && auction?.valorSubasta
-                    ? formatCurrency(
-                        (auction.marketPriceM2 * auction.surface) - auction.valorSubasta
-                      )
-                    : "—"}
-                </span>
-              </div>
+              {(() => {
+                const surfaceToUse = (safeResult as any)?.informacion_general?.superficie || surface || auction?.surface;
+                const auctionVal = auction?.valorSubasta || appraisalValue;
+                if (!surfaceToUse || !auctionVal) return null;
+
+                const cityForTable = (city || auction?.city || "").toLowerCase();
+                let tablePrice = 1800;
+                if (cityForTable.includes("madrid")) tablePrice = 3200;
+                else if (cityForTable.includes("barcelona")) tablePrice = 3500;
+                else if (cityForTable.includes("valencia")) tablePrice = 1800;
+                else if (cityForTable.includes("sevilla")) tablePrice = 1700;
+
+                // @ts-ignore
+                const vValue = typeof valuationResult !== 'undefined' ? valuationResult?.marketValue : null;
+                const finalMarketValue = vValue || (surfaceToUse * tablePrice);
+                const diferencia = finalMarketValue - auctionVal;
+
+                return (
+                  <div className="flex justify-between text-sm font-medium">
+                    <span>Diferencia estimada</span>
+                    <span>{formatCurrency(diferencia)}</span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Estrategia de puja orientativa */}

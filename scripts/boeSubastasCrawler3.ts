@@ -150,7 +150,7 @@ async function runCrawler() {
           for (const res of provinceResults) {
             if (!processedSlugs.has(res.urlDetalle)) {
               processedSlugs.add(res.urlDetalle);
-              if(currentPage === 2) allAuctions.push({ ...res, provinceText: province.text });
+              allAuctions.push({ ...res, provinceText: province.text });
             }
           }
 
@@ -167,9 +167,14 @@ async function runCrawler() {
             try {
               await Promise.all([
                 nextPageLink.click(),
-                page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 }),
-                page.waitForSelector('ul.resultado-busqueda li', { timeout: 30000 })
+                page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 45000 })
               ]);
+              try {
+                await page.waitForSelector('ul.resultado-busqueda li', { timeout: 15000 });
+              } catch (selectErr) {
+                console.warn("Reintentando espera de resultados (selector fallido)...");
+                await new Promise(r => setTimeout(r, 5000)); // Esperar más tiempo
+              }
               currentPage++;
             } catch (navError) {
               console.warn(` - Error al navegar a la siguiente página en ${province.text}: ${(navError as any).message}`);
@@ -263,8 +268,10 @@ async function runCrawler() {
             var fechaInicio = getVal('Fecha de inicio');
             var fechaFin = getVal('Fecha de conclusión') || getVal('Fecha de fin');
             var estadoSubasta = getVal('Estado') || 'Celebrándose';
+            var pujaMinima = getVal('Puja mínima') || getVal('Tramos entre pujas');
+            console.log("PUJA MINIMA RAW:", pujaMinima);
 
-            return { valorSubasta: valorSubasta, valorTasacion: valorTasacion, cantidadReclamada: cantidadReclamada, deposito: deposito, fechaInicio: fechaInicio, fechaFin: fechaFin, estadoSubasta: estadoSubasta };
+            return { valorSubasta: valorSubasta, valorTasacion: valorTasacion, cantidadReclamada: cantidadReclamada, deposito: deposito, fechaInicio: fechaInicio, fechaFin: fechaFin, estadoSubasta: estadoSubasta, pujaMinima: pujaMinima };
           })()
         `) as any;
 
@@ -341,6 +348,7 @@ async function runCrawler() {
         const deudaNum = parseNumber(generalData.cantidadReclamada as string);
         const depositoNum = parseNumber(generalData.deposito as string);
         const superficieNum = parseNumber(bienesData.superficie as string);
+        const pujaMinimaNum = parseNumber(generalData.pujaMinima as string);
 
         // Funciones de limpieza y normalización
         const toTitleCase = (str: string): string => {
@@ -490,6 +498,7 @@ async function runCrawler() {
             zone,
             superficie: superficieNum,
             cargas: bienesData.cargas,
+            minBid: pujaMinimaNum ?? null,
             opportunityScore,
           });
         } else {
@@ -617,6 +626,7 @@ async function runCrawler() {
     valorSubasta: ${s.valorSubasta || 'undefined'},
     valorTasacion: ${s.valorTasacion || 'undefined'},
     deposito: ${s.deposito || 'undefined'},
+    minBid: ${s.minBid ?? 'undefined'},
     procedureType: "${s.autoridad.replace(/"/g, '\\"')}",
     surface: ${s.superficie || 'undefined'},
     description: "${desc.replace(/"/g, '\\"').replace(/\n/g, ' ')}",

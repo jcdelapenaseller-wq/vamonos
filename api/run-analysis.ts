@@ -1,6 +1,7 @@
 // import auctions from '../src/data/auctions.json' assert { type: 'json' };
 
 import multer from 'multer';
+import { AUCTIONS } from '../src/data/auctions';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -134,12 +135,26 @@ export default async function handler(req: any, res: any) {
     }
 
     // Obtener datos de la subasta si existen
-    // const auction = auctionId ? (auctions as any)[auctionId] : null;
-    // const claimedDebt = auction?.claimedDebt;
-    const claimedDebt: any = null;
+    const auction = auctionId ? (AUCTIONS as any)[auctionId] : null;
+    const claimedDebt = auction?.claimedDebt;
+
+    let auctionContext = "";
+    if (auction) {
+      auctionContext = `
+DATOS DE LA SUBASTA (fuente BOE):
+- Valor de subasta: ${auction.valorSubasta ?? 'No especificado'}
+- Puja mínima: ${auction.minBid ?? 'No especificado'}
+- Ciudad: ${auction.city ?? 'No especificada'}
+- Tipo de activo: ${auction.propertyType ?? 'No especificado'}
+
+Instrucciones para la IA:
+- Prioriza estos datos sobre el PDF si hay conflicto
+- NO decir "no se especifica" si el dato existe arriba
+- Integrar estos datos de forma natural en el análisis
+`;
+    }
 
     let claimedDebtContext = "";
-    /*
     if (claimedDebt) {
       claimedDebtContext = `
 DATO OFICIAL DEL BOE (PRIORITARIO):
@@ -151,7 +166,6 @@ DEBES usar este valor exacto en el bloque "### 💰 Deuda del procedimiento" y m
 Si no detectas la cantidad reclamada en los documentos, indica: "No se especifica en la documentación analizada".
 `;
     }
-    */
 
     let analysisMode = "cargas";
     if (type === "completo") {
@@ -181,6 +195,8 @@ Si no detectas la cantidad reclamada en los documentos, indica: "No se especific
 
     const prompt = `
 Analiza EXCLUSIVAMENTE el contenido del documento PDF proporcionado. No respondas si no detectas texto claro del documento.
+
+${auctionContext}
 
 Actúa como jurista especialista en subastas judiciales inmobiliarias en España.
 FECHA ACTUAL DEL SISTEMA: ${currentDate} (Usa esta fecha para calcular la antigüedad de los documentos).
