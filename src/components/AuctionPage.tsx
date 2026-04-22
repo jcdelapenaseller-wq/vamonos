@@ -1703,6 +1703,8 @@ const AuctionPage: React.FC = () => {
     postPaymentStateActive: postPaymentState.active
   });
 
+  const showOnlyAnalysis = isUnlocked === true;
+
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
       {jsonLd && (
@@ -1717,8 +1719,10 @@ const AuctionPage: React.FC = () => {
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 md:px-6 pt-2 md:pt-4">
-        {/* Breadcrumbs - TOP LEVEL */}
-        <nav className="flex items-center text-[9px] md:text-[10px] text-slate-400 mb-3 md:mb-4 font-bold uppercase tracking-widest" aria-label="Breadcrumb">
+        {!showOnlyAnalysis && (
+          <>
+            {/* Breadcrumbs - TOP LEVEL */}
+            <nav className="flex items-center text-[9px] md:text-[10px] text-slate-400 mb-3 md:mb-4 font-bold uppercase tracking-widest" aria-label="Breadcrumb">
           <Link 
             to={ROUTES.HOME} className="hover:text-brand-600 transition-colors"
           >
@@ -2535,6 +2539,8 @@ const AuctionPage: React.FC = () => {
             </AnimatePresence>
           </div>
         </section>
+          </>
+        )}
 
         <div id="servicios-analisis" className="mb-8">
           {(isUnlocked || isTestMode) && auction && (
@@ -2822,7 +2828,9 @@ const AuctionPage: React.FC = () => {
           )}
         </div>
 
-        {/* User Notes Block */}
+        {!showOnlyAnalysis && (
+          <>
+            {/* User Notes Block */}
           {isLogged && (
             <div id="user-notes" className="mb-8 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -3282,6 +3290,8 @@ const AuctionPage: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+          </>
+        )}
       </main>
     </div>
   );
