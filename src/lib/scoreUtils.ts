@@ -10,14 +10,9 @@ export function calculateOpportunityScore(inputs: {
   pujaEstimada?: number;
   ocupacion_detectada: boolean;
 }) {
-  const { cargas_detectadas, valorMercado, pujaEstimada, ocupacion_detectada } = inputs;
+  const { cargas_detectadas, valorMercado, pujaEstimada, valorSubasta, ocupacion_detectada } = inputs;
 
-  if (!pujaEstimada) {
-    return {
-      scoreTotal: null,
-      warning: "Falta estimación de puja para calcular la rentabilidad real"
-    };
-  }
+  const pujaBase = pujaEstimada ?? valorSubasta;
 
   let scoreEconomico = 0;
   let scoreJuridico = 0;
@@ -36,7 +31,7 @@ export function calculateOpportunityScore(inputs: {
     .reduce((sum, c) => sum + (c.desglose?.principal || c.importe || 0), 0);
 
   // --- 2. FACTOR ECONÓMICO (4 PTS) ---
-  const inversionTotal = pujaEstimada + totalSubsistente;
+  const inversionTotal = pujaBase + totalSubsistente;
   const margenSeguridad = (valorMercado - inversionTotal) / valorMercado;
 
   if (margenSeguridad > 0.4) {
@@ -65,7 +60,9 @@ export function calculateOpportunityScore(inputs: {
       scoreJuridico = 0;
     } else if (pesoCargas < 0.1) {
       scoreJuridico = 3;
-    } else if (pesoCargas < 0.3) {
+    } else if (pesoCargas < 0.2) {
+      scoreJuridico = 2;
+    } else if (pesoCargas < 0.4) {
       scoreJuridico = 1;
     } else {
       scoreJuridico = 0;

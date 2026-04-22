@@ -12,6 +12,8 @@ import runAnalysisHandler from './api/run-analysis.ts';
 import createBillingPortalHandler from './api/create-billing-portal.ts';
 import createSubscriptionSessionHandler from './api/create-subscription-session.ts';
 
+import renderPdfHandler from './api/render-pdf.ts';
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -20,6 +22,7 @@ async function startServer() {
   const PORT = 3000;
 
   // Map API routes
+  app.all('/api/render-pdf', express.json(), (req, res) => renderPdfHandler(req as any, res as any));
   app.all('/api/valuation', express.json(), (req, res) => valuationHandler(req as any, res as any));
   app.post('/api/stripe-webhook', express.raw({ type: '*/*' }), (req, res) => stripeWebhookHandler(req as any, res as any));
   app.all('/api/create-checkout-session', express.json(), (req, res) => createCheckoutSessionHandler(req as any, res as any));

@@ -452,7 +452,41 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await fetch('/api/render-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          analysisResult: safeResult,
+          auction: auction
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al generar el PDF');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'informe-subasta.pdf';
+      document.body.appendChild(a);
+      a.click();
+      
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading PDF:", err);
+      // Fallback a JS PDF opcional if needed, pero la instrucción no lo pide
+    }
+  };
+
+  const handleDownloadPDFLegacy = () => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
@@ -1268,6 +1302,24 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
         {step === 'result' && safeResult && (
           <div className="space-y-8">
+            {/* Header Tipo de Análisis */}
+            {(() => {
+              const hasInvestmentData = !!((safeResult as any)?.informacion_general?.superficie || surface || auction?.surface || auction?.valorSubasta || appraisalValue);
+              
+              let label = '';
+              if (analysisType === 'completo' || (analysisType === 'cargas' && hasInvestmentData)) {
+                label = 'Análisis completo de inversión';
+              } else {
+                label = 'Análisis jurídico de cargas';
+              }
+
+              return (
+                <div className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-[-1rem]">
+                  {label}
+                </div>
+              );
+            })()}
+
             {/* Error Fallback Alert */}
             {(safeResult as any)?.error && (
               <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm">
@@ -1402,39 +1454,6 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
                   </div>
 
-                  {/* Claves de esta subasta */}
-                  <div className="bg-white border rounded-xl p-4 space-y-2">
-                    <div className="text-sm font-semibold">
-                      Claves de esta subasta
-                    </div>
-
-                    <div className="text-sm text-gray-700 space-y-1">
-                      {score.scoreTotal >= 8 && (
-                        <>
-                          <div>• Buen margen frente al valor de mercado</div>
-                          <div>• Riesgo jurídico bajo</div>
-                          <div>• Operación interesante</div>
-                        </>
-                      )}
-
-                      {score.scoreTotal >= 5 && score.scoreTotal < 8 && (
-                        <>
-                          <div>• Margen ajustado</div>
-                          <div>• Requiere analizar cargas y estrategia</div>
-                          <div>• Puede ser interesante con buena puja</div>
-                        </>
-                      )}
-
-                      {score.scoreTotal < 5 && (
-                        <>
-                          <div>• Riesgo elevado o baja rentabilidad</div>
-                          <div>• Cargas o incertidumbres relevantes</div>
-                          <div>• Solo recomendable para perfiles expertos</div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  
                   {/* Resumen Ejecutivo */}
                   {safeResult?.resumen_ejecutivo && (
                     <div className="bg-white border rounded-xl p-5 text-sm leading-relaxed">
@@ -1444,9 +1463,25 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
                         </span>
                       </div>
 
-                      <p className="text-gray-800 whitespace-pre-wrap">
-                        {safeResult.resumen_ejecutivo}
-                      </p>
+                      <div className="text-gray-800 space-y-3 md:space-y-4 max-w-prose">
+                        {String(safeResult.resumen_ejecutivo)
+                          .split(/\n+/)
+                          .filter((p) => p.trim() !== '')
+                          .map((paragraph, i) => {
+                            // Separar importes en euros (ej. 100.000 €)
+                            const parts = paragraph.split(/(\d+(?:[.,]\d+)*\s*€)/g);
+                            return (
+                              <p key={i} className="leading-relaxed">
+                                {parts.map((part, j) => {
+                                  if (/\d/.test(part) && /€/.test(part)) {
+                                    return <strong key={j} className="font-semibold text-gray-950">{part}</strong>;
+                                  }
+                                  return part;
+                                })}
+                              </p>
+                            );
+                          })}
+                      </div>
 
                       <p className="text-xs text-gray-500 mt-3 italic border-t border-gray-100 pt-2">
                         Interpretación basada en la nota simple registral aportada.
@@ -1755,26 +1790,84 @@ ${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
 
           {/* CONCLUSIÓN MOVIDA AL FINAL */}
           <div className="mt-6">
-            <div className="bg-black text-white rounded-xl p-5 space-y-3">
-              <div className="text-sm opacity-70">
+            <div className="bg-black text-white rounded-xl p-5 space-y-4">
+              <div className="text-sm opacity-70 mb-2">
                 Conclusión
               </div>
 
-              <div className="text-base font-semibold">
-                {globalOpportunityScore?.scoreTotal !== undefined && globalOpportunityScore.scoreTotal !== null && (
-                  <>
-                    {globalOpportunityScore.scoreTotal >= 8 && "Operación muy interesante con buen equilibrio entre riesgo y rentabilidad."}
-                    {globalOpportunityScore.scoreTotal >= 5 && globalOpportunityScore.scoreTotal < 8 && "Operación viable, pero requiere prudencia en la puja."}
-                    {globalOpportunityScore.scoreTotal < 5 && "Operación con riesgo elevado. Solo recomendable para perfiles expertos."}
-                  </>
-                )}
-              </div>
+              {(() => {
+                const surfaceToUse = (safeResult as any)?.informacion_general?.superficie || surface || auction?.surface;
+                const auctionVal = auction?.valorSubasta || appraisalValue;
+                const cityForTable = (city || auction?.city || "").toLowerCase();
+                let tablePrice = 1800;
+                if (cityForTable.includes("madrid")) tablePrice = 3200;
+                else if (cityForTable.includes("barcelona")) tablePrice = 3500;
+                else if (cityForTable.includes("valencia")) tablePrice = 1800;
+                else if (cityForTable.includes("sevilla")) tablePrice = 1700;
 
-              <div className="text-sm opacity-80">
-                {totalCargasGlobal > 0
-                  ? `El comprador deberá considerar cargas por ${formatCurrency(totalCargasGlobal)} en el coste final.`
-                  : "No se detectan cargas económicas relevantes en el expediente."}
-              </div>
+                // @ts-ignore
+                const vValue = typeof valuationResult !== 'undefined' ? valuationResult?.marketValue : null;
+                const finalMarketValue = vValue || (surfaceToUse * tablePrice);
+                const diferencia = (finalMarketValue && auctionVal) ? finalMarketValue - auctionVal : 0;
+                
+                const hasCargas = totalCargasGlobal > 0;
+
+                if (diferencia < 0) {
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 text-red-400 font-bold text-base md:text-lg border-b border-red-500/20 pb-3">
+                        <span>❌</span>
+                        <span>Operación no viable en condiciones actuales.</span>
+                      </div>
+                      <div className="text-sm md:text-base font-normal opacity-90 space-y-4">
+                        <p className="leading-relaxed">Esta subasta requiere prudencia. A día de hoy, el criterio correcto sería:</p>
+                        <ul className="space-y-3 ml-1">
+                          <li className="flex items-start gap-3"><span className="text-red-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">no tomar la tasación como referencia de valor real</span></li>
+                          <li className="flex items-start gap-3"><span className="text-red-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">asegurar un margen suficiente respecto al mercado</span></li>
+                          <li className="flex items-start gap-3"><span className="text-red-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">evitar una entrada impulsiva sin ajuste de precio</span></li>
+                        </ul>
+                        <p className="pt-2 leading-relaxed opacity-80">Aunque no existan cargas relevantes, el precio actual no justifica el riesgo asumido.</p>
+                      </div>
+                    </div>
+                  );
+                } else if (diferencia >= 0 && hasCargas) {
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 text-yellow-500 font-bold text-base md:text-lg border-b border-yellow-500/20 pb-3">
+                        <span>⚠️</span>
+                        <span>Operación viable con riesgos.</span>
+                      </div>
+                      <div className="text-sm md:text-base font-normal opacity-90 space-y-4">
+                        <p className="leading-relaxed">Esta subasta puede ser interesante, pero exige análisis detallado:</p>
+                        <ul className="space-y-3 ml-1">
+                          <li className="flex items-start gap-3"><span className="text-yellow-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">valorar correctamente el impacto de las cargas</span></li>
+                          <li className="flex items-start gap-3"><span className="text-yellow-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">ajustar la puja al riesgo real</span></li>
+                          <li className="flex items-start gap-3"><span className="text-yellow-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">no sobreestimar el margen potencial</span></li>
+                        </ul>
+                        <p className="pt-2 leading-relaxed opacity-80">La rentabilidad dependerá directamente de una estrategia de puja prudente.</p>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 text-emerald-400 font-bold text-base md:text-lg border-b border-emerald-500/20 pb-3">
+                        <span>✅</span>
+                        <span>Operación potencialmente rentable.</span>
+                      </div>
+                      <div className="text-sm md:text-base font-normal opacity-90 space-y-4">
+                        <p className="leading-relaxed">Esta subasta presenta condiciones favorables:</p>
+                        <ul className="space-y-3 ml-1">
+                          <li className="flex items-start gap-3"><span className="text-emerald-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">sin cargas relevantes detectadas</span></li>
+                          <li className="flex items-start gap-3"><span className="text-emerald-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">margen positivo frente al mercado</span></li>
+                          <li className="flex items-start gap-3"><span className="text-emerald-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">estructura relativamente limpia</span></li>
+                        </ul>
+                        <p className="pt-2 leading-relaxed opacity-80">Aun así, la clave será no sobrepujar y mantener disciplina en la estrategia.</p>
+                      </div>
+                    </div>
+                  );
+                }
+              })()}
             </div>
           </div>
 
