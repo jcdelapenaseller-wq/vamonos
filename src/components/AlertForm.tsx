@@ -6,6 +6,7 @@ import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
 import { alertService } from '../services/alertService';
 import { toast } from 'sonner';
+import SoftGateModal from './SoftGateModal';
 
 const PROVINCIAS = [
   "Álava", "Albacete", "Alicante", "Almería", "Asturias", "Ávila", "Badajoz", "Baleares", "Barcelona", "Burgos", 
@@ -28,6 +29,8 @@ const AlertForm: React.FC = () => {
   const [propertyType, setPropertyType] = useState('Todos');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showSoftGate, setShowSoftGate] = useState(false);
+  const [softGateOrigin, setSoftGateOrigin] = useState<'limit_alert' | null>(null);
 
   useEffect(() => {
     trackConversion('espana', 'alert_creation', 'email_submit', { step: 'arrival' });
@@ -52,6 +55,34 @@ const AlertForm: React.FC = () => {
     setErrorMessage(null);
     
     try {
+      const userAlerts = await alertService.getUserAlerts();
+
+      const isDuplicate = userAlerts.some(a => 
+        a.province === province &&
+        (a.municipality || '') === municipality &&
+        a.propertyType === propertyType &&
+        a.active !== false
+      );
+
+      if (isDuplicate) {
+        setStatus('idle');
+        setErrorMessage('Ya tienes esta alerta creada');
+        return;
+      }
+
+      const planLimit = plan === 'free' ? 1 : plan === 'basic' ? 3 : 5;
+
+      if (userAlerts.length >= planLimit) {
+        setStatus('idle');
+        if (plan === 'pro') {
+          setErrorMessage('Has alcanzado el límite máximo de 5 alertas de tu plan PRO.');
+        } else {
+          setSoftGateOrigin('limit_alert');
+          setShowSoftGate(true);
+        }
+        return;
+      }
+
       // 1. Save to Firestore via Service
       await alertService.createAlert({
         email,
@@ -182,6 +213,14 @@ const AlertForm: React.FC = () => {
           </div>
         )}
       </form>
+
+      {showSoftGate && softGateOrigin && (
+        <SoftGateModal
+          isOpen={showSoftGate}
+          onClose={() => setShowSoftGate(false)}
+          origin={softGateOrigin}
+        />
+      )}
     </div>
   );
 };

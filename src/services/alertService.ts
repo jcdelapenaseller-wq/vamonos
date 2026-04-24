@@ -1,5 +1,5 @@
 import { db, auth, updateLastActiveAt } from '../lib/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, doc, query, where, serverTimestamp, updateDoc } from 'firebase/firestore';
 
 export interface AlertData {
   id?: string;
@@ -62,6 +62,14 @@ export const alertService = {
 
     const alertRef = doc(db, 'alerts', alertId);
     await deleteDoc(alertRef);
+  },
+
+  async updateAlert(alertId: string, data: Partial<AlertData>) {
+    if (!auth.currentUser || !auth.currentUser.uid) throw new Error("Usuario no autenticado");
+    if (!alertId) throw new Error("ID de alerta no proporcionado");
+
+    const alertRef = doc(db, 'alerts', alertId);
+    await updateDoc(alertRef, data);
   },
 
   async getAlertCount() {

@@ -5,6 +5,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
 import { UserProvider } from './contexts/UserContext';
+import { FavoritesProvider } from './contexts/FavoritesContext';
 import { Toaster } from 'sonner';
 import { PushNotificationModal } from './components/PushNotificationModal';
 
@@ -57,7 +58,9 @@ function App() {
   return (
     <BrowserRouter>
       <UserProvider>
-        <AppContent />
+        <FavoritesProvider>
+          <AppContent />
+        </FavoritesProvider>
       </UserProvider>
     </BrowserRouter>
   );

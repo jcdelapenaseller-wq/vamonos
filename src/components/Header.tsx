@@ -110,6 +110,23 @@ const Header: React.FC = () => {
             Recientes
           </Link>
 
+          {isLogged && (
+            <>
+              <Link 
+                to={ROUTES.MIS_GUARDADOS} 
+                className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.MIS_GUARDADOS ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
+              >
+                Favoritos
+              </Link>
+              <Link 
+                to={ROUTES.ALERTAS} 
+                className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.ALERTAS ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
+              >
+                Alertas
+              </Link>
+            </>
+          )}
+
           {/* Tools Dropdown */}
           <div className="relative group">
             <button className="flex items-center gap-1 text-sm lg:text-base font-medium text-slate-600 hover:text-brand-700 transition-colors py-2">

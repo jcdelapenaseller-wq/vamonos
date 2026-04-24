@@ -1,0 +1,238 @@
+1:import React, { useEffect, useState } from 'react';
+2:import { Link, Navigate } from 'react-router-dom';
+3:import { Star, ArrowRight, TrendingUp, MapPin, Clock, Home, AlertTriangle, Bell, BellRing } from 'lucide-react';
+4:import { useUser } from '../contexts/UserContext';
+5:import { db } from '../lib/firebase';
+6:import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+7:import { AUCTIONS } from '../data/auctions';
+8:import { ROUTES } from '../constants/routes';
+9:import { normalizePropertyType, normalizeCity, formatAddress } from '../utils/auctionNormalizer';
+10:import { getAuctionType } from '../utils/auctionHelpers';
+11:
+12:const SavedAuctionsPage: React.FC = () => {
+13:  const { user, isLogged, isLoading } = useUser();
+14:  const [savedAuctions, setSavedAuctions] = useState<any[]>([]);
+15:  const [isFetching, setIsFetching] = useState(true);
+16:  const [isAlertsActive, setIsAlertsActive] = useState(false);
+17:
+18:  useEffect(() => {
+19:    const fetchSavedAuctions = async () => {
+20:      if (!user || !db) {
+21:        setIsFetching(false);
+22:        return;
+23:      }
+24:
+25:      try {
+26:        const q = query(
+27:          collection(db, 'favorites'),
+28:          where('userId', '==', user.id),
+29:          orderBy('createdAt', 'desc')
+30:        );
+31:        const querySnapshot = await getDocs(q);
+32:        
+33:        const auctions = querySnapshot.docs
+34:          .map(doc => {
+35:            const data = doc.data();
+36:            const auctionData = AUCTIONS[data.auctionId];
+37:            if (!auctionData) return null;
+38:            return {
+39:              id: doc.id,
+40:              auctionId: data.auctionId,
+41:              savedAt: data.createdAt?.toDate() || new Date(),
+42:              ...auctionData
+43:            };
+44:          })
+45:          .filter(Boolean);
+46:
+47:        setSavedAuctions(auctions);
+48:      } catch (error) {
+49:        console.error("Error fetching saved auctions:", error);
+50:      } finally {
+51:        setIsFetching(false);
+52:      }
+53:    };
+54:
+55:    if (!isLoading) {
+56:      fetchSavedAuctions();
+57:    }
+58:  }, [user, isLoading]);
+59:
+60:  if (isLoading) {
+61:    return (
+62:      <div className="min-h-[60vh] flex items-center justify-center">
+63:        <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
+64:      </div>
+65:    );
+66:  }
+67:
+68:  if (!user) {
+69:    return <Navigate to={ROUTES.HOME} replace />;
+70:  }
+71:
+72:  return (
+73:    <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 md:py-12">
+74:      <div className="flex items-center gap-3 mb-8">
+75:        <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500">
+76:          <Star size={24} className="fill-amber-500" />
+77:        </div>
+78:        <div>
+79:          <h1 className="text-2xl md:text-3xl font-serif font-bold text-slate-900">Mis Guardados</h1>
+80:          <p className="text-slate-500">Subastas que estás siguiendo</p>
+81:        </div>
+82:      </div>
+83:
+84:      {/* Alertas Block */}
+85:      <div className={`mb-8 border rounded-2xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 transition-all ${isAlertsActive ? 'bg-emerald-50/50 border-emerald-100' : 'bg-white border-slate-200'}`}>
+86:        <div className="flex items-start md:items-center gap-4">
+87:          <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 transition-colors ${isAlertsActive ? 'bg-emerald-100 text-emerald-600' : 'bg-brand-50 text-brand-600'}`}>
+88:            {isAlertsActive ? <BellRing size={20} className="md:hidden" /> : <Bell size={20} className="md:hidden" />}
+89:            {isAlertsActive ? <BellRing size={24} className="hidden md:block" /> : <Bell size={24} className="hidden md:block" />}
+90:          </div>
+91:          <div>
+92:            <h2 className={`text-base md:text-lg font-bold mb-0.5 ${isAlertsActive ? 'text-emerald-900' : 'text-slate-900'}`}>
+93:              {isAlertsActive ? 'Alertas activas' : 'Activa alertas sobre oportunidades similares'}
+94:            </h2>
+95:            <p className={`text-sm ${isAlertsActive ? 'text-emerald-700/80' : 'text-slate-500'}`}>
+96:              {isAlertsActive 
+97:                ? 'Te avisaremos cuando detectemos nuevas subastas que encajen con tu perfil.'
+98:                : 'Recibe notificaciones cuando se publiquen subastas similares a tus guardados.'}
+99:            </p>
+100:          </div>
+101:        </div>
+102:        <button 
+103:          onClick={() => setIsAlertsActive(!isAlertsActive)}
+104:          className={`w-full md:w-auto shrink-0 px-5 py-2.5 rounded-full font-bold text-sm transition-all ${
+105:            isAlertsActive 
+106:              ? 'bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-sm' 
+107:              : 'bg-slate-900 hover:bg-slate-800 text-white shadow-md'
+108:          }`}
+109:        >
+110:          {isAlertsActive ? 'Configurar alertas' : 'Activar alertas'}
+111:        </button>
+112:      </div>
+113:
+114:      {isFetching ? (
+115:        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+116:          {[1, 2, 3].map(i => (
+117:            <div key={i} className="bg-white rounded-2xl border border-slate-200 h-64 animate-pulse"></div>
+118:          ))}
+119:        </div>
+120:      ) : savedAuctions.length === 0 ? (
+121:        <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center">
+122:          <div className="w-20 h-20 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-6">
+123:            <Star size={32} className="text-slate-300" />
+124:          </div>
+125:          <h2 className="text-xl font-bold text-slate-900 mb-2">Aún no tienes subastas guardadas</h2>
+126:          <p className="text-slate-500 mb-8 max-w-md mx-auto">
+127:            Explora las subastas activas y guarda las que te interesen para hacerles seguimiento.
+128:          </p>
+129:          <Link 
+130:            to={ROUTES.RECENT_AUCTIONS}
+131:            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-600 text-white font-bold hover:bg-brand-700 transition-colors"
+132:          >
+133:            Explorar subastas <ArrowRight size={18} />
+134:          </Link>
+135:        </div>
+136:      ) : (
+137:        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+138:          {savedAuctions.map(auction => {
+139:            const propertyType = normalizePropertyType(auction.propertyType);
+140:            const cityName = normalizeCity(auction);
+141:            const discount = auction.appraisalValue && auction.claimedDebt 
+142:              ? Math.round((1 - (auction.claimedDebt / auction.appraisalValue)) * 100) 
+143:              : 0;
+144:            
+145:            const now = new Date();
+146:            const auctionDate = auction.auctionDate ? new Date(auction.auctionDate) : null;
+147:            const diffTime = auctionDate ? auctionDate.getTime() - now.getTime() : null;
+148:            const diffDays = diffTime !== null ? Math.ceil(diffTime / (1000 * 60 * 60 * 24)) : null;
+149:            
+150:            const isFinished = diffDays !== null && diffDays < 0;
+151:            const isSuspended = auction.status === 'suspended';
+152:            
+153:            return (
+154:              <Link 
+155:                key={auction.id}
+156:                to={`/subasta/${auction.auctionId}`}
+157:                className="bg-white rounded-2xl border border-slate-200 overflow-hidden hover:shadow-lg transition-all group flex flex-col"
+158:              >
+159:                <div className="p-5 flex-grow">
+160:                  <div className="flex items-start justify-between mb-4">
+161:                    <div className="flex items-center gap-2">
+162:                      <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500">
+163:                        <Home size={16} />
+164:                      </div>
+165:                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+166:                        {propertyType}
+167:                      </span>
+168:                    </div>
+169:                    {isFinished ? (
+170:                      <span className="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wider">
+171:                        Finalizada
+172:                      </span>
+173:                    ) : isSuspended ? (
+174:                      <span className="px-2 py-1 rounded-md bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider">
+175:                        Suspendida
+176:                      </span>
+177:                    ) : diffDays !== null && diffDays <= 3 ? (
+178:                      <span className="px-2 py-1 rounded-md bg-red-50 text-red-700 text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+179:                        <Clock size={10} /> Cierra pronto
+180:                      </span>
+181:                    ) : (
+182:                      <span className="px-2 py-1 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase tracking-wider">
+183:                        Activa
+184:                      </span>
+185:                    )}
+186:                  </div>
+187:
+188:                  <h3 className="font-serif font-bold text-lg text-slate-900 leading-tight mb-2 group-hover:text-brand-600 transition-colors line-clamp-2">
+189:                    {propertyType} en {cityName}
+190:                  </h3>
+191:                  
+192:                  <div className="flex items-center gap-1.5 text-sm text-slate-500 mb-4">
+193:                    <MapPin size={14} />
+194:                    <span className="truncate">{formatAddress(auction.address) || cityName}</span>
+195:                  </div>
+196:
+197:                  <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+198:                    <div>
+199:                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Tasación</p>
+200:                      <p className="font-bold text-slate-900">
+201:                        {auction.appraisalValue ? auction.appraisalValue.toLocaleString('es-ES') + '€' : '---'}
+202:                      </p>
+203:                    </div>
+204:                    <div>
+205:                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Deuda</p>
+206:                      <p className="font-bold text-slate-600">
+207:                        {auction.claimedDebt ? auction.claimedDebt.toLocaleString('es-ES') + '€' : '---'}
+208:                      </p>
+209:                    </div>
+210:                  </div>
+211:                </div>
+212:                
+213:                <div className="bg-slate-50 px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+214:                  {discount > 0 ? (
+215:                    <div className="flex items-center gap-1.5 text-emerald-600 font-bold text-sm">
+216:                      <TrendingUp size={16} />
+217:                      <span>{discount}% margen</span>
+218:                    </div>
+219:                  ) : (
+220:                    <div className="flex items-center gap-1.5 text-slate-500 font-bold text-sm">
+221:                      <AlertTriangle size={16} />
+222:                      <span>Revisar cargas</span>
+223:                    </div>
+224:                  )}
+225:                  <span className="text-brand-600 font-bold text-sm flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+226:                    Ver ficha <ArrowRight size={14} />
+227:                  </span>
+228:                </div>
+229:              </Link>
+230:            );
+231:          })}
+232:        </div>
+233:      )}
+234:    </div>
+235:  );
+236:};
+237:
+238:export default SavedAuctionsPage;

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapPin, DollarSign, ChevronRight, Percent, Calculator, Building2 } from 'lucide-react';
+import { MapPin, DollarSign, ChevronRight, Percent, Calculator, Building2, Heart } from 'lucide-react';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { AuctionData } from '../data/auctions';
 import { isAuctionFinished, getComputedStatus, isCapital, calculateDiscount, isConflictZone } from '../utils/auctionHelpers';
 import { normalizeLocationLabel, normalizePropertyType, normalizeCity, normalizeProvince } from '../utils/auctionNormalizer';
@@ -19,6 +20,7 @@ interface AuctionCardProps {
 
 export const AuctionCard: React.FC<AuctionCardProps> = ({ slug, data, showNewBadge, showImage }) => {
   const navigate = useNavigate();
+  const { isFavorite, toggleFavorite, isLoaded, isToggling } = useFavorites();
   const id = slug;
   const valorReferencia = data.valorTasacion || data.valorSubasta || data.appraisalValue;
   const cantidadReclamada = data.claimedDebt;
@@ -140,9 +142,26 @@ export const AuctionCard: React.FC<AuctionCardProps> = ({ slug, data, showNewBad
           onClick={() => navigate(`/subasta/${id}`)}
           className="block mb-3 cursor-pointer"
         >
-          <h2 className="text-base md:text-lg font-bold text-slate-900 leading-tight hover:text-brand-600 transition-colors line-clamp-2">
-            {normalizePropertyType(data.propertyType)} en {data.address?.split(',')[0] || normalizeLocationLabel(data).split(',')[0]}
-          </h2>
+          <div className="flex items-start justify-between gap-2">
+            <h2 className="flex-1 min-w-0 text-base md:text-lg font-bold text-slate-900 leading-tight hover:text-brand-600 transition-colors line-clamp-2">
+              {normalizePropertyType(data.propertyType)} en {data.address?.split(',')[0] || normalizeLocationLabel(data).split(',')[0]}
+            </h2>
+
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleFavorite(slug);
+              }}
+              disabled={!isLoaded || isToggling}
+              className="shrink-0 mt-1 opacity-60 hover:opacity-100 transition"
+            >
+              {isFavorite(slug) ? (
+                <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+              ) : (
+                <Heart className="w-4 h-4 text-gray-400" />
+              )}
+            </button>
+          </div>
           {isUpcoming && (
             <div className="mt-1.5 text-[10px] font-medium text-blue-600 flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />

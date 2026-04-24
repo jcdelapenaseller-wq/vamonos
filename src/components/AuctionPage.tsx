@@ -7,7 +7,7 @@ import {
   Info, ArrowRight, FileText, Scale, ShieldCheck, AlertOctagon,
   Clock, Calendar, User, Twitter, Linkedin, Mail, MessageCircle,
   ExternalLink, AlertCircle, Lock, ArrowUpRight, Heart, Share2,
-  Bell, StickyNote, X, Car, Train, Navigation, Shield, LineChart, Check, Zap, HelpCircle, ChevronDown
+  Bell, StickyNote, X, Car, Train, Navigation, Shield, LineChart, Check, Zap, HelpCircle, ChevronDown, Loader2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AUCTIONS } from '../data/auctions';
@@ -29,6 +29,7 @@ import Header from './Header';
 import Footer from './Footer';
 import AuctionCalculator from './AuctionCalculator';
 import { useUser, UserContext } from '../contexts/UserContext';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { db, updateLastActiveAt } from '../lib/firebase';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuctionValuation, ValuationResult } from '../services/valuationService';
@@ -87,6 +88,7 @@ const AuctionPage: React.FC = () => {
   const [auction, setAuction] = useState<any>(null);
   const cleanSlug = slug ? decodeURIComponent(slug).replace(/\/$/, '').toLowerCase() : '';
   const { user, isLogged, requireLogin, plan, trackAuctionView } = useUser();
+  const { isFavorite: checkFavorite, toggleFavorite, favoritesCount, isLoaded: isFavoriteLoaded, isToggling: isTogglingFavorite } = useFavorites();
   const hasAccess = isLogged && (plan === 'basic' || plan === 'pro');
   const userContext = useContext(UserContext);
 
@@ -226,10 +228,8 @@ const AuctionPage: React.FC = () => {
   const [showCalculator, setShowCalculator] = useState(false);
   
   // Favorites State
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [favoriteId, setFavoriteId] = useState<string | null>(null);
-  const [favoritesCount, setFavoritesCount] = useState<number>(0);
-  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const isFavorite = cleanSlug ? checkFavorite(cleanSlug) : false;
+  
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showFullAnalysisModal, setShowFullAnalysisModal] = useState(false);
   const [softGateOrigin, setSoftGateOrigin] = useState<'favorite' | 'alert' | 'note' | 'limit_favorite' | 'limit_alert' | 'valuation' | 'boe' | 'save' | 'limit_analysis' | 'streetview' | 'catastro' | 'comparativa' | null>(null);
@@ -712,44 +712,6 @@ const AuctionPage: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const checkFavoriteStatus = async () => {
-      if (!user?.id || !cleanSlug || !db) {
-        setIsFavorite(false);
-        setFavoriteId(null);
-        setFavoritesCount(0);
-        return;
-      }
-
-      try {
-        const q = query(
-          collection(db, 'favorites'),
-          where('userId', '==', user.id),
-          where('auctionId', '==', cleanSlug)
-        );
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          setIsFavorite(true);
-          setFavoriteId(querySnapshot.docs[0].id);
-        } else {
-          setIsFavorite(false);
-          setFavoriteId(null);
-        }
-
-        if (plan === 'free') {
-          const countQuery = query(collection(db, 'favorites'), where('userId', '==', user.id));
-          const snapshot = await getDocs(countQuery);
-          setFavoritesCount(snapshot.size);
-        }
-      } catch (error) {
-        console.error("Error checking favorite status:", error);
-      }
-    };
-
-    checkFavoriteStatus();
-  }, [user?.id, cleanSlug]);
-
   const scrollToNotes = () => {
     if (!isLogged) {
       setSoftGateOrigin('note');
@@ -762,55 +724,22 @@ const AuctionPage: React.FC = () => {
   };
 
   const handleToggleFavorite = async () => {
+    if (!isFavoriteLoaded) return;
+
     if (!isLogged) {
       setSoftGateOrigin('save');
       return;
     }
 
-    if (plan === 'free' && !isFavorite) {
-      setSoftGateOrigin('save');
-      return;
-    }
+    if (!cleanSlug || isTogglingFavorite) return;
 
-    if (!user?.id || !cleanSlug || isTogglingFavorite || !db || !auction) return;
-
-    setIsTogglingFavorite(true);
-
-    try {
-      if (isFavorite && favoriteId) {
-        // Remove from favorites
-        await deleteDoc(doc(db, 'favorites', favoriteId));
-        setIsFavorite(false);
-        setFavoriteId(null);
-        setFavoritesCount(prev => Math.max(0, prev - 1));
-      } else {
-        // Check limits for free users
-        if (plan === 'free') {
-          const countQuery = query(collection(db, 'favorites'), where('userId', '==', user.id));
-          const snapshot = await getDocs(countQuery);
-          if (snapshot.size >= 3) {
-            setShowPremiumModal(true);
-            setIsTogglingFavorite(false);
-            return;
-          }
-        }
-
-        // Add to favorites
-        const docRef = await addDoc(collection(db, 'favorites'), {
-          userId: user.id,
-          auctionId: cleanSlug,
-          createdAt: serverTimestamp()
-        });
-        setIsFavorite(true);
-        setFavoriteId(docRef.id);
-        setFavoritesCount(prev => prev + 1);
-        toast.success('Guardado en favoritos', { duration: 2000 });
-      }
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
-      // Revert optimistic update if failed (though we didn't do optimistic here to be safe)
-    } finally {
-      setIsTogglingFavorite(false);
+    const { success, limitReached } = await toggleFavorite(cleanSlug);
+    if (limitReached) {
+      setShowPremiumModal(true);
+    } else if (success && isFavorite) {
+      // It was favorite, now removed
+    } else if (success && !isFavorite) {
+      toast.success('Guardado en favoritos', { duration: 2000 });
     }
   };
 
@@ -1792,29 +1721,33 @@ const AuctionPage: React.FC = () => {
             <div className="flex items-center justify-center gap-2 shrink-0">
               {/* Favorite Toggle */}
               {(() => {
-                const isBlocked = !isLogged || (plan === 'free' && !isFavorite);
                 return (
                   <button 
                     onClick={handleToggleFavorite}
-                    disabled={isTogglingFavorite}
+                    disabled={!isFavoriteLoaded || isTogglingFavorite}
                     className={`flex flex-col items-center justify-center w-12 py-2 rounded-xl transition-all duration-300 ${
-                      isFavorite 
-                        ? 'text-red-500 bg-red-50 hover:bg-red-100' 
-                        : isBlocked
-                          ? 'text-slate-400 bg-slate-50 hover:bg-slate-100'
+                      !isFavoriteLoaded
+                        ? 'opacity-50 cursor-not-allowed text-slate-400 bg-slate-50'
+                        : isFavorite 
+                          ? 'text-red-500 bg-red-50 hover:bg-red-100' 
                           : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                     }`}
-                    title={isFavorite ? "Quitar de guardados" : isBlocked ? "Mejora tu plan para guardar" : "Guardar subasta"}
+                    title={
+                      !isFavoriteLoaded ? "Cargando..." : 
+                      isFavorite ? "Quitar de guardados" : 
+                      "Guardar subasta"
+                    }
                   >
                     <div className="relative">
-                      <Heart size={20} className={isFavorite ? 'fill-red-500' : ''} />
-                      {isBlocked && !isFavorite && (
-                        <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                          <Lock size={8} className="text-slate-400" />
+                      {!isFavoriteLoaded ? (
+                        <div className="w-5 h-5 flex items-center justify-center">
+                          <Loader2 size={18} className="animate-spin text-slate-400" />
                         </div>
+                      ) : (
+                        <Heart size={20} className={isFavorite ? 'fill-red-500' : ''} />
                       )}
                     </div>
-                    {isLogged && plan === 'free' && (
+                    {isLogged && plan === 'free' && isFavoriteLoaded && (
                       <span className="text-[11px] text-slate-500 leading-none mt-1 tabular-nums">
                         {favoritesCount}/3
                       </span>

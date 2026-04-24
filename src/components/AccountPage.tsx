@@ -13,7 +13,8 @@ import {
   Star,
   Bell,
   MapPin,
-  AlertCircle
+  AlertCircle,
+  Trash
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/routes';
@@ -22,9 +23,11 @@ import { db, auth } from '../lib/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { alertService, AlertData } from '../services/alertService';
 import { toast } from 'sonner';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 const AccountPage: React.FC = () => {
   const { user, isLogged, plan, isLoading } = useUser();
+  const { favoritesCount } = useFavorites();
   const navigate = useNavigate();
   const [history, setHistory] = React.useState<any[]>([]);
   const [alerts, setAlerts] = React.useState<AlertData[]>([]);
@@ -61,7 +64,8 @@ const AccountPage: React.FC = () => {
         setHistory(historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         // Fetch Alerts via Service
-        const userAlerts = await alertService.getUserAlerts();
+        let userAlerts = await alertService.getUserAlerts();
+        userAlerts = userAlerts.filter(a => a.active === true);
         // Sort alerts by createdAt descending
         userAlerts.sort((a, b) => {
           const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
@@ -159,7 +163,7 @@ const AccountPage: React.FC = () => {
     }
     return [
       'Acceso fichas subastas',
-      '5 favoritos',
+      '3 favoritos',
       '1 alerta básica',
       '1 análisis cargas gratis',
       'Checklist inversor'
@@ -305,14 +309,12 @@ const AccountPage: React.FC = () => {
                 <h3 className="font-bold text-slate-900 text-lg">Mis alertas activas</h3>
               </div>
               
-              {plan !== 'pro' && (
-                <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Uso de alertas</p>
-                  <p className="text-sm font-bold text-slate-900">
-                    {alerts.length} de {plan === 'free' ? 1 : 3} alertas usadas
-                  </p>
-                </div>
-              )}
+              <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Uso de alertas</p>
+                <p className="text-sm font-bold text-slate-900">
+                  {alerts.length} de {plan === 'free' ? 1 : plan === 'basic' ? 3 : 5} alertas usadas
+                </p>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -345,12 +347,39 @@ const AccountPage: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => alert.id && handleDeleteAlert(alert.id)}
-                        className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
-                      >
-                        Eliminar alerta
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={async () => {
+                            if (!alert.id) return;
+                            try {
+                              await alertService.updateAlert(alert.id, { active: !alert.active });
+                              setAlerts(prev =>
+                                prev.map(a =>
+                                  a.id === alert.id ? { ...a, active: !a.active } : a
+                                )
+                              );
+                            } catch (e) {
+                              console.error(e);
+                            }
+                          }}
+                          className={`w-10 h-6 flex items-center rounded-full p-1 transition ${
+                            alert.active !== false ? 'bg-green-500' : 'bg-slate-300'
+                          }`}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow transform transition ${
+                              alert.active !== false ? 'translate-x-4' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+
+                        <button 
+                          onClick={() => alert.id && handleDeleteAlert(alert.id)}
+                          className="flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition"
+                        >
+                          <Trash size={14} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -369,15 +398,17 @@ const AccountPage: React.FC = () => {
 
             {/* Alert CTA */}
             <div className="mt-8 pt-8 border-t border-slate-50">
-              {plan !== 'pro' && alerts.length >= (plan === 'free' ? 1 : 3) ? (
+              {alerts.length >= (plan === 'free' ? 1 : plan === 'basic' ? 3 : 5) ? (
                 <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <AlertCircle size={18} className="text-amber-600" />
                     <p className="text-xs font-bold text-slate-900">Límite de alertas alcanzado</p>
                   </div>
-                  <Link to="/pro" className="text-xs font-bold text-brand-600 hover:underline">
-                    Mejorar plan &rarr;
-                  </Link>
+                  {plan !== 'pro' && (
+                    <Link to="/pro" className="text-xs font-bold text-brand-600 hover:underline">
+                      Mejorar plan &rarr;
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <Link 
@@ -453,7 +484,12 @@ const AccountPage: React.FC = () => {
               {getPlanFeatures().map((feature, i) => (
                 <li key={i} className="flex items-start gap-3 text-slate-600">
                   <CheckCircle size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-xs font-medium">{feature}</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium">{feature}</span>
+                    {feature === '3 favoritos' && plan === 'free' && (
+                      <span className="text-[10px] text-slate-400 mt-0.5">Has usado {favoritesCount} de 3 favoritos</span>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
