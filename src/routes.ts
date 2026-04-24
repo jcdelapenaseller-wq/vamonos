@@ -50,6 +50,7 @@ import AuctionVisitGuide from './components/AuctionVisitGuide';
 import AuctionErrorsGuide from './components/AuctionErrorsGuide';
 import AuctionAssignmentGuide from './components/AuctionAssignmentGuide';
 import AuctionCalculator from './components/AuctionCalculator';
+import AuctionCalculatorLanding from './components/AuctionCalculatorLanding';
 import NotFound from './components/NotFound';
 import AuctionEmptyGuide from './components/AuctionEmptyGuide';
 import AuctionWorthItGuide from './components/AuctionWorthItGuide';
@@ -229,7 +230,7 @@ export const routes: RouteObject[] = [
   },
   {
     path: ROUTES.CALCULATOR,
-    element: createElement(AuctionCalculator),
+    element: createElement(AuctionCalculatorLanding),
   },
   {
     path: ROUTES.PROFITABILITY,

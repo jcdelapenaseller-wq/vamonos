@@ -51,89 +51,6 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
     }
   }, [appraisalValue, claimedDebt, city]);
 
-  useEffect(() => {
-    document.title = "Calculadora de Rentabilidad en Subastas Judiciales | ROI e ITP";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', "Calcula la rentabilidad real de una subasta judicial: ITP por comunidad autónoma, costes ocultos, ROI y precio máximo de puja según la regla del 70%.");
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "SoftwareApplication",
-          "name": "Calculadora de Rentabilidad para Subastas Judiciales",
-          "applicationCategory": "FinanceApplication",
-          "operatingSystem": "Web",
-          "description": "Herramienta para calcular rentabilidad, ITP, ROI y precio máximo de puja en subastas judiciales en España.",
-          "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "Article",
-          "headline": "Calculadora de Rentabilidad para Subastas Judiciales",
-          "description": "Calcula el ROI, beneficio neto y puja máxima recomendada para tus inversiones en subastas del BOE.",
-          "image": ["https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=1200&h=630"],
-          "datePublished": "2024-01-15T09:00:00+01:00",
-          "dateModified": new Date().toISOString(),
-          "author": {
-            "@type": "Person",
-            "name": "José de la Peña",
-            "url": "https://activosoffmarket.es/quien-soy"
-          },
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https://activosoffmarket.es/calculadora-subastas"
-          }
-        },
-        {
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "¿Cómo calcular la rentabilidad de una subasta judicial?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Para calcular la rentabilidad real debes comparar el valor de mercado actual del inmueble con el coste total de la inversión. Este coste incluye el precio de adjudicación, el ITP (que varía según la comunidad autónoma), gastos de reforma, notaría, registro y posibles cargas anteriores o deudas de comunidad. Nuestra calculadora de subastas te permite estimar todos estos valores automáticamente."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Cuánto dinero necesito para participar en una subasta judicial?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Para participar necesitas inicialmente el 5% del valor de tasación del bien en concepto de consignación o depósito. Si resultas adjudicatario, deberás abonar el resto del precio de adjudicación en el plazo legal (normalmente 40 días hábiles en subastas judiciales) más los impuestos y gastos asociados."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Qué impuestos se pagan al comprar en una subasta judicial?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "El impuesto principal es el ITP (Impuesto de Transmisiones Patrimoniales). El tipo impositivo depende de la Comunidad Autónoma donde se encuentre el inmueble, oscilando generalmente entre el 4% y el 10%. En subastas judiciales no se suele pagar IVA, salvo en casos muy específicos de ejecuciones entre empresas."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Cómo calcular la puja máxima en una subasta?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "La puja máxima se calcula restando del valor de mercado real todos los costes previstos (impuestos, reformas, cargas, gastos) y aplicando un margen de seguridad mínimo (beneficio deseado). Una regla común es no superar el 70% del valor de mercado tras descontar todos los gastos."
-              }
-            }
-          ]
-        }
-      ]
-    });
-    document.head.appendChild(script);
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
   const [adjudicacion, setAdjudicacion] = useState<number>(0);
   const [valorMercado, setValorMercado] = useState<number>(0);
   const [tasacionBOE, setTasacionBOE] = useState<number>(0);
@@ -305,9 +222,12 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
     <div className="max-w-7xl mx-auto px-6 pb-12 pt-12">
       <div className="mb-12">
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-6">
-          {hasData ? "Estás analizando esta subasta. Ajusta tu rentabilidad" : "Calculadora de Rentabilidad para Subastas Judiciales"}
+          {hasData ? "Estás analizando esta subasta. Ajusta tu rentabilidad" : "Calculadora de puja máxima en subastas judiciales"}
         </h1>
         <p className="text-lg text-slate-600">Herramienta gratuita para calcular rentabilidad, ITP, costes y precio máximo de puja en subastas judiciales en España.</p>
+        <p className="text-slate-600 text-sm mt-2">
+          Esta herramienta te permite calcular cuánto pujar en una subasta judicial en España paso a paso.
+        </p>
       </div>
 
       {/* Main Result Highlight - High Visibility */}
