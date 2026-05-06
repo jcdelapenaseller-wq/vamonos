@@ -1,10 +1,80 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onNotificationQueueCreate = exports.onAuctionCreate = void 0;
+exports.onNotificationQueueCreate = exports.onAuctionCreate = exports.onAuctionCreateEmailAlert = void 0;
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const mailersend_1 = require("mailersend");
 admin.initializeApp();
 const db = admin.firestore();
+exports.onAuctionCreateEmailAlert = functions
+    .region('europe-west1')
+    .runWith({
+    timeoutSeconds: 60,
+    memory: '256MB'
+})
+    .firestore
+    .document('auctions/{auctionId}')
+    .onCreate(async (snap, context) => {
+    const auctionData = snap.data();
+    const province = auctionData.province;
+    const municipality = auctionData.municipality;
+    const propertyType = auctionData.propertyType;
+    const valorSubasta = auctionData.valorSubasta;
+    const slug = auctionData.slug;
+    // Buscar alerts
+    const alertsSnapshot = await db.collection('alerts')
+        .where('province', '==', province)
+        .where('active', '==', true)
+        .get();
+    functions.logger.info(`[INFO] auction detected: ${context.params.auctionId}`);
+    functions.logger.info(`[INFO] alerts matched count: ${alertsSnapshot.size}`);
+    let emailSentCount = 0;
+    const mailerSendApiKey = process.env.MAILERSEND_API_KEY || functions.config().mailersend?.key;
+    const fromEmailAddress = process.env.FROM_EMAIL || 'alerts@activosoffmarket.es';
+    if (!mailerSendApiKey) {
+        functions.logger.error('[ERROR] MAILERSEND_API_KEY is not set.');
+        return null;
+    }
+    const mailerSend = new mailersend_1.MailerSend({
+        apiKey: mailerSendApiKey,
+    });
+    const sentFrom = new mailersend_1.Sender(fromEmailAddress, "Alertas Off-Market");
+    for (const doc of alertsSnapshot.docs) {
+        const alertData = doc.data();
+        const email = alertData.email;
+        if (!email)
+            continue;
+        const recipients = [new mailersend_1.Recipient(email)];
+        const emailParams = new mailersend_1.EmailParams()
+            .setFrom(sentFrom)
+            .setTo(recipients)
+            .setSubject(`Nueva subasta en ${province}`)
+            .setText(`Nueva subasta detectada
+
+Tipo: ${propertyType}
+Municipio: ${municipality}
+Precio: ${valorSubasta}€
+
+━━━━━━━━━━━━━━━━━━
+VER SUBASTAS RECIENTES
+https://activosoffmarket.es/subasta/${slug}
+━━━━━━━━━━━━━━━━━━
+
+—
+Activos OffMarket
+Preferencias:
+https://activosoffmarket.es/unsubscribe?email=${email}`);
+        try {
+            await mailerSend.email.send(emailParams);
+            emailSentCount++;
+        }
+        catch (error) {
+            functions.logger.error(`[ERROR] Failed to send email to ${email}:`, error);
+        }
+    }
+    functions.logger.info(`[INFO] emails sent count: ${emailSentCount}`);
+    return null;
+});
 exports.onAuctionCreate = functions
     .region('europe-west1')
     .runWith({
@@ -29,10 +99,10 @@ exports.onAuctionCreate = functions
         const auctionZone = (auctionData.zone || '').toLowerCase();
         const auctionPrice = auctionData.appraisalValue || 0;
         // 3. Optimizar: NO leer todas las alertas
-        // En el schema actual, la provincia se guarda en el campo 'city' de la alerta
-        const alertsSnapshot = await db.collectionGroup('alerts')
+        // En el nuevo schema, usamos la colección raíz 'alerts'
+        const alertsSnapshot = await db.collection('alerts')
             .where('active', '==', true)
-            .where('city', '==', auctionProvince)
+            .where('province', '==', auctionProvince)
             .get();
         functions.logger.info(`[INFO] Alertas encontradas para provincia '${auctionProvince}': ${alertsSnapshot.size}`);
         if (alertsSnapshot.empty) {
@@ -52,7 +122,7 @@ exports.onAuctionCreate = functions
         for (const doc of alertsSnapshot.docs) {
             const alertData = doc.data();
             const alertId = doc.id;
-            const userId = doc.ref.parent.parent?.id;
+            const userId = alertData.userId;
             if (!userId)
                 continue;
             // propertyType (si existe y no es 'Todos')
@@ -60,11 +130,11 @@ exports.onAuctionCreate = functions
             if (alertType && alertType !== 'todos' && alertType !== auctionType) {
                 continue;
             }
-            // city/zone (si existe en la alerta)
-            const alertZone = (alertData.zone || '').toLowerCase();
-            if (alertZone) {
+            // municipality (si existe en la alerta)
+            const alertMunicipality = (alertData.municipality || '').toLowerCase();
+            if (alertMunicipality) {
                 // Comprobar si coincide con el municipio (city) o la zona de la subasta
-                if (auctionCity !== alertZone && auctionZone !== alertZone) {
+                if (auctionCity !== alertMunicipality && auctionZone !== alertMunicipality) {
                     continue;
                 }
             }
@@ -143,86 +213,124 @@ exports.onNotificationQueueCreate = functions
         });
         functions.logger.info(`[LOCK] Notificación ${notificationId} marcada como processing.`);
         const { userId, auctionId } = notificationData;
-        // 3. Leer subasta
-        const auctionDoc = await db.collection('auctions').doc(auctionId).get();
-        if (!auctionDoc.exists) {
-            throw new Error(`Subasta ${auctionId} no encontrada.`);
+        // 3. Leer subasta (opcional para promos)
+        let auction = {};
+        if (auctionId) {
+            const auctionDoc = await db.collection('auctions').doc(auctionId).get();
+            if (auctionDoc.exists) {
+                auction = auctionDoc.data();
+            }
+            else if (!notificationData.type || notificationData.type === 'alert') {
+                throw new Error(`Subasta ${auctionId} no encontrada.`);
+            }
         }
-        const auction = auctionDoc.data();
         // 4. Leer usuario
         const userDoc = await db.collection('users').doc(userId).get();
         if (!userDoc.exists) {
             throw new Error(`Usuario ${userId} no encontrado.`);
         }
         const user = userDoc.data();
-        const userEmail = user.email;
-        if (!userEmail) {
-            throw new Error(`Usuario ${userId} no tiene email configurado.`);
+        // 1. Soporte para flags opcionales (push por defecto true, email por defecto false)
+        const shouldPush = notificationData.push !== false;
+        const shouldEmail = notificationData.email === true;
+        // 2. Lógica Push Actualizada
+        const isAlert = !notificationData.type || notificationData.type === 'alert';
+        if ((shouldPush && isAlert) || notificationData.push === true) {
+            let isActive = false;
+            if (user.lastActiveAt) {
+                const lastActiveDate = user.lastActiveAt.toDate ? user.lastActiveAt.toDate() : new Date(user.lastActiveAt);
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                if (lastActiveDate > thirtyDaysAgo) {
+                    isActive = true;
+                }
+            }
+            if (!isActive) {
+                functions.logger.info(`[PUSH] skipped inactive user ${userId}`);
+            }
+            else if (user.fcmToken) {
+                try {
+                    const pushTitle = notificationData.title || `Nueva subasta en ${auction.province || 'tu zona'}`;
+                    const pushBody = notificationData.body || `${auction.propertyType || 'Inmueble'} detectado — revisa antes que otros`;
+                    const targetUrl = notificationData.url || `https://activosoffmarket.es/subasta/${auction.slug || auctionId}`;
+                    await admin.messaging().send({
+                        token: user.fcmToken,
+                        notification: {
+                            title: pushTitle,
+                            body: pushBody,
+                        },
+                        data: {
+                            url: targetUrl
+                        }
+                    });
+                    functions.logger.info(`[PUSH] push sent to ${userId}`);
+                }
+                catch (pushError) {
+                    if (pushError.code === 'messaging/invalid-registration-token' || pushError.code === 'messaging/registration-token-not-registered') {
+                        functions.logger.warn(`[PUSH] push invalid token for user ${userId}`);
+                    }
+                    else {
+                        functions.logger.error(`[PUSH] push error for user ${userId}:`, pushError);
+                    }
+                }
+            }
+            else {
+                functions.logger.info(`[PUSH] push skipped no token for user ${userId}`);
+            }
         }
-        // 5. Generar payload email (básico)
-        const mailerliteApiKey = process.env.MAILERLITE_API_KEY || functions.config().mailerlite?.key;
-        if (!mailerliteApiKey) {
-            throw new Error('MAILERLITE_API_KEY no configurada en el entorno.');
-        }
-        const emailPayload = {
-            subject: `Nueva subasta detectada: ${auction.propertyType} en ${auction.city}`,
-            from: "alertas@activosoffmarket.es",
-            from_name: "Alertas Off-Market",
-            to: userEmail,
-            content: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #0f172a;">Nueva oportunidad detectada</h2>
-            <p>Hola,</p>
-            <p>Hemos encontrado una nueva subasta que coincide con tus filtros de búsqueda:</p>
-            <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-              <p><strong>Tipo:</strong> ${auction.propertyType}</p>
-              <p><strong>Ubicación:</strong> ${auction.city} (${auction.province})</p>
-              <p><strong>Valor Tasación:</strong> ${auction.appraisalValue ? auction.appraisalValue.toLocaleString('es-ES') + '€' : 'Consultar'}</p>
-            </div>
-            <a href="https://activosoffmarket.es/subasta/${auction.slug}" 
-               style="display: inline-block; background: #1d4ed8; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-               Ver detalles de la subasta
-            </a>
-          </div>
-        `
-        };
-        // 4. Evitar doble envío: volver a leer doc antes de enviar
-        const checkDoc = await snap.ref.get();
-        if (checkDoc.data()?.status !== 'processing') {
-            functions.logger.warn(`[ABORT] Notificación ${notificationId} cambió de estado antes de enviar (status: ${checkDoc.data()?.status}).`);
-            return null;
-        }
-        // Flag global de seguridad para testing
-        const ENABLE = functions.config().alerts?.enabled === "true";
-        if (!ENABLE) {
-            functions.logger.info("[SKIP] alerts disabled via config");
-            await snap.ref.update({
-                status: 'skipped_test',
-                skippedAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-            return null;
-        }
-        // 6. Enviar vía MailerLite API existente
-        const response = await fetch('https://connect.mailerlite.com/api/emails/transactional', {
-            method: 'POST',
-            headers: {
+        // 3. Lógica Email (Placeholder + MailerLite actual)
+        if (shouldEmail) {
+            functions.logger.info(`EMAIL_PENDING ${notificationData.type || 'alert'} ${userId}`);
+            const userEmail = user.email;
+            if (!userEmail) {
+                throw new Error(`Usuario ${userId} no tiene email configurado.`);
+            }
+            /*
+            const mailerliteApiKey = process.env.MAILERLITE_API_KEY || functions.config().mailerlite?.key;
+            if (!mailerliteApiKey) {
+              throw new Error('MAILERLITE_API_KEY no configurada en el entorno.');
+            }
+            */
+            const checkDoc = await snap.ref.get();
+            if (checkDoc.data()?.status !== 'processing') {
+                functions.logger.warn(`[ABORT] Notificación ${notificationId} cambió de estado antes de enviar (status: ${checkDoc.data()?.status}).`);
+                return null;
+            }
+            const ENABLE = functions.config().alerts?.enabled === "true";
+            if (!ENABLE) {
+                functions.logger.info("[SKIP] alerts disabled via config");
+                await snap.ref.update({
+                    status: 'skipped_test',
+                    skippedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                return null;
+            }
+            /*
+            const response = await fetch('https://connect.mailerlite.com/api/emails/transactional', {
+              method: 'POST',
+              headers: {
                 'Authorization': `Bearer ${mailerliteApiKey}`,
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-            },
-            body: JSON.stringify(emailPayload),
-        });
-        if (!response.ok) {
-            const errorData = await response.text();
-            throw new Error(`Error MailerLite (${response.status}): ${errorData}`);
+              },
+              body: JSON.stringify(emailPayload),
+            });
+    
+            if (!response.ok) {
+              const errorData = await response.text();
+              throw new Error(`Error MailerLite (${response.status}): ${errorData}`);
+            }
+            */
+            functions.logger.info(`[SIMULATED] Email would be sent to ${userEmail} (MailerLite disabled)`);
         }
         // 2. Después enviar OK
         await snap.ref.update({
             status: 'sent',
+            sent: true,
             sentAt: admin.firestore.FieldValue.serverTimestamp()
         });
         // 5. Logs: enviado
-        functions.logger.info(`[SENT] Email enviado con éxito a ${userEmail} para subasta ${auctionId}`);
+        functions.logger.info(`[SENT] Notificación procesada con éxito para usuario ${userId} y subasta ${auctionId}`);
         return null;
     }
     catch (error) {

@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Informe de Subasta SUB-RC-2026-2800500103325 | Activos OffMarket</title>
+  <style>
+    :root{
+      --bg:#071521;
+      --bg-soft:#0d2133;
+      --panel:#11283d;
+      --panel-2:#16344f;
+      --line:rgba(255,255,255,.08);
+      --text:#edf4fa;
+      --muted:#9fb3c4;
+      --muted-2:#7f97aa;
+      --white:#ffffff;
+      --accent:#7dd3fc;
+      --accent-2:#38bdf8;
+      --success:#34d399;
+      --warning:#fbbf24;
+      --danger:#f87171;
+      --violet:#a78bfa;
+      --shadow:0 18px 60px rgba(0,0,0,.35);
+      --radius:22px;
+      --radius-sm:14px;
+      --max:1180px;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(167,139,250,.10), transparent 22%),
+        linear-gradient(180deg, #071521 0%, #08131d 100%);
+      line-height:1.55;
+    }
+
+    .container{
+      width:min(var(--max), calc(100% - 32px));
+      margin:0 auto;
+    }
+
+    .topbar{
+      border-bottom:1px solid var(--line);
+      background:rgba(7,21,33,.75);
+      backdrop-filter:blur(10px);
+      position:sticky;
+      top:0;
+      z-index:20;
+    }
+
+    .topbar-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      min-height:70px;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-weight:700;
+      letter-spacing:.2px;
+    }
+
+    .brand-mark{
+      width:38px;
+      height:38px;
+      border-radius:12px;
+      background:linear-gradient(135deg, var(--accent-2), var(--violet));
+      display:grid;
+      place-items:center;
+      box-shadow:0 10px 30px rgba(56,189,248,.25);
+      color:white;
+      font-size:15px;
+      font-weight:800;
+    }
+
+    .brand small{
+      display:block;
+      color:var(--muted);
+      font-weight:500;
+      font-size:12px;
+      margin-top:2px;
+    }
+
+    .hero{
+      padding:46px 0 24px;
+    }
+
+    .hero-card{
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
+        linear-gradient(135deg, rgba(56,189,248,.08), rgba(167,139,250,.06));
+      border:1px solid var(--line);
+      border-radius:32px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .hero-inner{
+      display:grid;
+      grid-template-columns:1.3fr .9fr;
+      gap:28px;
+      padding:34px;
+    }
+
+    .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:8px 12px;
+      border-radius:999px;
+      background:rgba(125,211,252,.09);
+      border:1px solid rgba(125,211,252,.18);
+      color:#cbefff;
+      font-size:12px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+
+    h1{
+      font-size:clamp(30px, 4vw, 50px);
+      line-height:1.08;
+      margin:18px 0 16px;
+      letter-spacing:-.03em;
+    }
+
+    .subtitle{
+      color:var(--muted);
+      font-size:17px;
+      max-width:760px;
+      margin-bottom:24px;
+    }
+
+    .hero-meta{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border-radius:999px;
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--line);
+      color:var(--text);
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .score-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:24px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      min-height:100%;
+    }
+
+    .score-kicker{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+    }
+
+    .score-value{
+      font-size:54px;
+      font-weight:800;
+      line-height:1;
+      margin:10px 0 8px;
+      letter-spacing:-.04em;
+    }
+
+    .score-value span{
+      font-size:20px;
+      color:var(--muted);
+      font-weight:700;
+    }
+
+    .score-note{
+      color:var(--muted);
+      font-size:14px;
+      margin-top:8px;
+    }
+
+    .grid-stats{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:16px;
+      margin-top:22px;
+    }
+
+    .stat{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:20px;
+      min-height:120px;
+    }
+
+    .stat-label{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:10px;
+    }
+
+    .stat-value{
+      font-size:28px;
+      font-weight:800;
+      letter-spacing:-.03em;
+      line-height:1.1;
+    }
+
+    .stat-sub{
+      color:var(--muted-2);
+      font-size:13px;
+      margin-top:8px;
+    }
+
+    section{
+      padding:18px 0;
+    }
+
+    .section-title{
+      font-size:30px;
+      letter-spacing:-.03em;
+      margin:0 0 14px;
+    }
+
+    .section-lead{
+      color:var(--muted);
+      max-width:900px;
+      margin:0 0 24px;
+    }
+
+    .cards-3{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:16px;
+    }
+
+    .insight{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+    }
+
+    .insight-icon{
+      font-size:22px;
+      margin-bottom:14px;
+    }
+
+    .insight h3{
+      margin:0 0 8px;
+      font-size:18px;
+      letter-spacing:-.02em;
+    }
+
+    .insight p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .panel{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid var(--line);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel-head{
+      padding:22px 24px 0;
+    }
+
+    .panel-body{
+      padding:24px;
+    }
+
+    .two-col{
+      display:grid;
+      grid-template-columns:1.05fr .95fr;
+      gap:18px;
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      font-size:14px;
+    }
+
+    th,td{
+      text-align:left;
+      padding:13px 0;
+      border-bottom:1px solid var(--line);
+      vertical-align:top;
+    }
+
+    th{
+      width:38%;
+      color:var(--muted);
+      font-weight:600;
+    }
+
+    .bullet-list{
+      display:grid;
+      gap:12px;
+      margin:0;
+      padding:0;
+      list-style:none;
+    }
+
+    .bullet-list li{
+      padding:14px 16px;
+      border:1px solid var(--line);
+      border-radius:16px;
+      background:rgba(255,255,255,.02);
+      color:var(--text);
+    }
+
+    .bullet-list li strong{
+      display:block;
+      margin-bottom:4px;
+      color:var(--white);
+    }
+
+    .risk-grid{
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:16px;
+    }
+
+    .risk-card{
+      background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015));
+      border:1px solid var(--line);
+      border-radius:22px;
+      padding:22px;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-size:12px;
+      font-weight:800;
+      letter-spacing:.04em;
+      text-transform:uppercase;
+      padding:7px 10px;
+      border-radius:999px;
+      margin-bottom:12px;
+    }
+
+    .tag.green{background:rgba(52,211,153,.12); color:#b8f5dc; border:1px solid rgba(52,211,153,.2)}
+    .tag.red{background:rgba(248,113,113,.12); color:#ffd0d0; border:1px solid rgba(248,113,113,.18)}
+    .tag.yellow{background:rgba(251,191,36,.12); color:#ffe8a3; border:1px solid rgba(251,191,36,.18)}
+    .tag.blue{background:rgba(125,211,252,.12); color:#d5f2ff; border:1px solid rgba(125,211,252,.18)}
+
+    .risk-card h3{
+      margin:0 0 8px;
+      font-size:19px;
+    }
+
+    .risk-card p{
+      margin:0;
+      color:var(--muted);
+    }
+
+    .market-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:16px;
+    }
+
+    .market-box{
+      border:1px solid var(--line);
+      border-radius:20px;
+      padding:22px;
+      background:rgba(255,255,255,.02);
+    }
+
+    .market-box .k{
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:8px;
+    }
+
+    .market-box .v{
+      font-size:30px;
+      font-weight:800;
+      letter-spacing:-.03em;
+      line-height:1.1;
+    }
+
+    .market-box .s{
+      color:var(--muted-2);
+      font-size:13px;
+      margin-top:8px;
+    }
+
+    .highlight{
+      margin-top:18px;
+      padding:22px;
+      border-radius:22px;
+      background:linear-gradient(135deg, rgba(248,113,113,.08), rgba(251,191,36,.06));
+      border:1px solid rgba(248,113,113,.18);
+      color:var(--text);
+    }
+
+    .highlight strong{
+      display:block;
+      font-size:19px;
+      margin-bottom:10px;
+    }
+
+    .steps{
+      display:grid;
+      gap:14px;
+    }
+
+    .step{
+      display:grid;
+      grid-template-columns:64px 1fr;
+      gap:16px;
+      padding:18px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.02);
+    }
+
+    .step-num{
+      width:48px;
+      height:48px;
+      border-radius:14px;
+      background:linear-gradient(135deg, var(--accent-2), var(--violet));
+      display:grid;
+      place-items:center;
+      font-weight:800;
+      box-shadow:0 10px 25px rgba(56,189,248,.18);
+    }
+
+    .step h4{
+      margin:0 0 6px;
+      font-size:17px;
+    }
+
+    .step p{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+    }
+
+    .conclusion{
+      display:grid;
+      grid-template-columns:1.1fr .9fr;
+      gap:18px;
+    }
+
+    .conclusion-box{
+      background:linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border:1px solid var(--line);
+      border-radius:26px;
+      padding:26px;
+    }
+
+    .verdict{
+      font-size:15px;
+      color:var(--muted);
+      margin-bottom:12px;
+    }
+
+    .verdict-title{
+      font-size:34px;
+      line-height:1.08;
+      letter-spacing:-.04em;
+      margin:0 0 14px;
+    }
+
+    .checklist{
+      list-style:none;
+      padding:0;
+      margin:0;
+      display:grid;
+      gap:10px;
+    }
+
+    .checklist li{
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.02);
+      border-radius:16px;
+      padding:14px 16px;
+    }
+
+    .footer-note{
+      margin:28px 0 60px;
+      padding:22px;
+      border:1px solid var(--line);
+      border-radius:20px;
+      color:var(--muted);
+      font-size:13px;
+      background:rgba(255,255,255,.02);
+    }
+
+    .print-note{
+      color:var(--muted-2);
+      font-size:12px;
+      margin-top:10px;
+    }
+
+    @media (max-width: 1100px){
+      .hero-inner,
+      .two-col,
+      .conclusion{
+        grid-template-columns:1fr;
+      }
+      .grid-stats,
+      .cards-3,
+      .market-grid{
+        grid-template-columns:repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 760px){
+      .container{
+        width:min(var(--max), calc(100% - 20px));
+      }
+      .hero{
+        padding-top:22px;
+      }
+      .hero-inner,
+      .panel-body,
+      .panel-head{
+        padding:20px;
+      }
+      .grid-stats,
+      .cards-3,
+      .risk-grid,
+      .market-grid{
+        grid-template-columns:1fr;
+      }
+      .stat{
+        min-height:auto;
+      }
+      .step{
+        grid-template-columns:52px 1fr;
+      }
+      .verdict-title{
+        font-size:28px;
+      }
+      h1{
+        font-size:34px;
+      }
+      .score-value{
+        font-size:42px;
+      }
+      table th, table td{
+        display:block;
+        width:100%;
+        padding:8px 0;
+      }
+      table tr{
+        display:block;
+        padding:10px 0;
+        border-bottom:1px solid var(--line);
+      }
+      table th{
+        border-bottom:none;
+        padding-bottom:3px;
+      }
+      table td{
+        border-bottom:none;
+        padding-top:0;
+      }
+    }
+
+    @media print{
+      body{
+        background:#fff;
+        color:#111827;
+      }
+      .topbar{
+        position:static;
+        background:#fff;
+        backdrop-filter:none;
+      }
+      .hero-card,.panel,.conclusion-box,.stat,.insight,.risk-card,.market-box,.step,.footer-note,.highlight{
+        box-shadow:none;
+        background:#fff;
+        color:#111827;
+        border:1px solid #dbe3ea;
+      }
+      .subtitle,.section-lead,.stat-label,.stat-sub,.score-note,.bullet-list li,.risk-card p,.market-box .k,.market-box .s,.step p,.footer-note,.verdict{
+        color:#4b5563 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">AOM</div>
+        <div>
+          Activos OffMarket
+          <small>Informe confidencial · Análisis de subasta</small>
+        </div>
+      </div>
+      <div class="chip">SUB-RC-2026-2800500103325</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-card">
+          <div class="hero-inner">
+            <div>
+              <div class="eyebrow">Informe profesional · Recaudación tributaria</div>
+              <h1>Análisis de subasta · Avenida de Filipinas, 50, Madrid</h1>
+              <p class="subtitle">
+                Informe enfocado a decidir con criterio si esta subasta merece seguimiento real,
+                qué riesgos jurídicos y económicos presenta, y por qué el valor de mercado pesa
+                más aquí que la tasación administrativa del expediente.
+              </p>
+
+              <div class="hero-meta">
+                <div class="chip">📍 Esc. 3, 7º C · Madrid 28003</div>
+                <div class="chip">🏠 Piso · 72 m² + 13 m² comunes</div>
+                <div class="chip">🗓 Fin: 20-04-2026 · 18:00 CET</div>
+              </div>
+            </div>
+
+            <aside class="score-card">
+              <div>
+                <div class="score-kicker">Puntuación de interés</div>
+                <div class="score-value">6,5 <span>/ 10</span></div>
+                <div class="tag yellow">Lectura recomendada: prudencia económica</div>
+              </div>
+              <p class="score-note">
+                Buen punto jurídico por la hipoteca aparentemente extinguida, pero con fuerte
+                desajuste entre la tasación del expediente y el valor estimado real de mercado.
+              </p>
+            </aside>
+          </div>
+        </div>
+
+        <div class="grid-stats">
+          <article class="stat">
+            <div class="stat-label">Valor subasta / tasación</div>
+            <div class="stat-value">601.005 €</div>
+            <div class="stat-sub">Referencia administrativa publicada</div>
+          </article>
+
+          <article class="stat">
+            <div class="stat-label">Puja mínima</div>
+            <div class="stat-value">60.101 €</div>
+            <div class="stat-sub">No equivale al precio razonable de entrada</div>
+          </article>
+
+          <article class="stat">
+            <div class="stat-label">Cantidad reclamada</div>
+            <div class="stat-value">75.656 €</div>
+            <div class="stat-sub">Importe del expediente de recaudación</div>
+          </article>
+
+          <article class="stat">
+            <div class="stat-label">Depósito exigido</div>
+            <div class="stat-value">30.050 €</div>
+            <div class="stat-sub">5% del valor de subasta</div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <h2 class="section-title">Resumen ejecutivo</h2>
+        <p class="section-lead">
+          A primera vista, la operación puede parecer atractiva por la baja relación entre deuda
+          reclamada y valor de subasta. Sin embargo, esa impresión puede resultar engañosa si se
+          toma como referencia la tasación administrativa. El dato clave aquí es doble: la hipoteca
+          parece económicamente extinguida, pero el valor estimado de mercado queda muy por debajo
+          del valor de subasta publicado.
+        </p>
+
+        <div class="cards-3">
+          <article class="insight">
+            <div class="insight-icon">🔒</div>
+            <h3>Seguridad jurídica</h3>
+            <p>
+              La hipoteca registral parece extinguida económicamente según comunicación bancaria,
+              aunque continúe pendiente de cancelación formal en el Registro.
+            </p>
+          </article>
+
+          <article class="insight">
+            <div class="insight-icon">💰</div>
+            <h3>Valor económico</h3>
+            <p>
+              La tasación del expediente está muy por encima del valor estimado de venta que se
+              maneja para el inmueble.
+            </p>
+          </article>
+
+          <article class="insight">
+            <div class="insight-icon">⚠️</div>
+            <h3>Riesgo principal</h3>
+            <p>
+              El problema más relevante no parece ser una gran carga hipotecaria viva, sino pagar
+              de más por un activo cuyo mercado probable es muy inferior.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container two-col">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 class="section-title">Ficha técnica</h2>
+          </div>
+          <div class="panel-body">
+            <table>
+              <tr>
+                <th>Identificador</th>
+                <td>SUB-RC-2026-2800500103325</td>
+              </tr>
+              <tr>
+                <th>Tipo de subasta</th>
+                <td>Recaudación tributaria</td>
+              </tr>
+              <tr>
+                <th>Ubicación</th>
+                <td>Esc. 3, 7º C, Avenida de Filipinas, 50, Madrid 28003</td>
+              </tr>
+              <tr>
+                <th>Tipo de inmueble</th>
+                <td>Piso</td>
+              </tr>
+              <tr>
+                <th>Superficie orientativa</th>
+                <td>72 m² vivienda + 13 m² áreas comunes</td>
+              </tr>
+              <tr>
+                <th>Distribución</th>
+                <td>2 habitaciones · 1 baño</td>
+              </tr>
+              <tr>
+                <th>Año / ascensor</th>
+                <td>1970 · con ascensor</td>
+              </tr>
+              <tr>
+                <th>Valor subasta / tasación</th>
+                <td>601.004,95 €</td>
+              </tr>
+              <tr>
+                <th>Cantidad reclamada</th>
+                <td>75.655,85 €</td>
+              </tr>
+              <tr>
+                <th>Puja mínima</th>
+                <td>60.100,50 €</td>
+              </tr>
+              <tr>
+                <th>Depósito</th>
+                <td>30.050,25 €</td>
+              </tr>
+              <tr>
+                <th>Fecha fin</th>
+                <td>20-04-2026 · 18:00 CET</td>
+              </tr>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2 class="section-title">Qué significa realmente</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="bullet-list">
+              <li>
+                <strong>La hipoteca histórica no parece hoy una deuda viva exigible</strong>
+                La clave no es solo que figure en nota simple, sino que exista o no obligación económica viva detrás.
+              </li>
+              <li>
+                <strong>La puja mínima no convierte la operación en barata</strong>
+                Solo fija un umbral formal de inicio; no determina el precio razonable de adjudicación.
+              </li>
+              <li>
+                <strong>El valor de mercado importa más que la tasación del expediente</strong>
+                Aquí la disciplina de precio es mucho más importante que la aparente baja deuda reclamada.
+              </li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <h2 class="section-title">Análisis registral y de cargas</h2>
+        <p class="section-lead">
+          La lectura correcta de esta subasta no consiste en listar cargas sin más, sino en entender
+          su naturaleza, su rango y si generan un riesgo económico real para el adjudicatario.
+        </p>
+
+        <div class="risk-grid">
+          <article class="risk-card">
+            <div class="tag blue">Situación registral</div>
+            <h3>Hipoteca inscripción 7.ª</h3>
+            <p>
+              Registralmente continúa apareciendo una hipoteca formalizada en 2008 por 550.976 €,
+              pero la comunicación bancaria indica que la obligación está extinguida y sin saldo deudor,
+              quedando pendiente la cancelación formal registral.
+            </p>
+          </article>
+
+          <article class="risk-card">
+            <div class="tag red">Procedimiento ejecutivo</div>
+            <h3>Embargos administrativos</h3>
+            <p>
+              Constan dos anotaciones preventivas de embargo, una del Ayuntamiento de Madrid y otra de la AEAT.
+              Estas anotaciones son la base real del procedimiento de apremio y explican por qué el activo sale a subasta.
+            </p>
+          </article>
+
+          <article class="risk-card">
+            <div class="tag yellow">Carga subsistente</div>
+            <h3>Servidumbre de luces y vistas</h3>
+            <p>
+              Figura por procedencia y debe asumirse como una situación jurídica propia del inmueble.
+              No es una carga cancelable por el procedimiento de apremio.
+            </p>
+          </article>
+
+          <article class="risk-card">
+            <div class="tag green">Idea clave</div>
+            <h3>Qué se ejecuta realmente</h3>
+            <p>
+              Lo que se ejecuta aquí no es la hipoteca, sino las anotaciones de embargo administrativo.
+              Esta diferencia es esencial para valorar correctamente qué cargas pueden subsistir y cuáles no.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container two-col">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 class="section-title">Lectura práctica para el comprador</h2>
+          </div>
+          <div class="panel-body">
+            <table>
+              <tr>
+                <th>Servidumbre de luces y vistas</th>
+                <td>Subsiste. No es una carga cancelable por el procedimiento de apremio.</td>
+              </tr>
+              <tr>
+                <th>Hipoteca inscripción 7.ª</th>
+                <td>No parece una deuda viva exigible, aunque registralmente siga figurando hasta su cancelación formal.</td>
+              </tr>
+              <tr>
+                <th>Cargas posteriores</th>
+                <td>En principio podrán cancelarse mediante el correspondiente mandamiento de cancelación de cargas posteriores.</td>
+              </tr>
+              <tr>
+                <th>IBI y comunidad</th>
+                <td>No operan como cargas previas inscritas, pero el adjudicatario puede responder en los términos previstos en las condiciones de subasta.</td>
+              </tr>
+            </table>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2 class="section-title">Reglas aplicables</h2>
+          </div>
+          <div class="panel-body">
+            <ul class="bullet-list">
+              <li>
+                <strong>Subrogación en lo que legalmente subsista</strong>
+                El adjudicatario asume las cargas y situaciones jurídicas que deban subsistir legalmente.
+              </li>
+              <li>
+                <strong>Cancelación de cargas posteriores</strong>
+                La Administración expedirá el mandamiento correspondiente tras la adjudicación e ingreso del remate.
+              </li>
+              <li>
+                <strong>La titularidad nace al final</strong>
+                Hasta la certificación del acta de adjudicación o la escritura pública no existe todavía plena adquisición.
+              </li>
+              <li>
+                <strong>Gastos del adjudicatario</strong>
+                El comprador asume impuestos, inscripción registral, cancelación de cargas posteriores y otras responsabilidades previstas.
+              </li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <h2 class="section-title">Valoración de mercado</h2>
+        <p class="section-lead">
+          Este es el punto económico más importante del informe. La tasación administrativa del expediente
+          parece muy por encima del mercado esperable para el inmueble, y eso cambia por completo la lectura de la oportunidad.
+        </p>
+
+        <div class="market-grid">
+          <article class="market-box">
+            <div class="k">Valor estimado de venta</div>
+            <div class="v">395.000 €</div>
+            <div class="s">Rango estimado: 355.000 € – 421.000 €</div>
+          </article>
+
+          <article class="market-box">
+            <div class="k">Valor estimado de alquiler</div>
+            <div class="v">1.600 € / mes</div>
+            <div class="s">Rango estimado: 1.470 € – 1.710 € / mes</div>
+          </article>
+
+          <article class="market-box">
+            <div class="k">Diferencia aprox. frente a tasación</div>
+            <div class="v">-206.005 €</div>
+            <div class="s">Distancia relevante entre valor de subasta y valor de venta estimado</div>
+          </article>
+        </div>
+
+        <div class="highlight">
+          <strong>Lectura económica clara</strong>
+          La operación no debe enfocarse como “deuda pequeña frente a inmueble muy valioso”. Debe leerse
+          como una compra en la que el mercado parece valorar bastante menos que la Administración.
+          Eso obliga a fijar una puja máxima estricta y a no anclar la decisión en la cifra administrativa.
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container two-col">
+        <article class="panel">
+          <div class="panel-head">
+            <h2 class="section-title">Análisis de oportunidad</h2>
+          </div>
+          <div class="panel-body">
+            <div class="risk-grid">
+              <div class="risk-card">
+                <div class="tag green">Escenario favorable</div>
+                <h3>Compra con sentido</h3>
+                <p>
+                  Si la adjudicación se produce en una zona de precio claramente alejada del valor de subasta
+                  y razonablemente cercana a un margen seguro respecto al valor de mercado.
+                </p>
+              </div>
+
+              <div class="risk-card">
+                <div class="tag red">Escenario desfavorable</div>
+                <h3>Sobrepago</h3>
+                <p>
+                  Si la puja sube demasiado apoyándose en la tasación administrativa o en la idea de
+                  “gran activo por poca deuda”, la compra puede perder atractivo con rapidez.
+                </p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2 class="section-title">Rentabilidad orientativa</h2>
+          </div>
+          <div class="panel-body">
+            <p style="margin-top:0;color:var(--muted)">
+              Con una renta estimada de 1.600 € al mes, el activo puede tener interés patrimonial
+              si se adquiere a un precio adecuado. Pero ese interés desaparece o se reduce mucho si
+              la compra se acerca demasiado a una valoración claramente superior al mercado.
+            </p>
+
+            <ul class="bullet-list">
+              <li>
+                <strong>Lo positivo</strong>
+                La hipoteca parece económicamente extinguida, lo que reduce bastante el riesgo jurídico principal.
+              </li>
+              <li>
+                <strong>Lo exigente</strong>
+                La disciplina de precio aquí es decisiva. La tasación administrativa no debería guiar la puja.
+              </li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="container">
+        <h2 class="section-title">Pasos recomendados antes de pujar</h2>
+        <div class="steps">
+          <article class="step">
+            <div class="step-num">1</div>
+            <div>
+              <h4>Tomar como referencia el mercado, no la tasación</h4>
+              <p>Evita anclar la decisión en una cifra administrativa que parece inflada respecto al valor real esperado.</p>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-num">2</div>
+            <div>
+              <h4>Fijar una puja máxima estricta</h4>
+              <p>Controla el riesgo de sobrepago en una subasta con puja mínima baja pero valor de salida muy alto.</p>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-num">3</div>
+            <div>
+              <h4>Analizar el coste total de entrada</h4>
+              <p>Incluye impuestos, registro, regularizaciones, posibles incidencias y cualquier gasto de cierre.</p>
+            </div>
+          </article>
+
+          <article class="step">
+            <div class="step-num">4</div>
+            <div>
+              <h4>Conservar la carta de CaixaBank</h4>
+              <p>Es el documento con mayor fuerza para sostener que la hipoteca no responde ya a una deuda viva.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="container conclusion">
+        <article class="conclusion-box">
+          <div class="verdict">Recomendación clara</div>
+          <h2 class="verdict-title">Oportunidad posible, pero solo con mucha disciplina en precio</h2>
+          <p style="color:var(--muted);margin-top:0">
+            La subasta no parece especialmente problemática por una gran hipoteca viva, pero sí exige criterio económico.
+            El riesgo principal no es una carga oculta grave, sino pagar más de lo que el mercado justificaría.
+          </p>
+        </article>
+
+        <article class="conclusion-box">
+          <ul class="checklist">
+            <li>✔ Buen punto jurídico por la hipoteca aparentemente extinguida</li>
+            <li>✔ Mucha prudencia económica por el desfase entre tasación y mercado</li>
+            <li>✔ No dejarse llevar por la cantidad reclamada ni por la puja mínima</li>
+            <li>✔ Decidir en función del valor real de salida que estés dispuesto a defender</li>
+          </ul>
+        </article>
+      </div>
+
+      <div class="container">
+        <div class="footer-note">
+          <strong>Cláusula informativa y limitación de responsabilidad</strong><br><br>
+          El presente informe tiene carácter meramente informativo y se basa en la documentación disponible en el momento de su elaboración.
+          No constituye asesoramiento vinculante ni garantía sobre el resultado del procedimiento de subasta ni sobre la situación registral
+          definitiva del inmueble. El emisor del informe no asume responsabilidad por decisiones adoptadas en base al mismo ni por posibles
+          variaciones en la situación jurídica o económica del activo con posterioridad a su emisión.
+          <div class="print-note">Documento de referencia preparado con estructura visual premium para web, exportación o PDF.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>

@@ -59,7 +59,1045 @@ export interface AuctionData {
 }
 
 export const AUCTIONS: Record<string, AuctionData> = {
+<<<<<<< HEAD
   "subasta-sub-at-2026-26r4586002004": {
+=======
+  'subasta-v-1776021283975': {
+    boeId: "V-1776021283975",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:43.977Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R4586002008&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021281845': {
+    boeId: "V-1776021281845",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:41.846Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R4586002004&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021265881': {
+    boeId: "V-1776021265881",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:25.883Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JV-2026-259444&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021265622': {
+    boeId: "V-1776021265622",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:25.623Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JV-2026-259515&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021263914': {
+    boeId: "V-1776021263914",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:23.916Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JA-2026-259312&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021261918': {
+    boeId: "V-1776021261918",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:21.923Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R3086002001&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021260128': {
+    boeId: "V-1776021260128",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:21.653Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R0886002010&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "RENAULT",
+    model: "MEGANE SCENIC",
+    licensePlate: "8580HDF",
+    year: 2011,
+    vin: "VF1JZ3G0D45296204",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021259801': {
+    boeId: "V-1776021259801",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:19.802Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R0886002009&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021258099': {
+    boeId: "V-1776021258099",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:19.540Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R2886002055&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "FERRARI",
+    model: "CALIFORNIA T",
+    licensePlate: "6596KBC",
+    year: 2017,
+    vin: "ZFF77XJB000219339",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021257776': {
+    boeId: "V-1776021257776",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:17.777Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002225&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021254880': {
+    boeId: "V-1776021254880",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:14.881Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002222&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021253095': {
+    boeId: "V-1776021253095",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:14.617Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002221&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "FIAT",
+    model: "FIAT TIPO",
+    licensePlate: "7472KHJ",
+    year: 2018,
+    vin: "ZFA35600006F51088",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021250899': {
+    boeId: "V-1776021250899",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:10.904Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002219&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021249191': {
+    boeId: "V-1776021249191",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:10.641Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002218&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "TOYOTA",
+    model: "PROACE CITY",
+    licensePlate: "7437LNB",
+    year: 2021,
+    vin: "YAREFYHZJGJ928732",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021244965': {
+    boeId: "V-1776021244965",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:04.966Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002215&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021244697': {
+    boeId: "V-1776021244697",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:04.698Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002214&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021240909': {
+    boeId: "V-1776021240909",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:00.909Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002211&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021239177': {
+    boeId: "V-1776021239177",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:14:00.680Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002210&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "CITROEN",
+    model: "C4",
+    licensePlate: "1996GFB",
+    year: 2008,
+    vin: "VF7LC9HXC74845121",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021236933': {
+    boeId: "V-1776021236933",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:56.934Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002207&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021230917': {
+    boeId: "V-1776021230917",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:50.918Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002204&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021229188': {
+    boeId: "V-1776021229188",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:50.694Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002203&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "RENAULT",
+    model: "KANGOO",
+    licensePlate: "8847HVW",
+    year: 2014,
+    vin: "VF1FW17BE50324261",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021228818': {
+    boeId: "V-1776021228818",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:48.822Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002202&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021224927': {
+    boeId: "V-1776021224927",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:44.928Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002191&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021224702': {
+    boeId: "V-1776021224702",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:44.703Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002190&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021223841': {
+    boeId: "V-1776021223841",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:43.842Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002185&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021222935': {
+    boeId: "V-1776021222935",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:42.936Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002154&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776021221923': {
+    boeId: "V-1776021221923",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T19:13:41.924Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002146&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012625539': {
+    boeId: "V-1776012625539",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:25.540Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JV-2026-259515&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012621515': {
+    boeId: "V-1776012621515",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:21.518Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R3086002001&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012619703': {
+    boeId: "V-1776012619703",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:21.262Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R0886002010&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "RENAULT",
+    model: "MEGANE SCENIC",
+    licensePlate: "8580HDF",
+    year: 2011,
+    vin: "VF1JZ3G0D45296204",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012619368': {
+    boeId: "V-1776012619368",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:19.372Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R0886002009&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012617778': {
+    boeId: "V-1776012617778",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:19.113Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R2886002055&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "FERRARI",
+    model: "CALIFORNIA T",
+    licensePlate: "6596KBC",
+    year: 2017,
+    vin: "ZFF77XJB000219339",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012617443': {
+    boeId: "V-1776012617443",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:17.444Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002225&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012613533': {
+    boeId: "V-1776012613533",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:13.538Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002222&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012611761': {
+    boeId: "V-1776012611761",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:13.269Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002221&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "FIAT",
+    model: "FIAT TIPO",
+    licensePlate: "7472KHJ",
+    year: 2018,
+    vin: "ZFA35600006F51088",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012609538': {
+    boeId: "V-1776012609538",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:09.539Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002219&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012607791': {
+    boeId: "V-1776012607791",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:09.251Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002218&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "TOYOTA",
+    model: "PROACE CITY",
+    licensePlate: "7437LNB",
+    year: 2021,
+    vin: "YAREFYHZJGJ928732",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012605563': {
+    boeId: "V-1776012605563",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:05.566Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002216&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012603768': {
+    boeId: "V-1776012603768",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:05.329Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002215&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "MERCEDES-BENZ",
+    model: "GLC 250 4MATIC",
+    licensePlate: "0261JYH",
+    year: 2017,
+    vin: "WDC2533461F258395",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012603461': {
+    boeId: "V-1776012603461",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:50:03.462Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002214&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012599508': {
+    boeId: "V-1776012599508",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:49:59.509Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002211&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012584733': {
+    boeId: "V-1776012584733",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:49:47.295Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002203&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "RENAULT",
+    model: "KANGOO",
+    licensePlate: "8847HVW",
+    year: 2014,
+    vin: "VF1FW17BE50324261",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012584423': {
+    boeId: "V-1776012584423",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:49:44.424Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002202&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012575735': {
+    boeId: "V-1776012575735",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "Tarragona",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:49:37.187Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002189&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: "CITROEN",
+    model: "XSARA PICASSO",
+    licensePlate: "4779GTJ",
+    year: 2010,
+    vin: "VF7CH9HXC9J332623",
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012573569': {
+    boeId: "V-1776012573569",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:49:33.570Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002155&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012572512': {
+    boeId: "V-1776012572512",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:49:32.513Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002147&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+  'subasta-v-1776012572280': {
+    boeId: "V-1776012572280",
+    status: "active",
+    valorSubasta: 0,
+    valorTasacion: 0,
+    province: "No Consta",
+    city: "No Consta",
+    publishedAt: "2026-04-12T16:49:32.281Z",
+    auctionDate: undefined,
+    boeUrl: "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002146&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
+    assetCategory: "vehiculo",
+    brand: undefined,
+    model: undefined,
+    licensePlate: undefined,
+    year: undefined,
+    vin: undefined,
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },
+'subasta-sub-at-2026-26r4586002004': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-26R4586002004",
     status: "active",
     valorSubasta: 17650,
@@ -383,7 +1421,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 7200,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:19:52.275Z",
+=======
+    publishedAt: "2026-04-12T19:14:43.696Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "20-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R4586002006&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -402,6 +1444,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
     municipality: undefined,
     pickupLocation: undefined,
+<<<<<<< HEAD
     locationText:
       "Audi A6 Avant 3.0 TDI quattro V6 S-Line AUT 240cv, color blanco, diésel, matriculación 02-03- 2010, 338278 km, llaves si, documentación si, caducidad itv 13-03-2026. Distintivo B. Equipamiento deportivo S-Line, tracción 4x4, climatizador bizona, cambio automático secuencial, dirección asistida, 4 elevalunas eléctricos, cierre centralizado, espejos regulación eléctrica calefactables y plegables, pantalla central multifunción (navegador, sonido, computadora, media, información, teléfono, etc), blu",
     documents: [
@@ -476,6 +1519,12 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-v-1775987857335": {
+=======
+    locationText: undefined,
+    documents: []
+  },,,
+'subasta-v-1775987857335': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "V-1775987857335",
     status: "active",
     valorSubasta: 0,
@@ -509,7 +1558,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 3340,
     province: "Malaga",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:17:12.515Z",
+=======
+    publishedAt: "2026-04-12T19:14:41.477Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "20-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R4186002001&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -526,6 +1579,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775988826/activos_offmarket/vehiculos/SUB-AT-2026-26R4186002001_img_5.jpg",
     ],
     municipality: undefined,
+<<<<<<< HEAD
     pickupLocation: "https://sede.registradores.org/sede/sede-csv-web/csv",
     locationText:
       "- Depositario: Unión Andaluza Servicios De Mudanzas SL. -Lugar depósito: C/ Castelao 17, Polígono Industrial Guadalhorce (Málaga). -Contacto depositario: Telf. 952-245-994. Email: malaga.trafico@gil-tauffer.com. Horario de oficina de lunes a viernes (excepto festivos) en horario de 9:00h a 17:00h - Modelo vehículo: MERCEDES ; E 270 - Datos comunicados por el depositario: 239.250 km, consta documentación conforme a fotografías anexas, llave sí. -Se desconoce la existencia de otros desperfectos di",
@@ -701,13 +1755,24 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r4186002113": {
+=======
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r4186002113': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R4186002113",
     status: "active",
     valorSubasta: 8904,
     valorTasacion: 8904,
     province: "Malaga",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:13:39.770Z",
+=======
+    publishedAt: "2026-04-12T19:14:37.594Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "20-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R4186002113&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -722,6 +1787,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
     municipality: undefined,
     pickupLocation: undefined,
+<<<<<<< HEAD
     locationText:
       "1) Depositario: AEAT. Datos de contacto del depositario: Telf. 952-245-994. Email: malaga.trafico@gil-stauffer.com Horario de visitas: lunes a viernes (excepto festivos) en horario de 9:00h a 17:00h. 2) Lugar depósito: C/CASTELAO, 17. Málaga. 3) Datos comunicados por el depositario: 48.586 km; documentación conforme a las fotografías anexas; llave: SÍ. 4) Se desconoce la existencia de otros desperfectos distintos a los que constan en el Anexo III (que se incorpora como documento adjunto) que pue",
     documents: [
@@ -796,13 +1862,23 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r4186002105": {
+=======
+    locationText: undefined,
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r4186002105': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R4186002105",
     status: "active",
     valorSubasta: 3630,
     valorTasacion: 3630,
     province: "Sevilla",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:12:12.298Z",
+=======
+    publishedAt: "2026-04-12T19:14:33.625Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "20-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R4186002105&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -818,6 +1894,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775987843/activos_offmarket/vehiculos/SUB-AT-2026-25R4186002105_img_5.webp",
     ],
     municipality: undefined,
+<<<<<<< HEAD
     pickupLocation: "https://sede.registradores.org/sede/sede-csv-web/csv",
     locationText:
       "Informacin interactiva del Registro de Bienes Muebles de Espa REGISTRO BIENES MUEBLES DE SEVILLA NOTA INFORMATIVA INFORMACIÓN BIEN MUEBLE En vista de la solicitud que causó entrada 20250050469 en fecha nueve de octubre de d o s m i l v e i n t i c i n c o , e n r e l a c i ó n a l b i e n m a t r í c u l a 1 8 6 6 C W G , b a s t i d o r WBAED91080FM74401 comunicado por la DGT y examinada la base de datos obrante en este Registro, de conformidad con el artículo 34 de la Orden de 19 de julio de 1",
@@ -961,13 +2038,24 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r4186002102": {
+=======
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r4186002102': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R4186002102",
     status: "active",
     valorSubasta: 2120,
     valorTasacion: 2120,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:09:15.756Z",
+=======
+    publishedAt: "2026-04-12T19:14:31.248Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "20-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R4186002102&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -980,6 +2068,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     images: [],
     municipality: undefined,
     pickupLocation: undefined,
+<<<<<<< HEAD
     locationText: "  -- 1 of 3 --    -- 2 of 3 --    -- 3 of 3 --  ",
     documents: [
       {
@@ -1101,13 +2190,23 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-jv-2026-259584": {
+=======
+    locationText: undefined,
+    documents: []
+  },,,
+'subasta-sub-jv-2026-259584': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-JV-2026-259584",
     status: "active",
     valorSubasta: 151460.3,
     valorTasacion: 188957,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:07:08.084Z",
+=======
+    publishedAt: "2026-04-12T19:14:26.233Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "16-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JV-2026-259584&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -1120,6 +2219,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     images: [],
     municipality: undefined,
     pickupLocation: undefined,
+<<<<<<< HEAD
     locationText:
       "  -- 1 of 2 --  MINISTERIO DE INCLUSIÓN, SEGURIDAD SOCIAL Y MIGRACIONES TESORERÍA GENERAL DE LA SEGURIDAD SOCIAL  -- 2 of 2 --  ",
     documents: [
@@ -1142,6 +2242,12 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-jv-2026-259444": {
+=======
+    locationText: undefined,
+    documents: []
+  },,,
+'subasta-sub-jv-2026-259444': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-JV-2026-259444",
     status: "active",
     valorSubasta: 16714,
@@ -1213,7 +2319,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 0,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:06:22.906Z",
+=======
+    publishedAt: "2026-04-12T19:14:25.356Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-JC-2026-255695&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -1227,9 +2337,15 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [],
   },
   "subasta-sub-ja-2026-259312": {
+=======
+    documents: []
+  },,,
+'subasta-sub-ja-2026-259312': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-JA-2026-259312",
     status: "active",
     valorSubasta: 2125,
@@ -1259,7 +2375,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 2930,
     province: "Murcia",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:06:20.364Z",
+=======
+    publishedAt: "2026-04-12T19:14:23.670Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-26R3086002002&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -1278,6 +2398,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
     municipality: undefined,
     pickupLocation: undefined,
+<<<<<<< HEAD
     locationText:
       "Depositario: Grúas Tomi, S.L. Carril Torremolina, 125 - Albatalía – Murcia (30009) Tlf 968 29 17 00 Horario: viernes de 11 a 13 horas  -- 1 of 1 --  ",
     documents: [
@@ -1360,6 +2481,12 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-26r3086002001": {
+=======
+    locationText: undefined,
+    documents: []
+  },,,
+'subasta-sub-at-2026-26r3086002001': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-26R3086002001",
     status: "active",
     valorSubasta: 5016,
@@ -1657,7 +2784,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 6610,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T10:00:44.386Z",
+=======
+    publishedAt: "2026-04-12T19:14:17.512Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002224&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -1677,6 +2808,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -1717,13 +2849,22 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002223": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002223': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002223",
     status: "active",
     valorSubasta: 10247.5,
     valorTasacion: 10247.5,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:59:54.877Z",
+=======
+    publishedAt: "2026-04-12T19:14:16.846Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002223&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -1743,6 +2884,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -1799,6 +2941,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002222": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002222': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002222",
     status: "active",
     valorSubasta: 14900.01,
@@ -1917,7 +3064,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 5697.25,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:57:29.888Z",
+=======
+    publishedAt: "2026-04-12T19:14:12.781Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002220&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -1937,6 +3088,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -1969,6 +3121,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002219": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002219': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002219",
     status: "active",
     valorSubasta: 3933,
@@ -2046,7 +3203,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 4235.75,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:55:36.697Z",
+=======
+    publishedAt: "2026-04-12T19:14:08.801Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002217&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2066,6 +3227,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -2094,13 +3256,18 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002216": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002216': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002216",
     status: "active",
     valorSubasta: 13450,
     valorTasacion: 13450,
-    province: "No Consta",
+    province: "Tarragona",
     city: "No Consta",
-    publishedAt: "2026-04-12T09:55:01.421Z",
+    publishedAt: "2026-04-12T19:14:06.857Z",
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002216&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2110,6 +3277,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     licensePlate: "0600GNX",
     year: 2008,
     vin: "1HD1JD5168Y042579",
+<<<<<<< HEAD
     images: [
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775987671/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002216_img_2.webp",
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775987673/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002216_img_3.webp",
@@ -2147,6 +3315,15 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002215": {
+=======
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },,
+'subasta-sub-at-2026-25r0886002215': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002215",
     status: "active",
     valorSubasta: 32092.5,
@@ -2259,7 +3436,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 12961.43,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:53:17.918Z",
+=======
+    publishedAt: "2026-04-12T19:14:04.453Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002213&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2273,6 +3454,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -2313,6 +3495,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-v-1775987622231": {
+=======
+    documents: []
+  },,,
+'subasta-v-1775987622231': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "V-1775987622231",
     status: "active",
     valorSubasta: 0,
@@ -2521,9 +3708,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     status: "active",
     valorSubasta: 17917.5,
     valorTasacion: 17917.5,
-    province: "No Consta",
+    province: "Tarragona",
     city: "No Consta",
-    publishedAt: "2026-04-12T09:40:50.795Z",
+    publishedAt: "2026-04-12T19:13:42.703Z",
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002147&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2533,6 +3720,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     licensePlate: "9704KJC",
     year: 2018,
     vin: "VF3MCYHZJJL006032",
+<<<<<<< HEAD
     images: [
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775941845/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002147_img_1.webp",
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775941847/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002147_img_2.webp",
@@ -2591,6 +3779,15 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002154": {
+=======
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },,
+'subasta-sub-at-2026-25r0886002154': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002154",
     status: "active",
     valorSubasta: 34969,
@@ -2657,9 +3854,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     status: "active",
     valorSubasta: 11477.47,
     valorTasacion: 12462.5,
-    province: "No Consta",
+    province: "Tarragona",
     city: "No Consta",
-    publishedAt: "2026-04-12T09:41:57.756Z",
+    publishedAt: "2026-04-12T19:13:43.620Z",
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002155&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2673,6 +3870,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -2701,6 +3899,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002185": {
+=======
+    documents: []
+  },,
+'subasta-sub-at-2026-25r0886002185': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002185",
     status: "active",
     valorSubasta: 12750,
@@ -2763,9 +3966,9 @@ export const AUCTIONS: Record<string, AuctionData> = {
     status: "active",
     valorSubasta: 5074.75,
     valorTasacion: 5074.75,
-    province: "No Consta",
+    province: "Tarragona",
     city: "No Consta",
-    publishedAt: "2026-04-12T09:42:55.603Z",
+    publishedAt: "2026-04-12T19:13:44.440Z",
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002189&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2775,6 +3978,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     licensePlate: "4779GTJ",
     year: 2010,
     vin: "VF7CH9HXC9J332623",
+<<<<<<< HEAD
     images: [
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775986955/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002189_img_2.webp",
       "https://res.cloudinary.com/dmw71xf7z/image/upload/v1775986957/activos_offmarket/vehiculos/SUB-AT-2026-25R0886002189_img_3.webp",
@@ -2803,6 +4007,15 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002190": {
+=======
+    images: [],
+    municipality: undefined,
+    pickupLocation: undefined,
+    locationText: undefined,
+    documents: []
+  },,
+'subasta-sub-at-2026-25r0886002190': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002190",
     status: "active",
     valorSubasta: 17795,
@@ -2926,7 +4139,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 4687.5,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:44:33.283Z",
+=======
+    publishedAt: "2026-04-12T19:13:46.732Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002192&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2945,6 +4162,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -2965,13 +4183,22 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002200": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002200': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002200",
     status: "active",
     valorSubasta: 8120,
     valorTasacion: 8120,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:45:21.827Z",
+=======
+    publishedAt: "2026-04-12T19:13:48.591Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002200&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -2989,6 +4216,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -3033,6 +4261,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002202": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002202': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002202",
     status: "active",
     valorSubasta: 26600.01,
@@ -3255,7 +4488,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 8546.25,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:48:54.674Z",
+=======
+    publishedAt: "2026-04-12T19:13:54.875Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002205&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -3275,6 +4512,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -3327,13 +4565,22 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002206": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002206': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002206",
     status: "active",
     valorSubasta: 13949.75,
     valorTasacion: 13949.75,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:49:31.270Z",
+=======
+    publishedAt: "2026-04-12T19:13:56.708Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002206&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -3353,6 +4600,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -3385,6 +4633,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002207": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002207': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002207",
     status: "active",
     valorSubasta: 4787.25,
@@ -3449,7 +4702,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 9132.5,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:50:37.986Z",
+=======
+    publishedAt: "2026-04-12T19:13:58.814Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002209&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -3469,6 +4726,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -3493,6 +4751,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2026-25r0886002210": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2026-25r0886002210': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     boeId: "SUB-AT-2026-25R0886002210",
     status: "active",
     valorSubasta: 3099.5,
@@ -3609,7 +4872,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     valorTasacion: 15574.75,
     province: "No Consta",
     city: "No Consta",
+<<<<<<< HEAD
     publishedAt: "2026-04-12T09:52:37.476Z",
+=======
+    publishedAt: "2026-04-12T19:14:02.836Z",
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     auctionDate: "13-04-2026",
     boeUrl:
       "https://subastas.boe.es/detalleSubasta.php?idSub=SUB-AT-2026-25R0886002212&idBus=QW5Zd3ZPaEp5MDdXQkovNTlLc3pPMTUyWXF4SXNXSmp4U2lPYVQ0ZVkwWHJSNGNUN2Z0SEFLbmhpQ1lwOHB6Mm9EVnRLN2M1cm10bnhENG42dzI2T2h4THErb1RScWlJdkRDWW5xUnFoWlRleDdmVElrcll0VFhmMFp3SUt0YitUUXZ6VlVOendRMVk4aHI2WHYyNy9vMGJ1VDZYZ2Y4dVJ6a1I0Z0U3ZnJQd0pqbXpNQjRvRDFlc0RmNENmdTlWOUk4L3RuMmlFU1AzbVNyT2JHbVhoeWo3UnZGZlp3VlBBajdDM0M5dmtSVDdmQkxCaTFtcFd0ZU1FYkJqNzVqSi9jUVpkb0FzbUlhOTMyc002NERoTjlFVU1Lb1F5N1lqS3RZYmdzL1Z3R0xJbHpaREpXQi9RRktoYkZaNitSd0hhY2VSZ0tQOGhkZmdNY2MraUZmY05nPT0,--50&ver=1",
@@ -3629,6 +4896,7 @@ export const AUCTIONS: Record<string, AuctionData> = {
     municipality: undefined,
     pickupLocation: undefined,
     locationText: undefined,
+<<<<<<< HEAD
     documents: [
       {
         name: "Documento",
@@ -3665,6 +4933,11 @@ export const AUCTIONS: Record<string, AuctionData> = {
     ],
   },
   "subasta-sub-at-2024-23r4586001244": {
+=======
+    documents: []
+  },,,
+'subasta-sub-at-2024-23r4586001244': {
+>>>>>>> b4d5356 (fix provincias vehículos definitivo)
     propertyType: "Piso",
     city: "MADRID",
     province: "Madrid",

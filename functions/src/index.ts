@@ -333,28 +333,7 @@ export const onNotificationQueueCreate = functions
         }
         */
 
-        const emailPayload = {
-          subject: `Nueva subasta detectada: ${auction.propertyType} en ${auction.city}`,
-          from: "alertas@activosoffmarket.es",
-          from_name: "Alertas Off-Market",
-          to: userEmail,
-          content: `
-            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-              <h2 style="color: #0f172a;">Nueva oportunidad detectada</h2>
-              <p>Hola,</p>
-              <p>Hemos encontrado una nueva subasta que coincide con tus filtros de búsqueda:</p>
-              <div style="background: #f8fafc; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <p><strong>Tipo:</strong> ${auction.propertyType}</p>
-                <p><strong>Ubicación:</strong> ${auction.city} (${auction.province})</p>
-                <p><strong>Valor Tasación:</strong> ${auction.appraisalValue ? auction.appraisalValue.toLocaleString('es-ES') + '€' : 'Consultar'}</p>
-              </div>
-              <a href="https://activosoffmarket.es/subasta/${auction.slug}" 
-                 style="display: inline-block; background: #1d4ed8; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">
-                 Ver detalles de la subasta
-              </a>
-            </div>
-          `
-        };
+      
 
         const checkDoc = await snap.ref.get();
         if (checkDoc.data()?.status !== 'processing') {
