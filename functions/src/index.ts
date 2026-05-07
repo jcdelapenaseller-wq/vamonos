@@ -32,11 +32,15 @@ https://activosoffmarket.es/unsubscribe?u=${encodeURIComponent(userId)}&t=${enco
 
   const recipients = [new Recipient(to)];
 
+  const fullText = text + footer;
+  const htmlContent = fullText.replace(/\n/g, '<br>');
+
   const emailParams = new EmailParams()
     .setFrom(sentFrom)
     .setTo(recipients)
     .setSubject(subject)
-    .setText(text + footer);
+    .setText(fullText)
+    .setHtml(htmlContent);
 
   await mailerSend.email.send(emailParams);
 }
