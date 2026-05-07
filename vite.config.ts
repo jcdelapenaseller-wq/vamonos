@@ -106,7 +106,8 @@ const routesToPrerender = [
   ...Object.keys(DISCOVER_REPORTS).map(slug => `/analisis/${slug}`),
   ...provinceRoutes,
   ...activeAuctionRoutes,
-  '/equipo'
+  '/equipo',
+  '/subastas-recientes'
 ];
 
 // https://vitejs.dev/config/
