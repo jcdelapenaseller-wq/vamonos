@@ -1,5 +1,14 @@
 import React, { Suspense, useEffect } from 'react';
 import { useRoutes, BrowserRouter, useLocation } from 'react-router-dom';
+import ReactGA from 'react-ga4';
+
+if (typeof window !== 'undefined') {
+  const isProd = window.location.hostname === 'activosoffmarket.es' || window.location.hostname === 'www.activosoffmarket.es';
+  if (isProd && typeof navigator !== 'undefined' && !navigator.userAgent.includes('Headless')) {
+    ReactGA.initialize('G-K6DV9L7XQ1');
+  }
+}
+
 import { routes } from './routes';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -25,16 +34,10 @@ function AppContent() {
   }, [location.pathname]);
 
   useEffect(() => {
-    // Manual GA4 tracking for SPA navigation
-    // Solo en producción, con gtag disponible y fuera de entornos headless
-    const isProd = window.location.hostname === 'activosoffmarket.es';
-    const gtag = (window as any).gtag;
-    
-    if (isProd && typeof gtag === 'function' && !navigator.userAgent.includes('Headless')) {
-      gtag('event', 'page_view', {
-        page_path: location.pathname + location.search,
-        page_location: window.location.href
-      });
+    // GA4 tracking for SPA navigation
+    const isProd = window.location.hostname === 'activosoffmarket.es' || window.location.hostname === 'www.activosoffmarket.es';
+    if (isProd && typeof navigator !== 'undefined' && !navigator.userAgent.includes('Headless')) {
+      ReactGA.send({ hitType: "pageview", page: location.pathname + location.search });
     }
   }, [location.pathname, location.search]);
 

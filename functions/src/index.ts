@@ -10,7 +10,7 @@ const db = admin.firestore();
    EMAIL HELPER
 ========================================= */
 
-async function sendEmail(to: string, subject: string, text: string, userId: string, unsubscribeToken: string) {
+async function sendEmail(to: string, subject: string, text: string, userId: string, unsubscribeToken: string, emailType?: string) {
   const apiKey = process.env.MAILERSEND_API_KEY;
   if (!apiKey) return;
 
@@ -41,6 +41,10 @@ https://activosoffmarket.es/unsubscribe?u=${encodeURIComponent(userId)}&t=${enco
     .setSubject(subject)
     .setText(fullText)
     .setHtml(htmlContent);
+
+  if (emailType) {
+    emailParams.setTags([emailType]);
+  }
 
   await mailerSend.email.send(emailParams);
 }
@@ -319,22 +323,32 @@ https://activosoffmarket.es/mi-cuenta`;
         auction = auctionDoc.data();
       }
 
-      const title = auction?.title || "Nueva subasta";
-      const price = auction?.price || "";
-      const city = auction?.city || "";
+      const title = auction?.title || "Nueva oportunidad detectada";
+      const price = auction?.price || "Consultar en el expediente";
+      const city = auction?.city || "Ubicación no especificada";
 
-      subject = `Nueva subasta: ${title}`;
+      subject = `⚡ Match de Alerta: Nueva oportunidad en ${city !== "Ubicación no especificada" ? city : "tu zona"}`;
 
-      text = `${title}
+      text = `Hemos detectado un nuevo activo que coincide con tus criterios de alerta. Las oportunidades off-market tienen plazos estrictos, te recomendamos revisar el expediente lo antes posible.
 
-${price ? "Precio: " + price : ""}
-${city ? "Ubicación: " + city : ""}
+RESUMEN DEL ACTIVO
+• Descripción: ${title}
+• Ubicación: ${city}
+• Valoración: ${price}
 
-https://activosoffmarket.es/subasta/${data.auctionId}`;
+👉 Ver expediente completo y análisis técnico:
+https://activosoffmarket.es/subasta/${data.auctionId}
+
+*Recuerda revisar siempre las cargas y requisitos antes de participar.*`;
     }
 
     try {
-      await sendEmail(user.email, subject, text, data.userId, user.unsubscribeToken || "");
+      let emailTypeForTag = data.type;
+      if (data.type === "onboarding") {
+        emailTypeForTag = `onboarding_step_${data.step}`;
+      }
+
+      await sendEmail(user.email, subject, text, data.userId, user.unsubscribeToken || "", emailTypeForTag);
 
       await db
         .collection("notifications_queue")
