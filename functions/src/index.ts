@@ -92,11 +92,17 @@ export const onAuctionCreate = onDocumentCreated(
 export const onUserCreate = onDocumentCreated(
   "users/{userId}",
   async (event) => {
+    // 1) Initialize user onboarding properties
     await db.collection("users").doc(event.params.userId).update({
       onboardingStep: 0,
       onboardingCreatedAt: admin.firestore.FieldValue.serverTimestamp(),
       emailNotifications: true
     });
+
+    // 2) Increment totalUsers in stats/global
+    await db.collection("stats").doc("global").set({
+      totalUsers: admin.firestore.FieldValue.increment(1)
+    }, { merge: true });
   }
 );
 

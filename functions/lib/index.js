@@ -65,11 +65,16 @@ exports.onAuctionCreate = (0, firestore_1.onDocumentCreated)("auctions/{auctionI
    ON USER CREATE -> INIT ONBOARDING
 ========================================= */
 exports.onUserCreate = (0, firestore_1.onDocumentCreated)("users/{userId}", async (event) => {
+    // 1) Initialize user onboarding properties
     await db.collection("users").doc(event.params.userId).update({
         onboardingStep: 0,
         onboardingCreatedAt: admin.firestore.FieldValue.serverTimestamp(),
         emailNotifications: true
     });
+    // 2) Increment totalUsers in stats/global
+    await db.collection("stats").doc("global").set({
+        totalUsers: admin.firestore.FieldValue.increment(1)
+    }, { merge: true });
 });
 /* =========================================
    ONBOARDING SCHEDULER
