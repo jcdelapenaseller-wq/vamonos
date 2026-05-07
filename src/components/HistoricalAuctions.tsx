@@ -2,13 +2,13 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Calculator, TrendingUp, Percent } from 'lucide-react';
 import { AUCTIONS } from '../data/auctions';
-import { getFilteredAuctions, sortAuctions, getComputedStatus } from '../utils/auctionHelpers';
-import { ROUTES } from '../constants/routes';
+import { getFilteredAuctions, sortAuctions, isAuctionFinished } from '../utils/auctionHelpers';
+import { ROUTES } from '@/constants/routes';
 import { AuctionCard } from './AuctionCard';
 
 const HistoricalAuctions: React.FC = () => {
   const historicalAuctions = sortAuctions(
-    Object.entries(AUCTIONS).filter(([_, data]) => getComputedStatus(data) === 'closed' && data.assetCategory !== 'vehiculo')
+    Object.entries(AUCTIONS).filter(([_, data]) => isAuctionFinished(data.auctionDate) && data.assetCategory !== 'vehiculo')
   );
   const historicalCount = historicalAuctions.length;
 

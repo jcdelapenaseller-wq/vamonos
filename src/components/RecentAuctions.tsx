@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { MapPin, DollarSign, TrendingUp, ChevronRight, Calculator, Calendar, ArrowRight, Percent, Zap, ShieldCheck, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { MapPin, DollarSign, TrendingUp, ChevronRight, Calculator, Calendar, ArrowRight, Percent, Zap, ShieldCheck, FileText, ChevronDown, ChevronUp, Gavel, Send } from 'lucide-react';
 import { AUCTIONS } from '../data/auctions';
-import { ROUTES } from '../constants/routes';
-import { getFilteredAuctions, isAuctionFinished, sortAuctions, formatDate, isAuctionActive } from '../utils/auctionHelpers';
+import { ROUTES } from '@/constants/routes';
+import { getFilteredAuctions, isAuctionFinished, sortAuctions, formatDate, isAuctionActive, calculateDiscount } from '../utils/auctionHelpers';
 import { AuctionCard } from './AuctionCard';
 import { AuctionFilters } from './AuctionFilters';
 import { AuctionData } from '../data/auctions';
@@ -24,7 +24,7 @@ const FaqItem: React.FC<{ question: string; answer: string }> = ({ question, ans
         {isOpen ? <ChevronUp size={20} className="text-brand-500" /> : <ChevronDown size={20} className="text-slate-400" />}
       </button>
       {isOpen && (
-        <div className="px-5 pb-5 text-slate-600 text-sm md:text-base leading-relaxed border-t border-slate-50 pt-4">
+        <div className="px-5 pb-5 text-slate-600 text-sm md:text-base leading-relaxed text-justify border-t border-slate-50 pt-4">
           {answer}
         </div>
       )}
@@ -37,7 +37,7 @@ const SeoExpandableContent: React.FC = () => {
   
   return (
     <div className="mt-20 pt-12 border-t border-slate-200">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         <div className={`relative overflow-hidden transition-all duration-500 ${isExpanded ? 'max-h-[2000px]' : 'max-h-[180px] md:max-h-[280px]'}`}>
           <div className="prose prose-slate max-w-none">
             <h2 className="font-serif text-xl md:text-2xl font-bold text-slate-900 mb-4">
@@ -123,6 +123,45 @@ const RecentAuctions: React.FC = () => {
   // Calculate total active auctions (without filters)
   const totalActiveAuctions = useMemo(() => {
     return Object.values(AUCTIONS).filter(a => isAuctionActive(a) && a.assetCategory !== 'vehiculo').length;
+  }, []);
+
+  const seoStats = useMemo(() => {
+    const activeAuctions = Object.values(AUCTIONS).filter(a => isAuctionActive(a) && a.assetCategory !== 'vehiculo');
+    const totalVisible = activeAuctions.length;
+    const provinces = new Set(activeAuctions.map(a => a.province).filter(Boolean));
+    const totalProvinces = provinces.size;
+    
+    let totalDiscount = 0;
+    let discountCount = 0;
+    let minPrice = Infinity;
+    let maxPrice = 0;
+
+    activeAuctions.forEach(a => {
+      // Calculamos descuento si tiene tasación y deuda o valor de subasta
+      // Utilizamos calculateDiscount directamente si es posible, o ratio
+      const discount = a.opportunityRatio || calculateDiscount(a.valorTasacion, a.valorSubasta, a.claimedDebt);
+      if (discount != null && discount >= 20 && discount <= 60) {
+        totalDiscount += discount;
+        discountCount++;
+      }
+      if (a.valorSubasta && a.valorSubasta > 0) {
+        if (a.valorSubasta < minPrice) minPrice = a.valorSubasta;
+        if (a.valorSubasta > maxPrice) maxPrice = a.valorSubasta;
+      }
+    });
+
+    const averageDiscount = discountCount > 0 ? Math.round(totalDiscount / discountCount) : null;
+    const priceRange = {
+      min: minPrice === Infinity ? null : minPrice,
+      max: maxPrice === 0 ? null : maxPrice,
+    };
+
+    return {
+      totalVisible,
+      totalProvinces,
+      averageDiscount,
+      priceRange
+    };
   }, []);
 
   console.log('RecentAuctions: Total AUCTIONS keys:', Object.keys(AUCTIONS).length);
@@ -335,26 +374,42 @@ const RecentAuctions: React.FC = () => {
             "mainEntity": [
               {
                 "@type": "Question",
-                "name": "¿Cómo encontrar oportunidades reales en el listado de subastas?",
+                "name": "¿Qué son las subastas BOE activas?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Las mejores oportunidades se encuentran analizando la diferencia entre el valor de tasación y el precio de mercado actual. Es vital filtrar por activos con cargas cancelables y revisar el estado ocupacional del inmueble."
+                  "text": "Una subasta BOE activa es un procedimiento público de venta forzosa administrado por el Estado para saldar deudas. Permiten adquirir inmuebles a precios reducidos, finalizando con la adjudicación al mejor postor."
                 }
               },
               {
                 "@type": "Question",
-                "name": "¿Qué riesgos hay que revisar en el BOE antes de pujar?",
+                "name": "¿Cómo saber si una subasta es una buena oportunidad?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Es imprescindible revisar las cargas preferentes en la certificación de dominio y cargas, el estado de ocupación, posibles deudas de comunidad o IBI, y si el edicto contiene errores en la descripción del activo."
+                  "text": "Se determina analizando la diferencia entre el valor de mercado, la deuda reclamada y las posibles cargas anteriores. Una oportunidad rentable debe tener un amplio margen sin sorpresas ocultas previas a la adjudicación."
                 }
               },
               {
                 "@type": "Question",
-                "name": "¿Es necesario contar con un abogado para participar en subastas?",
+                "name": "¿Qué riesgos tiene comprar en subasta pública?",
                 "acceptedAnswer": {
                   "@type": "Answer",
-                  "text": "Aunque cualquier persona con certificado digital puede pujar, se recomienda encarecidamente contar con asesoramiento legal o técnico para la revisión del expediente judicial y asegurar que la adjudicación sea firme y libre de cargas inesperadas."
+                  "text": "Los mayores riesgos al participar en subastas BOE incluyen asumir cargas preferentes, deudas con la comunidad de propietarios, o tener que iniciar desalojos si la vivienda cuenta con ocupantes ilícitos o inquilinos de renta antigua."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Cuánto dinero necesito para participar en una subasta?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Para confirmar una puja, es requisito legal consignar un depósito, que generalmente equivale al 5% del valor de tasación del inmueble. El depósito se retorna de forma íntegra a los postores que no ganaron."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "¿Qué pasa si gano una subasta del BOE?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Tras cerrarse las pujas, si se confirma la adjudicación a su favor, el sistema le concederá un plazo (habitualmente 40 días) para rematar el precio. No ingresar el dinero restante implica la pérdida automática del depósito retenido."
                 }
               }
             ]
@@ -394,7 +449,33 @@ const RecentAuctions: React.FC = () => {
 
           <div className="flex items-center gap-2 text-slate-500 text-xs md:text-sm font-medium mt-1 md:mt-2">
             <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-            Actualizado hoy · Datos oficiales BOE
+            Actualizado: {formatDate(new Date().toISOString())} · Datos oficiales BOE
+          </div>
+
+          <div className="mt-6 md:mt-8 bg-slate-50 border border-slate-200 rounded-2xl p-5 shadow-sm w-full">
+            <p className="text-slate-700 font-medium mb-4 text-sm md:text-base leading-relaxed w-full">
+              Listado actualizado de subastas BOE activas en España. Estas oportunidades se filtran automáticamente para destacar activos con valor, riesgo controlado y potencial de inversión.
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mt-6 w-full">
+              <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+                <Gavel className="w-5 h-5 text-brand-500 mb-2 opacity-80" />
+                <span className="text-2xl md:text-3xl font-bold text-slate-900">{seoStats.totalVisible}</span>
+                <span className="text-xs md:text-sm text-slate-500 mt-1 font-medium">Subastas activas</span>
+              </div>
+              <div className="bg-white rounded-xl p-4 border border-slate-100 shadow-sm flex flex-col items-center justify-center text-center">
+                <MapPin className="w-5 h-5 text-brand-500 mb-2 opacity-80" />
+                <span className="text-2xl md:text-3xl font-bold text-slate-900">{seoStats.totalProvinces}</span>
+                <span className="text-xs md:text-sm text-slate-500 mt-1 font-medium">Provincias</span>
+              </div>
+              <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100 shadow-sm flex flex-col items-center justify-center text-center col-span-2 md:col-span-1">
+                <Percent className="w-5 h-5 text-emerald-600 mb-2 opacity-80" />
+                <span className={`text-2xl md:text-3xl font-bold ${seoStats.averageDiscount != null ? 'text-emerald-600' : 'text-slate-400'}`}>
+                  {seoStats.averageDiscount != null ? `${seoStats.averageDiscount}%` : '—'}
+                </span>
+                <span className="text-xs md:text-sm text-emerald-800 mt-1 font-medium">Descuento medio</span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
@@ -475,13 +556,13 @@ const RecentAuctions: React.FC = () => {
 
         {/* Bloque B: Editorial SEO + FAQ */}
         <div className="mt-16 pt-12 border-t border-slate-200">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
             <div className="prose prose-slate max-w-none mb-12">
               <h2 className="font-serif text-2xl md:text-3xl font-bold text-slate-900 mb-6">Inversión inteligente en subastas inmobiliarias</h2>
-              <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+              <p className="text-slate-600 leading-relaxed text-sm md:text-base text-justify">
                 El mercado de subastas judiciales y administrativas en España representa una de las vías más eficientes para la adquisición de activos inmobiliarios con descuentos que a menudo superan el 30% o 40% sobre su valor de tasación oficial. No obstante, navegar por el Portal de Subastas del BOE requiere una metodología rigurosa para evitar riesgos jurídicos y financieros. 
               </p>
-              <p className="text-slate-600 leading-relaxed text-sm md:text-base">
+              <p className="text-slate-600 leading-relaxed text-sm md:text-base text-justify">
                 En Activos Off-Market, simplificamos este proceso mediante la monitorización constante de nuevos edictos, permitiendo a nuestros usuarios detectar oportunidades en tiempo real sin necesidad de revisar manualmente miles de publicaciones diarias. Nuestro enfoque se centra en la transparencia y el análisis técnico, cruzando datos de Catastro y Registro para identificar posibles cargas preferentes o situaciones posesorias complejas. Antes de participar en cualquier puja, es fundamental realizar una revisión exhaustiva del expediente judicial y contar con una estrategia de puja máxima definida. Nuestra plataforma no solo lista activos, sino que proporciona el contexto necesario para que cada inversión se realice con la máxima seguridad jurídica y rentabilidad potencial.
               </p>
             </div>
@@ -489,38 +570,28 @@ const RecentAuctions: React.FC = () => {
             <div className="space-y-4">
               <h3 className="text-xl font-bold text-slate-900 mb-6">Preguntas frecuentes sobre subastas</h3>
               <FaqItem 
-                question="¿Cómo encontrar oportunidades reales en el listado de subastas?"
-                answer="Las mejores oportunidades se encuentran analizando la diferencia entre el valor de tasación y el precio de mercado actual. Es vital filtrar por activos con cargas cancelables y revisar el estado ocupacional del inmueble antes de comprometer capital."
+                question="¿Qué son las subastas BOE activas?"
+                answer="Una subasta BOE activa es un procedimiento público de venta forzosa administrado por el Estado para saldar deudas. Permiten adquirir inmuebles a precios reducidos, finalizando con la adjudicación al mejor postor."
               />
               <FaqItem 
-                question="¿Qué riesgos hay que revisar en el BOE antes de pujar?"
-                answer="Es imprescindible revisar las cargas preferentes en la certificación de dominio y cargas, el estado de ocupación, posibles deudas de comunidad o IBI, y si el edicto contiene errores en la descripción del activo que puedan invalidar la subasta."
+                question="¿Cómo saber si una subasta es una buena oportunidad?"
+                answer="Se determina analizando la diferencia entre el valor de mercado, la deuda reclamada y las posibles cargas anteriores. Una oportunidad rentable debe tener un amplio margen sin sorpresas ocultas previas a la adjudicación."
               />
               <FaqItem 
-                question="¿Es necesario contar con un abogado para participar en subastas?"
-                answer="Aunque cualquier persona con certificado digital puede pujar, se recomienda encarecidamente contar con asesoramiento legal o técnico para la revisión del expediente judicial y asegurar que la adjudicación sea firme y libre de cargas inesperadas tras el decreto de adjudicación."
+                question="¿Qué riesgos tiene comprar en subasta pública?"
+                answer="Los mayores riesgos al participar en subastas BOE incluyen asumir cargas preferentes, deudas con la comunidad de propietarios, o tener que iniciar desalojos si la vivienda cuenta con ocupantes ilícitos o inquilinos de renta antigua."
+              />
+              <FaqItem 
+                question="¿Cuánto dinero necesito para participar en una subasta?"
+                answer="Para confirmar una puja, es requisito legal consignar un depósito, que generalmente equivale al 5% del valor de tasación del inmueble. El depósito se retorna de forma íntegra a los postores que no ganaron."
+              />
+              <FaqItem 
+                question="¿Qué pasa si gano una subasta del BOE?"
+                answer="Tras cerrarse las pujas, si se confirma la adjudicación a su favor, el sistema le concederá un plazo (habitualmente 40 días) para rematar el precio. No ingresar el dinero restante implica la pérdida automática del depósito retenido."
               />
             </div>
           </div>
         </div>
-
-        {totalPages > 1 && (
-          <div className="mt-12 flex flex-wrap justify-center items-center gap-2">
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`w-10 h-10 rounded-lg font-bold transition-all ${
-                  safePage === page
-                    ? 'bg-brand-600 text-white shadow-md shadow-brand-200'
-                    : 'bg-white border border-slate-200 text-slate-600 hover:border-brand-500 hover:text-brand-600'
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-          </div>
-        )}
 
         <div className="mt-20 bg-brand-900 rounded-[2.5rem] p-12 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-800 rounded-full -mr-32 -mt-32 opacity-50 blur-3xl"></div>
@@ -543,29 +614,31 @@ const RecentAuctions: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-12 bg-emerald-50 border border-emerald-100 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="mt-12 bg-blue-50 border border-blue-100 rounded-3xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-600 rounded-xl flex items-center justify-center text-white shrink-0">
-              <Percent size={24} />
+            <div className="w-12 h-12 bg-[#24A1DE] rounded-xl flex items-center justify-center text-white shrink-0">
+              <Send size={24} className="ml-1" />
             </div>
             <div>
-              <h3 className="text-xl font-bold text-slate-900">¿Buscas las mejores oportunidades?</h3>
-              <p className="text-slate-600">Hemos seleccionado los activos con mayor margen de beneficio potencial.</p>
+              <h3 className="text-xl font-bold text-slate-900">Recibe las mejores oportunidades gratis</h3>
+              <p className="text-slate-600">Publicamos en Telegram una selección gratuita de subastas BOE con potencial, alertas rápidas y oportunidades destacadas.</p>
             </div>
           </div>
-          <Link 
-            to="/subastas-descuento-50" 
-            className="bg-emerald-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-emerald-700 transition-all whitespace-nowrap"
+          <a 
+            href="https://t.me/activosOffmarket" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-[#24A1DE] text-white font-bold py-3 px-8 rounded-xl hover:bg-[#1f8cbf] transition-all whitespace-nowrap shadow-sm hover:shadow"
           >
-            Subastas con más del 50% de descuento
-          </Link>
+            Seguir canal gratis
+          </a>
         </div>
 
         <div className="mt-20 pt-12 border-t border-slate-200">
           <h2 className="text-2xl font-serif font-bold text-slate-900 mb-8 text-center">
             Hub de contenido y subastas por ciudad
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 mb-12">
             <Link 
               to={ROUTES.NOTICIAS_SUBASTAS_INDEX} 
               className="flex items-center justify-between bg-white border border-slate-200 p-6 rounded-2xl hover:border-brand-500 hover:shadow-md transition-all group"
@@ -573,16 +646,6 @@ const RecentAuctions: React.FC = () => {
               <div>
                 <h3 className="font-bold text-slate-900 group-hover:text-brand-600">Noticias de Subastas</h3>
                 <p className="text-sm text-slate-500">Actualidad y avisos del BOE</p>
-              </div>
-              <ChevronRight className="text-slate-300 group-hover:text-brand-600" />
-            </Link>
-            <Link 
-              to={ROUTES.HIGH_DISCOUNT} 
-              className="flex items-center justify-between bg-white border border-slate-200 p-6 rounded-2xl hover:border-brand-500 hover:shadow-md transition-all group"
-            >
-              <div>
-                <h3 className="font-bold text-slate-900 group-hover:text-brand-600">Subastas con Descuento</h3>
-                <p className="text-sm text-slate-500">Más del 50% sobre tasación</p>
               </div>
               <ChevronRight className="text-slate-300 group-hover:text-brand-600" />
             </Link>

@@ -1,13 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldAlert, UploadCloud, FileText, CheckCircle, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp } from 'lucide-react';
+import { jsPDF } from "jspdf";
+import { calculateOpportunityScore } from "../lib/scoreUtils";
+import { CheckCircle,  ShieldAlert, UploadCloud, FileText, AlertTriangle, Lock, Loader2, ArrowRight, ShieldCheck, FileWarning, Download, Info, Calculator, Calendar, Scale, ExternalLink, X, HelpCircle, FileSearch, LogIn, TrendingUp, Check, ChevronDown  } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
+import { auth } from '../lib/firebase';
 
 interface CargaDetectada {
   identificador_registral: string;
   tipo: string;
+  descripcion: string;
   fuente_textual: string;
   desglose: {
     principal: number;
@@ -28,6 +32,7 @@ interface AnalysisResult {
   fuente_documento: string;
   nivel_confianza_global: string;
   riesgo_global: 'BAJO' | 'MEDIO' | 'ALTO' | string;
+  cargas?: any[]; // Fallback field de legacy raw model
   cargas_detectadas: CargaDetectada[];
   incoherencias_detectadas: string[];
   ocupacion_detectada: boolean;
@@ -45,6 +50,7 @@ interface AnalysisResult {
   };
   alertas: string[];
   recomendacion: string;
+  resumen_ejecutivo?: string;
   // Datos de mercado opcionales
   refCat?: string | null;
   ciudad?: string | null;
@@ -75,7 +81,13 @@ interface LoadAnalysisBlockProps {
   city?: string;
   propertyType?: string;
   isStandalone?: boolean;
+  auction?: any;
 }
+
+const getFichaValue = (pdfValue: any, auctionValue: any) => {
+  if (pdfValue && pdfValue !== "" && pdfValue !== "—") return pdfValue;
+  return auctionValue || "—";
+};
 
 const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({ 
   boeId, 
@@ -93,7 +105,8 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   appraisalValue,
   city,
   propertyType,
-  isStandalone = false
+  isStandalone = false,
+  auction
 }) => {
   const [step, setStep] = useState<'locked' | 'upload' | 'loading' | 'result'>(initialData ? 'result' : initialStep);
 
@@ -108,6 +121,117 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   const [files, setFiles] = useState<File[]>([]);
   const [resultData, setResultData] = useState<AnalysisResult | null>(initialData);
+  
+  const session_id = boeId; // alias explicitly
+  
+  const fullLocation = [auction?.address, auction?.city, auction?.province]
+    .filter(Boolean)
+    .join(", ");
+  
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+
+  const esSubsiste = (c: any) =>
+    (c.resultado || c.estado_carga || "").toUpperCase().includes("SUBSISTE");
+
+  const esPurga = (c: any) => {
+    const s = (c.resultado || c.estado_carga || "").toUpperCase();
+    return s.includes("PURGA") || s.includes("CANCELA") || s.includes("REEMPLAZA");
+  };
+
+  const esDesconocido = (c: any) => !esSubsiste(c) && !esPurga(c);
+
+  useEffect(() => {
+    if (!initialData) {
+      console.log("RESET STATE FOR SESSION:", session_id);
+      setResultData(null);
+    }
+  }, [session_id, initialData]);
+
+  const safeResult = resultData ? {
+    ...resultData,
+    cargas_detectadas: (resultData.cargas?.length) 
+      ? resultData.cargas.map((c: any) => ({
+          identificador_registral: c.referencia_registral || c.tipo || "",
+          tipo: c.tipo || "Carga",
+          descripcion: c.descripcion || "",
+          fuente_textual: c.descripcion || c.tipo || "",
+          desglose: {
+            principal: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0,
+            intereses: 0,
+            costas: 0,
+            total: parseFloat(String(c.importe_principal || c.importe || "0").replace(/[^\d.,-]/g, "").replace(",", ".")) || 0
+          },
+          titular: c.beneficiario || "",
+          rango: c.fecha_inscripcion || "",
+          resultado: c.estado_en_subasta || "",
+          estado_carga: c.estado_en_subasta || "",
+          vigente: String(c.estado_en_subasta || "").toUpperCase().trim() === 'SUBSISTE',
+          confianza: 'MEDIA'
+        }))
+      : (resultData.cargas_detectadas || []),
+    incoherencias_detectadas: resultData.incoherencias_detectadas || [],
+    alertas: resultData.alertas || [],
+    peor_escenario: {
+      ...resultData.peor_escenario,
+      total: resultData.peor_escenario?.total ?? 0,
+      importe_total: resultData.peor_escenario?.importe_total ?? 0,
+    },
+    impacto_economico: {
+      ...resultData.impacto_economico,
+      nivel: resultData.impacto_economico?.nivel || "DESCONOCIDO",
+    },
+    nivel_confianza_global: resultData.nivel_confianza_global || "DESCONOCIDO",
+    riesgo_global: resultData.riesgo_global || "DESCONOCIDO",
+    fuente_documento: resultData.fuente_documento || "Desconocida",
+  } : null;
+
+  const totalSubsistente = safeResult?.cargas_detectadas
+    ? safeResult.cargas_detectadas
+        .filter(esSubsiste)
+        .reduce((sum: number, c: any) => sum + (c.desglose?.principal || 0), 0)
+    : 0;
+
+  // Mantenemos estas variables por si otros bloques las usan, aunque ocultemos la UI principal
+  const totalSubsistenteManual = safeResult?.cargas_detectadas
+    ? safeResult.cargas_detectadas
+        .filter(esSubsiste)
+        .reduce((acc: number, c: any) => acc + (c.desglose?.total || 0), 0)
+    : 0;
+
+  const peorEscenarioFinal =
+    (safeResult?.peor_escenario?.total && safeResult.peor_escenario.total > 0)
+      ? safeResult.peor_escenario.total
+      : totalSubsistenteManual;
+
+  const riesgoGlobalFinal =
+    (safeResult?.riesgo_global && safeResult.riesgo_global !== "DESCONOCIDO")
+      ? safeResult.riesgo_global
+      : (totalSubsistenteManual > 100000
+          ? "ALTO"
+          : totalSubsistenteManual > 0
+          ? "MEDIO"
+          : "BAJO");
+
+  if (resultData) {
+    console.log("SAFE RESULT FULL:", safeResult);
+    console.log("2. STATE resultData:", resultData);
+    console.log("3. SAFE RESULT:", safeResult);
+    console.log("4. UI cargas:", safeResult?.cargas_detectadas);
+  }
+
+  const recomendacionText = safeResult?.recomendacion
+    ? typeof safeResult.recomendacion === "string"
+      ? safeResult.recomendacion
+      : `
+${(safeResult.recomendacion as any).resumen_claro || ""}
+
+${(safeResult.recomendacion as any).deuda_del_procedimiento || ""}
+
+${(safeResult.recomendacion as any).que_paga_el_comprador || ""}
+`.trim()
+    : "";
+
   const [showHowToModal, setShowHowToModal] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -128,31 +252,30 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
   const userContext = useUser();
   const user = userContext?.user;
   const currentPlan = userContext?.plan;
-  const incrementAnalysisCount = userContext?.incrementAnalysisCount;
   const navigate = useNavigate();
 
   // Redirect to dedicated page when analysis is done in integrated mode
   useEffect(() => {
-    if (isIntegrated && step === 'result' && resultData) {
+    if (isIntegrated && step === 'result' && safeResult) {
       console.log('🔍 [DIAGNOSTIC] LoadAnalysisBlock boeId value:', boeId);
       console.log('🔍 [DIAGNOSTIC] LoadAnalysisBlock boeId type:', typeof boeId);
       
       // Save to session storage to prevent data loss on reload
       try {
-        sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(resultData));
+        sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(safeResult));
       } catch (e) {
         console.error('🔍 [DIAGNOSTIC] Crash at line 105 (sessionStorage):', e);
       }
       
       try {
         navigate(`/analisis-cargas?id=${boeId}&report=ready`, { 
-          state: { analysisResult: resultData } 
+          state: { analysisResult: safeResult } 
         });
       } catch (e) {
         console.error('🔍 [DIAGNOSTIC] Crash at line 107 (navigate):', e);
       }
     }
-  }, [step, resultData, isIntegrated, navigate, boeId]);
+  }, [step, safeResult, isIntegrated, navigate, boeId]);
   
   const usage = user?.analysisUsed || 0;
 
@@ -329,6 +452,335 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     }
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await fetch('/api/render-pdf', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          analysisResult: safeResult,
+          auction: auction
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al generar el PDF');
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'informe-subasta.pdf';
+      document.body.appendChild(a);
+      a.click();
+      
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading PDF:", err);
+      // Fallback a JS PDF opcional if needed, pero la instrucción no lo pide
+    }
+  };
+
+  const handleDownloadPDFLegacy = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let y = 20;
+
+    const addFooter = (pdf: typeof doc) => {
+      const totalPages = pdf.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(8);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(150);
+        pdf.setDrawColor(230);
+        pdf.line(10, pageHeight - 15, pageWidth - 10, pageHeight - 15);
+        pdf.text("Activos Off-Market · Análisis profesional de subastas", 10, pageHeight - 10);
+        pdf.text("www.activosoffmarket.es", pageWidth - 10, pageHeight - 10, { align: "right" });
+      }
+    };
+
+    const checkPageBreak = (neededHeight: number) => {
+      if (y + neededHeight > pageHeight - 25) {
+        doc.addPage();
+        y = 20;
+      }
+    };
+
+    const cleanText = (text: string | undefined | null): string => {
+      if (!text) return "";
+      return text
+        .replace(/#+\s?/g, "")        // elimina ###
+        .replace(/\*\*/g, "")         // elimina **
+        .replace(/\*/g, "")           // elimina *
+        .replace(/Ø|Ý|à|Ü|°|þ/g, "")  // limpia caracteres corruptos comunes
+        .replace(/\n\s*\n/g, "\n")    // limpia saltos dobles
+        .trim();
+    };
+
+    const formatCurrencyPDF = (value: number | undefined | null): string => {
+      if (!value) return "0 EUR";
+      return `${Math.round(value).toLocaleString("es-ES")} EUR`;
+    };
+
+    // --- CONFIGURACIÓN VISUAL ---
+    const colors = {
+      primary: [15, 23, 42],    // Slate 900
+      secondary: [71, 85, 105], // Slate 600
+      accent: [2, 132, 199],    // Sky 600
+      bg: [248, 250, 252],      // Slate 50
+      border: [226, 232, 240],  // Slate 200
+      white: [255, 255, 255]
+    };
+
+    const margin = 15;
+    const contentWidth = pageWidth - (margin * 2);
+
+    const drawHeader = (pdf: typeof doc, title: string) => {
+      pdf.setFontSize(18);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+      pdf.text(title, margin, y);
+      y += 6;
+      pdf.setDrawColor(colors.accent[0], colors.accent[1], colors.accent[2]);
+      pdf.setLineWidth(0.8);
+      pdf.line(margin, y, margin + 20, y);
+      y += 10;
+    };
+
+    const drawSectionBox = (pdf: typeof doc, title: string, content: string[], bgColor: number[] = colors.bg) => {
+      const boxPadding = 8;
+      const lineHeight = 6;
+      const boxHeight = (content.length * lineHeight) + (boxPadding * 2) + 10;
+      
+      checkPageBreak(boxHeight + 10);
+      
+      // Fondo
+      pdf.setFillColor(bgColor[0], bgColor[1], bgColor[2]);
+      pdf.roundedRect(margin, y, contentWidth, boxHeight, 3, 3, "F");
+      
+      let boxY = y + boxPadding + 4;
+      
+      // Título del bloque
+      pdf.setFontSize(11);
+      pdf.setFont("helvetica", "bold");
+      pdf.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+      pdf.text(title.toUpperCase(), margin + boxPadding, boxY);
+      boxY += 8;
+      
+      // Contenido
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      pdf.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+      
+      content.forEach(line => {
+        pdf.text(line, margin + boxPadding, boxY);
+        boxY += lineHeight;
+      });
+      
+      y += boxHeight + 10;
+    };
+
+    // --- PORTADA ---
+    // Fondo decorativo lateral
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.rect(0, 0, 5, pageHeight, "F");
+
+    y = 40;
+    doc.setFontSize(28);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.text("DOSSIER DE", margin, y);
+    y += 12;
+    doc.text("ANÁLISIS JURÍDICO", margin, y);
+    
+    y += 15;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    doc.text("Informe profesional de cargas y riesgos de subasta", margin, y);
+
+    y += 30;
+    // Bloque de datos rápidos en portada
+    doc.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
+    doc.setLineWidth(0.5);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 15;
+
+    const dateStr = new Date().toLocaleDateString('es-ES', { 
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("IDENTIFICADOR:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(boeId || "N/A", margin + 40, y);
+    y += 8;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("FECHA INFORME:", margin, y);
+    doc.setFont("helvetica", "normal");
+    doc.text(dateStr, margin + 40, y);
+    y += 8;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("RIESGO GLOBAL:", margin, y);
+    doc.setFont("helvetica", "bold");
+    const riskColor = safeResult?.riesgo_global === 'ALTO' ? [185, 28, 28] : safeResult?.riesgo_global === 'MEDIO' ? [180, 83, 9] : [21, 128, 61];
+    doc.setTextColor(riskColor[0], riskColor[1], riskColor[2]);
+    doc.text(safeResult?.riesgo_global || "PENDIENTE", margin + 40, y);
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    y += 20;
+
+    // Resumen económico rápido en portada
+    const importeCargas = safeResult?.peor_escenario?.importe_total ?? safeResult?.peor_escenario?.total ?? 0;
+    const totalCost = (appraisalValue || 0) + importeCargas;
+
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.roundedRect(margin, y, contentWidth, 35, 2, 2, "F");
+    
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(9);
+    doc.text("ESTIMACIÓN DE COSTE TOTAL (PUJA + CARGAS)", margin + 10, y + 12);
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text(appraisalValue ? formatCurrencyPDF(totalCost) : "PUJA + " + formatCurrencyPDF(importeCargas), margin + 10, y + 25);
+    
+    y += 45;
+
+    // --- BLOQUE: VEREDICTO DE INVERSIÓN ---
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.text("VEREDICTO DE INVERSIÓN:", margin, y);
+    y += 10;
+
+    let veredictoText = "";
+    let veredictoColor = [15, 23, 42];
+
+    if (safeResult?.riesgo_global === 'ALTO') {
+      veredictoText = "X ALTO RIESGO JURÍDICO";
+      veredictoColor = [185, 28, 28]; // Rojo
+    } else if (safeResult?.riesgo_global === 'MEDIO' || importeCargas > 0) {
+      veredictoText = "! REVISAR EN DETALLE";
+      veredictoColor = [180, 83, 9]; // Ámbar
+    } else {
+      veredictoText = "V OPERACIÓN LIMPIA (SIN CARGAS)";
+      veredictoColor = [21, 128, 61]; // Verde
+    }
+
+    doc.setFillColor(veredictoColor[0], veredictoColor[1], veredictoColor[2], 0.1);
+    doc.setDrawColor(veredictoColor[0], veredictoColor[1], veredictoColor[2]);
+    doc.roundedRect(margin, y, contentWidth, 20, 1, 1, "FD");
+    
+    doc.setTextColor(veredictoColor[0], veredictoColor[1], veredictoColor[2]);
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(veredictoText, margin + 10, y + 13);
+
+    y = pageHeight - 40;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "italic");
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    doc.text("Este documento contiene información técnica procesada mediante inteligencia", margin, y);
+    doc.text("artificial y revisión jurídica. Consulte siempre con un profesional.", margin, y + 5);
+
+    // --- PÁGINA 2: CONTENIDO ---
+    doc.addPage();
+    // Fondo decorativo lateral
+    doc.setFillColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.rect(0, 0, 5, pageHeight, "F");
+    y = 25;
+
+    // Sección: Resumen claro
+    if (recomendacionText) {
+      drawHeader(doc, "Decisión rápida");
+      const cleanedRec = cleanText(recomendacionText);
+      const recLines = doc.splitTextToSize(cleanedRec, contentWidth - 10);
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+      
+      recLines.forEach((line: string) => {
+        checkPageBreak(6);
+        doc.text(line, margin, y);
+        y += 6;
+      });
+      y += 10;
+    }
+
+    // Sección: Qué pagarías realmente
+    if (safeResult?.peor_escenario) {
+      const infoLines = [];
+      if (!importeCargas) {
+        infoLines.push("- Solo pagas el importe de tu puja adjudicada.");
+        infoLines.push("- No existen cargas preferentes que subsistan tras la subasta.");
+        infoLines.push("- La deuda que motiva la subasta se cancela con el remate.");
+      } else {
+        infoLines.push(`- Cargas que subsisten: ${formatCurrencyPDF(importeCargas)}`);
+        infoLines.push("- Estas cargas deben ser liquidadas por el adjudicatario.");
+        if (appraisalValue) {
+          infoLines.push(`- Coste total estimado (Puja + Cargas): ${formatCurrencyPDF(totalCost)}`);
+        }
+      }
+      
+      drawSectionBox(doc, "Impacto económico real", infoLines, [240, 253, 244]); // Emerald 50
+    }
+
+    // Sección: Análisis jurídico
+    if (safeResult?.razonamiento_juridico) {
+      drawHeader(doc, "Análisis Jurídico Detallado");
+      const cleanedReasoning = cleanText(safeResult.razonamiento_juridico);
+      const textLines = doc.splitTextToSize(cleanedReasoning, contentWidth);
+      
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+      
+      for (let i = 0; i < textLines.length; i++) {
+        checkPageBreak(6);
+        doc.text(textLines[i], margin, y);
+        y += 5.5;
+      }
+      y += 15;
+    }
+
+    // Límite de responsabilidad
+    checkPageBreak(35);
+    doc.setDrawColor(colors.border[0], colors.border[1], colors.border[2]);
+    doc.setFillColor(252, 252, 253);
+    doc.roundedRect(margin, y, contentWidth, 25, 2, 2, "FD");
+    
+    y += 8;
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(colors.primary[0], colors.primary[1], colors.primary[2]);
+    doc.text("AVISO LEGAL Y RESPONSABILIDAD", margin + 5, y);
+    y += 6;
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(colors.secondary[0], colors.secondary[1], colors.secondary[2]);
+    const disclaimer = "Este informe es una herramienta de apoyo basada en el análisis de documentos aportados. No constituye asesoramiento legal vinculante. Activos Off-Market no se hace responsable de decisiones de inversión basadas exclusivamente en este informe.";
+    const disclaimerLines = doc.splitTextToSize(disclaimer, contentWidth - 10);
+    disclaimerLines.forEach((line: string) => {
+      doc.text(line, margin + 5, y);
+      y += 4;
+    });
+
+    // Añadir footer a todas las páginas
+    addFooter(doc);
+
+    doc.save(`informe-subasta-${boeId || 'analisis'}.pdf`);
+  };
+
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -338,6 +790,35 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
   const removeFile = (indexToRemove: number) => {
     setFiles(prev => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  const uploadToCloudinary = async (file: File): Promise<string> => {
+    const cloudName = "dmw71xf7z"; // Encontrado en el proyecto
+    const uploadPreset = "unsigned_pdf"; // Ajustar si es necesario
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    formData.append("resource_type", "raw");
+    
+    const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
+      method: "POST",
+      body: formData
+    });
+    
+    if (!response.ok) {
+      const error = await response.json();
+      console.error("[Frontend] Cloudinary Upload Error:", error);
+      throw new Error(error.error?.message || "Error al subir a Cloudinary");
+    }
+    
+    const data = await response.json();
+    console.log("[Frontend] Cloudinary Upload Success Data:", data);
+    console.log("[Frontend] Secure URL:", data.secure_url);
+    console.log("[Frontend] Resource Type:", data.resource_type);
+    console.log("FINAL resource_type:", data.resource_type);
+    console.log("FINAL URL:", data.secure_url);
+    return data.secure_url;
   };
 
   const handleAnalyze = async () => {
@@ -354,41 +835,71 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
 
     setStep('loading');
     
+    // 🔥 LIMPIAR CACHE antes de iniciar nuevo análisis
+    if (boeId) {
+      sessionStorage.removeItem(`analysisResult_${boeId}`);
+    }
+    
     try {
+      // Subir a Cloudinary (Comentado para usar envío directo)
+      // console.log("Subiendo archivo a Cloudinary...");
+      // const pdfUrl = await uploadToCloudinary(files[0]);
+      // console.log("PDF subido a Cloudinary:", pdfUrl);
+
+      const selectedFile = files[0];
+      console.log("Enviando archivo a backend:", selectedFile?.name, selectedFile?.size);
+
       const formData = new FormData();
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-      formData.append('type', analysisType);
+      formData.append("files", selectedFile); // clave exacta
+      formData.append("type", analysisType);
       if (auctionId) {
-        formData.append('auctionId', auctionId);
+        formData.append("auctionId", auctionId);
+      }
+
+      let token = '';
+      try {
+        if (auth.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch (e) {
+        console.warn("Could not get Firebase token", e);
       }
 
       const response = await fetch('/api/run-analysis', {
         method: 'POST',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        // headers: {
+        //   'Content-Type': 'application/json'
+        // },
+        // body: JSON.stringify({
+        //   pdfUrl,
+        //   type: analysisType,
+        //   auctionId
+        // })
         body: formData
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        if (response.status === 403) {
+          setStep('upload');
+          if (onShowSoftGate) onShowSoftGate();
+          return;
+        }
+        if (response.status === 401) {
+          throw new Error("Debes iniciar sesión para analizar documentos.");
+        }
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.error || "Error al analizar el documento.");
       }
 
       const result = await response.json();
-      
-      // Incrementar contador solo cuando análisis se ejecuta correctamente
-      let success = true;
-      if (!isPaid) {
-        success = await incrementAnalysisCount();
-      }
-      
-      if (!success && currentPlan !== 'pro') {
-        setStep('upload');
-        if (onShowSoftGate) onShowSoftGate();
-        return;
-      }
+      console.log("1. RAW RESULT:", result);
 
       setResultData(result);
+      console.log("FINAL RESULT DATA FRONT:", result);
+      console.log("STATE SET:", result);
       // Also save to session storage for the current page if needed
       sessionStorage.setItem(`analysisResult_${boeId}`, JSON.stringify(result));
       setStep('result');
@@ -408,6 +919,45 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
     if (nivel.includes('BAJA')) return 'Basado solo en Nota Simple. Riesgo de cargas ocultas o desactualizadas.';
     return 'Evaluación basada en los documentos aportados.';
   };
+
+  const razonamiento = safeResult?.razonamiento_juridico
+    ? (typeof safeResult.razonamiento_juridico === "string"
+        ? safeResult.razonamiento_juridico
+        : JSON.stringify(safeResult.razonamiento_juridico, null, 2))
+    : "";
+
+  const surfaceSafe = (safeResult as any)?.informacion_general?.superficie || auction?.surface || surface || null;
+  const surfaceParsed = typeof surfaceSafe === "string"
+    ? parseFloat(surfaceSafe.replace(",", "."))
+    : surfaceSafe;
+
+  const valorMercadoGlobal = surfaceParsed && marketPriceM2 ? surfaceParsed * marketPriceM2 : 0;
+  
+  const totalCargasGlobal = safeResult?.cargas_detectadas
+    ?.filter(esSubsiste)
+    ?.reduce((sum: number, c: any) => sum + (c.desglose?.principal || 0), 0) || 0;
+
+  const globalOpportunityScore = safeResult ? calculateOpportunityScore({
+    cargas_detectadas: safeResult.cargas_detectadas || [],
+    valorMercado: valorMercadoGlobal,
+    valorSubasta: appraisalValue || 0,
+    pujaEstimada: appraisalValue || 0,
+    ocupacion_detectada: safeResult?.ocupacion_detectada || false,
+  }) : null;
+
+  console.log("FRONT RESULT DATA:", resultData);
+  if (safeResult) {
+    console.log("FRONT FINAL CARGAS:", safeResult.cargas_detectadas);
+    console.log("FICHA DEBUG:", {
+      superficiePDF: (safeResult as any)?.informacion_general?.superficie,
+      superficieAuction: auction?.surface,
+    });
+    console.log("MARKET DEBUG:", {
+      surfacePDF: (safeResult as any)?.informacion_general?.superficie,
+      surfaceParsed,
+      marketPriceM2,
+    });
+  }
 
   return (
     <div ref={blockRef} className={`${isIntegrated ? 'w-full' : `${noMargin ? '' : 'my-8 md:my-12'} bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden`}`}>
@@ -601,7 +1151,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                     </div>
                     
                     <div className={`w-full max-w-md space-y-2 ${isIntegrated ? 'mb-4' : 'mb-6'}`}>
-                      {files.map((f, idx) => (
+                      {files?.map((f, idx) => (
                         <motion.div 
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
@@ -622,7 +1172,7 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
                             </button>
                           </div>
                         </motion.div>
-                      ))}
+                      )) || []}
                     </div>
 
                     <button 
@@ -758,735 +1308,583 @@ const LoadAnalysisBlock: React.FC<LoadAnalysisBlockProps> = ({
           </div>
         )}
 
-        {step === 'result' && resultData && (
+        {step === 'result' && safeResult && (
           <div className="space-y-8">
-            {/* Barra de confianza superior */}
-            <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8 p-4 bg-slate-50/50 border border-slate-200 rounded-2xl shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                <ShieldCheck size={14} className="text-brand-600" />
-                <span>Análisis IA jurídico</span>
+            {/* Header Tipo de Análisis */}
+            {(() => {
+              const hasInvestmentData = !!((safeResult as any)?.informacion_general?.superficie || surface || auction?.surface || auction?.valorSubasta || appraisalValue);
+              
+              let label = '';
+              if (analysisType === 'completo' || (analysisType === 'cargas' && hasInvestmentData)) {
+                label = 'Análisis completo de inversión';
+              } else {
+                label = 'Análisis jurídico de cargas';
+              }
+
+              return (
+                <div className="text-xs font-medium uppercase tracking-wider text-slate-500 mb-[-1rem]">
+                  {label}
+                </div>
+              );
+            })()}
+
+            {/* Error Fallback Alert */}
+            {(safeResult as any)?.error && (
+              <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-xl text-sm">
+                <p className="font-medium">No hemos podido procesar este documento con suficiente precisión.</p>
+                <p className="mt-1">Este tipo de documento requiere revisión jurídica manual para detectar correctamente las cargas y riesgos reales.</p>
+                
+                <div className="mt-3">
+                  <a 
+                    href="https://calendly.com/activosoffmarket"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline font-medium"
+                  >
+                    Solicitar revisión jurídica experta →
+                  </a>
+                </div>
               </div>
-              <div className="hidden md:block w-px h-4 bg-slate-300"></div>
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                <FileText size={14} className="text-brand-600" />
-                <span>{isStandalone ? 'Documentos registrales' : 'Datos BOE oficiales'}</span>
+            )}
+
+            {/* Ficha Técnica */}
+            <div className="bg-white border rounded-xl p-4 space-y-3">
+              <div className="text-sm font-semibold">
+                Ficha técnica de la subasta
               </div>
-              <div className="hidden md:block w-px h-4 bg-slate-300"></div>
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                <TrendingUp size={14} className="text-brand-600" />
-                <span>{isStandalone ? 'Análisis de riesgos' : 'Estimación mercado'}</span>
+
+              <div className="grid grid-cols-2 gap-y-2 text-sm break-words">
+
+                <div className="text-gray-500">Identificador</div>
+                <div>{auction?.id || boeId || "—"}</div>
+
+                <div className="text-gray-500">Tipo de subasta</div>
+                <div>{auction?.procedureType ?? auction?.auctionType ?? "—"}</div>
+
+                <div className="text-gray-500">Ubicación</div>
+                <div>{fullLocation || "—"}</div>
+
+                <div className="text-gray-500">Tipo de inmueble</div>
+                <div>{getFichaValue((safeResult as any)?.informacion_general?.tipo_inmueble, auction?.propertyType || propertyType)}</div>
+
+                <div className="text-gray-500">Superficie</div>
+                <div>
+                  {(() => {
+                    const val = getFichaValue((safeResult as any)?.informacion_general?.superficie, auction?.surface);
+                    return val !== "—" ? `${val}${typeof val === 'number' ? ' m²' : ''}` : "—";
+                  })()}
+                </div>
+
+                {(auction?.rooms != null || auction?.bathrooms != null) && (
+                  <>
+                    <div className="text-gray-500">Habitaciones / baño</div>
+                    <div>
+                      {[
+                        auction?.rooms != null ? `${auction.rooms} hab` : null,
+                        auction?.bathrooms != null ? `${auction.bathrooms} baño` : null
+                      ].filter(x => x !== null).join(' · ')}
+                    </div>
+                  </>
+                )}
+
+                {(auction?.yearBuilt != null || auction?.hasElevator != null) && (
+                  <>
+                    <div className="text-gray-500">Año / ascensor</div>
+                    <div>
+                      {[
+                        auction?.yearBuilt != null ? auction.yearBuilt : null,
+                        auction?.hasElevator != null ? (auction.hasElevator ? "con ascensor" : "sin ascensor") : null
+                      ].filter(x => x !== null).join(' · ')}
+                    </div>
+                  </>
+                )}
+
+                <div className="text-gray-500">Valor subasta</div>
+                <div>{auction?.valorSubasta || appraisalValue ? formatCurrency(auction?.valorSubasta || appraisalValue || 0) : "—"}</div>
+
+                <div className="text-gray-500">Cantidad reclamada</div>
+                <div>{auction?.claimedAmount || auction?.claimedDebt ? formatCurrency(auction?.claimedAmount || auction?.claimedDebt || 0) : "—"}</div>
+
+                <div className="text-gray-500">Puja mínima</div>
+                <div>{(auction?.minBid ?? auction?.minimumBid ?? auction?.pujaMinima ?? auction?.valorMinimoPuja) != null ? formatCurrency(auction?.minBid ?? auction?.minimumBid ?? auction?.pujaMinima ?? auction?.valorMinimoPuja) : "—"}</div>
+
+                <div className="text-gray-500">Depósito</div>
+                <div>{(auction?.deposito ?? auction?.deposit ?? auction?.depositAmount) != null ? formatCurrency(auction?.deposito ?? auction?.deposit ?? auction?.depositAmount) : "—"}</div>
+
+                <div className="text-gray-500">Fecha fin</div>
+                <div>{auction?.auctionDate ?? auction?.auctionEndDate ?? "—"}</div>
+
+                {(safeResult as any)?.informacion_general?.fecha_documento && (
+                  <>
+                    <div className="text-gray-500">Fecha documento</div>
+                    <div>{(safeResult as any).informacion_general.fecha_documento}</div>
+                  </>
+                )}
+
               </div>
             </div>
 
-            {/* Contador de créditos */}
-            {user && (
-              <div className="flex flex-col items-center -mt-4">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white border border-slate-200 rounded-full shadow-sm">
-                  <div className={`w-2 h-2 rounded-full ${planLimit - usage > 0 ? 'bg-emerald-500' : 'bg-rose-500 animate-pulse'}`}></div>
-                  <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
-                    {planLimit - usage <= 0 
-                      ? "Has alcanzado el límite mensual" 
-                      : currentPlan === 'free' 
-                        ? `Te queda ${planLimit - usage} análisis gratis` 
-                        : `Te quedan ${planLimit - usage} análisis este mes`
-                    }
-                  </span>
-                </div>
-                
-                {user.lastAnalysisReset && currentPlan !== 'free' && (
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">
-                    {(() => {
-                      const lastReset = user.lastAnalysisReset.toDate ? user.lastAnalysisReset.toDate() : new Date(user.lastAnalysisReset);
-                      const resetDate = new Date(lastReset);
-                      resetDate.setMonth(resetDate.getMonth() + 1);
-                      const day = resetDate.getDate();
-                      const month = resetDate.toLocaleString('es-ES', { month: 'long' });
-                      return `Se reinician el ${day} ${month}`;
-                    })()}
-                  </p>
-                )}
-              </div>
-            )}
+            {/* Puntuación de Oportunidad */}
+            {(() => {
+              const score = globalOpportunityScore;
 
-            {/* Resumen Inversión */}
-            {analysisType === 'completo' && canCalculateFinancials && (
-              <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                  <TrendingUp size={20} className="text-brand-600" /> Resumen inversión
-                </h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">Valor mercado estimado</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(surface! * marketPriceM2!)}
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">Tasación</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue!)}
-                    </p>
-                  </div>
-                  <div className="bg-emerald-50 p-4 rounded-xl border border-emerald-100">
-                    <p className="text-xs text-emerald-600 font-medium mb-1">Descuento estimado</p>
-                    <p className="text-lg font-bold text-emerald-700">
-                      {new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: 1 }).format(((surface! * marketPriceM2!) - appraisalValue!) / (surface! * marketPriceM2!))}
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">Superficie</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(surface!)} m²
-                    </p>
-                  </div>
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100">
-                    <p className="text-xs text-slate-500 font-medium mb-1">€/m² mercado</p>
-                    <p className="text-lg font-bold text-slate-900">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(marketPriceM2!)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+              if (score?.scoreTotal === null || score?.scoreTotal === undefined) return null;
 
-            {/* Coste total estimado */}
-            {analysisType === 'completo' && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
-              <div className="bg-slate-900 text-white rounded-2xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-                  <Calculator size={20} className="text-brand-400" /> Coste total estimado
-                </h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-slate-400 text-sm">
-                    <span>Tasación</span>
-                    <span className="font-medium text-slate-200">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(appraisalValue || 0)}
-                    </span>
+              return (
+                <>
+                  <div className="bg-white border rounded-xl p-4 space-y-2">
+                    
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-500">Puntuación de oportunidad</span>
+                      <span className="text-lg font-semibold">{score.scoreTotal} / 10</span>
+                    </div>
+
+                    {/* Barra */}
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${
+                          score.scoreTotal >= 8
+                            ? "bg-green-500"
+                            : score.scoreTotal >= 5
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                        style={{ width: `${score.scoreTotal * 10}%` }}
+                      />
+                    </div>
+
+                    {/* Explicación */}
+                    <div className="text-xs text-gray-600 space-y-1">
+                      {score.explicacion?.map((e: string, i: number) => (
+                        <div key={i}>• {e}</div>
+                      ))}
+                    </div>
+
                   </div>
-                  <div className="flex justify-between items-center text-slate-400 text-sm">
-                    <span>Cargas que subsisten</span>
-                    <span className="font-medium text-amber-400">
-                      + {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total)}
-                    </span>
+
+                  {/* Resumen Ejecutivo */}
+                  {safeResult?.resumen_ejecutivo && (
+                    <div className="bg-white border rounded-xl p-5 text-sm leading-relaxed">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Análisis de la subasta
+                        </span>
+                      </div>
+
+                      <div className="text-gray-800 space-y-3 md:space-y-4 max-w-prose">
+                        {String(safeResult.resumen_ejecutivo)
+                          .split(/\n+/)
+                          .filter((p) => p.trim() !== '')
+                          .map((paragraph, i) => {
+                            // Separar importes en euros (ej. 100.000 €)
+                            const parts = paragraph.split(/(\d+(?:[.,]\d+)*\s*€)/g);
+                            return (
+                              <p key={i} className="leading-relaxed">
+                                {parts.map((part, j) => {
+                                  if (/\d/.test(part) && /€/.test(part)) {
+                                    return <strong key={j} className="font-semibold text-gray-950">{part}</strong>;
+                                  }
+                                  return part;
+                                })}
+                              </p>
+                            );
+                          })}
+                      </div>
+
+                      <p className="text-xs text-gray-500 mt-3 italic border-t border-gray-100 pt-2">
+                        Interpretación basada en la nota simple registral aportada.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Fallback segura si hay error */}
+                  {(safeResult as any)?.error && (
+                    <div className="bg-white border rounded-xl p-5 text-sm leading-relaxed">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                          Análisis de la subasta
+                        </span>
+                      </div>
+                      <p className="text-gray-500">
+                        No se ha podido generar el resumen automático.
+                      </p>
+                    </div>
+                  )}
+
+                  {/* CTAs Premium */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* CTA 1 — CONSULTORÍA */}
+                    <a
+                      href="https://calendly.com/activosoffmarket"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group border rounded-xl p-5 bg-white hover:shadow-md transition"
+                    >
+                      <div className="text-sm text-gray-500 mb-1">
+                        Revisión profesional
+                      </div>
+                      <div className="text-lg font-semibold mb-2">
+                        Revisión jurídica experta
+                      </div>
+                      <div className="text-sm text-gray-600 mb-4">
+                        Analizamos contigo esta subasta concreta, riesgos reales y hasta dónde pujar sin perder dinero.
+                      </div>
+                      <div className="text-sm font-medium text-black group-hover:underline">
+                        Reservar asesoría →
+                      </div>
+                    </a>
+
+                    {/* CTA 2 — CALCULADORA */}
+                    <a
+                      href="/calculadora-subastas"
+                      className="group border rounded-xl p-5 bg-black text-white hover:opacity-90 transition"
+                    >
+                      <div className="text-sm text-gray-300 mb-1">
+                        Herramienta
+                      </div>
+                      <div className="text-lg font-semibold mb-2">
+                        Calcular puja máxima
+                      </div>
+                      <div className="text-sm text-gray-300 mb-4">
+                        Calcula ahora mismo tu puja máxima segura según mercado y cargas detectadas.
+                      </div>
+                      <div className="text-sm font-medium group-hover:underline">
+                        Ir a la calculadora →
+                      </div>
+                    </a>
                   </div>
-                  <div className="pt-3 border-t border-slate-800 flex justify-between items-center">
-                    <span className="font-bold text-slate-200">Coste total estimado</span>
-                    <span className="text-2xl font-black text-brand-400">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format((appraisalValue || 0) + (resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total))}
-                    </span>
-                  </div>
-                </div>
-                <p className="mt-4 text-[10px] text-slate-500 leading-tight">
-                  * Este cálculo asume una puja igual al valor de tasación. El coste final dependerá de tu puja real en el portal del BOE.
-                </p>
-              </div>
-            )}
 
-            {/* Decisión de inversión - Bloque Agrupado */}
-            {analysisType === 'completo' && canCalculateFinancials && (resultData.peor_escenario?.total !== undefined || resultData.peor_escenario?.importe_total !== undefined) && (
-              <div className="bg-slate-50/50 border border-slate-200 rounded-3xl p-8 shadow-sm space-y-10">
-                <div className="text-center space-y-2">
-                  <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 justify-center uppercase tracking-widest">
-                    <ShieldCheck size={24} className="text-brand-600" /> Decisión de inversión
-                  </h3>
-                  <p className="text-sm text-slate-500 font-medium italic">
-                    Análisis final basado en datos de mercado y cargas detectadas
-                  </p>
-                </div>
+                  {/* Bloque 1 — Análisis Jurídico (Desplegable) */}
+                  <details className="bg-white border rounded-xl p-4">
+                    <summary className="cursor-pointer font-medium text-sm">
+                      Ver análisis jurídico detallado
+                    </summary>
 
-                {(() => {
-                  const valorMercadoEstimado = surface! * marketPriceM2!;
-                  const importeCargas = resultData.peor_escenario.importe_total ?? resultData.peor_escenario.total;
-                  const costeTotal = (appraisalValue || 0) + importeCargas;
-                  const margenSeguridad = valorMercadoEstimado - costeTotal;
-                  const margenPorcentaje = (margenSeguridad / valorMercadoEstimado) * 100;
-                  const margenObjetivo = 0.20;
-                  const precioMaximoPuja = (valorMercadoEstimado * (1 - margenObjetivo)) - importeCargas;
-
-                  // Lógica de veredicto
-                  let veredicto = "No recomendable";
-                  let colorClass = "text-rose-600";
-                  let bgColorClass = "bg-rose-50";
-                  let borderColorClass = "border-rose-100";
-                  let Icon = FileWarning;
-                  let explicacion = "El margen es insuficiente para cubrir riesgos imprevistos.";
-                  let ctaText = "Ver otras oportunidades";
-                  let ctaIcon = <ArrowRight size={18} />;
-                  let ctaLink = "/";
-
-                  if (margenPorcentaje >= 25) {
-                    veredicto = "Alta oportunidad";
-                    colorClass = "text-emerald-600";
-                    bgColorClass = "bg-emerald-50";
-                    borderColorClass = "border-emerald-100";
-                    Icon = ShieldCheck;
-                    explicacion = "Excelente margen de seguridad. La operación es muy sólida financieramente.";
-                    ctaText = "Analizar cargas ahora";
-                    ctaIcon = <ShieldCheck size={18} />;
-                    ctaLink = "#analisis-juridico";
-                  } else if (margenPorcentaje >= 15) {
-                    veredicto = "Oportunidad interesante";
-                    colorClass = "text-amber-600";
-                    bgColorClass = "bg-amber-50";
-                    borderColorClass = "border-amber-100";
-                    Icon = CheckCircle;
-                    explicacion = "Buen margen. Operación atractiva si el resto de factores legales son favorables.";
-                    ctaText = "Calcular puja precisa";
-                    ctaIcon = <Calculator size={18} />;
-                    ctaLink = "/pro";
-                  } else if (margenPorcentaje >= 5) {
-                    veredicto = "Analizar con cautela";
-                    colorClass = "text-orange-600";
-                    bgColorClass = "bg-orange-50";
-                    borderColorClass = "border-orange-100";
-                    Icon = AlertTriangle;
-                    explicacion = "Margen ajustado. Requiere un análisis legal y de mercado muy preciso.";
-                    ctaText = "Revisar análisis jurídico";
-                    ctaIcon = <FileSearch size={18} />;
-                    ctaLink = "#analisis-juridico";
-                  }
-
-                  return (
-                    <div className="space-y-10">
-                      {/* 1. Veredicto de Inversión - HERO */}
-                      <div className="flex flex-col items-center text-center space-y-6">
-                        <div className={`inline-flex items-center gap-4 px-10 py-6 rounded-3xl border-2 ${borderColorClass} ${bgColorClass} shadow-md transform transition-all hover:scale-[1.02]`}>
-                          <Icon size={48} className={colorClass} />
-                          <h4 className={`text-4xl font-black ${colorClass} tracking-tight`}>
-                            {veredicto}
-                          </h4>
-                        </div>
-                        <div className="max-w-xl space-y-6">
-                          <div className="space-y-3">
-                            <p className="text-2xl font-black text-slate-900">
-                              Margen de seguridad del {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 1 }).format(margenPorcentaje)}%
-                            </p>
-                            <p className="text-lg text-slate-600 leading-relaxed font-medium">
-                              {explicacion}
-                            </p>
-                          </div>
-
-                          {/* CTA Dinámico */}
-                          <div className="pt-2">
-                            {ctaLink.startsWith('#') ? (
-                              <button 
-                                onClick={() => {
-                                  const el = document.getElementById(ctaLink.substring(1));
-                                  el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                                }}
-                                className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 ${
-                                  veredicto === 'No recomendable' 
-                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
-                                    : 'bg-brand-600 text-white hover:bg-brand-700'
-                                }`}
-                              >
-                                {ctaIcon}
-                                {ctaText}
-                              </button>
-                            ) : (
-                              <Link 
-                                to={ctaLink}
-                                className={`inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 ${
-                                  veredicto === 'No recomendable' 
-                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' 
-                                    : 'bg-brand-600 text-white hover:bg-brand-700'
-                                }`}
-                              >
-                                {ctaIcon}
-                                {ctaText}
-                              </Link>
-                            )}
-                          </div>
+                    <div className="mt-4 text-sm text-gray-700 space-y-4">
+                      <div>
+                        <strong>Situación registral</strong>
+                        <div>
+                          {(safeResult?.razonamiento_juridico as any)?.situacion || "Información no disponible"}
                         </div>
                       </div>
 
-                      {/* 2. Comparativa Valor vs Coste & Beneficio Potencial */}
-                      <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative">
-                          {/* Columna Izquierda: Valor Mercado */}
-                          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Valor mercado estimado</p>
-                            <p className="text-3xl font-black text-slate-900">
-                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(valorMercadoEstimado)}
-                            </p>
-                          </div>
-
-                          {/* Separador Visual (Flecha o VS) */}
-                          <div className="hidden md:flex absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-slate-100 border border-slate-200 rounded-full items-center justify-center z-10 text-slate-400 font-bold text-xs">
-                            VS
-                          </div>
-
-                          {/* Columna Derecha: Coste Total */}
-                          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm text-center">
-                            <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mb-2">Inversión total estimada</p>
-                            <p className="text-3xl font-black text-slate-900">
-                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(costeTotal)}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Beneficio Potencial */}
-                        <div className={`p-6 rounded-2xl border flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 ${margenSeguridad >= 0 ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-rose-50 border-rose-100 text-rose-700'} shadow-sm`}>
-                          <div className="flex items-center gap-2">
-                            <TrendingUp size={24} />
-                            <span className="text-base font-bold uppercase tracking-wider">Beneficio potencial:</span>
-                          </div>
-                          <span className="text-3xl font-black">
-                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(margenSeguridad)}
-                          </span>
+                      <div>
+                        <strong>Cargas identificadas</strong>
+                        <div>
+                          {safeResult?.cargas_detectadas?.length
+                            ? `Se han identificado ${safeResult.cargas_detectadas.length} cargas en el expediente.`
+                            : "No se han detectado cargas relevantes."}
                         </div>
                       </div>
 
-                      {/* 3. Estimación orientativa de puja - Discreta */}
-                      <div className="bg-slate-100/50 border border-slate-200 rounded-2xl p-6 text-center max-w-2xl mx-auto">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-slate-200 text-slate-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">
-                          <Scale size={12} /> Estimación orientativa de puja
-                        </div>
-                        <div className="space-y-3">
-                          <p className="text-3xl font-black text-slate-800">
-                            {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(Math.max(0, precioMaximoPuja))}
-                          </p>
-                          <div className="space-y-1">
-                            <p className="text-sm text-slate-500 font-medium">
-                              Puja máxima sugerida para mantener un margen del 20%
-                            </p>
-                            <p className="text-brand-600 text-xs font-bold">
-                              Para cálculo preciso usar la Calculadora PRO
-                            </p>
-                          </div>
-
-                          {/* CTA para usuarios FREE o sin plan */}
-                          {(!currentPlan || currentPlan === 'free') && (
-                            <div className="mt-4">
-                              <Link 
-                                to="/pro" 
-                                className="inline-flex items-center gap-2 px-5 py-2 bg-brand-600 text-white rounded-lg text-xs font-bold hover:bg-brand-700 transition-all shadow-sm"
-                              >
-                                <Calculator size={14} />
-                                Calcular puja máxima
-                              </Link>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <hr className="border-slate-200" />
-
-                      {/* 4. Margen de Seguridad - Detalle */}
-                      <div className="space-y-4">
-                        <h4 className="text-sm font-bold text-slate-500 uppercase tracking-widest text-center">Detalle del margen de seguridad</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center justify-center text-center">
-                            <p className="text-xs text-slate-400 font-bold uppercase mb-1">Margen en euros</p>
-                            <p className="text-2xl font-black text-slate-900">
-                              {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(margenSeguridad)}
-                            </p>
-                          </div>
-                          <div className={`${bgColorClass} p-5 rounded-2xl border ${borderColorClass} shadow-sm flex flex-col items-center justify-center text-center`}>
-                            <p className={`text-xs ${colorClass.replace('text', 'text-opacity-70 text')} font-bold uppercase mb-1`}>Margen porcentual</p>
-                            <p className={`text-2xl font-black ${colorClass}`}>
-                              {new Intl.NumberFormat('es-ES', { style: 'percent', maximumFractionDigits: 1 }).format(margenPorcentaje / 100)}
-                            </p>
-                          </div>
+                      <div>
+                        <strong>Implicación para el comprador</strong>
+                        <div>
+                          {(safeResult as any)?.analisis?.implicacion || "Revisar documentación para determinar impacto real."}
                         </div>
                       </div>
                     </div>
-                  );
-                })()}
+                  </details>
+                </>
+              );
+            })()}
+
+            {/* Valoración de la oportunidad */}
+            <div className="bg-white border rounded-xl p-4 space-y-3">
+              <div className="text-sm font-semibold">
+                Valoración de la oportunidad
               </div>
-            )}
 
-
-            {/* CTAs Section */}
-            <div className="flex flex-col gap-3">
-              <button 
-                onClick={() => alert("Abriendo calculadora de puja máxima...")}
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 px-6 rounded-xl shadow-md transition-colors flex items-center justify-center gap-3 text-lg"
-              >
-                <Calculator size={24} />
-                Calcular puja máxima segura
-              </button>
-
+              {/* VALOR MERCADO */}
               {(() => {
-                const hasSubsistingCharges = resultData.cargas_detectadas.some(c => c.estado_carga === 'SUBSISTE');
-                const isLowConfidence = resultData.nivel_confianza_global.includes('BAJA');
-                const isHighRisk = resultData.riesgo_global === 'ALTO';
-                const hasOccupancy = resultData.ocupacion_detectada;
-                const uniqueProperties = new Set(resultData.cargas_detectadas.map(c => c.identificador_registral)).size;
-                const hasMultipleProperties = uniqueProperties > 1;
-                
-                const shouldShowConsultingCta = hasOccupancy || hasSubsistingCharges || isLowConfidence || isHighRisk || hasMultipleProperties;
+                const surfaceToUse = (safeResult as any)?.informacion_general?.superficie || surface || auction?.surface;
+                if (!surfaceToUse) return null;
 
-                if (!shouldShowConsultingCta) return null;
+                const cityForTable = (city || auction?.city || "").toLowerCase();
+                let tablePrice = 1800;
+                if (cityForTable.includes("madrid")) tablePrice = 3200;
+                else if (cityForTable.includes("barcelona")) tablePrice = 3500;
+                else if (cityForTable.includes("valencia")) tablePrice = 1800;
+                else if (cityForTable.includes("sevilla")) tablePrice = 1700;
+
+                // @ts-ignore
+                const vValue = typeof valuationResult !== 'undefined' ? valuationResult?.marketValue : null;
+                const finalMarketValue = vValue || (surfaceToUse * tablePrice);
 
                 return (
-                  <a 
-                    href="https://calendly.com/activosoffmarket" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-semibold py-3 px-6 rounded-xl transition-colors flex flex-col items-center justify-center gap-1"
-                  >
-                    <div className="flex items-center gap-2 text-base">
-                      <Calendar size={20} className="text-brand-600" />
-                      Analizar esta subasta conmigo
-                    </div>
-                    <span className="text-xs text-slate-500 font-normal">Revisión jurídica y estrategia de puja</span>
-                  </a>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Valor estimado mercado</span>
+                    <span>{formatCurrency(finalMarketValue)}</span>
+                  </div>
+                );
+              })()}
+
+              {/* VALOR SUBASTA */}
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">Valor subasta</span>
+                <span>{auction?.valorSubasta ? formatCurrency(auction.valorSubasta) : "—"}</span>
+              </div>
+
+              {/* DIFERENCIA */}
+              {(() => {
+                const surfaceToUse = (safeResult as any)?.informacion_general?.superficie || surface || auction?.surface;
+                const auctionVal = auction?.valorSubasta || appraisalValue;
+                if (!surfaceToUse || !auctionVal) return null;
+
+                const cityForTable = (city || auction?.city || "").toLowerCase();
+                let tablePrice = 1800;
+                if (cityForTable.includes("madrid")) tablePrice = 3200;
+                else if (cityForTable.includes("barcelona")) tablePrice = 3500;
+                else if (cityForTable.includes("valencia")) tablePrice = 1800;
+                else if (cityForTable.includes("sevilla")) tablePrice = 1700;
+
+                // @ts-ignore
+                const vValue = typeof valuationResult !== 'undefined' ? valuationResult?.marketValue : null;
+                const finalMarketValue = vValue || (surfaceToUse * tablePrice);
+                const diferencia = finalMarketValue - auctionVal;
+
+                return (
+                  <div className="flex justify-between text-sm font-medium">
+                    <span>Diferencia estimada</span>
+                    <span>{formatCurrency(diferencia)}</span>
+                  </div>
                 );
               })()}
             </div>
 
-            {/* Context Header */}
-            <div id="analisis-juridico" className="flex flex-wrap gap-4 items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
-              <div className="flex items-center gap-2 text-sm text-slate-600">
-                <FileText size={16} className="text-slate-400" />
-                <span>Fuente: <strong className="text-slate-900">{resultData.fuente_documento}</strong></span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-slate-600 group relative">
-                <ShieldCheck size={16} className={resultData.nivel_confianza_global.includes('ALTA') ? 'text-emerald-500' : resultData.nivel_confianza_global.includes('MEDIA') ? 'text-amber-500' : 'text-orange-500'} />
-                <span className="cursor-help border-b border-dashed border-slate-400">
-                  Confianza IA: <strong className="text-slate-900">{resultData.nivel_confianza_global}</strong>
-                </span>
-                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 text-white text-xs rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-10 pointer-events-none">
-                  {getConfianzaExplanation(resultData.nivel_confianza_global)}
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800"></div>
-                </div>
-              </div>
-            </div>
+            {/* Estrategia de puja orientativa */}
+            {(() => {
+              const valorMercado = auction?.marketPriceM2 && auction?.surface 
+                ? auction.marketPriceM2 * auction.surface 
+                : 0;
 
-            {/* Incoherencias Críticas */}
-            {resultData.incoherencias_detectadas && resultData.incoherencias_detectadas.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 p-5 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle size={20} className="text-amber-600" />
-                  <h4 className="font-bold text-amber-900">Discrepancias en la documentación</h4>
+              const totalCargas = totalCargasGlobal;
+
+              const score = globalOpportunityScore;
+
+              let factor = 0.7;
+              if (score?.scoreTotal !== null && score?.scoreTotal !== undefined) {
+                if (score.scoreTotal >= 8) factor = 0.75;
+                else if (score.scoreTotal >= 5) factor = 0.7;
+                else factor = 0.6;
+              }
+
+              const pujaBase = valorMercado * factor;
+              const pujaAjustada = pujaBase - totalCargas;
+
+              return (
+                <div className="bg-black text-white rounded-xl p-4 space-y-2">
+                  <div className="text-sm font-semibold">
+                    Estrategia de puja orientativa
+                  </div>
+
+                  <div className="text-lg font-bold">
+                    {valorMercado ? formatCurrency(Math.max(pujaAjustada, 0)) : "—"}
+                  </div>
+
+                  <div className="text-xs text-gray-300">
+                    Estimación ajustada considerando cargas detectadas. Revisar antes de pujar.
+                  </div>
                 </div>
-                <ul className="space-y-2">
-                  {resultData.incoherencias_detectadas.map((incoherencia, idx) => (
-                    <li key={idx} className="text-sm text-amber-800 flex items-start gap-2">
-                      <span className="mt-1 text-amber-500">•</span>
-                      <span>{incoherencia}</span>
-                    </li>
-                  ))}
-                </ul>
+              );
+            })()}
+
+            {/* BLOQUE 1: RESUMEN CLARO (HUMANO) */}
+            {(() => {
+              const total = safeResult.cargas_detectadas?.length || 0;
+              const subsisten = safeResult.cargas_detectadas?.filter((c: any) => esSubsiste(c)) || [];
+
+              let resumenHumano = "";
+              if (total === 0) {
+                resumenHumano = "No se han detectado cargas relevantes en la documentación analizada.";
+              } else if (subsisten.length === 0) {
+                resumenHumano = `Se han detectado ${total} cargas, pero todas se cancelan con la adjudicación.`;
+              } else {
+                resumenHumano = `Se han detectado ${total} cargas. Algunas subsisten, por lo que el comprador deberá asumir ciertas obligaciones.`;
+              }
+
+              return (
+                <div className="bg-white border rounded-xl p-4 text-sm shadow-sm">
+                  {resumenHumano}
+                </div>
+              );
+            })()}
+
+            {/* BLOQUE 2: CARGAS VISUALES (CLAVE) */}
+            {safeResult.cargas_detectadas && safeResult.cargas_detectadas.length > 0 && (
+              <div className="space-y-3">
+                {safeResult.cargas_detectadas.map((c: any, i: number) => {
+                  const subsiste = esSubsiste(c);
+
+                  return (
+                    <div key={i} className="p-4 border rounded-xl bg-white flex justify-between shadow-sm">
+                      <div>
+                        <div className="font-semibold text-slate-900">{c.tipo || "Carga"}</div>
+                        <p className="text-xs text-gray-600 mt-1 leading-relaxed break-words">
+                          {c.descripcion || c.fuente_textual}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <div className={`font-bold text-lg ${subsiste ? 'text-rose-600' : 'text-slate-900'}`}>
+                          {formatCurrency(c.desglose?.principal || c.importe || 0)}
+                        </div>
+
+                        <div className={`text-xs mt-1 font-bold tracking-wider uppercase ${subsiste ? "text-rose-600 bg-rose-50 inline-block px-2 py-0.5 rounded" : "text-emerald-600 bg-emerald-50 inline-block px-2 py-0.5 rounded"}`}>
+                          {subsiste ? "SUBSISTE" : "SE CANCELA"}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
 
-            {/* Ocupación del Inmueble */}
-            {resultData.ocupacion_detectada && (
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <Info size={20} className="text-slate-600" />
-                  <h4 className="font-bold text-slate-900">Situación de posesión a revisar</h4>
-                </div>
-                <p className="text-sm text-slate-700 mb-2">
-                  Se han encontrado indicios en la documentación de que el inmueble podría estar ocupado. En estos casos puede ser necesario gestionar la posesión tras la adjudicación.
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="text-xs font-bold text-slate-500 uppercase">Nivel de Riesgo:</span>
-                  <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                    resultData.nivel_riesgo_ocupacion === 'ALTO' ? 'bg-amber-100 text-amber-700' :
-                    resultData.nivel_riesgo_ocupacion === 'MEDIO' ? 'bg-slate-200 text-slate-700' :
-                    'bg-slate-100 text-slate-600'
-                  }`}>
-                    {resultData.nivel_riesgo_ocupacion}
-                  </span>
-                </div>
-              </div>
-            )}
+            {/* BLOQUE 3: COSTE REAL (SÚPER IMPORTANTE) */}
+            {(() => {
+              const totalSubsiste = safeResult.cargas_detectadas
+                ? safeResult.cargas_detectadas
+                    .filter(esSubsiste)
+                    .reduce((sum: number, c: any) => sum + (c.desglose?.principal || c.importe || 0), 0)
+                : 0;
 
-            {/* Razonamiento Jurídico (Chain of Thought) */}
-            {resultData.razonamiento_juridico && (
-              <div className="bg-slate-50 border border-slate-200 p-5 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <Info size={20} className="text-slate-600" />
-                  <h4 className="font-bold text-slate-900">Razonamiento Jurídico (IA)</h4>
-                </div>
-                <div className="text-sm text-slate-700 whitespace-pre-line leading-relaxed">
-                  {resultData.razonamiento_juridico}
-                </div>
-              </div>
-            )}
+              return (
+                <>
+                  <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-md">
+                  <div className="text-sm text-slate-400 font-medium uppercase tracking-wider mb-1">Coste adicional estimado</div>
+                  <div className="text-4xl font-black">{formatCurrency(totalSubsiste)}</div>
 
-            {/* Semaphore Header */}
-            <div className={`p-6 rounded-2xl border flex flex-col md:flex-row items-center gap-6 ${
-              resultData.riesgo_global === 'ALTO' ? 'bg-orange-50 border-orange-200 text-orange-900' :
-              resultData.riesgo_global === 'MEDIO' ? 'bg-amber-50 border-amber-200 text-amber-900' :
-              'bg-emerald-50 border-emerald-200 text-emerald-900'
-            }`}>
-              <div className={`p-4 rounded-full ${
-                resultData.riesgo_global === 'ALTO' ? 'bg-orange-100 text-orange-600' :
-                resultData.riesgo_global === 'MEDIO' ? 'bg-amber-100 text-amber-600' :
-                'bg-emerald-100 text-emerald-600'
-              }`}>
-                {resultData.riesgo_global === 'ALTO' ? <ShieldAlert size={32} /> :
-                 resultData.riesgo_global === 'MEDIO' ? <AlertTriangle size={32} /> :
-                 <ShieldCheck size={32} />}
-              </div>
-              <div className="text-center md:text-left">
-                <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Riesgo Global de la Operación</h3>
-                <p className="text-3xl font-black">{resultData.riesgo_global}</p>
-              </div>
-              <div className="md:ml-auto text-center md:text-right w-full md:w-auto border-t md:border-t-0 md:border-l border-current/20 pt-4 md:pt-0 md:pl-6 mt-2 md:mt-0">
-                <h3 className="text-sm uppercase tracking-wider font-bold opacity-80 mb-1">Peor Escenario Registral</h3>
-                <p className="text-3xl font-black">{resultData.peor_escenario.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</p>
-                <p className="text-xs opacity-80 mt-1 font-medium">Impacto: {resultData.impacto_economico.nivel}</p>
-              </div>
-            </div>
-
-            {/* Cargas Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Subsisting Charges (Bad) */}
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
-                  <FileWarning className="text-amber-600" size={20} />
-                  <h4 className="font-bold text-amber-900">Cargas que SUBSISTEN</h4>
-                </div>
-                <div className="p-6">
-                  {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SUBSISTE').length > 0 ? (
-                    <ul className="space-y-6">
-                      {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SUBSISTE').map((carga, idx) => (
-                        <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <p className="font-bold text-slate-900">{carga.identificador_registral} - {carga.tipo}</p>
-                              <p className="text-sm text-slate-500">{carga.titular}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
-                                  Rango: {carga.rango}
-                                </span>
-                                <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                  carga.confianza === 'ALTA' ? 'bg-emerald-100 text-emerald-700' :
-                                  carga.confianza === 'MEDIA' ? 'bg-amber-100 text-amber-700' :
-                                  'bg-orange-100 text-orange-700'
-                                }`}>
-                                  Confianza: {carga.confianza}
-                                </span>
-                                {carga.estado_carga && (
-                                  <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                    carga.estado_carga === 'SUBSISTE' ? 'bg-amber-100 text-amber-700' :
-                                    carga.estado_carga === 'SE_CANCELA_EN_SUBASTA' ? 'bg-emerald-100 text-emerald-700' :
-                                    carga.estado_carga === 'CANCELADA_REGISTRAL' ? 'bg-slate-200 text-slate-600' :
-                                    'bg-amber-100 text-amber-700'
-                                  }`}>
-                                    {carga.estado_carga.replace(/_/g, ' ')}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <span className="font-black text-lg text-amber-700">{carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                          </div>
-                          
-                          {/* Desglose */}
-                          <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100">
-                            <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                              <span className="text-slate-500">Principal:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                              <span className="text-slate-500">Intereses (est.):</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                              <span className="text-slate-500">Costas:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                            </div>
-                          </div>
-                          
-                          {/* Fuente Textual */}
-                          <div className="mt-3 bg-slate-100/50 rounded p-2 text-[10px] text-slate-500 italic border-l-2 border-slate-300">
-                            "{carga.fuente_textual}"
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
+                  {totalSubsiste > 0 ? (
+                    <div className="text-sm mt-2 text-rose-300 font-medium flex items-center gap-2">
+                      <AlertTriangle size={16} /> Deudas que deberás asumir tras la subasta
+                    </div>
                   ) : (
-                    <p className="text-slate-500 italic">No se han detectado cargas subsistentes.</p>
+                    <div className="text-sm mt-2 text-emerald-300 font-medium flex items-center gap-2">
+                       <ShieldCheck size={16} /> No se detectan cargas económicas relevantes
+                    </div>
                   )}
-                </div>
-              </div>
 
-              {/* Purged Charges (Good/Neutral) */}
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden">
-                <div className="bg-emerald-50 px-6 py-4 border-b border-emerald-100 flex items-center gap-2">
-                  <CheckCircle className="text-emerald-600" size={20} />
-                  <h4 className="font-bold text-emerald-900">Cargas que se PURGAN, REEMPLAZAN o CANCELAN</h4>
-                </div>
-                <div className="p-6">
-                  {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA').length > 0 ? (
-                    <ul className="space-y-6">
-                      {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'SE PURGA' || c.resultado.toUpperCase() === 'REEMPLAZADA' || c.resultado.toUpperCase() === 'CANCELADA').map((carga, idx) => (
-                        <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
-                          <div className="flex justify-between items-start mb-3">
-                            <div>
-                              <p className="font-bold text-slate-900">{carga.identificador_registral} - {carga.tipo}</p>
-                              <p className="text-sm text-slate-500">{carga.titular}</p>
-                              <div className="flex items-center gap-2 mt-1">
-                                <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
-                                  Rango: {carga.rango}
-                                </span>
-                                <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                  carga.confianza === 'ALTA' ? 'bg-emerald-100 text-emerald-700' :
-                                  carga.confianza === 'MEDIA' ? 'bg-amber-100 text-amber-700' :
-                                  'bg-orange-100 text-orange-700'
-                                }`}>
-                                  Confianza: {carga.confianza}
-                                </span>
-                                {carga.estado_carga && (
-                                  <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                    carga.estado_carga === 'SUBSISTE' ? 'bg-amber-100 text-amber-700' :
-                                    carga.estado_carga === 'SE_CANCELA_EN_SUBASTA' ? 'bg-emerald-100 text-emerald-700' :
-                                    carga.estado_carga === 'CANCELADA_REGISTRAL' ? 'bg-slate-200 text-slate-600' :
-                                    'bg-amber-100 text-amber-700'
-                                  }`}>
-                                    {carga.estado_carga.replace(/_/g, ' ')}
-                                  </span>
-                                )}
-                                {carga.resultado.toUpperCase() === 'REEMPLAZADA' && (
-                                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-600 px-2 py-0.5 rounded">
-                                    REEMPLAZADA
-                                  </span>
-                                )}
-                                {carga.resultado.toUpperCase() === 'CANCELADA' && (
-                                  <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-slate-200 text-slate-600 px-2 py-0.5 rounded">
-                                    CANCELADA
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                            <span className="font-bold text-slate-400 line-through">{carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                          </div>
-                          
-                          {/* Desglose */}
-                          <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100 opacity-60">
-                            <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                              <span className="text-slate-500">Principal:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                              <span className="text-slate-500">Intereses (est.):</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                              <span className="text-slate-500">Costas:</span>
-                              <span className="font-medium text-slate-700">{carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                            </div>
-                          </div>
-                          
-                          {/* Fuente Textual */}
-                          <div className="mt-3 bg-slate-100/50 rounded p-2 text-[10px] text-slate-500 italic border-l-2 border-slate-300 opacity-60">
-                            "{carga.fuente_textual}"
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="text-slate-500 italic">No se han detectado cargas a purgar.</p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* Unknown Charges (Critical) */}
-            {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO').length > 0 && (
-              <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden mt-8">
-                <div className="bg-amber-50 px-6 py-4 border-b border-amber-100 flex items-center gap-2">
-                  <AlertTriangle className="text-amber-600" size={20} />
-                  <h4 className="font-bold text-amber-900">Cargas de Estado DESCONOCIDO (Requieren Revisión Manual)</h4>
-                </div>
-                <div className="p-6">
-                  <ul className="space-y-6">
-                    {resultData.cargas_detectadas.filter(c => c.resultado.toUpperCase() === 'DESCONOCIDO').map((carga, idx) => (
-                      <li key={idx} className="pb-6 border-b border-slate-100 last:border-0 last:pb-0">
-                        <div className="flex justify-between items-start mb-3">
-                          <div>
-                            <p className="font-bold text-slate-900">{carga.identificador_registral} - {carga.tipo}</p>
-                            <p className="text-sm text-slate-500">{carga.titular}</p>
-                            <div className="flex items-center gap-2 mt-1">
-                              <span className="inline-block text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2 py-0.5 rounded">
-                                Rango: {carga.rango}
-                              </span>
-                              <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                carga.confianza === 'ALTA' ? 'bg-emerald-100 text-emerald-700' :
-                                carga.confianza === 'MEDIA' ? 'bg-amber-100 text-amber-700' :
-                                'bg-orange-100 text-orange-700'
-                              }`}>
-                                Confianza: {carga.confianza}
-                              </span>
-                              {carga.estado_carga && (
-                                <span className={`inline-block text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                                  carga.estado_carga === 'SUBSISTE' ? 'bg-amber-100 text-amber-700' :
-                                  carga.estado_carga === 'SE_CANCELA_EN_SUBASTA' ? 'bg-emerald-100 text-emerald-700' :
-                                  carga.estado_carga === 'CANCELADA_REGISTRAL' ? 'bg-slate-200 text-slate-600' :
-                                  'bg-amber-100 text-amber-700'
-                                }`}>
-                                  {carga.estado_carga.replace(/_/g, ' ')}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <span className="font-black text-lg text-amber-600">{carga.desglose.total.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                        </div>
-                        
-                        {/* Desglose */}
-                        <div className="bg-slate-50 rounded-lg p-3 text-xs border border-slate-100">
-                          <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                            <span className="text-slate-500">Principal:</span>
-                            <span className="font-medium text-slate-700">{carga.desglose.principal.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                            <span className="text-slate-500">Intereses (est.):</span>
-                            <span className="font-medium text-slate-700">{carga.desglose.intereses.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                          </div>
-                          <div className="flex justify-between py-1 border-b border-slate-200/60 last:border-0">
-                            <span className="text-slate-500">Costas:</span>
-                            <span className="font-medium text-slate-700">{carga.desglose.costas.toLocaleString('es-ES', {style: 'currency', currency: 'EUR'})}</span>
-                          </div>
-                        </div>
-                        
-                        {/* Fuente Textual */}
-                        <div className="mt-3 bg-amber-50/50 rounded p-2 text-[10px] text-amber-700 italic border-l-2 border-amber-300">
-                          "{carga.fuente_textual}"
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-
-            {/* Alerts & Recommendation */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {resultData.alertas.length > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6">
-                  <h4 className="font-bold text-amber-900 mb-4 flex items-center gap-2">
-                    <AlertTriangle size={20} /> Advertencias Jurídicas
-                  </h4>
-                  <ul className="space-y-3">
-                    {resultData.alertas.map((adv, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-amber-800 text-sm leading-relaxed">
-                        <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
-                        <span>{adv}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {resultData.recomendacion && (
-                <div className="bg-brand-50 border border-brand-200 rounded-2xl p-6">
-                  <h4 className="font-bold text-brand-900 mb-4 flex items-center gap-2">
-                    <Info size={20} /> Recomendación del Analista IA
-                  </h4>
-                  <p className="text-brand-800 text-sm leading-relaxed italic border-l-2 border-brand-300 pl-4 whitespace-pre-line">
-                    "{resultData.recomendacion}"
+                  <p className="text-xs text-slate-400 mt-4 leading-relaxed border-t border-slate-800 pt-3">
+                    {totalCargasGlobal === 0
+                      ? "No existen cargas económicas que subsistan tras la subasta. Las deudas detectadas se cancelan con la adjudicación (art. 674 LEC)."
+                      : "Existen cargas anteriores que subsistan tras la subasta y deberán ser asumidas por el comprador."}
                   </p>
                 </div>
-              )}
+
+                {totalCargasGlobal > 0 && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mt-3 text-sm">
+                    <p className="font-medium text-amber-800">
+                      Impacto real en la inversión
+                    </p>
+
+                    <p className="text-amber-700 mt-2 leading-relaxed">
+                      Este inmueble no queda completamente libre de cargas. 
+                      Existen deudas anteriores que subsistan tras la subasta, 
+                      por lo que el coste real para el comprador no es solo la puja.
+                    </p>
+
+                    <p className="text-amber-700 mt-2 leading-relaxed">
+                      En la práctica, el precio total de adquisición será:
+                    </p>
+
+                    <p className="font-semibold text-amber-900 mt-2 text-base">
+                      Puja + {formatCurrency(totalCargasGlobal)}
+                    </p>
+                  </div>
+                )}
+              </>
+            );
+          })()}
+
+          {/* CONCLUSIÓN MOVIDA AL FINAL */}
+          <div className="mt-6">
+            <div className="bg-black text-white rounded-xl p-5 space-y-4">
+              <div className="text-sm opacity-70 mb-2">
+                Conclusión
+              </div>
+
+              {(() => {
+                const surfaceToUse = (safeResult as any)?.informacion_general?.superficie || surface || auction?.surface;
+                const auctionVal = auction?.valorSubasta || appraisalValue;
+                const cityForTable = (city || auction?.city || "").toLowerCase();
+                let tablePrice = 1800;
+                if (cityForTable.includes("madrid")) tablePrice = 3200;
+                else if (cityForTable.includes("barcelona")) tablePrice = 3500;
+                else if (cityForTable.includes("valencia")) tablePrice = 1800;
+                else if (cityForTable.includes("sevilla")) tablePrice = 1700;
+
+                // @ts-ignore
+                const vValue = typeof valuationResult !== 'undefined' ? valuationResult?.marketValue : null;
+                const finalMarketValue = vValue || (surfaceToUse * tablePrice);
+                const diferencia = (finalMarketValue && auctionVal) ? finalMarketValue - auctionVal : 0;
+                
+                const hasCargas = totalCargasGlobal > 0;
+
+                if (diferencia < 0) {
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 text-red-400 font-bold text-base md:text-lg border-b border-red-500/20 pb-3">
+                        <span>❌</span>
+                        <span>Operación no viable en condiciones actuales.</span>
+                      </div>
+                      <div className="text-sm md:text-base font-normal opacity-90 space-y-4">
+                        <p className="leading-relaxed">Esta subasta requiere prudencia. A día de hoy, el criterio correcto sería:</p>
+                        <ul className="space-y-3 ml-1">
+                          <li className="flex items-start gap-3"><span className="text-red-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">no tomar la tasación como referencia de valor real</span></li>
+                          <li className="flex items-start gap-3"><span className="text-red-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">asegurar un margen suficiente respecto al mercado</span></li>
+                          <li className="flex items-start gap-3"><span className="text-red-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">evitar una entrada impulsiva sin ajuste de precio</span></li>
+                        </ul>
+                        <p className="pt-2 leading-relaxed opacity-80">Aunque no existan cargas relevantes, el precio actual no justifica el riesgo asumido.</p>
+                      </div>
+                    </div>
+                  );
+                } else if (diferencia >= 0 && hasCargas) {
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 text-yellow-500 font-bold text-base md:text-lg border-b border-yellow-500/20 pb-3">
+                        <span>⚠️</span>
+                        <span>Operación viable con riesgos.</span>
+                      </div>
+                      <div className="text-sm md:text-base font-normal opacity-90 space-y-4">
+                        <p className="leading-relaxed">Esta subasta puede ser interesante, pero exige análisis detallado:</p>
+                        <ul className="space-y-3 ml-1">
+                          <li className="flex items-start gap-3"><span className="text-yellow-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">valorar correctamente el impacto de las cargas</span></li>
+                          <li className="flex items-start gap-3"><span className="text-yellow-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">ajustar la puja al riesgo real</span></li>
+                          <li className="flex items-start gap-3"><span className="text-yellow-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">no sobreestimar el margen potencial</span></li>
+                        </ul>
+                        <p className="pt-2 leading-relaxed opacity-80">La rentabilidad dependerá directamente de una estrategia de puja prudente.</p>
+                      </div>
+                    </div>
+                  );
+                } else {
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 text-emerald-400 font-bold text-base md:text-lg border-b border-emerald-500/20 pb-3">
+                        <span>✅</span>
+                        <span>Operación potencialmente rentable.</span>
+                      </div>
+                      <div className="text-sm md:text-base font-normal opacity-90 space-y-4">
+                        <p className="leading-relaxed">Esta subasta presenta condiciones favorables:</p>
+                        <ul className="space-y-3 ml-1">
+                          <li className="flex items-start gap-3"><span className="text-emerald-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">sin cargas relevantes detectadas</span></li>
+                          <li className="flex items-start gap-3"><span className="text-emerald-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">margen positivo frente al mercado</span></li>
+                          <li className="flex items-start gap-3"><span className="text-emerald-400 mt-0.5 font-bold">✔</span> <span className="leading-relaxed">estructura relativamente limpia</span></li>
+                        </ul>
+                        <p className="pt-2 leading-relaxed opacity-80">Aun así, la clave será no sobrepujar y mantener disciplina en la estrategia.</p>
+                      </div>
+                    </div>
+                  );
+                }
+              })()}
             </div>
+          </div>
 
             {/* Download Action */}
             <div className="flex justify-center pt-4">
-              <button className="bg-slate-900 text-white font-bold py-3 px-8 rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2">
+              <button 
+                onClick={handleDownloadPDF}
+                className="bg-slate-900 text-white font-bold py-3 px-8 rounded-xl hover:bg-slate-800 transition-colors flex items-center gap-2"
+              >
                 <Download size={20} /> Descargar Informe PDF
               </button>
             </div>

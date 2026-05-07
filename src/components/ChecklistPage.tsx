@@ -14,18 +14,6 @@ import {
 import { trackConversion } from '../utils/tracking';
 
 const ChecklistPage: React.FC = () => {
-  useEffect(() => {
-    // Add noindex meta tag
-    const meta = document.createElement('meta');
-    meta.name = 'robots';
-    meta.content = 'noindex, nofollow';
-    document.head.appendChild(meta);
-
-    return () => {
-      document.head.removeChild(meta);
-    };
-  }, []);
-
   const handleDownload = () => {
     trackConversion('all', 'lead_magnet', 'download');
     window.print();
@@ -151,7 +139,7 @@ const ChecklistPage: React.FC = () => {
             <Info className="text-brand-600" />
             Cómo utilizar este checklist
           </h2>
-          <div className="prose prose-slate max-w-none text-lg text-slate-700 leading-relaxed">
+          <div className="prose prose-slate text-lg text-slate-700 text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
             <p>
               Este checklist no es una garantía absoluta, sino un <strong>filtro de seguridad</strong>. En el mundo de las subastas, la información es poder, pero la información <em>verificada</em> es dinero.
             </p>

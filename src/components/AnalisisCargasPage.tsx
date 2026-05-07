@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useLocation } from 'react-router-dom';
-import { Shield, ArrowRight, AlertTriangle, FileText, CheckCircle, ShieldCheck } from 'lucide-react';
+import { Shield, ArrowRight, AlertTriangle, FileText, ShieldCheck } from 'lucide-react';
 import LoadAnalysisBlock from './LoadAnalysisBlock';
 import PaymentModal from './PaymentModal';
 import { extractId } from '../utils/extractId';
@@ -154,7 +154,8 @@ const AnalisisCargasPage: React.FC = () => {
             Análisis Finalizado con Éxito
           </div>
           <h1 className="text-4xl md:text-5xl font-serif font-bold text-slate-900 mb-4">Informe de Cargas Registrales</h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+          
+                <p className="text-xl text-slate-600 max-w-2xl mx-auto">
             Revisión técnica detallada del expediente {processedId} realizada por nuestra IA especializada.
           </p>
         </div>

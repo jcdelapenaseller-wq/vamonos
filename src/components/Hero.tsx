@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ArrowRight, TrendingUp, ShieldCheck, UserCheck, Sparkles, Star, Calculator } from 'lucide-react';
 import { MetricHighlight, MetricPositive, MetricTag } from '../utils/themeClasses';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 const Hero: React.FC = () => {
   return (

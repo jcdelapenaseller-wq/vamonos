@@ -134,6 +134,9 @@ export function extractFinalPrice(pujasText?: string): number | null {
   return null;
 }
 
+// ⚠️ IMPORTANTE:
+// No introducir condiciones hardcodeadas por fecha (debug)
+// Esta función se usa en producción para determinar estado real
 export function isAuctionFinished(auctionDate?: string | null): boolean {
   if (!auctionDate || auctionDate === 'null') return false;
   
@@ -142,10 +145,6 @@ export function isAuctionFinished(auctionDate?: string | null): boolean {
   if (isNaN(endDate.getTime())) return false; // Invalid date
 
   const now = new Date();
-  // DEBUG: Para desarrollo, permitimos ver subastas de marzo 2026 como si no hubieran terminado
-  if (endDate.getFullYear() === 2026 && endDate.getMonth() === 2) { // Marzo es 2
-    return false;
-  }
   
   return now.getTime() > endDate.getTime();
 }
@@ -158,12 +157,11 @@ export function formatDate(dateString: string | null): string {
 }
 
 export function isAuctionActive(data: AuctionData): boolean {
-  const status = getComputedStatus(data);
-  return ['active', 'upcoming', 'suspended'].includes(status);
+  return !isAuctionFinished(data.auctionDate);
 }
 
 export function isAuctionClosed(data: AuctionData): boolean {
-  return data.status === 'closed';
+  return isAuctionFinished(data.auctionDate);
 }
 
 export function applyBasicFilters(data: AuctionData): boolean {
@@ -177,7 +175,7 @@ export function getFilteredAuctions(
 ): Record<string, AuctionData> {
   const filtered: Record<string, AuctionData> = {};
   for (const [slug, data] of Object.entries(auctions)) {
-    if (isAuctionActive(data) && applyBasicFilters(data) && data.assetCategory !== 'vehiculo') {
+    if (!isAuctionFinished(data.auctionDate) && applyBasicFilters(data) && data.assetCategory !== 'vehiculo') {
       filtered[slug] = data;
     }
   }
@@ -231,4 +229,107 @@ export function sortActiveFirst<T>(
     if (!aFinished && bFinished) return -1;
     return 0;
   });
+}
+
+/**
+ * Extrae planta y puerta de un string de dirección del BOE.
+ * Implementa lógica de seguridad para evitar falsos positivos con números de calle.
+ */
+export function extractFloorFromAddress(address?: string | null): string | null {
+  if (!address) return null;
+
+  const upper = address.toUpperCase();
+  const hasStrongContext = 
+    upper.includes("PLANTA") || 
+    upper.includes("PISO") || 
+    upper.includes("BAJO") || 
+    upper.includes("ATICO") || 
+    upper.includes("ÁTICO") ||
+    upper.includes("ENTRESUELO") ||
+    upper.includes("PUERTA") ||
+    upper.includes("DERECHA") ||
+    upper.includes("IZQUIERDA");
+
+  if (!address.includes(',') && !hasStrongContext) return null;
+
+  const parts = address.split(',');
+  const firstSegment = parts[0];
+  // Si hay coma, buscamos en segmentos extra. Si no, buscamos en todo el string (contexto fuerte).
+  const searchContext = address.includes(',') ? parts.slice(1).join(',').toUpperCase() : address.toUpperCase();
+
+  // Extraer número de calle del primer segmento para validación (último número antes de la coma)
+  const streetNumberMatch = firstSegment.match(/\s(\d+)[^\d]*$/);
+  const streetNumber = streetNumberMatch ? streetNumberMatch[1] : null;
+
+  const ordinalMap: Record<string, string> = {
+    "PRIMERA": "1ª", "SEGUNDA": "2ª", "TERCERA": "3ª", "CUARTA": "4ª", "QUINTA": "5ª",
+    "SEXTA": "6ª", "SEPTIMA": "7ª", "SÉPTIMA": "7ª", "OCTAVA": "8ª", "NOVENA": "9ª", "DECIMA": "10ª", "DÉCIMA": "10ª"
+  };
+
+  // 1. Buscar Planta (Obligatoria para este helper)
+  let planta: string | null = null;
+  
+  // A) Planta narrativa
+  const plantaNarrativeRegex = /(?:PLANTA|PISO)\s+(BAJA|PRIMERA|SEGUNDA|TERCERA|CUARTA|QUINTA|SEXTA|S[EÉ]PTIMA|OCTAVA|NOVENA|D[EÉ]CIMA|BAJO-CUBIERTA|S[OÓ]TANO|[AÁ]TICO|ENTRESUELO|ENTREPLANTA)/i;
+  const plantaNarrativeMatch = searchContext.match(plantaNarrativeRegex);
+  
+  if (plantaNarrativeMatch) {
+    const val = plantaNarrativeMatch[1].toUpperCase();
+    if (val === "BAJA") planta = "Bajo";
+    else if (val === "BAJO-CUBIERTA") planta = "Bajo cubierta";
+    else if (ordinalMap[val]) planta = ordinalMap[val];
+    else planta = val.charAt(0) + val.slice(1).toLowerCase();
+  }
+
+  // B) Planta formato corto (PLANTA 3, PLANTA 3ª)
+  if (!planta) {
+    const plantaShortRegex = /PLANTA\s*([A-Z0-9ªº°-]+)/i;
+    const plantaShortMatch = searchContext.match(plantaShortRegex);
+    if (plantaShortMatch) {
+      planta = plantaShortMatch[1].trim();
+    }
+  }
+
+  // C) Planta formato ordinal directo (1º, 2ª) - Solo si no es número de calle
+  if (!planta) {
+    const ordinalMatch = searchContext.match(/(\d{1,2}\s?[ºª°])(\s?[A-Z0-9ªº°-]*)/i);
+    if (ordinalMatch) {
+      const floorNumber = ordinalMatch[1].replace(/[^\d]/g, '');
+      const hasDoor = ordinalMatch[2] && ordinalMatch[2].trim() !== "";
+      if (hasDoor || floorNumber !== streetNumber) {
+        planta = ordinalMatch[1].trim();
+      }
+    }
+  }
+
+  // Si no hay planta, abortamos (según requerimiento: planta obligatoria)
+  if (!planta) return null;
+
+  // 2. Buscar Puerta (Opcional, solo si hay planta)
+  let puerta: string | null = null;
+
+  // A) Puerta narrativa
+  const puertaNarrativeRegex = /(?:PUERTA\s+(PRIMERA|SEGUNDA|TERCERA|CUARTA|QUINTA|SEXTA|S[EÉ]PTIMA|OCTAVA|NOVENA|D[EÉ]CIMA|[A-Z0-9]+)|A LA (DERECHA|IZQUIERDA)|AL (CENTRO))/i;
+  const puertaNarrativeMatch = searchContext.match(puertaNarrativeRegex);
+  
+  if (puertaNarrativeMatch) {
+    if (puertaNarrativeMatch[1]) {
+      const val = puertaNarrativeMatch[1].toUpperCase();
+      puerta = ordinalMap[val] || val;
+    } else if (puertaNarrativeMatch[2]) {
+      puerta = puertaNarrativeMatch[2].toLowerCase();
+    } else if (puertaNarrativeMatch[3]) {
+      puerta = puertaNarrativeMatch[3].toLowerCase();
+    }
+  }
+
+  // B) Puerta desde el match ordinal (si existía)
+  if (!puerta) {
+    const ordinalMatch = searchContext.match(/(\d{1,2}\s?[ºª°])\s?([A-Z0-9ªº°]+)/i);
+    if (ordinalMatch && ordinalMatch[2]) {
+      puerta = ordinalMatch[2].trim().toLowerCase();
+    }
+  }
+
+  return puerta ? `${planta} ${puerta}` : planta;
 }

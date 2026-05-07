@@ -436,5 +436,101 @@ export const DISCOVER_REPORTS: Record<string, DiscoverReport> = {
     conclusion: 'El negocio de comprar pisos ocupados o con problemas posesorios en subasta es, sin lugar a dudas, el último reducto de las rentabilidades extraordinarias en el sector inmobiliario español.\n\nPara el ciudadano de a pie, adquirir un problema legal por cientos de miles de euros parece una locura. Para el inversor profesional, es una simple ecuación matemática donde el "descuento por ocupación" compensa con creces los costes legales y el tiempo de espera.\n\nSin embargo, desde Activos Off-Market lanzamos una advertencia clara: esta estrategia no admite aficionados. Un error en la lectura del edicto o una mala evaluación del perfil del ocupante pueden convertir el "chollo de su vida" en una trampa financiera letal.',
     publishDate: '2026-03-23',
     image: 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=675&q=80'
+  },
+  'pisos-subasta-madrid-oportunidades-ocultas': {
+    id: 'pisos-subasta-madrid-oportunidades-ocultas',
+    title: 'Pisos embargados en Madrid: el circuito secreto donde se compra un 40% más barato',
+    intro: 'Con el precio del metro cuadrado en Madrid en máximos históricos, acceder a la vivienda parece imposible para muchos inversores y particulares.\n\nSin embargo, los fondos y patrimonialistas se están nutriendo de un canal alternativo: las subastas judiciales y de la AEAT publicadas en el Boletín Oficial del Estado (BOE).\n\nA través de procedimientos de apremio y ejecuciones hipotecarias, salen a diario pisos y chalets en la Comunidad de Madrid con descuentos que pueden rozar el 40% sobre su valor real de mercado.\n\nAnalizamos en profundidad este fenómeno: dónde se encuentran las mayores bolsas de oportunidades (tanto dentro de la M-30 como en el área metropolitana) y los riesgos técnicos que debes auditar antes de consignar tu depósito.',
+    publishDate: '2026-04-29',
+    image: 'https://images.unsplash.com/photo-1543783207-ec64e4d95325?auto=format&fit=crop&q=80&w=1200',
+    keyPoints: [
+      'Alta competencia en la capital: Dentro de la M-30, la clave es buscar expedientes con defectos de forma o cargas aparente que ahuyentan a inversores novatos.',
+      'El cinturón sur y Corredor del Henares: Móstoles, Alcorcón y Alcalá de Henares lideran el volumen de adjudicaciones con altos márgenes de rentabilidad.',
+      'Riesgos de ocupación: Los inmuebles de fondos o bancos adjudicados suelen requerir gestión de lanzamiento (desahucio), dilatando la toma de posesión.',
+      'Cargas ocultas: Calcular la deuda de comunidad e IBI (afecciones reales) es imprescindible para no devorar la rentabilidad esperada.'
+    ],
+    editorialSections: [
+      {
+        subtitle: 'El espejismo del precio de salida',
+        content: 'Un error común del inversor primerizo en Madrid es obsesionarse con la "cantidad reclamada" o la "puja mínima". En el mercado madrileño, altamente competitivo, las adjudicaciones reales rara vez se cierran por el importe de la deuda originaria.\n\nEl análisis profesional siempre se calcula con el "valor de tasación a efectos de subasta". En zonas demandadas (como Chamberí, Salamanca o Retiro), las adjudicaciones suelen rondar el 70% u 80% de ese valor de tasación.\n\nLa verdadera magia ocurre cuando dicho importe de tasación está desfasado (es una hipoteca muy antigua) y el valor de mercado real actual es sustancialmente mayor.'
+      },
+      {
+        subtitle: '¿Dónde está el verdadero margen de descuento?',
+        content: 'Nuestros datos revelan que los mayores descuentos (frecuentemente superiores al 30%) no están en los barrios premium, sino en el primer y segundo anillo metropolitano, y en tipologías específicas: pisos con ocupantes (para flippers agresivos), proindivisos (comprar solo una parte de la propiedad), o activos de la AEAT.\n\nPara el inversor tipo "Buy-to-Let" o "Flipping" (comprar, reformar y vender), localidades como Leganés, Getafe o Parla ofrecen un mercado de compradores finales muy dinámico y con alta demanda de alquiler. Adquirir un piso con gran descuento aquí garantiza un flujo de caja (yield) estelar, impensable en el centro de Madrid.',
+        chartType: 'ranking',
+        chartData: [
+          { label: 'Parla', value: 32, suffix: '% (Descuento medio)', color: 'bg-brand-600' },
+          { label: 'Fuenlabrada', value: 28, suffix: '% (Descuento medio)', color: 'bg-brand-500' },
+          { label: 'Villaverde (Madrid)', value: 25, suffix: '% (Descuento medio)', color: 'bg-brand-400' },
+          { label: 'Alcalá de Henares', value: 24, suffix: '% (Descuento medio)', color: 'bg-brand-300' },
+          { label: 'Centro (Madrid)', value: 12, suffix: '% (Descuento medio)', color: 'bg-slate-400' }
+        ]
+      }
+    ],
+    auctionDetails: [
+      {
+        slug: 'subasta-sub-ja-2026-258001',
+        subtitle: 'Oportunidad de alto margen en el arco metropolitano (Alcorcón)',
+        analysis: 'Este expediente ilustra a la perfección el modelo de inversión en el extrarradio de Madrid. Nos encontramos ante una vivienda (tasada en cerca de 277.000€) donde la cantidad reclamada es muy inferior (156.000€). Para el inversor "Value", este gap histórico representa el colchón de seguridad. La clave en el extrarradio sur no es aspirar a la revalorización más agresiva de España, sino asegurar la estabilidad de los flujos de caja y la altísima demanda de alquiler por parte de familias y jóvenes que no pueden afrontar los precios de Madrid Central.',
+        risks: 'En este tipo de expedientes con tanto descuento aparente, la revisión exhaustiva de la situación posesoria (ocupación) y las afecciones reales pendientes (IBI de los últimos 4 años y comunidad) son innegociables. El margen bruto debe ser suficiente para absorber ambos reveses, además del pago del ITP.',
+        investorProfile: 'Perfil Rentista / Búsqueda de Yield. Óptimo para inversores que buscan rentabilidades por alquiler estables (muy por encima del bono a 10 años) y tienen capacidad de gestión para posibles adecuaciones y reformas.'
+      },
+      {
+        slug: 'subasta-sub-ja-2026-257184',
+        subtitle: 'El activo estratégico con margen de seguridad en Nuevo Baztán',
+        analysis: 'Una propiedad con componentes mixtos: zona periférica-residencial, pero con liquidez demostrable si se ajusta al precio de mercado. Tasado en 335.000€ y ejecutándose por debajo de los 165.000€. La vivienda unifamiliar o los chalets adosados en anillos exteriores han visto una revalorización tras el cambio de tendencias post-2020. Adjudicarse algo así sin pujar a la desesperada permite acometer su reintroducción al mercado minorista logrando una Tasa Interna de Retorno (TIR) notable, dada la escasez de obra nueva en esta tipología.',
+        risks: 'Es crucial realizar una lectura escrupulosa de la Certificación de Cargas expedida por el registrador. Los inversores a menudo ignoran las menciones a otras cargas o a resoluciones de afección fiscal previas inscritas. Un asesoramiento técnico registral te ahorrará absorber una deuda inesperada de varias decenas de miles de euros.',
+        investorProfile: 'Perfil Activo / Reformista. Inversores con capital para afrontar los gastos de saneamiento registral y reforma inminente, que persiguen un cierre de operación (Take Profit) rápido ("flipping") en un mercado de reposición caliente.'
+      }
+    ],
+    sources: [
+      { name: "Consejo General del Poder Judicial - Estadística de Ejecuciones", url: "https://www.poderjudicial.es/" },
+      { name: "Observatorio de Vivienda de la Comunidad de Madrid", url: "https://www.comunidad.madrid/" }
+    ],
+    conclusion: 'Madrid es un tablero de ajedrez donde las subastas del BOE recompensan al inversor metódico y penalizan severamente al especulador que puja desde el sofá de su casa.\n\nAdquirir inmuebles muy por debajo de mercado es real y sucede todas las semanas, pero ese descuento siempre compensa un nivel de complejidad técnica (incidencias de posesión, demoras en el juzgado o cargas registrales cruzadas).\n\nNuestra recomendación permanente: antes de consignar el importante depósito (el 5% del valor de tasación), debes dominar la información. Utiliza herramientas de cálculo como nuestra calculadora, estudia la nota simple sin margen de duda y establece un precio máximo intransigible que preserve tu rentabilidad.',
+    hidePreAuctionCTA: false
+  },
+  'deudas-ocultas-pisos-banco-subastas-boe': {
+    id: 'deudas-ocultas-pisos-banco-subastas-boe',
+    title: 'El "agujero negro" de los pisos de banco en subasta: 4 deudas ocultas que arruinan a los inversores',
+    intro: 'El contexto del mercado inmobiliario actual en España no da tregua. Con los tipos de interés estabilizándose en niveles altos y los precios del metro cuadrado batiendo récords en grandes capitales como Madrid, Barcelona o Málaga, cada vez son más las familias y pequeños inversores que buscan canales alternativos para comprar vivienda por debajo de mercado.\n\nEn esta búsqueda desesperada del "chollo", el portal de subastas del Boletín Oficial del Estado (BOE) brilla como la última frontera dorada. Decenas de miles de personas entran a diario buscando viviendas embargadas por bancos y cajas a precios de saldo.\n\nSin embargo, lo que muchos perciben como una oportunidad única es, en la práctica, un campo de minas legal si no se cuenta con los conocimientos técnicos adecuados. La pregunta más repetida en internet —y la que levanta más miedos— es: «¿Qué pasa con las deudas de una casa de subasta? ¿Tengo que pagarlas yo?».\n\nLa respuesta rápida asusta: Sí, la ley establece que al adjudicarte un inmueble asumes ciertas "mochilas" financieras del deudor anterior. No se trata simplemente de ganar la puja y firmar escrituras. El verdadero coste de una subasta judicial incluye el desglose de las llamadas "afecciones reales" y otras cargas previas que no se purgan con el embargo.\n\nEn este reportaje de investigación, abordamos las 4 grandes trampas financieras y deudas ocultas que nadie te cuenta antes de pujar, para evitar que una compra con un 40% de descuento aparente se transforme en tu ruina económica.',
+    publishDate: '2026-04-29',
+    image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&q=80&w=1200',
+    keyPoints: [
+      'Cargas anteriores a la hipoteca ejecutada: no desaparecen y el nuevo propietario debe asumirlas obligatoriamente.',
+      'Las deudas con la comunidad de vecinos: estás obligado legalmente a pagar el año en curso y los tres años anteriores.',
+      'El IBI municipal: el Ayuntamiento siempre cobra su parte, reclamándola al nuevo titular mediante afección real.',
+      'Costes de lanzamiento y desahucio judicial: gastos de procuradores, cerrajeros y saneamiento de inmuebles vandalizados.'
+    ],
+    editorialSections: [
+      {
+        subtitle: '1. La trampa registral: Hipotecas previas y embargos que "heredas"',
+        content: 'El error número uno y más letal para el capital de cualquier inversor es la falta de comprensión de la "purga de cargas" en el Registro de la Propiedad. La regla básica del derecho hipotecario español es que cuando compras en un procedimiento judicial de ejecución hipotecaria, se cancelan la deuda ejecutada y todas las cargas o embargos posteriores. Hasta ahí, todo parece seguro.\n\nEl grave riesgo surge con las cargas anteriores o preferentes. Si la subasta proviene del embargo de una segunda hipoteca, un embargo de Hacienda o de la Seguridad Social, todas las anotaciones o hipotecas inscritas antes de ese embargo seguirán vigentes.\n\nEsto significa que si te adjudicas un piso por 60.000 euros, pero en la nota registral había una hipoteca previa del banco de 150.000 euros, esa deuda pasará íntegramente a tus espaldas, sumándose al coste real de la vivienda. Este es el motivo exacto por el que decenas de subastas quedan desiertas mes tras mes. Para protegerse, el inversor cualificado jamás consigna un depósito ciego; su primer paso innegociable es investigar la Certificación de Cargas.'
+      },
+      {
+        subtitle: '2. La temida "Afección Real" de la Comunidad de Propietarios',
+        content: 'Uno de los sustos más dolorosos llega semanas después de recibir el Decreto de Adjudicación. Con las llaves en mano —y un falso alivio— el nuevo propietario acude a presentarse al administrador de la finca. En ese instante le presentan una factura escalofriante por deudas impagadas del anterior ocupante moroso.\n\nLa Ley de Propiedad Horizontal (LPH) contiene una cláusula implacable: la "afección real". Toda persona que adquiere una vivienda responde solidariamente con el propio inmueble de los importes adeudados a la comunidad por el año de adquisición y por los tres años naturales inmediatamente anteriores.\n\nSi consideramos una cuota comunitaria promedio o sumamos posibles derramas importantes en el bloque, la suma impagada de cuatro anualidades puede superar con facilidad los 8.000 o 10.000 euros. Esta cantidad debe cubrirse obligatoriamente al contado por el comprador.',
+        chartType: 'ranking',
+        chartData: [
+          { label: 'Gastos Ordinarios (4 años)', value: 7200, suffix: '€ (Media)' },
+          { label: 'Derramas Extraordinarias Instaladas', value: 4500, suffix: '€ (Media)' },
+          { label: 'Recargos y Costes Legales Comunidad', value: 1200, suffix: '€ (Media)' }
+        ]
+      },
+      {
+        subtitle: '3. La cuota intocable de los Ayuntamientos: El IBI',
+        content: 'La administración pública nunca pierde su cobro, y cuando se trata de impuestos municipales vinculados a la propiedad territorial, el mecanismo de recaudación es implacable. El Impuesto sobre Bienes Inmuebles (IBI) viaja unido a los cimientos físicos del piso, independientemente de la titularidad.\n\nCuando un particular adquiere una vivienda embargada que acumula años de impagos fiscales, el Ayuntamiento ejercerá su privilegio. En las viviendas de subasta provenientes de deuda continuada, el adjudicatario suele verse obligado a regularizar todo el ejercicio fiscal en curso y, debido a las afecciones reales, responder subsidiariamente de los impagos acumulados no prescritos.\n\nEl impacto fiscal no termina ahí, puesto que calcular esto erróneamente reduce de un plumazo gran parte del beneficio en la compra.'
+      },
+      {
+        subtitle: '4. Costes logísticos y de "Saneamiento Posesorio"',
+        content: 'La peor deuda técnica no está en los mandamientos del juzgado, sino escondida al otro lado de la cerradura. Gran cantidad de propiedades liquidadas al mejor postor han permanecido con sus antiguos poseedores deudores en situaciones de extrema tensión contra acreedores bancarios.\n\nRecuperar económicamente la vivienda (una "posesión pacífica") no es un trámite estéril ni gratuito. Demandar el desahucio implica abonar facturas de despachos de procuradores y pagar un cerrajero de emergencias el día del alzamiento judicial. Sumado a esto está el "saneamiento por vandalización". Quien sufre un desahucio forzado no suele priorizar el mantenimiento meticuloso; las humedades extremas, tuberías cegadas, sistemas de calefacción ausentes o cocinas desmanteladas obligan a una inyección inminente de miles de euros para volver a habilitar el activo.'
+      }
+    ],
+    sources: [
+      { name: 'Ley de Propiedad Horizontal (LPH) - Afecciones a adquirentes', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1960-10906' },
+      { name: 'Ley Hipotecaria - Subsistencia y cancelación de cargas', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1946-2453' }
+    ],
+    conclusion: 'Operar en el opaco mercado de las subastas BOE permite adquirir inmuebles con descuentos inalcanzables en los portales clásicos, pero el BOE no es un supermercado altruista;\n\nCreer que el precio que marcas con tu puja es tu coste total y final es una de las mayores irresponsabilidades financieras de los principiantes. Como hemos desglosado, un piso embargado llega repleto de compromisos anclados al pasado: el IBI acumulado, la comunidad de varios años rezagada, posibles hipotecas preferentes no disueltas y un estado material destructivo que devora la liquidez.\n\nEl éxito reside siempre en la anticipación metódica y en usar las herramientas exactas. Antes de jugar tus ahorros, audita la nota simple y descuenta forzosamente cada impuesto, deuda y coste oculto. Nunca pujes sin realizar una previsión minuciosa en tu cálculo de viabilidad.',
+    hidePreAuctionCTA: true
   }
 };

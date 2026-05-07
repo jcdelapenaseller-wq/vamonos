@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Car, Zap, ShieldCheck, FileText } from 'lucide-react';
 import { AUCTIONS } from '../data/auctions';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { VehicleCard } from './VehicleCard';
 import { isAuctionActive } from '../utils/auctionHelpers';
 
@@ -104,7 +104,7 @@ const VehicleAuctionsPage: React.FC = () => {
         )}
 
         <div className="mt-20 pt-12 border-t border-slate-200 max-w-4xl mx-auto">
-          <div className="prose prose-slate max-w-none">
+          <div className="prose prose-slate text-justify max-w-4xl space-y-6">
             <h2 className="font-serif text-2xl font-bold text-slate-900 mb-4">Invertir en vehículos de subastas judiciales</h2>
             <p className="text-slate-600 leading-relaxed">
               Las subastas de vehículos del BOE ofrecen una oportunidad única para adquirir coches, motos y furgonetas a precios significativamente inferiores a los de mercado. A diferencia de las viviendas, los vehículos suelen tener un proceso de adjudicación más rápido, aunque requieren una revisión técnica minuciosa.

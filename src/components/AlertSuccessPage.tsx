@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { CheckCircle, Zap, Clock, ShieldCheck, ArrowRight, Star, Mail, Bell } from 'lucide-react';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
 import Header from './Header';

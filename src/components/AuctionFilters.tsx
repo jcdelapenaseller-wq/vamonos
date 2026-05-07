@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { MapPin, Map, Activity, Building2, ArrowUpDown } from 'lucide-react';
 import { AuctionData } from '../data/auctions';
-import { getComputedStatus, getAuctionType, isAuctionActive } from '../utils/auctionHelpers';
+import { getComputedStatus, getAuctionType, isAuctionActive, isAuctionFinished } from '../utils/auctionHelpers';
 
 interface AuctionFiltersProps {
   auctions: Record<string, AuctionData>;
@@ -48,6 +48,9 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({
 
   const filteredAuctions = useMemo(() => {
     return Object.entries(auctions).reduce((acc, [slug, data]) => {
+      // Forzar filtro base: eliminar siempre finalizadas
+      if (isAuctionFinished(data.auctionDate)) return acc;
+      
       if (data.assetCategory === 'vehiculo') return acc;
       if (city && data.city && normalizeText(data.city) !== normalizeText(city)) return acc;
       if (province && data.province?.toLowerCase() !== province.toLowerCase()) return acc;
@@ -104,7 +107,7 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({
   return (
     <div className={`sticky top-[72px] md:top-[80px] z-40 transition-all duration-300 mb-8 ${isScrolled ? 'bg-white/95 shadow-md md:rounded-2xl border-b md:border border-slate-200/50 p-2 md:p-3 -mx-6 px-6 md:mx-0 md:px-3' : 'bg-slate-50 p-3 md:p-6 rounded-2xl border border-slate-200 shadow-sm'}`}>
       <div className={`grid gap-2 md:gap-3 ${onSortChange ? 'grid-cols-2 md:grid-cols-6' : 'grid-cols-2 md:grid-cols-4'}`}>
-        <div className="col-span-1 relative">
+        <div className="hidden md:block col-span-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <MapPin size={16} className="text-slate-400" />
           </div>
@@ -117,7 +120,7 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({
           </div>
         </div>
         
-        <div className="hidden md:block col-span-1 relative">
+        <div className="col-span-1 relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <Map size={16} className="text-slate-400" />
           </div>
@@ -139,7 +142,6 @@ export const AuctionFilters: React.FC<AuctionFiltersProps> = ({
             <option value="active">En curso</option>
             <option value="upcoming">Próxima apertura</option>
             <option value="suspended">Pausada</option>
-            <option value="closed">Finalizada</option>
           </select>
           <div className="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
             <ArrowUpDown size={14} className="text-slate-400" />

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { Calculator } from 'lucide-react';
 
 const ConversionBlock: React.FC = () => {
@@ -23,7 +23,7 @@ const ConversionBlock: React.FC = () => {
         >
           ejemplos de subastas analizadas
         </Link> o revisa nuestra <Link 
-          to={ROUTES.GUIDE_INDEX} className="text-brand-600 font-medium hover:underline"
+          to={ROUTES.GUIDE_HUB} className="text-brand-600 font-medium hover:underline"
         >
           guía de subastas
         </Link>.

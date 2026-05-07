@@ -1,21 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import Hero from './Hero';
 import { DiscoverReportsBlock } from './DiscoverReportsBlock';
 import RecentAuctionsHome from './RecentAuctionsHome';
-import LeadMagnetBlock from './LeadMagnetBlock';
-import Services from './Services';
 import SocialProof from './SocialProof';
 import Pricing from './Pricing';
 import Process from './Process';
 import Opportunities from './Opportunities';
 import { ArrowRight } from 'lucide-react';
-import SeoBlock from './SeoBlock';
 import FAQ from './FAQ';
 import FinalCTA from './FinalCTA';
 import { trackConversion } from '../utils/tracking';
-import PremiumValueBlock from './PremiumValueBlock';
 
 const Home: React.FC = () => {
   React.useEffect(() => {
@@ -32,63 +28,52 @@ const Home: React.FC = () => {
       <Hero />
       <DiscoverReportsBlock />
       <RecentAuctionsHome />
-      <div className="max-w-7xl mx-auto px-6">
-        <LeadMagnetBlock />
-      </div>
       <SocialProof />
-      <Services />
       <Pricing />
-      
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-6">
-          <PremiumValueBlock />
-        </div>
-      </section>
 
       <Process />
       <Opportunities />
 
-      <section className="py-20 bg-slate-50 border-y border-slate-100">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-6">
-              Analiza cualquier subasta antes de pujar
-            </h2>
-            <p className="text-lg text-slate-600 leading-relaxed">
-              Pega el enlace de la subasta y elige el nivel de profundidad que necesitas para tomar tu decisión de inversión.
+      <section className="py-20 bg-white border-t border-slate-100">
+        <div className="max-w-6xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-6 text-center">
+            Cómo funcionan las subastas del BOE
+          </h2>
+          <p className="text-lg text-slate-600 mb-12 text-center max-w-3xl mx-auto">
+            Participar con garantías requiere entender el ecosistema jurídico y financiero para localizar activos y minimizar el riesgo.
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-brand-200 transition-colors">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Qué es una subasta judicial</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                Es un procedimiento público donde se liquida un activo para el pago a acreedores. Todo ocurre a través del Portal de Subastas del BOE, que marca un valor de subasta inicial sobre el que los inversores pujan electrónicamente.
+              </p>
+            </div>
+            
+            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-brand-200 transition-colors">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Riesgos principales</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                El importe de remate no es tu único coste. Es vital identificar las cargas registrales anteriores, los riesgos de ocupación sin título y las posibles deudas ocultas como el IBI o la comunidad comunitaria.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 hover:border-brand-200 transition-colors">
+              <h3 className="text-xl font-bold text-slate-900 mb-4">Cómo analizar correctamente</h3>
+              <p className="text-slate-600 leading-relaxed text-sm">
+                Un análisis riguroso exige interpretar la certificación de cargas actualizada del registro correspondiente, contrastar el edicto de ejecución y evaluar todos los datos antes de concretar tu postura.
+              </p>
+            </div>
+          </div>
+          
+          <div className="mt-10 text-center max-w-4xl mx-auto">
+            <p className="text-xs text-slate-400">
+              El análisis de subastas requiere revisión jurídica de cargas, situación posesoria y riesgos económicos. La información mostrada tiene carácter informativo y no constituye asesoramiento financiero.
             </p>
           </div>
-
-          <div className="flex justify-center">
-            <Link 
-              to={ROUTES.ANALIZAR_SUBASTA}
-              className="inline-flex items-center gap-2 bg-slate-900 text-white font-bold py-4 px-8 rounded-xl hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-            >
-              Analizar una subasta <ArrowRight size={20} />
-            </Link>
-          </div>
         </div>
       </section>
 
-      <section className="py-20 bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-serif font-bold text-slate-900 mb-6">
-            Ejemplos reales de subastas analizadas
-          </h2>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto mb-10">
-            Descubre cómo analizamos oportunidades reales procedentes del BOE. Casos prácticos con números detallados, rentabilidad calculada y riesgos evaluados para que entiendas el proceso de inversión.
-          </p>
-          <Link 
-            to={ROUTES.EXAMPLES_INDEX} 
-            onClick={() => trackConversion('general', 'home', 'listado')}
-            className="inline-flex items-center gap-2 bg-brand-600 text-white font-bold py-4 px-8 rounded-xl hover:bg-brand-700 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-          >
-            Ver ejemplos de subastas <ArrowRight size={20} />
-          </Link>
-        </div>
-      </section>
-
-      <SeoBlock />
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="bg-brand-900 rounded-3xl p-8 md:p-12 text-center text-white flex flex-col items-center">
             <h2 className="text-2xl md:text-3xl font-serif font-bold mb-6">Herramienta gratuita: Calculadora de rentabilidad en subastas judiciales</h2>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, FileText, Download, RefreshCw, Eye, AlertTriangle, CheckCircle, TrendingUp, ShieldAlert, Activity } from 'lucide-react';
+import { CheckCircle,  X, FileText, Download, RefreshCw, Eye, AlertTriangle, TrendingUp, ShieldAlert, Activity  } from 'lucide-react';
 
 interface FullAnalysisModalProps {
   isOpen: boolean;

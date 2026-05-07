@@ -5,7 +5,7 @@ export const ROUTES = {
   RECENT_AUCTIONS: '/subastas-recientes',
   HISTORICAL_AUCTIONS: '/subastas-historico',
   HIGH_DISCOUNT: '/subastas-descuento-50',
-  GUIDE_INDEX: '/indice-guia-subastas',
+  GUIDE_INDEX: '/guias-subastas',
   GUIDE_PILLAR: '/subastas-judiciales-espana',
   ANALYSIS: '/como-analizar-subasta-judicial-paso-a-paso',
   ANALISIS_SLUG: '/r/:slug',
@@ -78,4 +78,7 @@ export const ROUTES = {
   ANALISIS_INVERSION: '/analisis-inversion',
   ANALIZAR_SUBASTA: '/analizar-subasta',
   LOGIN: '/login',
+  UNSUBSCRIBE: '/unsubscribe',
+  GUIDE_HUB: '/guias-subastas',
+  COMO_COMPRAR: '/como-comprar-subasta',
 };

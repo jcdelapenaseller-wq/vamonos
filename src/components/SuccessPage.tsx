@@ -31,6 +31,13 @@ const SuccessPage: React.FC = () => {
     processSubscription();
   }, [isLogged, isLoading, searchParams, updatePlan]);
 
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      window.location.href = '/mi-cuenta';
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4">
       <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full text-center">

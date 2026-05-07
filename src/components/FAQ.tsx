@@ -30,28 +30,28 @@ const FAQItem: React.FC<FAQItemProps> = ({ question, answer }) => {
 const FAQ: React.FC = () => {
   const faqs = [
     {
-      question: "¿Qué recibo exactamente en el Plan Premium (9€/semana)?",
-      answer: "Acceso a información estratégica y depurada. Semanalmente selecciono oportunidades reales y te entrego un análisis que incluye: cálculo detallado de cargas anteriores (la deuda real oculta tras la subasta), evaluación de la situación posesoria (ocupación sin título, alquileres, etc.) y una valoración conservadora de mercado. Mi objetivo es que tengas todos los datos críticos antes de plantearte siquiera pujar."
+      question: "¿Qué incluye el plan BASIC?",
+      answer: "Acceso a la estructura de cargas simplificada, estimación del valor de mercado y alertas en tiempo real de nuevas oportunidades. Permite visualizar los datos clave de cada expediente para filtrar activos rápidamente y tomar decisiones fundamentadas."
     },
     {
-      question: "¿Garantizas que ganaré dinero?",
-      answer: "No. Y huye de quien te lo garantice. Yo garantizo que la información sobre la que tomas la decisión es veraz, ha sido contrastada jurídicamente y que los riesgos legales están identificados. La rentabilidad final depende de tu estrategia de puja y de la gestión posterior del activo."
+      question: "¿Qué diferencia hay entre BASIC y PRO?",
+      answer: "El plan PRO incluye todas las funcionalidades de BASIC y amplía la cobertura con herramientas de priorización, valoración estimada del activo y un dashboard exclusivo de seguimiento de oportunidades."
     },
     {
-      question: "¿Eres una agencia inmobiliaria?",
-      answer: "No. No vendo inmuebles, no tengo cartera propia y no cobro comisiones de éxito. Soy un consultor independiente. Mi único cliente eres tú (el inversor), no el banco ni el ejecutado. Cobro por mi análisis técnico, ganes la subasta o no."
+      question: "¿Cuántos análisis puedo hacer al mes?",
+      answer: "El acceso se adapta al nivel elegido. El plan FREE permite explorar las subastas disponibles. Los planes BASIC y PRO desbloquean el análisis detallado y la estructura de cargas en base a las herramientas que necesite el inversor."
     },
     {
-      question: "¿Qué pasa si me suscribo y no me convence?",
-      answer: "Te das de baja al momento. Sin permanencia ni preguntas. Si entras, revisas el material y consideras que no se ajusta a tu perfil de inversión, cancelas tu suscripción con un solo clic."
+      question: "¿Necesito conocimientos previos?",
+      answer: "La plataforma traduce la complejidad técnica y jurídica del BOE en indicadores financieros y legales accesibles. Está pensada tanto para quienes buscan la compra de una vivienda propia como para inversores, reduciendo sustancialmente la curva de aprendizaje."
     },
     {
-      question: "¿La consultoría 1:1 incluye informe jurídico escrito?",
-      answer: "La sesión (desde 39€) se centra en un análisis estratégico y verbal en tiempo real. Revisamos la documentación (Certificación de Cargas, Edicto, etc.) en pantalla compartida y determinamos la viabilidad jurídica y económica de la operación. Si el caso requiere un dictamen pericial por escrito para presentar a terceros o socios, este servicio se puede contratar adicionalmente tras la sesión."
+      question: "¿Puedo probar la plataforma antes de pagar?",
+      answer: "Sí. Crear una cuenta FREE permite explorar el inventario de activos, acceder a calculadoras de rentabilidad y familiarizarse con el entorno antes de requerir un plan superior para ver áreas críticas como las cargas y embargos."
     },
     {
-      question: "¿Pujas tú por mí?",
-      answer: "No. Yo te doy la munición (información y estrategia), pero tú disparas (pujas). Debes hacerlo con tu propio certificado digital en el Portal del BOE. Si no sabes cómo, te guío en el proceso, es más sencillo de lo que parece."
+      question: "¿Existe compromiso de permanencia?",
+      answer: "No hay ningún compromiso de permanencia. La gestión de las suscripciones (BASIC y PRO) se realiza desde el panel de control del usuario y se puede cancelar de forma inmediata, manteniendo el acceso hasta que finalice el periodo en curso."
     },
   ];
 

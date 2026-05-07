@@ -2,14 +2,14 @@ import React, { useEffect, useMemo } from 'react';
 import { useParams, Navigate, Link } from 'react-router-dom';
 import { AUCTIONS } from '../data/auctions';
 import { DISCOVER_REPORTS } from '../data/discoverReports';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { ChevronRight, ShieldCheck, Calculator, ArrowRight, MapPin, Building2 } from 'lucide-react';
 import { AuctionCard } from './AuctionCard';
 import { ShareButtons } from './ShareButtons';
 import Header from './Header';
 import Footer from './Footer';
 import TelegramCTA from './TelegramCTA';
-import { normalizeCity, normalizePropertyType } from '../utils/auctionNormalizer';
+import { normalizeCity, normalizePropertyType, normalizeProvince } from '../utils/auctionNormalizer';
 
 const getRelativeTime = (dateString: string) => {
   const date = new Date(dateString);
@@ -68,6 +68,18 @@ const DiscoverReportArticle: React.FC = () => {
       .filter(item => item.data !== undefined);
   }, [report]);
 
+  const uniqueProvinces = useMemo(() => {
+    if (reportAuctions.length === 0) return [];
+    const provinces = reportAuctions.map(item => item.data.province || item.data.city || '').filter(Boolean).map(normalizeProvince);
+    return Array.from(new Set(provinces)).sort();
+  }, [reportAuctions]);
+
+  const cleanDescription = useMemo(() => {
+    if (!report) return "";
+    const text = report.intro.replace(/[\n\r]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+    return text.length > 155 ? text.substring(0, 152).trim() + '...' : text;
+  }, [report]);
+
   const jsonLd = useMemo(() => {
     if (!report) return null;
     
@@ -75,13 +87,14 @@ const DiscoverReportArticle: React.FC = () => {
       "@context": "https://schema.org",
       "@type": "NewsArticle",
       "headline": report.title,
-      "description": report.intro,
+      "description": cleanDescription,
       "image": [report.image],
       "datePublished": new Date(report.publishDate).toISOString(),
       "dateModified": new Date(report.publishDate).toISOString(),
       "author": [{
-        "@type": "Organization",
-        "name": "Equipo Activos Off-Market",
+        "@type": "Person",
+        "name": "José Carlos de la Peña",
+        "jobTitle": "Analista de subastas BOE",
         "url": "https://activosoffmarket.es"
       }],
       "publisher": {
@@ -114,16 +127,16 @@ const DiscoverReportArticle: React.FC = () => {
     }
 
     return baseJsonLd;
-  }, [report, reportAuctions]);
+  }, [report, reportAuctions, cleanDescription]);
 
   useEffect(() => {
     if (report) {
       document.title = `${report.title} | Activos Off-Market`;
       const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) metaDesc.setAttribute('content', report.intro.substring(0, 155) + '...');
+      if (metaDesc) metaDesc.setAttribute('content', cleanDescription);
       window.scrollTo(0, 0);
     }
-  }, [report]);
+  }, [report, cleanDescription]);
 
   if (!report) return <Navigate to={ROUTES.HOME} replace />;
 
@@ -160,23 +173,25 @@ const DiscoverReportArticle: React.FC = () => {
               {report.title}
             </h1>
 
+            {/* AUTOR EEAT */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 py-6 border-y border-slate-100">
-              <div className="flex items-center gap-4">
+              <div className="flex items-start gap-4">
                 <img 
-                  src="https://activosoffmarket.es/logo.png" 
-                  alt="Activos Off-Market" 
-                  className="w-12 h-12 rounded-full bg-slate-900 object-cover border-2 border-white shadow-sm"
+                  src="https://ui-avatars.com/api/?name=JC+P&background=0f172a&color=fff" 
+                  alt="José Carlos de la Peña" 
+                  className="w-12 h-12 rounded-full bg-slate-900 object-cover border-2 border-white shadow-sm flex-shrink-0"
                   width="48"
                   height="48"
                   loading="lazy"
                   decoding="async"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = 'https://ui-avatars.com/api/?name=Activos+OffMarket&background=0f172a&color=fff';
-                  }}
                 />
                 <div>
-                  <div className="font-bold text-slate-900">Equipo Activos Off-Market</div>
-                  <div className="text-sm text-slate-500 flex items-center gap-2 flex-wrap">
+                  <div className="font-bold text-slate-900">José Carlos de la Peña</div>
+                  <div className="text-xs font-bold text-brand-600 mb-1 tracking-wide uppercase">Analista de subastas & EEAT</div>
+                  <div className="text-sm text-slate-600 mb-2 max-w-xl leading-snug">
+                    Consultor especialista en viabilidad jurídica y valoración de ejecuciones hipotecarias.
+                  </div>
+                  <div className="text-xs text-slate-500 flex items-center gap-2 flex-wrap">
                     <time dateTime={report.publishDate} className="font-medium text-emerald-700">
                       {getRelativeTime(report.publishDate)}
                     </time>
@@ -248,7 +263,7 @@ const DiscoverReportArticle: React.FC = () => {
               </div>
             )}
 
-            <div className="prose prose-lg prose-slate max-w-none">
+            <div className="prose prose-lg prose-slate text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
               {report.intro.split('\n').filter(p => p.trim() !== '').map((paragraph, idx) => (
                 <p key={idx} className="text-lg md:text-xl leading-loose text-slate-700 mb-8">
                   {highlightText(paragraph)}
@@ -345,7 +360,7 @@ const DiscoverReportArticle: React.FC = () => {
                   <h2 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-6 leading-tight">
                     {section.subtitle}
                   </h2>
-                  <div className="prose prose-lg prose-slate max-w-none mb-10">
+                  <div className="prose prose-lg prose-slate mb-10 text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
                     {section.content.split('\n').filter(p => p.trim() !== '').map((paragraph, pIdx) => (
                       <p key={pIdx} className="text-lg md:text-xl leading-loose text-slate-700 mb-8">
                         {highlightText(paragraph)}
@@ -415,7 +430,32 @@ const DiscoverReportArticle: React.FC = () => {
             </div>
           )}
 
-          <div className="prose prose-lg prose-slate max-w-none mb-16 bg-slate-50 p-8 md:p-12 rounded-3xl border border-slate-200">
+          {uniqueProvinces.length > 0 && (
+            <div className="my-12 bg-white border-2 border-brand-100 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+              <div>
+                <h3 className="text-xl font-bold text-brand-900 mb-2 mt-0">¿Buscas oportunidades activas actualmente?</h3>
+                <p className="text-slate-600 m-0 text-sm md:text-base">
+                  Nuestro radar monitoriza a diario las nuevas oportunidades del BOE y subastas extrajudiciales en toda España.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3 shrink-0">
+                {uniqueProvinces.map(prov => {
+                  const pSlug = prov.toLowerCase().replace(/\s+/g, '-');
+                  return (
+                    <Link
+                      key={prov}
+                      to={`/noticias-subastas/provincia/${pSlug}`}
+                      className="bg-brand-50 hover:bg-brand-100 text-brand-700 font-bold px-5 py-2.5 rounded-xl border border-brand-200 transition-colors whitespace-nowrap text-sm flex items-center gap-2 no-underline"
+                    >
+                      <MapPin size={16} /> Ver subastas en {prov}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="prose prose-lg prose-slate mb-16 bg-slate-50 p-8 md:p-12 rounded-3xl border border-slate-200 text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
             <h3 className="text-2xl md:text-3xl font-serif font-bold text-slate-900 mb-8 mt-0">Conclusión</h3>
             {report.conclusion.split('\n').filter(p => p.trim() !== '').map((paragraph, idx) => (
               <p key={idx} className="text-slate-700 leading-loose text-lg md:text-xl mb-8">

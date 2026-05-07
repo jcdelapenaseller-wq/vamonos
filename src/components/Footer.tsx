@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Gavel, Send, Calculator, CheckSquare, Crown, MapPin, Briefcase, Tag, Target, User, ArrowRight, BookOpen, X, CheckCircle, Calendar, Search, TrendingUp } from 'lucide-react';
-import { ROUTES } from '../constants/routes';
+import { CheckCircle,  Gavel, Send, Calculator, CheckSquare, Crown, MapPin, Briefcase, Tag, Target, User, ArrowRight, BookOpen, X, Calendar, Search, TrendingUp  } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
 
 const Footer: React.FC = () => {
   const navigate = useNavigate();
@@ -80,48 +80,12 @@ const Footer: React.FC = () => {
 
           {/* Col 2: Herramientas & Recursos (Span 3) */}
           <div className="lg:col-span-3">
-            <h4 className="text-white font-bold text-base mb-6 flex items-center gap-2">
-                Herramientas
-            </h4>
-            <ul className="space-y-4 text-sm mb-8">
-              <li>
-                <Link 
-                  to={ROUTES.ANALIZAR_SUBASTA} 
-                  className="flex items-center gap-2 hover:text-white transition-colors group"
-                >
-                  <Search size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span className="font-medium">Analizar Subasta</span>
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  to={ROUTES.CALCULATOR} 
-                  className="flex items-center gap-2 hover:text-white transition-colors group"
-                >
-                  <Calculator size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span className="font-medium">Calculadora de Rentabilidad</span>
-                </Link>
-              </li>
-              <li>
-                <button onClick={() => setIsChecklistModalOpen(true)} className="flex items-center gap-2 hover:text-white transition-colors group w-full text-left">
-                  <CheckSquare size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span>Checklist BOE</span>
-                </button>
-              </li>
-              <li>
-                <a href="https://sublaunch.com/activosoffmarket" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors group">
-                  <Crown size={16} className="text-yellow-600 group-hover:text-yellow-400 transition-colors" />
-                  <span className="text-yellow-500/90 group-hover:text-yellow-400 font-medium">Canal Premium</span>
-                </a>
-              </li>
-            </ul>
-
-            <h4 className="text-slate-300 font-bold text-sm mb-4">Recursos</h4>
+            <h4 className="text-white font-bold text-base mb-6">Recursos</h4>
             <ul className="space-y-3 text-sm">
               <li><Link to={ROUTES.REPORTS_INDEX} className="hover:text-white transition-colors">Reportajes y Análisis</Link></li>
               <li><Link to={ROUTES.NOTICIAS_SUBASTAS_INDEX} className="hover:text-white transition-colors">Noticias de subastas</Link></li>
               <li><Link to={ROUTES.GLOSSARY} className="hover:text-white transition-colors">Glosario de términos</Link></li>
-              <li><Link to={ROUTES.HISTORICAL_AUCTIONS} className="hover:text-white transition-colors">Histórico de Subastas</Link></li>
+              <li><Link to="/equipo" className="hover:text-white transition-colors">Quiénes somos</Link></li>
             </ul>
           </div>
 
@@ -174,11 +138,8 @@ const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-3 text-sm">
               <li><Link to={ROUTES.GUIDE_PILLAR} className="hover:text-white transition-colors">Subastas judiciales en España</Link></li>
-              <li><Link to={ROUTES.RULE_70} className="hover:text-white transition-colors">Regla del 70%</Link></li>
-              <li><Link to={ROUTES.DEPOSIT} className="hover:text-white transition-colors">Depósito del 5%</Link></li>
               <li><Link to={ROUTES.ANALYSIS} className="hover:text-white transition-colors">Cómo analizar una subasta</Link></li>
               <li><Link to={ROUTES.CHARGES} className="hover:text-white transition-colors">Cargas en subasta judicial</Link></li>
-              <li><Link to={ROUTES.OCCUPIED} className="hover:text-white transition-colors">Vivienda ocupada en subasta</Link></li>
             </ul>
           </div>
 
@@ -194,16 +155,16 @@ const Footer: React.FC = () => {
                   className="flex items-center gap-2 hover:text-white transition-colors group"
                 >
                   <Search size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span>Análisis de cargas</span>
+                  <span>Analizar Cargas</span>
                 </Link>
               </li>
               <li>
                 <Link 
-                  to={ROUTES.ANALISIS_INVERSION} 
+                  to={ROUTES.CALCULATOR} 
                   className="flex items-center gap-2 hover:text-white transition-colors group"
                 >
-                  <TrendingUp size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span>Análisis inversión</span>
+                  <Calculator size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
+                  <span>Calculadora PRO</span>
                 </Link>
               </li>
               <li>
@@ -216,31 +177,19 @@ const Footer: React.FC = () => {
                 </Link>
               </li>
               <li>
-                <a href="#como-te-ayudo" onClick={(e) => handleNavClick(e, '#como-te-ayudo')} className="flex items-center gap-2 hover:text-white transition-colors group">
-                  <Briefcase size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span>Servicios</span>
-                </a>
-              </li>
-              <li>
-                <a href="#precios" onClick={(e) => handleNavClick(e, '#precios')} className="flex items-center gap-2 hover:text-white transition-colors group">
-                  <Tag size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span>Precios</span>
-                </a>
-              </li>
-              <li>
-                <a href="#metodo" onClick={(e) => handleNavClick(e, '#metodo')} className="flex items-center gap-2 hover:text-white transition-colors group">
-                  <Target size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span>Método</span>
-                </a>
-              </li>
-              <li>
                 <Link 
-                  to={ROUTES.ABOUT} 
+                  to="/pro" 
                   className="flex items-center gap-2 hover:text-white transition-colors group"
                 >
-                  <User size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
-                  <span>Equipo</span>
+                  <Crown size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
+                  <span>Planes</span>
                 </Link>
+              </li>
+              <li>
+                <a href="https://t.me/activosoffmarket" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors group">
+                  <Send size={16} className="text-slate-600 group-hover:text-brand-400 transition-colors" />
+                  <span>Alertas Telegram</span>
+                </a>
               </li>
             </ul>
           </div>
@@ -259,15 +208,6 @@ const Footer: React.FC = () => {
               <Calculator size={14} className="text-brand-500" />
               Calculadora PRO
             </Link>
-            <a 
-              href="https://sublaunch.com/activosoffmarket"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 rounded-full bg-slate-900 border border-slate-800 hover:border-yellow-500/50 hover:bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center gap-2"
-            >
-              <Crown size={14} className="text-yellow-500" />
-              Canal Premium
-            </a>
             <Link 
               to={ROUTES.RECENT_AUCTIONS}
               className="px-4 py-2 rounded-full bg-slate-900 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-800 text-slate-300 hover:text-white transition-all flex items-center gap-2"
@@ -286,6 +226,7 @@ const Footer: React.FC = () => {
               <Link to={ROUTES.PRIVACY} className="hover:text-slate-400 transition-colors">Privacidad</Link>
               <Link to={ROUTES.COOKIES} className="hover:text-slate-400 transition-colors">Cookies</Link>
               <Link to={ROUTES.TERMS} className="hover:text-slate-400 transition-colors">Términos</Link>
+              <Link to={ROUTES.CONTACT} className="hover:text-slate-400 transition-colors">Contacto</Link>
               <a href="https://t.me/activosoffmarket" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors flex items-center gap-1.5 ml-2">
                 <Send size={12} /> Telegram
               </a>

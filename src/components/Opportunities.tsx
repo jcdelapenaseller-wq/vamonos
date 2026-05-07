@@ -1,5 +1,7 @@
 import React from 'react';
 import { MapPin, TrendingUp, AlertTriangle, ArrowRight, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '@/constants/routes';
 
 const Opportunities: React.FC = () => {
   return (
@@ -106,18 +108,16 @@ const Opportunities: React.FC = () => {
                 <div className="mb-8 bg-brand-800 p-6 rounded-full border border-brand-600 shadow-inner group-hover:scale-110 transition-transform duration-300">
                     <ArrowRight size={40} className="text-white" />
                 </div>
-                <h3 className="text-3xl font-serif font-bold mb-6 text-white">¿Quieres ver las activas de esta semana?</h3>
+                <h3 className="text-3xl font-serif font-bold mb-6 text-white">¿Quieres ver las nuevas de esta semana?</h3>
                 <p className="text-brand-100 mb-10 leading-relaxed text-lg">
-                    Publico nuevas oportunidades filtradas cada semana en el canal gratuito y análisis profundos en el Premium.
+                    Accede a oportunidades con datos clave, riesgos y valoración antes de decidir.
                 </p>
-                <a 
-                    href="https://t.me/activosoffmarket" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-4 bg-white text-brand-900 font-bold text-lg rounded-xl hover:bg-brand-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+                <Link 
+                    to={ROUTES.RECENT_AUCTIONS}
+                    className="flex justify-center items-center w-full py-4 bg-white text-brand-900 font-bold text-lg rounded-xl hover:bg-brand-50 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-1"
                 >
-                    Ver alertas en el canal
-                </a>
+                    Ver Oportunidades
+                </Link>
                 <p className="mt-6 text-xs text-brand-400 opacity-60">
                     *Resultados pasados no garantizan rentabilidades futuras.
                 </p>

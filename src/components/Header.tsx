@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Gavel, Sparkles, ChevronDown, Calculator, FileText, Calendar, ExternalLink, User, LogOut, Star, Search, Bell, ArrowRight } from 'lucide-react';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { useUser } from '../contexts/UserContext';
 import { alertService } from '../services/alertService';
 
@@ -98,8 +98,8 @@ const Header: React.FC = () => {
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-4 lg:gap-6 whitespace-nowrap">
           <Link 
-            to={ROUTES.GUIDE_PILLAR} 
-            className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.GUIDE_PILLAR ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
+            to={ROUTES.GUIDE_HUB} 
+            className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.GUIDE_HUB ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
           >
             Guía BOE
           </Link>
@@ -109,12 +109,23 @@ const Header: React.FC = () => {
           >
             Recientes
           </Link>
-          <Link 
-            to={ROUTES.VEHICLE_AUCTIONS} 
-            className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.VEHICLE_AUCTIONS ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
-          >
-            Vehículos
-          </Link>
+
+          {isLogged && (
+            <>
+              <Link 
+                to={ROUTES.MIS_GUARDADOS} 
+                className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.MIS_GUARDADOS ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
+              >
+                Favoritos
+              </Link>
+              <Link 
+                to={ROUTES.ALERTAS} 
+                className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === ROUTES.ALERTAS ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
+              >
+                Alertas
+              </Link>
+            </>
+          )}
 
           {/* Tools Dropdown */}
           <div className="relative group">
@@ -157,14 +168,6 @@ const Header: React.FC = () => {
             </div>
           </div>
           
-          <Link 
-            to={ROUTES.ANALIZAR_SUBASTA} 
-            className="flex items-center gap-2 px-2 py-1 rounded-md text-slate-800 hover:text-brand-700 hover:bg-brand-50 text-sm lg:text-base font-medium transition-all whitespace-nowrap"
-          >
-            <Search size={18} className="text-brand-600" />
-            Analizar
-          </Link>
-
           <Link 
             to="/pro" 
             className={`text-sm lg:text-base font-medium transition-colors ${location.pathname === '/pro' ? 'text-brand-700 font-bold' : 'text-slate-600 hover:text-brand-700'}`}
@@ -389,7 +392,7 @@ const Header: React.FC = () => {
           <div className="flex flex-col gap-1">
             <p className="px-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Navegación</p>
             <Link 
-              to={ROUTES.GUIDE_PILLAR} 
+              to={ROUTES.GUIDE_HUB} 
               className="text-lg font-bold text-slate-900 py-3 px-2 hover:bg-slate-50 rounded-lg transition-colors"
               onClick={() => {
                 setIsMobileMenuOpen(false);
@@ -407,16 +410,6 @@ const Header: React.FC = () => {
               }}
             >
               Subastas Recientes
-            </Link>
-            <Link 
-              to={ROUTES.VEHICLE_AUCTIONS} 
-              className="text-lg font-bold text-slate-900 py-3 px-2 hover:bg-slate-50 rounded-lg transition-colors"
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                window.scrollTo(0, 0);
-              }}
-            >
-              Subastas de Vehículos
             </Link>
 
             <div className="border-b border-slate-100 pb-2 mb-2">
@@ -469,17 +462,7 @@ const Header: React.FC = () => {
               )}
             </div>
             
-            <Link 
-              to={ROUTES.ANALIZAR_SUBASTA}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="text-lg font-bold text-slate-700 py-4 px-4 bg-slate-50 hover:bg-slate-100 rounded-xl flex items-center justify-between border border-slate-200 transition-colors mb-4"
-            >
-              <div className="flex items-center gap-3">
-                <Search size={20} className="text-brand-600" />
-                Analizar Subasta
-              </div>
-              <ArrowRight size={20} className="text-slate-400" />
-            </Link>
+
           </div>
 
           {/* Account Section (Logged In) */}

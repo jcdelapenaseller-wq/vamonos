@@ -2,62 +2,38 @@ import React, { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Star, ArrowRight, TrendingUp, MapPin, Clock, Home, AlertTriangle, Bell, BellRing } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
-import { db } from '../lib/firebase';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { AUCTIONS } from '../data/auctions';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { normalizePropertyType, normalizeCity, formatAddress } from '../utils/auctionNormalizer';
 import { getAuctionType } from '../utils/auctionHelpers';
 
 const SavedAuctionsPage: React.FC = () => {
   const { user, isLogged, isLoading } = useUser();
+  const { favoritesMap, isLoaded } = useFavorites();
   const [savedAuctions, setSavedAuctions] = useState<any[]>([]);
-  const [isFetching, setIsFetching] = useState(true);
   const [isAlertsActive, setIsAlertsActive] = useState(false);
 
   useEffect(() => {
-    const fetchSavedAuctions = async () => {
-      if (!user || !db) {
-        setIsFetching(false);
-        return;
-      }
-
-      try {
-        const q = query(
-          collection(db, 'favorites'),
-          where('userId', '==', user.id),
-          orderBy('createdAt', 'desc')
-        );
-        const querySnapshot = await getDocs(q);
-        
-        const auctions = querySnapshot.docs
-          .map(doc => {
-            const data = doc.data();
-            const auctionData = AUCTIONS[data.auctionId];
-            if (!auctionData) return null;
-            return {
-              id: doc.id,
-              auctionId: data.auctionId,
-              savedAt: data.createdAt?.toDate() || new Date(),
-              ...auctionData
-            };
-          })
-          .filter(Boolean);
-
-        setSavedAuctions(auctions);
-      } catch (error) {
-        console.error("Error fetching saved auctions:", error);
-      } finally {
-        setIsFetching(false);
-      }
-    };
-
-    if (!isLoading) {
-      fetchSavedAuctions();
+    if (!user) return;
+    if (isLoaded) {
+      const auctions = Object.keys(favoritesMap)
+        .map(auctionId => {
+          const auctionData = AUCTIONS[auctionId];
+          if (!auctionData) return null;
+          return {
+            id: auctionId,
+            auctionId: auctionId,
+            savedAt: new Date(),
+            ...auctionData
+          };
+        })
+        .filter(Boolean);
+      setSavedAuctions(auctions);
     }
-  }, [user, isLoading]);
+  }, [user, favoritesMap, isLoaded]);
 
-  if (isLoading) {
+  if (isLoading || !isLoaded) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-12 h-12 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin"></div>
@@ -111,7 +87,7 @@ const SavedAuctionsPage: React.FC = () => {
         </button>
       </div>
 
-      {isFetching ? (
+      {!isLoaded ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
             <div key={i} className="bg-white rounded-2xl border border-slate-200 h-64 animate-pulse"></div>

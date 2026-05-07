@@ -10,7 +10,7 @@ import { generateEditorialArticle, shouldGenerateDiscoverArticle } from '../util
 import TelegramCTA from './TelegramCTA';
 import DiscoverSingleAuctionArticle from './DiscoverSingleAuctionArticle';
 import { DISCOVER_REPORTS } from '../data/discoverReports';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { BookOpen } from 'lucide-react';
 
 import { getAllowedProvincesForToday } from '../utils/discoverLimits';

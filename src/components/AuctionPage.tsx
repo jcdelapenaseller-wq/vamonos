@@ -1,19 +1,20 @@
-import React, { useEffect, useState, useMemo, useContext } from 'react';
+import React, { useEffect, useState, useMemo, useContext, useRef } from 'react';
 import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { 
+import { CheckCircle,  
   Calculator, Gavel, TrendingUp, Search, ChevronRight, 
-  MapPin, Home, DollarSign, AlertTriangle, CheckCircle, 
+  MapPin, Home, DollarSign, AlertTriangle, 
   Info, ArrowRight, FileText, Scale, ShieldCheck, AlertOctagon,
   Clock, Calendar, User, Twitter, Linkedin, Mail, MessageCircle,
   ExternalLink, AlertCircle, Lock, ArrowUpRight, Heart, Share2,
-  Bell, StickyNote, X, Car, Train, Navigation, Shield, LineChart, Check, Zap, HelpCircle, ChevronDown
-} from 'lucide-react';
+  Bell, StickyNote, X, Car, Train, Navigation, Shield, LineChart, Check, Zap, HelpCircle, ChevronDown, Loader2
+ } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Helmet } from 'react-helmet';
 import { AUCTIONS } from '../data/auctions';
 import { AUCTION_RESULTS } from '../data/auctionResults';
-import { getFilteredAuctions, isAuctionFinished, getAuctionType, getProcedureType } from '../utils/auctionHelpers';
-import { ROUTES } from '../constants/routes';
+import { getFilteredAuctions, isAuctionFinished, getAuctionType, getProcedureType, extractFloorFromAddress } from '../utils/auctionHelpers';
+import { ROUTES } from '@/constants/routes';
 import { normalizePropertyType, normalizeCity, normalizeLocationLabel, normalizeProvince, formatAddress } from '../utils/auctionNormalizer';
 import { trackConversion } from '../utils/tracking';
 import FinishedAuctionBanner from './FinishedAuctionBanner';
@@ -29,6 +30,7 @@ import Header from './Header';
 import Footer from './Footer';
 import AuctionCalculator from './AuctionCalculator';
 import { useUser, UserContext } from '../contexts/UserContext';
+import { useFavorites } from '../contexts/FavoritesContext';
 import { db, updateLastActiveAt } from '../lib/firebase';
 import { collection, query, where, getDocs, addDoc, deleteDoc, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getAuctionValuation, ValuationResult } from '../services/valuationService';
@@ -80,6 +82,19 @@ const LockedFeatureBlock: React.FC<LockedFeatureBlockProps> = ({
   );
 };
 
+/**
+ * Helper to slugify text for URLs
+ */
+const slugifyText = (text: string) => {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+};
+
 const AuctionPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
@@ -87,6 +102,7 @@ const AuctionPage: React.FC = () => {
   const [auction, setAuction] = useState<any>(null);
   const cleanSlug = slug ? decodeURIComponent(slug).replace(/\/$/, '').toLowerCase() : '';
   const { user, isLogged, requireLogin, plan, trackAuctionView } = useUser();
+  const { isFavorite: checkFavorite, toggleFavorite, favoritesCount, isLoaded: isFavoriteLoaded, isToggling: isTogglingFavorite } = useFavorites();
   const hasAccess = isLogged && (plan === 'basic' || plan === 'pro');
   const userContext = useContext(UserContext);
 
@@ -152,15 +168,18 @@ const AuctionPage: React.FC = () => {
   }, [auctionId]);
   const [isGenerating, setIsGenerating] = React.useState(false);
   const [analysisResult, setAnalysisResult] = React.useState<any>(null);
+  const hasTriggeredAnalysisRef = useRef(false);
 
   // Load analysis result from sessionStorage if available
   useEffect(() => {
     if (!auction?.boeId) return;
     try {
+      /*
       const savedResult = sessionStorage.getItem(`analysisResult_${auction.boeId}`);
       if (savedResult && !analysisResult) {
         setAnalysisResult(JSON.parse(savedResult));
       }
+      */
     } catch (e) {
       console.warn("Error loading analysis result from sessionStorage:", e);
     }
@@ -168,10 +187,17 @@ const AuctionPage: React.FC = () => {
 
   const formatFloor = (floor?: string): string => {
     if (!floor) return "—";
-    const raw = floor.trim().toUpperCase();
+    const raw = floor.trim();
+    
+    // Si ya parece formateado (contiene º, ª, o palabras clave), lo devolvemos tal cual
+    if (raw.includes('º') || raw.includes('ª') || /PLANTA|BAJO|ATICO|SOTANO|ENTREPLANTA|ENTRESUELO/i.test(raw)) {
+      return raw;
+    }
+
+    const upper = raw.toUpperCase();
     
     // Si tiene espacios (ej: "02 01"), nos quedamos con la primera parte
-    const firstPart = raw.split(/\s+/)[0];
+    const firstPart = upper.split(/\s+/)[0];
 
     const mapping: Record<string, string> = {
       "00": "Bajo",
@@ -200,7 +226,9 @@ const AuctionPage: React.FC = () => {
   useEffect(() => {
     try {
       const params = new URLSearchParams(window.location.search);
-      const isUnlockedParam = params.get('analysis') === 'unlocked';
+      const isUnlockedParam =
+        params.get('analysis') === 'unlocked' ||
+        params.get('session_id') === 'test';
       setIsUnlocked(((analysisPaid || cargasPaid) && !!auction) || isUnlockedParam);
     } catch (e) {
       console.error("Error checking analysis param:", e);
@@ -214,10 +242,8 @@ const AuctionPage: React.FC = () => {
   const [showCalculator, setShowCalculator] = useState(false);
   
   // Favorites State
-  const [isFavorite, setIsFavorite] = useState(false);
-  const [favoriteId, setFavoriteId] = useState<string | null>(null);
-  const [favoritesCount, setFavoritesCount] = useState<number>(0);
-  const [isTogglingFavorite, setIsTogglingFavorite] = useState(false);
+  const isFavorite = cleanSlug ? checkFavorite(cleanSlug) : false;
+  
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showFullAnalysisModal, setShowFullAnalysisModal] = useState(false);
   const [softGateOrigin, setSoftGateOrigin] = useState<'favorite' | 'alert' | 'note' | 'limit_favorite' | 'limit_alert' | 'valuation' | 'boe' | 'save' | 'limit_analysis' | 'streetview' | 'catastro' | 'comparativa' | null>(null);
@@ -258,10 +284,12 @@ const AuctionPage: React.FC = () => {
   }, [note, cleanSlug]);
 
   const generateAnalysis = async (type: string, sessionId: string) => {
+    console.log("[generateAnalysis] 1. INICIO - type:", type, "sessionId:", sessionId);
     setIsGenerating(true);
     setShowPaymentModal(false);
     setShowPremiumModal(false);
     try {
+      console.log("[generateAnalysis] 2. Ejecutando fetch a /api/generate-analysis...");
       const response = await fetch(`/api/generate-analysis?session_id=${sessionId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -270,24 +298,48 @@ const AuctionPage: React.FC = () => {
           type: type
         })
       });
+      console.log("[generateAnalysis] 3. Fetch completado - status:", response.status, "ok:", response.ok);
 
       if (response.status === 403) {
         toast.error("El pago no pudo validarse. Contacta soporte.");
-        setIsGenerating(false);
+        console.log("[generateAnalysis] 3b. Abortando por 403 (return prematuro)");
         return;
       }
 
-      const data = await response.json();
+      console.log("[generateAnalysis] 4. Ejecutando response.json()...");
+      let data;
+      try {
+        data = await response.json();
+        console.log("[generateAnalysis] 5. JSON parseado correctamente data.ok:", data?.ok);
+      } catch (e) {
+        console.error("JSON PARSE ERROR", e);
+        data = {
+          error: true,
+          recomendacion: "No se ha podido procesar el informe automáticamente. Puedes solicitar revisión manual."
+        };
+      }
       
-      if (data.ok) {
-        toast.success("Pago confirmado. Generando informe...");
-        setPostPaymentState({ active: true, type: type });
+      if (data?.ok) {
+        const isTestMode = sessionId === "test";
+        if (!isTestMode) {
+          toast.success("Pago confirmado. Generando informe...");
+          setPostPaymentState({ active: true, type: type });
+        }
       } else {
-        setAnalysisResult(data);
-        setIsGenerating(false);
+        if (!data || data.error) {
+          setAnalysisResult({
+            error: true,
+            cargas: [],
+            recomendacion: data?.recomendacion || "Error en el análisis"
+          });
+        } else {
+          setAnalysisResult(data);
+        }
       }
     } catch (error) {
-      console.error('Error generating analysis:', error);
+      console.error('[generateAnalysis] ERROR capturado:', error);
+    } finally {
+      console.log("[generateAnalysis] 6. Ejecutando finally -> setIsGenerating(false)");
       setIsGenerating(false);
     }
   };
@@ -297,11 +349,41 @@ const AuctionPage: React.FC = () => {
 
     try {
       const params = new URLSearchParams(window.location.search);
+      const isTestMode = params.get("session_id") === "test";
       const analysisParam = params.get('analysis');
       const cargasParam = params.get('cargas');
       const sessionIdParam = params.get('session_id');
 
-      if (analysisParam && sessionIdParam && !isGenerating && !analysisResult) {
+      if (isTestMode) {
+        console.log("[TEST] forcing unlocked state");
+        setAnalysisPaid(true);
+        setCargasPaid(true);
+        setShowPaymentModal(false);
+        setShowPremiumModal(false);
+      }
+
+      console.log("[DIAG] === useEffect start ===");
+      console.log("[DIAG] Vars:", {
+        analysisParam, 
+        sessionIdParam, 
+        isTestMode, 
+        analysisPaid, 
+        cargasPaid, 
+        isGenerating, 
+        analysisResult: !!analysisResult 
+      });
+
+      console.log("[DIAG] BEFORE IF 1 (Test Mode)");
+      if (isTestMode && !hasTriggeredAnalysisRef.current) {
+        hasTriggeredAnalysisRef.current = true;
+        console.log("[DIAG] INSIDE IF 1 (Test Mode)");
+        console.log("TEST MODE: forcing analysis");
+        generateAnalysis("completo", "test");
+      }
+
+      console.log("[DIAG] BEFORE IF 2 (Generate)");
+      if (!isTestMode && analysisParam && sessionIdParam && !isGenerating && !analysisResult) {
+        console.log("[DIAG] INSIDE IF 2 (Generate)");
         generateAnalysis(analysisParam, sessionIdParam);
       }
       
@@ -309,7 +391,9 @@ const AuctionPage: React.FC = () => {
       let shouldScrollToAnalysis = false;
       let shouldScrollToCargas = false;
 
+      console.log("[DIAG] BEFORE IF 3 (Unlock Analysis)");
       if (analysisParam === 'unlocked' || analysisParam === 'paid') {
+        console.log("[DIAG] INSIDE IF 3 (Unlock Analysis)");
         sessionStorage.setItem(`analysisPaid_${auctionId}`, 'true');
         sessionStorage.setItem(`analysisPaid_${auctionId}_time`, Date.now().toString());
         setAnalysisPaid(true);
@@ -323,7 +407,9 @@ const AuctionPage: React.FC = () => {
         window.history.replaceState({}, document.title, newUrl);
       }
 
+      console.log("[DIAG] BEFORE IF 4 (Unlock Cargas)");
       if (cargasParam === 'unlocked' || cargasParam === 'paid') {
+        console.log("[DIAG] INSIDE IF 4 (Unlock Cargas)");
         sessionStorage.setItem(`cargasPaid_${auctionId}`, 'true');
         sessionStorage.setItem(`cargasPaid_${auctionId}_time`, Date.now().toString());
         setCargasPaid(true);
@@ -336,7 +422,9 @@ const AuctionPage: React.FC = () => {
         window.history.replaceState({}, document.title, newUrl);
       }
 
+      console.log("[DIAG] BEFORE IF 5 (Open Boe)");
       if (params.get('openBoe') === 'true' && user?.id && auction) {
+        console.log("[DIAG] INSIDE IF 5 (Open Boe)");
         const boeUrl = auction.boeUrl || `https://subastas.boe.es/detalle_subasta.php?idSub=${auction.boeId}`;
         window.open(boeUrl, '_blank');
         
@@ -345,7 +433,9 @@ const AuctionPage: React.FC = () => {
         window.history.replaceState({}, document.title, newUrl);
       }
 
+      console.log("[DIAG] BEFORE IF 6 (Scroll)");
       if (shouldScrollToAnalysis || analysisPaid || shouldScrollToCargas || cargasPaid) {
+        console.log("[DIAG] INSIDE IF 6 (Scroll)");
         setTimeout(() => {
           const element = document.getElementById('analisis-tecnico');
           if (element) {
@@ -356,7 +446,7 @@ const AuctionPage: React.FC = () => {
     } catch (e) {
       console.error("Error handling analysis unlock logic:", e);
     }
-  }, [auctionId, analysisPaid, cargasPaid, user, auction]);
+  }, [auctionId, analysisPaid, cargasPaid, user, auction, analysisResult, isGenerating]);
 
   const approximateCoords = useMemo(() => {
     if (!auction?.lat || !auction?.lng) return null;
@@ -477,24 +567,11 @@ const AuctionPage: React.FC = () => {
         const result = await getAuctionValuation(auction);
         setValuationResult(result);
       } catch (e) {
-        console.error('Error loading valuation:', e);
+        console.warn("Valuation failed, continuing", e);
       }
     };
     loadValuation();
   }, [auction?.boeId]);
-
-  // Handle noindex for valuation results from local fallbacks
-  useEffect(() => {
-    if (valuationResult && valuationResult.metadata.source === 'local_fallback') {
-      const meta = document.createElement('meta');
-      meta.name = 'robots';
-      meta.content = 'noindex, nofollow';
-      document.head.appendChild(meta);
-      return () => {
-        document.head.removeChild(meta);
-      };
-    }
-  }, [valuationResult]);
 
   const calculatePotencial = () => {
     if (!valuationResult || !auction || !auction?.appraisalValue) return 0;
@@ -636,44 +713,6 @@ const AuctionPage: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const checkFavoriteStatus = async () => {
-      if (!user?.id || !cleanSlug || !db) {
-        setIsFavorite(false);
-        setFavoriteId(null);
-        setFavoritesCount(0);
-        return;
-      }
-
-      try {
-        const q = query(
-          collection(db, 'favorites'),
-          where('userId', '==', user.id),
-          where('auctionId', '==', cleanSlug)
-        );
-        const querySnapshot = await getDocs(q);
-        
-        if (!querySnapshot.empty) {
-          setIsFavorite(true);
-          setFavoriteId(querySnapshot.docs[0].id);
-        } else {
-          setIsFavorite(false);
-          setFavoriteId(null);
-        }
-
-        if (plan === 'free') {
-          const countQuery = query(collection(db, 'favorites'), where('userId', '==', user.id));
-          const snapshot = await getDocs(countQuery);
-          setFavoritesCount(snapshot.size);
-        }
-      } catch (error) {
-        console.error("Error checking favorite status:", error);
-      }
-    };
-
-    checkFavoriteStatus();
-  }, [user?.id, cleanSlug]);
-
   const scrollToNotes = () => {
     if (!isLogged) {
       setSoftGateOrigin('note');
@@ -686,55 +725,22 @@ const AuctionPage: React.FC = () => {
   };
 
   const handleToggleFavorite = async () => {
-    if (!isLogged) {
-      setSoftGateOrigin('save');
+    if (!isFavoriteLoaded) return;
+
+    if (!cleanSlug || isTogglingFavorite) return;
+
+    if (!user?.id) {
+      navigate('/login', { state: { returnTo: window.location.pathname } });
       return;
     }
 
-    if (plan === 'free' && !isFavorite) {
-      setSoftGateOrigin('save');
-      return;
-    }
-
-    if (!user?.id || !cleanSlug || isTogglingFavorite || !db || !auction) return;
-
-    setIsTogglingFavorite(true);
-
-    try {
-      if (isFavorite && favoriteId) {
-        // Remove from favorites
-        await deleteDoc(doc(db, 'favorites', favoriteId));
-        setIsFavorite(false);
-        setFavoriteId(null);
-        setFavoritesCount(prev => Math.max(0, prev - 1));
-      } else {
-        // Check limits for free users
-        if (plan === 'free') {
-          const countQuery = query(collection(db, 'favorites'), where('userId', '==', user.id));
-          const snapshot = await getDocs(countQuery);
-          if (snapshot.size >= 3) {
-            setShowPremiumModal(true);
-            setIsTogglingFavorite(false);
-            return;
-          }
-        }
-
-        // Add to favorites
-        const docRef = await addDoc(collection(db, 'favorites'), {
-          userId: user.id,
-          auctionId: cleanSlug,
-          createdAt: serverTimestamp()
-        });
-        setIsFavorite(true);
-        setFavoriteId(docRef.id);
-        setFavoritesCount(prev => prev + 1);
-        toast.success('Guardado en favoritos', { duration: 2000 });
-      }
-    } catch (error) {
-      console.error("Error toggling favorite:", error);
-      // Revert optimistic update if failed (though we didn't do optimistic here to be safe)
-    } finally {
-      setIsTogglingFavorite(false);
+    const { success, limitReached } = await toggleFavorite(cleanSlug);
+    if (limitReached) {
+      setShowPremiumModal(true);
+    } else if (success && isFavorite) {
+      // It was favorite, now removed
+    } else if (success && !isFavorite) {
+      toast.success('Guardado en favoritos', { duration: 2000 });
     }
   };
 
@@ -793,6 +799,15 @@ const AuctionPage: React.FC = () => {
   };
 
   const isFinished = auction ? (auction.status === 'closed' || isAuctionFinished(auction.auctionDate)) : false;
+  const auctionResult = auction ? AUCTION_RESULTS[auction.boeId] : null;
+
+  const getAdjudicationPercentage = () => {
+    if (!auctionResult?.finalPrice || !auction?.appraisalValue) return null;
+    return Math.round((auctionResult.finalPrice / auction.appraisalValue) * 100);
+  };
+
+  const adjudicationPercentage = getAdjudicationPercentage();
+
   const isSuspended = auction?.status === 'suspended';
   const isUpcoming = auction?.status === 'upcoming';
   const isActive = auction ? (auction.status === 'active' || (!isFinished && !isSuspended && !isUpcoming)) : false;
@@ -804,6 +819,7 @@ const AuctionPage: React.FC = () => {
 
   const opportunityRatio = useMemo(() => {
     if (auction?.appraisalValue && auction?.claimedDebt !== undefined && auction?.claimedDebt !== null) {
+      if (auction.claimedDebt >= auction.appraisalValue) return null;
       const ratio = 1 - (auction.claimedDebt / (auction?.appraisalValue ?? 0));
       if (auction.claimedDebt === 0 || ratio > 0.85) {
         return null;
@@ -840,83 +856,12 @@ const AuctionPage: React.FC = () => {
         discountPart = ` con ${discount}% de descuento`;
       }
       
-      // Dynamic Title by Status
-      const isFinishedStatus = auction.status === 'closed' || isAuctionFinished(auction.auctionDate);
-      const isSuspendedStatus = auction.status === 'suspended';
-      
-      let title = '';
-      if (isFinishedStatus) {
-        const hasResult = !!(auction.auctionResultStatus || auction.finalPrice);
-        const suffix = hasResult ? 'Resultado subasta BOE' : 'Subasta BOE finalizada';
-        title = `${propertyType} subastado en ${cityName} | ${suffix}`;
-      } else if (isSuspendedStatus) {
-        title = `Subasta suspendida en ${cityName} | ${propertyType} en análisis BOE`;
-      } else {
-        // Active or Upcoming
-        title = `${propertyType} en subasta judicial en ${cityName} | Análisis BOE y cargas`;
-      }
-      
-      document.title = title;
-
-      // Meta Description - Dynamic by Status
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        const isFinishedStatus = auction?.status === 'closed' || isAuctionFinished(auction?.auctionDate);
-        const isSuspendedStatus = auction?.status === 'suspended';
-        
-        let desc = '';
-        const appraisalStr = auction?.appraisalValue ? `${(auction?.appraisalValue ?? 0).toLocaleString('es-ES')}€` : 'consultar';
-
-        if (isFinishedStatus) {
-          desc = `Subasta BOE finalizada en ${cityName}. ${propertyType} adjudicado. Consulta cargas, riesgos y resultado de esta subasta judicial.`;
-        } else if (isSuspendedStatus) {
-          desc = `Subasta judicial suspendida en ${cityName}. ${propertyType}. Analizamos cargas, riesgos legales y posibles escenarios del expediente.`;
-        } else {
-          // Active or Upcoming
-          desc = `Subasta judicial de ${propertyType} en ${cityName}. Tasación: ${appraisalStr}. Análisis técnico del expediente BOE: revisión de cargas, deudas y riesgos.`;
-        }
-        
-        metaDesc.setAttribute('content', desc);
-      }
-
-      // Canonical Link
-      let canonical = document.querySelector('link[rel="canonical"]');
-      if (!canonical) {
-        canonical = document.createElement('link');
-        canonical.setAttribute('rel', 'canonical');
-        document.head.appendChild(canonical);
-      }
-      canonical.setAttribute('href', `https://activosoffmarket.es/subasta/${cleanSlug}`);
-
-      // Social SEO - Open Graph
-      const ogTitle = `${propertyType} en subasta en ${cityName} | Análisis y cargas`;
-      const ogDesc = `Análisis técnico de subasta en ${cityName}. Tasación ${auction?.appraisalValue?.toLocaleString('es-ES')}€. Deuda ${auction?.claimedDebt?.toLocaleString('es-ES')}€. Riesgos y estrategia.`;
-      const ogImage = auction?.imageUrl || 'https://activosoffmarket.es/og-image-subastas.jpg';
-      const ogUrl = `https://activosoffmarket.es/subasta/${cleanSlug}`;
-
-      const setMetaTag = (property: string, content: string, attr: 'property' | 'name' = 'property') => {
-        let tag = document.querySelector(`meta[${attr}="${property}"]`);
-        if (!tag) {
-          tag = document.createElement('meta');
-          tag.setAttribute(attr, property);
-          document.head.appendChild(tag);
-        }
-        tag.setAttribute('content', content);
-      };
-
-      setMetaTag('og:title', ogTitle);
-      setMetaTag('og:description', ogDesc);
-      setMetaTag('og:type', 'article');
-      setMetaTag('og:url', ogUrl);
-      setMetaTag('og:image', ogImage);
-
-      // Social SEO - Twitter
-      setMetaTag('twitter:card', 'summary_large_image', 'name');
-      setMetaTag('twitter:title', ogTitle, 'name');
-      setMetaTag('twitter:description', ogDesc, 'name');
-      setMetaTag('twitter:image', ogImage, 'name');
+      // We use react-helmet instead of manual DOM manipulation for SEO.
+      // Keeping document.title update ONLY for tracking view purposes dynamically inside useEffect
+      const title = `${propertyType} en ${cityName}`;
+      trackAuctionView(cleanSlug, title);
     }
-  }, [cleanSlug, auction]);
+  }, [user?.id, auction, cleanSlug, trackAuctionView, propertyType, cityName]);
 
   const analysisInsights = useMemo(() => {
     if (!auction) return null;
@@ -1310,27 +1255,43 @@ const AuctionPage: React.FC = () => {
 
   const dynamicIntro = useMemo(() => {
     const ratio = opportunityRatio || 0;
-    const phrases = [
-      `Esta subasta de ${propertyType.toLowerCase()} en ${cityName} representa una oportunidad estratégica con un margen del ${Math.round(ratio * 100)}% respecto a su valor de tasación.`,
-      `Oportunidad detectada en ${cityName}: ${propertyType} con un descuento del ${Math.round(ratio * 100)}% sobre el valor oficial. Ideal para inversores que buscan rentabilidad inmediata.`,
-      `Adquisición preferente de ${propertyType.toLowerCase()} en ${cityName}. El activo cuenta con un valor de mercado muy superior al precio de salida, lo que garantiza un colchón de seguridad para el adjudicatario.`
+    const isHighDiscount = ratio >= 0.1;
+    
+    const basePhrases = isHighDiscount ? [
+      `Esta subasta de ${propertyType.toLowerCase()} en ${cityName} destaca por su margen del ${Math.round(ratio * 100)}% frente a la tasación oficial.`,
+      `Margen de seguridad detectado: este activo en ${cityName} sale a subasta con un ${Math.round(ratio * 100)}% de descuento sobre el valor técnico.`,
+      `Oportunidad técnica en ${cityName}. Analizamos este ${propertyType.toLowerCase()} que presenta un descuento del ${Math.round(ratio * 100)}% respecto al valor de subasta.`,
+      `Inversión en ${auction?.province || ''}: este activo ofrece un colchón del ${Math.round(ratio * 100)}% que minimiza el riesgo operativo en la adjudicación.`
+    ] : [
+      `Localización estratégica: este ${propertyType.toLowerCase()} en ${cityName} se sitúa en una de las zonas con mayor demanda de ${auction?.province || ''}.`,
+      `Activo en ${cityName} bajo escrutinio. La tipología de este ${propertyType.toLowerCase()} lo convierte en una pieza clave para carteras patrimonialistas.`,
+      `Análisis de activo en ${auction?.province || ''}. Este expediente en ${cityName} requiere una revisión exhaustiva de cargas por su ubicación y características.`,
+      `Ficha técnica de ${propertyType.toLowerCase()} en ${cityName}. Una oportunidad para adquirir metros cuadrados por debajo del valor medio de mercado de la zona.`
     ];
+
     const fomoPhrases = [
-      " Las subastas en esta zona suelen recibir un alto volumen de pujas en las últimas 48 horas.",
-      " Activos con este nivel de descuento en la provincia de " + (auction?.province || '') + " son escasos y de alta rotación.",
-      " La fecha de cierre se aproxima y el interés por este expediente ha crecido significativamente esta semana."
+      `La presión compradora en ${cityName} suele intensificarse al cierre de los expedientes judiciales.`,
+      `Historial de adjudicaciones en ${auction?.province || ''} sugiere que activos similares atraen a múltiples licitadores profesionales.`,
+      `La escasez de oferta de ${propertyType.toLowerCase()} en esta área de ${cityName} eleva el interés preventivo de esta subasta.`,
+      `Detectamos una monitorización inusual de este activo, lo que anticipa una fase competitiva de pujas.`,
+      `Activos con estas características en ${cityName} suelen tener una alta tasa de rotación en el mercado secundario.`,
+      `La fecha de cierre se aproxima y el interés por este expediente en ${auction?.province || ''} ha crecido significativamente.`
     ];
+
     const professionalPhrases = [
-      " Se recomienda encarecidamente la revisión del estado de cargas antes de formalizar la puja.",
+      " Es fundamental contrastar la carga hipotecaria con la certificación de dominio y cargas del Registro de la Propiedad.",
+      " La estrategia de puja debe contemplar no solo el precio, sino el coste total incluyendo deudas preferentes.",
+      " Recomendamos verificar si el activo se encuentra libre de ocupantes antes de proceder con el depósito bancario.",
+      " Consultar el edicto es el único camino para garantizar que no existan errores de bulto en la descripción del lote.",
       " El análisis documental jurídico es el paso crítico para asegurar el éxito y la seguridad de la inversión.",
-      " Un estudio detallado del edicto y la certificación registral evitará sorpresas tras la adjudicación."
+      " Un estudio detallado de la certificación registral evitará sorpresas tras la adjudicación definitiva."
     ];
     
-    const base = phrases[Math.floor(Math.random() * phrases.length)] || phrases[0];
+    const base = basePhrases[Math.floor(Math.random() * basePhrases.length)] || basePhrases[0];
     const fomo = fomoPhrases[Math.floor(Math.random() * fomoPhrases.length)] || fomoPhrases[0];
     const prof = professionalPhrases[Math.floor(Math.random() * professionalPhrases.length)] || professionalPhrases[0];
     
-    return `${base}${fomo}${prof}`;
+    return `${base} ${fomo}${prof}`;
   }, [cityName, propertyType, opportunityRatio, auction?.province]);
 
   const jsonLd = useMemo(() => {
@@ -1360,8 +1321,12 @@ const AuctionPage: React.FC = () => {
       ? `${analysisInsights.marketContext} ${analysisInsights.investorProfile}`.substring(0, 160) + '...'
       : `Subasta de ${propertyType.toLowerCase()} en ${cityName}, ${provinceName}.`;
 
-    const imageUrl = auction?.imageUrl;
-    const price = auction?.claimedDebt ?? auction?.appraisalValue ?? auction?.valorSubasta ?? 0;
+    const imageUrl = auction?.imageUrl && auction.imageUrl.startsWith('http') 
+      ? auction.imageUrl 
+      : auction?.imageUrl 
+        ? `https://activosoffmarket.es${auction.imageUrl.startsWith('/') ? '' : '/'}${auction.imageUrl}` 
+        : "https://activosoffmarket.es/og-image.png";
+    const price = auctionResult?.finalPrice ?? auction?.claimedDebt ?? auction?.appraisalValue ?? auction?.valorSubasta ?? 0;
     const url = window.location.href;
     
     const now = new Date();
@@ -1394,14 +1359,17 @@ const AuctionPage: React.FC = () => {
     const product: any = {
       "@context": "https://schema.org",
       "@type": "Product",
+      "sku": auction.boeId,
+      "productID": auction.boeId,
       "name": finalTitle,
       "description": description,
-      "image": imageUrl || "https://activosoffmarket.es/og-image.png",
+      "image": imageUrl,
       "category": propertyType,
       "brand": {
         "@type": "Brand",
         "name": "Activos Off-Market"
       },
+      "dateModified": dateModified,
       "offers": {
         "@type": "Offer",
         "price": price,
@@ -1552,15 +1520,6 @@ const AuctionPage: React.FC = () => {
       ];
     }
 
-    const slugify = (text: string) => {
-      return text
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '');
-    };
-
     const breadcrumbList: any = {
       "@context": "https://schema.org",
       "@type": "BreadcrumbList",
@@ -1581,13 +1540,13 @@ const AuctionPage: React.FC = () => {
           "@type": "ListItem",
           "position": 3,
           "name": provinceName,
-          "item": `https://activosoffmarket.es/subastas/${slugify(provinceName)}`
+          "item": `https://activosoffmarket.es/subastas/${slugifyText(provinceName)}`
         },
         {
           "@type": "ListItem",
           "position": 4,
           "name": cityName,
-          "item": `https://activosoffmarket.es/subastas/${slugify(cityName)}`
+          "item": `https://activosoffmarket.es/subastas/${slugifyText(cityName)}`
         },
         {
           "@type": "ListItem",
@@ -1599,7 +1558,7 @@ const AuctionPage: React.FC = () => {
     };
 
     return [product, faqPage, breadcrumbList];
-  }, [auction, slug, cityName, provinceName, isFinished, analysisInsights]);
+  }, [auction, slug, cityName, provinceName, isFinished, analysisInsights, auctionResult, cleanSlug]);
 
   if (isLoading) return null;
 
@@ -1607,31 +1566,86 @@ const AuctionPage: React.FC = () => {
     return <Navigate to={ROUTES.HOME} replace />;
   }
 
-  if (postPaymentState.active && auction) {
+  const isTestMode = new URLSearchParams(window.location.search).get("session_id") === "test";
+
+  if (postPaymentState.active && auction && !isTestMode) {
     return (
-      <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
-        <Header />
-        <main className="max-w-4xl mx-auto px-4 md:px-6 pt-8 md:pt-12">
-          <React.Suspense fallback={<div className="h-64 flex items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-600"></div></div>}>
-            <LoadAnalysisBlock 
-              boeId={auction.boeId} 
-              boeUrl={auction.boeUrl}
-              isIntegrated={false}
-              initialStep="upload"
-              isPaid={true}
-              noMargin={true}
-              analysisType={postPaymentState.type as 'cargas' | 'completo'}
-              auctionId={auction.id}
-            />
-          </React.Suspense>
-        </main>
-        <Footer />
+      <div className="bg-slate-50 min-h-screen flex items-center justify-center flex-col">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-600 mb-4"></div>
+        <p className="text-slate-600 font-bold">Generando y cargando informes...</p>
       </div>
     );
   }
 
+  console.log("RENDER GATE", {
+    isGenerating,
+    isUnlocked,
+    analysisPaid,
+    cargasPaid,
+    isTestMode: new URLSearchParams(window.location.search).get("session_id") === "test",
+    postPaymentStateActive: postPaymentState.active
+  });
+
+  const showOnlyAnalysis = isUnlocked === true;
+
+  // --- SEO Dynamic Meta Logic ---
+  let seoTitle = 'Subasta BOE';
+  let seoDescription = 'Análisis y ficha técnica de subasta BOE.';
+  const seoCanonical = `https://activosoffmarket.es/subasta/${cleanSlug}`;
+  let ogImage = 'https://activosoffmarket.es/og-image-subastas.jpg';
+  let ogTitle = seoTitle;
+  let ogDesc = seoDescription;
+  
+  if (auction) {
+    ogImage = auction.imageUrl || ogImage;
+    const isFinishedStatus = auction.status === 'closed' || isFinished; // isFinished logic is up above
+    const isSuspendedStatus = auction.status === 'suspended';
+    
+    // Si hay tasación, mostramos "Tasación: 123.456€", si no, "Tasación no publicada" para evitar un error tipo "consultar€"
+    const appraisalPhrase = auction.appraisalValue 
+      ? `Tasación: ${(auction.appraisalValue).toLocaleString('es-ES')}€` 
+      : 'Tasación no publicada';
+
+    if (isFinishedStatus) {
+      const hasResult = !!(auction?.auctionResultStatus || auctionResult?.finalPrice);
+      seoTitle = hasResult 
+        ? `Resultado Subasta BOE: ${propertyType} en ${cityName}`
+        : `Subasta BOE Finalizada: ${propertyType} en ${cityName}`;
+      seoDescription = `${propertyType} en subasta en ${cityName}. Consulta resultado, precio de adjudicación y referencia de mercado.`;
+    } else if (isSuspendedStatus) {
+      seoTitle = `Subasta BOE Suspendida: ${propertyType} en ${cityName}`;
+      seoDescription = `${propertyType} en subasta judicial suspendida en ${cityName}. Analizamos motivos de suspensión, cargas y riesgos legales.`;
+    } else {
+      seoTitle = `Subasta BOE de ${propertyType} en ${cityName} | Análisis y cargas`;
+      seoDescription = `${propertyType} en subasta en ${cityName}. ${appraisalPhrase}. Revisa cargas, riesgos y análisis antes de pujar.`;
+    }
+
+    ogTitle = `${propertyType} en subasta en ${cityName} | Análisis y cargas`;
+    ogDesc = `${propertyType} en subasta en ${cityName}. ${appraisalPhrase}. Deuda ${auction.claimedDebt?.toLocaleString('es-ES') || 'a consultar'}€. Riesgos y estrategia.`;
+  }
+
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-600 pb-20">
+      <Helmet>
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        <link rel="canonical" href={seoCanonical} />
+        <meta name="robots" content="index, follow" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={seoCanonical} />
+        <meta property="og:title" content={ogTitle} />
+        <meta property="og:description" content={ogDesc} />
+        <meta property="og:image" content={ogImage} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={seoCanonical} />
+        <meta name="twitter:title" content={ogTitle} />
+        <meta name="twitter:description" content={ogDesc} />
+        <meta name="twitter:image" content={ogImage} />
+      </Helmet>
       {jsonLd && (
         <>
           <script type="application/ld+json">
@@ -1644,8 +1658,10 @@ const AuctionPage: React.FC = () => {
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 md:px-6 pt-2 md:pt-4">
-        {/* Breadcrumbs - TOP LEVEL */}
-        <nav className="flex items-center text-[9px] md:text-[10px] text-slate-400 mb-3 md:mb-4 font-bold uppercase tracking-widest" aria-label="Breadcrumb">
+        {!showOnlyAnalysis && (
+          <>
+            {/* Breadcrumbs - TOP LEVEL */}
+            <nav className="flex items-center text-[9px] md:text-[10px] text-slate-400 mb-3 md:mb-4 font-bold uppercase tracking-widest" aria-label="Breadcrumb">
           <Link 
             to={ROUTES.HOME} className="hover:text-brand-600 transition-colors"
           >
@@ -1715,29 +1731,38 @@ const AuctionPage: React.FC = () => {
             <div className="flex items-center justify-center gap-2 shrink-0">
               {/* Favorite Toggle */}
               {(() => {
-                const isBlocked = !isLogged || (plan === 'free' && !isFavorite);
                 return (
                   <button 
-                    onClick={handleToggleFavorite}
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleToggleFavorite();
+                    }}
                     disabled={isTogglingFavorite}
                     className={`flex flex-col items-center justify-center w-12 py-2 rounded-xl transition-all duration-300 ${
-                      isFavorite 
-                        ? 'text-red-500 bg-red-50 hover:bg-red-100' 
-                        : isBlocked
-                          ? 'text-slate-400 bg-slate-50 hover:bg-slate-100'
+                      !isFavoriteLoaded
+                        ? 'opacity-50 cursor-not-allowed text-slate-400 bg-slate-50'
+                        : isFavorite 
+                          ? 'text-red-500 bg-red-50 hover:bg-red-100' 
                           : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
                     }`}
-                    title={isFavorite ? "Quitar de guardados" : isBlocked ? "Mejora tu plan para guardar" : "Guardar subasta"}
+                    title={
+                      !isFavoriteLoaded ? "Cargando..." : 
+                      isFavorite ? "Quitar de guardados" : 
+                      "Guardar subasta"
+                    }
                   >
                     <div className="relative">
-                      <Heart size={20} className={isFavorite ? 'fill-red-500' : ''} />
-                      {isBlocked && !isFavorite && (
-                        <div className="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
-                          <Lock size={8} className="text-slate-400" />
+                      {!isFavoriteLoaded ? (
+                        <div className="w-5 h-5 flex items-center justify-center">
+                          <Loader2 size={18} className="animate-spin text-slate-400" />
                         </div>
+                      ) : (
+                        <Heart size={20} className={isFavorite ? 'fill-red-500' : ''} />
                       )}
                     </div>
-                    {isLogged && plan === 'free' && (
+                    {isLogged && plan === 'free' && isFavoriteLoaded && (
                       <span className="text-[11px] text-slate-500 leading-none mt-1 tabular-nums">
                         {favoritesCount}/3
                       </span>
@@ -1832,6 +1857,71 @@ const AuctionPage: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* RESULTS BLOCK - ONLY SHOWN IF RESULT AVAILABLE */}
+        {auctionResult?.finalPrice !== undefined && auctionResult.auctionResultStatus === 'adjudicated' && (
+          <section className="mb-6 md:mb-8">
+            <h2 className="text-xl md:text-2xl font-serif font-bold text-slate-900 mb-4">Resultado de la subasta</h2>
+            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-100">
+                <div className="p-4 md:p-6 bg-slate-50/50">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Precio de Adjudicación</p>
+                  <p className="text-2xl md:text-3xl font-bold text-brand-600">
+                    {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(auctionResult.finalPrice)}
+                  </p>
+                </div>
+                <div className="p-4 md:p-6">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">Valor de Tasación</p>
+                  <p className="text-xl md:text-2xl font-bold text-slate-700">
+                    {auction?.appraisalValue ? new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(auction.appraisalValue) : 'No disponible'}
+                  </p>
+                </div>
+                <div className="p-4 md:p-6 bg-slate-50/50 flex flex-col justify-center">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">% Adjudicación</p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl md:text-3xl font-bold text-slate-900">
+                      {adjudicationPercentage ? `${Math.round(adjudicationPercentage)}%` : '-'}
+                    </span>
+                    {adjudicationPercentage && (
+                      <span className="text-xs text-slate-500 leading-tight">del valor<br/>de tasación</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {adjudicationPercentage && (
+                <div className="p-4 md:p-6 border-t border-slate-100 bg-white">
+                  <div className="flex gap-3">
+                    <div className="w-8 h-8 rounded-full bg-brand-50 flex items-center justify-center shrink-0 mt-0.5">
+                      <ShieldCheck size={16} className="text-brand-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm md:text-base text-slate-700 leading-relaxed">
+                        Se adjudicó al <strong>{adjudicationPercentage}%</strong> del valor de tasación, lo que indica un nivel de competencia {adjudicationPercentage > 70 ? 'alto' : adjudicationPercentage > 50 ? 'moderado' : 'bajo'} para este perfil de activo en {cityName}. 
+                        {adjudicationPercentage > 70 
+                          ? ' El mercado ha considerado que el activo tenía poco riesgo jurídico o un alto valor comercial latente.' 
+                          : adjudicationPercentage > 50 
+                            ? ' El margen de seguridad permite al adjudicatario absorber posibles cargas ocultas o retrasos en la toma de posesión.' 
+                            : ' El alto descuento sugiere problemas estructurales, jurídicos graves (como ocupación firme) o falta de postores en la plaza.'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-lg md:text-xl font-bold text-slate-900 mb-3 block">Referencia para subastas similares</h2>
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+              <p className="text-sm text-slate-600 leading-relaxed mb-3">
+                Si estás buscando invertir en inmuebles similares en <strong>{cityName}</strong>, este expediente es un excelente benchmark. Los adjudicatarios en esta zona están cerrando operaciones en torno al <strong>{adjudicationPercentage ? `${adjudicationPercentage}%` : '50-70%'} del valor de tasación</strong>.
+              </p>
+              <ul className="space-y-2 text-sm text-slate-600">
+                <li className="flex gap-2 items-start"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> Considera este porcentaje como tu base de cálculo para futuras pujas.</li>
+                <li className="flex gap-2 items-start"><Check size={16} className="text-emerald-500 shrink-0 mt-0.5" /> Revisa si el expediente tenía cargas previas (deuda de IBI, comunidad), ya que pudo haber deprimido artificialmente el precio final.</li>
+              </ul>
+            </div>
+          </section>
+        )}
 
         {/* MAIN ASSET DATA BLOCK - PREMIUM STYLE */}
         <motion.section 
@@ -2066,7 +2156,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  analysisResult?.yearBuilt || analysisResult?.metadata?.yearBuilt || valuationResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
+                  valuationResult?.metadata?.yearBuilt || analysisResult?.yearBuilt || analysisResult?.metadata?.yearBuilt || auction.yearBuilt || "—"
                 )}
               </p>
             </div>
@@ -2076,7 +2166,7 @@ const AuctionPage: React.FC = () => {
                 {isGenerating ? (
                   <span className="text-brand-600 animate-pulse">Calculando...</span>
                 ) : (
-                  formatFloor(analysisResult?.floor || analysisResult?.metadata?.floor || valuationResult?.metadata?.floor)
+                  formatFloor(valuationResult?.metadata?.floor || extractFloorFromAddress(`${auction.address || ''} ${auction.description || ''}`) || analysisResult?.floor || analysisResult?.metadata?.floor)
                 )}
               </p>
             </div>
@@ -2370,10 +2460,10 @@ const AuctionPage: React.FC = () => {
                       className="w-full md:w-auto px-6 py-2.5 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all shadow-lg flex items-center justify-center gap-2"
                     >
                       {plan === 'pro' ? <Search size={14} /> : <Lock size={14} />}
-                      Verificar m² con Catastro
+                      Calcula Beneficio Potencial
                     </button>
                     <p className="text-xs text-slate-500 text-center mt-2">
-                      Calcula superficie real y ahorro potencial antes de pujar
+                      Evita pagar de más. Calcula el precio real antes de pujar.
                     </p>
                   </div>
                 </motion.div>
@@ -2462,21 +2552,25 @@ const AuctionPage: React.FC = () => {
             </AnimatePresence>
           </div>
         </section>
+          </>
+        )}
 
         <div id="servicios-analisis" className="mb-8">
-          {isUnlocked && auction && (
+          {(isUnlocked || isTestMode) && auction && (
             <div id="analisis-tecnico" className="w-full">
               <LoadAnalysisBlock 
                 boeId={auction.boeId || ''} 
                 boeUrl={auction.boeUrl}
                 isIntegrated={false}
                 initialStep="upload"
-                isPaid={analysisPaid || cargasPaid}
+                isPaid={analysisPaid || cargasPaid || isTestMode}
                 noMargin={true}
+                appraisalValue={auction.appraisalValue}
+                auction={auction}
               />
             </div>
           )}
-          {!isUnlocked && (
+          {!(isUnlocked || isTestMode) && (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
                 {/* Card 1: Análisis de cargas */}
@@ -2747,7 +2841,9 @@ const AuctionPage: React.FC = () => {
           )}
         </div>
 
-        {/* User Notes Block */}
+        {!showOnlyAnalysis && (
+          <>
+            {/* User Notes Block */}
           {isLogged && (
             <div id="user-notes" className="mb-8 bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
               <div className="flex items-center justify-between mb-4">
@@ -3028,6 +3124,32 @@ const AuctionPage: React.FC = () => {
         {cleanSlug && (
           <div className="mb-32 border-t border-slate-100 pt-8 md:pt-12">
             <RelatedAuctions currentAuctionSlug={cleanSlug} currentAuctionData={auction} />
+
+            {/* SEO INTERNAL LINKS */}
+            <div className="max-w-7xl mx-auto px-4 md:px-8 mt-12 text-center">
+              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-xs md:text-sm font-medium text-slate-500 uppercase tracking-wider">
+                <Link 
+                  to={`/subastas/${slugifyText(provinceName)}`}
+                  className="hover:text-brand-600 transition-colors flex items-center gap-1.5 group"
+                >
+                   Ver todas las subastas en {provinceName}
+                   <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </Link>
+                
+                {cityName && cityName !== 'España' && slugifyText(cityName) !== slugifyText(provinceName) && (
+                  <>
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-200 hidden md:block" />
+                    <Link 
+                      to={`/subastas/${slugifyText(cityName)}`}
+                      className="hover:text-brand-600 transition-colors flex items-center gap-1.5 group"
+                    >
+                      Subastas en {cityName}
+                      <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
@@ -3085,14 +3207,6 @@ const AuctionPage: React.FC = () => {
           onClose={() => setSoftGateOrigin(null)} 
           origin={softGateOrigin || undefined}
           onUnlock={async () => {
-            if (plan === 'basic') {
-              const { incrementAnalysisCount } = userContext || {};
-              if (incrementAnalysisCount) {
-                const success = await incrementAnalysisCount();
-                if (!success) return;
-              }
-            }
-            
             if (softGateOrigin === 'streetview') {
               setShowStreetView(true);
             } else if (softGateOrigin === 'catastro' || softGateOrigin === 'comparativa') {
@@ -3207,6 +3321,8 @@ const AuctionPage: React.FC = () => {
             </motion.div>
           )}
         </AnimatePresence>
+          </>
+        )}
       </main>
     </div>
   );

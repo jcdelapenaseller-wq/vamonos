@@ -1,7 +1,7 @@
 import React from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { trackConversion } from '../utils/tracking';
 
 const MobileSticky: React.FC = () => {

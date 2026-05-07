@@ -42,7 +42,7 @@ const normalizeProvince = (raw: string): string => {
  * Crawler para obtener subastas activas del portal del BOE usando Puppeteer.
  * Se enfoca en la sección de Inmuebles para obtener un mayor volumen de datos.
  */
-async function runCrawler() {
+export async function runSubastasCrawler() {
   const url = 'https://subastas.boe.es/index.php?ver=1'; // Todos los inmuebles
   console.log(`Iniciando crawler en: ${url}`);
   const targetIds = ['SUB-JA-2026-259511', 'SUB-AT-2024-23R4586001244'];
@@ -87,8 +87,8 @@ async function runCrawler() {
       '50': { maxPages: 5, onlyCapital: false, minTasacion: 180000 }, // Zaragoza
     };
 
-    const provincesToTest = provinces.filter(p => p.value === '28' || p.value === '23'); // Madrid and Jaén
-    console.log(`Ejecutando para ${provincesToTest.length} provincias (DIAGNOSTIC MODE: MADRID ONLY).`);
+    const provincesToTest = provinces;
+    console.log(`Ejecutando para ${provincesToTest.length} provincias.`);
     
     const allAuctions: any[] = [];
     const processedSlugs = new Set();
@@ -100,7 +100,7 @@ async function runCrawler() {
       // Reset paginación por provincia
       const visitedPages = new Set();
       let currentPage = 1;
-      const config = provinceConfig[province.value] || { maxPages: 3, onlyCapital: false, minTasacion: 160000 };
+      const config = provinceConfig[province.value] || { maxPages: 5, onlyCapital: false, minTasacion: 160000 };
       const maxPages = config.maxPages;
       const capitalName = province.text.replace(/\s*\(\d+\)$/, '').trim();
       console.log(`Provincia ${capitalName} -> páginas: ${maxPages}`);
@@ -608,7 +608,7 @@ async function runCrawler() {
         let esDeudaCero = deudaNum === 0;
 
         const isExisting = existingIds.has(idSub);
-        const passesFilters = (idSub === 'SUB-JA-2026-259511') || (valorReferencia !== null && valorReferencia >= 5000 && !esEstadoInvalido && !esTipoExcluido && !esRatioBajo && true && !esValorBajo && !esDeudaCero);
+        const passesFilters = (idSub === 'SUB-JA-2026-259511') || (valorReferencia !== null && valorReferencia >= 5000 && !esEstadoInvalido && !esTipoExcluido && true && !esValorBajo && !esDeudaCero);
 
         if (targetIds.includes(idSub)) {
           console.log(`[DIAGNOSTIC] ID ${idSub} found in list!`);
@@ -721,7 +721,6 @@ async function runCrawler() {
           let motivo = "";
           if (esEstadoInvalido) motivo = `Estado: ${generalData.estadoSubasta}`;
           else if (esTipoExcluido) motivo = `Tipo excluido: ${tipoBienLimpio}`;
-          else if (esRatioBajo) motivo = `Ratio insuficiente`;
           else if (esRatioExcesivo) motivo = `Ratio excesivo (>85%)`;
           else if (esValorBajo) { motivo = `Valor tasación bajo (<${minTasacion/1000}k)`; }
           else if (esDeudaCero) motivo = `Deuda cero`;
@@ -784,15 +783,17 @@ async function runCrawler() {
           }
 
           // Verificar si ya existe en el archivo por boeId (más fiable que el slug)
-          const exists = auctionsContent.includes(`'${slug}': {`);
+          const searchRegex = new RegExp(`['"]${slug}['"]\\s*:\\s*\\{`);
+          const matchSlug = auctionsContent.match(searchRegex);
+          const exists = matchSlug !== null;
+
           if (boeId === 'SUB-AT-2026-25R2886001818') {
             console.log(`[DIAGNOSTIC] ID ${boeId} exists in file: ${exists}`);
           }
 
-          if (exists) {
+          if (exists && matchSlug.index !== undefined) {
             // ACTUALIZAR: status, isActive, lastCheckedAt
-            const startString = `'${slug}': {`;
-            const startIndex = auctionsContent.indexOf(startString);
+            const startIndex = matchSlug.index;
             
             if (startIndex !== -1) {
               const endIndex = auctionsContent.indexOf('},', startIndex);
@@ -880,6 +881,7 @@ async function runCrawler() {
     let totalSubastasRestoProvinciasFinal = 0;
     const globalProvincesSet = new Set<string>();
 
+    console.log("TOTAL ANTES FILTRO:", finalResults.length);
     const filteredBlocks = blocks.filter(block => {
       const provinceMatch = block.match(/province:\s*"([^"]+)"/);
       if (!provinceMatch) return true;
@@ -970,6 +972,17 @@ async function runCrawler() {
     
     totalProvinciasConReglaGlobal = globalProvincesSet.size;
 
+    console.log("TOTAL DESPUÉS FILTRO:", filteredBlocks.length);
+    const countByProvince: Record<string, number> = {};
+    filteredBlocks.forEach(b => {
+      const match = b.match(/province:\s*"([^"]+)"/);
+      if (match) {
+        const p = match[1];
+        countByProvince[p] = (countByProvince[p] || 0) + 1;
+      }
+    });
+    console.log("POR PROVINCIA:", countByProvince);
+
     // Diagnostic for orphaned auctions
     const currentAuctionsContent = fs.readFileSync(auctionsFilePath, 'utf-8');
     targetIds.forEach(id => {
@@ -982,7 +995,7 @@ async function runCrawler() {
       }
     });
 
-    fs.writeFileSync(auctionsFilePath, filteredBlocks.join(''));
+    // fs.writeFileSync(auctionsFilePath, filteredBlocks.join(''));
 
     console.log(`\n--- RESULTADOS FINALES ---`);
     console.log(`totalProvinciasConReglaGlobal: ${totalProvinciasConReglaGlobal}`);
@@ -997,4 +1010,4 @@ async function runCrawler() {
   }
 }
 
-runCrawler();
+runSubastasCrawler();

@@ -2,21 +2,27 @@ import fs from 'fs';
 import path from 'path';
 import { AUCTIONS } from '../src/data/auctions.ts';
 import { DISCOVER_REPORTS } from '../src/data/discoverReports.ts';
+import { ROUTES } from '../src/constants/routes.ts';
 
 const BASE_URL = 'https://activosoffmarket.es';
 
-const staticPages = [
-  '/',
-  '/quien-soy',
-  '/subastas-boe',
-  '/indice-guia-subastas',
-  '/subastas-judiciales-espana',
-  '/calculadora-subastas',
-  '/ejemplos-subastas',
-  '/noticias-subastas',
-  '/subastas-recientes',
-  '/subastas-descuento-50'
+const excludeFromSitemap = [
+  ROUTES.LOGIN,
+  ROUTES.MI_CUENTA,
+  ROUTES.MIS_GUARDADOS,
+  ROUTES.ALERTA_CONFIRMADA,
+  ROUTES.ADMIN_TRACKING,
+  ROUTES.SUCCESS,
+  ROUTES.CANCEL,
+  ROUTES.UNSUBSCRIBE,
+  ROUTES.PRO
 ];
+
+const staticPages = Array.from(new Set(Object.values(ROUTES).filter(route => 
+  typeof route === 'string' && 
+  !route.includes(':') && 
+  !excludeFromSitemap.includes(route)
+)));
 
 import { getAllowedProvincesForToday } from '../src/utils/discoverLimits.ts';
 

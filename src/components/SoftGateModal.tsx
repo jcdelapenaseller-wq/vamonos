@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Lock, ShieldCheck, Bell, Heart } from 'lucide-react';
 import { useUser } from '../contexts/UserContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 interface SoftGateModalProps {
   isOpen: boolean;

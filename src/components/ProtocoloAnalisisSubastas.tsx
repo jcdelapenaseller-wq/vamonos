@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ShieldCheck, AlertTriangle, FileText, CheckCircle, XCircle, ArrowRight, Lock } from 'lucide-react';
+import { CheckCircle,  ShieldCheck, AlertTriangle, FileText, XCircle, ArrowRight, Lock  } from 'lucide-react';
 
 const ProtocoloAnalisisSubastas: React.FC = () => {
 

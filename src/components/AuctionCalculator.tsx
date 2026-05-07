@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Calculator, TrendingUp, AlertTriangle, CheckCircle, Info, ArrowRight, BookOpen, Mail, Lock, ShieldCheck } from 'lucide-react';
+import { CheckCircle,  Calculator, TrendingUp, AlertTriangle, Info, ArrowRight, BookOpen, Mail, Lock, ShieldCheck, Home  } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from 'recharts';
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
@@ -51,89 +51,6 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
     }
   }, [appraisalValue, claimedDebt, city]);
 
-  useEffect(() => {
-    document.title = "Calculadora de Rentabilidad en Subastas Judiciales | ROI e ITP";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', "Calcula la rentabilidad real de una subasta judicial: ITP por comunidad autónoma, costes ocultos, ROI y precio máximo de puja según la regla del 70%.");
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "SoftwareApplication",
-          "name": "Calculadora de Rentabilidad para Subastas Judiciales",
-          "applicationCategory": "FinanceApplication",
-          "operatingSystem": "Web",
-          "description": "Herramienta para calcular rentabilidad, ITP, ROI y precio máximo de puja en subastas judiciales en España.",
-          "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "EUR"
-          }
-        },
-        {
-          "@type": "Article",
-          "headline": "Calculadora de Rentabilidad para Subastas Judiciales",
-          "description": "Calcula el ROI, beneficio neto y puja máxima recomendada para tus inversiones en subastas del BOE.",
-          "image": ["https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=1200&h=630"],
-          "datePublished": "2024-01-15T09:00:00+01:00",
-          "dateModified": new Date().toISOString(),
-          "author": {
-            "@type": "Person",
-            "name": "José de la Peña",
-            "url": "https://activosoffmarket.es/quien-soy"
-          },
-          "mainEntityOfPage": {
-            "@type": "WebPage",
-            "@id": "https://activosoffmarket.es/calculadora-subastas"
-          }
-        },
-        {
-          "@type": "FAQPage",
-          "mainEntity": [
-            {
-              "@type": "Question",
-              "name": "¿Cómo calcular la rentabilidad de una subasta judicial?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Para calcular la rentabilidad real debes comparar el valor de mercado actual del inmueble con el coste total de la inversión. Este coste incluye el precio de adjudicación, el ITP (que varía según la comunidad autónoma), gastos de reforma, notaría, registro y posibles cargas anteriores o deudas de comunidad. Nuestra calculadora de subastas te permite estimar todos estos valores automáticamente."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Cuánto dinero necesito para participar en una subasta judicial?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "Para participar necesitas inicialmente el 5% del valor de tasación del bien en concepto de consignación o depósito. Si resultas adjudicatario, deberás abonar el resto del precio de adjudicación en el plazo legal (normalmente 40 días hábiles en subastas judiciales) más los impuestos y gastos asociados."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Qué impuestos se pagan al comprar en una subasta judicial?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "El impuesto principal es el ITP (Impuesto de Transmisiones Patrimoniales). El tipo impositivo depende de la Comunidad Autónoma donde se encuentre el inmueble, oscilando generalmente entre el 4% y el 10%. En subastas judiciales no se suele pagar IVA, salvo en casos muy específicos de ejecuciones entre empresas."
-              }
-            },
-            {
-              "@type": "Question",
-              "name": "¿Cómo calcular la puja máxima en una subasta?",
-              "acceptedAnswer": {
-                "@type": "Answer",
-                "text": "La puja máxima se calcula restando del valor de mercado real todos los costes previstos (impuestos, reformas, cargas, gastos) y aplicando un margen de seguridad mínimo (beneficio deseado). Una regla común es no superar el 70% del valor de mercado tras descontar todos los gastos."
-              }
-            }
-          ]
-        }
-      ]
-    });
-    document.head.appendChild(script);
-    return () => {
-      document.head.removeChild(script);
-    };
-  }, []);
   const [adjudicacion, setAdjudicacion] = useState<number>(0);
   const [valorMercado, setValorMercado] = useState<number>(0);
   const [tasacionBOE, setTasacionBOE] = useState<number>(0);
@@ -144,6 +61,20 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
   const [ibi, setIbi] = useState<number>(0);
   const [deudaComunidad, setDeudaComunidad] = useState<number>(0);
   const [isMobile, setIsMobile] = useState(false);
+
+  // Hipoteca
+  const [useMortgage, setUseMortgage] = useState(false);
+  const [mortgageAmount, setMortgageAmount] = useState(0);
+  const [mortgageYears, setMortgageYears] = useState(25);
+  const [mortgageRate, setMortgageRate] = useState(3);
+
+  const monthlyPayment = useMemo(() => {
+    if (!useMortgage || !mortgageAmount) return 0;
+    const r = mortgageRate / 100 / 12;
+    const n = mortgageYears * 12;
+    return (mortgageAmount * r) / (1 - Math.pow(1 + r, -n));
+  }, [useMortgage, mortgageAmount, mortgageYears, mortgageRate]);
+
   const { plan: currentPlan, isBasicUser, isProUser } = useUser();
   const navigate = useNavigate();
   
@@ -203,6 +134,13 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
     
     return { itp, registroNotaria, gestoria, costeTotalInversion, beneficio, roi, precioMaxPuja, margenSeguridad, escenarioConservador, escenarioOptimista };
   }, [adjudicacion, valorMercado, reforma, comunidad, deudas, otrosGastos, ibi, deudaComunidad]);
+
+  const capitalPropio = Math.max(adjudicacion - mortgageAmount, 0);
+
+  const roiConFinanciacion =
+    useMortgage && capitalPropio > 0
+      ? (results.beneficio / capitalPropio) * 100
+      : null;
 
   const hasData = adjudicacion > 0 || valorMercado > 0 || tasacionBOE > 0 || reforma > 0 || deudas > 0;
   const isDataIncoherent = hasData && valorMercado > 0 && (
@@ -284,9 +222,12 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
     <div className="max-w-7xl mx-auto px-6 pb-12 pt-12">
       <div className="mb-12">
         <h1 className="text-4xl font-serif font-bold text-slate-900 mb-6">
-          {hasData ? "Estás analizando esta subasta. Ajusta tu rentabilidad" : "Calculadora de Rentabilidad para Subastas Judiciales"}
+          {hasData ? "Estás analizando esta subasta. Ajusta tu rentabilidad" : "Calculadora de puja máxima en subastas judiciales"}
         </h1>
         <p className="text-lg text-slate-600">Herramienta gratuita para calcular rentabilidad, ITP, costes y precio máximo de puja en subastas judiciales en España.</p>
+        <p className="text-slate-600 text-sm mt-2">
+          Esta herramienta te permite calcular cuánto pujar en una subasta judicial en España paso a paso.
+        </p>
       </div>
 
       {/* Main Result Highlight - High Visibility */}
@@ -305,6 +246,10 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
           <div className="absolute top-0 right-0 w-96 h-96 bg-brand-600 rounded-full -translate-y-1/2 translate-x-1/3 blur-[100px] opacity-30"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-400 rounded-full translate-y-1/2 -translate-x-1/2 blur-[80px] opacity-20"></div>
           
+          {!isPro && (
+            <div className="absolute inset-0 bg-white/60 backdrop-blur-[4px] rounded-[2.5rem]" />
+          )}
+
           {isPro && (
             <div className="absolute top-6 right-6 md:top-8 md:right-8 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs px-3 py-1.5 rounded-full font-bold tracking-wider uppercase flex items-center gap-1.5 shadow-sm">
               <CheckCircle size={14} /> {getProBadgeText()}
@@ -320,36 +265,50 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
                 <div className="text-6xl md:text-7xl font-bold mb-4 text-emerald-400 tracking-tighter drop-shadow-lg">
                   {results.precioMaxPuja.toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0})}
                 </div>
+                {useMortgage && mortgageAmount > 0 && (
+                  <p className="text-slate-300 text-sm mb-3">
+                    Necesitarías aportar aprox.{" "}
+                    <span className="font-semibold text-white">
+                      {(adjudicacion - mortgageAmount).toLocaleString('es-ES')} €
+                    </span>
+                  </p>
+                )}
                 <p className="text-slate-300 text-lg font-medium">Este número decide si ganas o pierdes.</p>
                 <p className="text-slate-400 text-sm mt-2 max-w-lg mx-auto">Por encima de este precio empiezas a perder dinero.</p>
               </>
             ) : (
               <div id="pro-plans-block" className="flex flex-col items-center w-full max-w-4xl mx-auto">
-                <div className="text-6xl md:text-7xl font-bold mb-4 text-white/20 tracking-tighter blur-[8px] select-none">
+                <div className="text-6xl md:text-7xl font-bold mb-4 text-white/30 tracking-tighter blur-[3px] select-none">
                   € 145.000
                 </div>
-                <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 text-center">Aquí ves si esta subasta tiene margen real</h3>
-                <p className="text-slate-300 text-lg mb-10 text-center">Tu resultado real depende de tu puja. Desbloquea el escenario completo.</p>
+                <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2 text-center">Aquí ves si esta subasta tiene margen real</h3>
+                <p className="text-slate-600 text-lg mb-10 text-center">Tu resultado real depende de tu puja. Desbloquea el escenario completo.</p>
                 
                 <button 
                   onClick={() => navigate('/pro')}
                   className="bg-brand-600 text-white font-bold py-4 px-8 rounded-2xl hover:bg-brand-500 transition-all shadow-xl shadow-brand-500/20 flex items-center justify-center gap-2 w-full max-w-md text-lg"
                 >
                   <Lock size={20} />
-                  Desbloquear calculadora completa
+                  Ver si esta subasta es rentable
                 </button>
+                <p className="text-sm text-slate-600 mt-4 text-center">
+                  Descubre si esta operación te hace ganar o perder dinero antes de pujar
+                </p>
+                <p className="text-xs text-slate-500 mt-2 text-center">
+                  +1.200 inversores ya usan esta herramienta
+                </p>
                 
                 <div className="mt-6 flex flex-col items-center gap-3">
-                  <p className="text-slate-300 text-sm font-bold uppercase tracking-widest">Con BASIC verás:</p>
+                  <p className="text-slate-700 text-sm font-bold uppercase tracking-widest">Con BASIC verás:</p>
                   <div className="flex flex-wrap justify-center gap-2">
-                    <span className="bg-white/10 text-white text-xs px-3 py-1 rounded-full border border-white/20">ROI estimado</span>
-                    <span className="bg-white/10 text-white text-xs px-3 py-1 rounded-full border border-white/20">Margen de seguridad</span>
-                    <span className="bg-white/10 text-white text-xs px-3 py-1 rounded-full border border-white/20">Costes reales</span>
+                    <span className="bg-slate-200 text-slate-700 text-xs px-3 py-1 rounded-full border border-slate-300">ROI estimado (sin financiación)</span>
+                    <span className="bg-slate-200 text-slate-700 text-xs px-3 py-1 rounded-full border border-slate-300">Margen de seguridad</span>
+                    <span className="bg-slate-200 text-slate-700 text-xs px-3 py-1 rounded-full border border-slate-300">Costes reales</span>
                   </div>
                 </div>
 
                 <div className="mt-8 flex flex-col items-center gap-2">
-                  <p className="text-slate-400 text-sm font-medium flex items-center gap-2">
+                  <p className="text-slate-600 text-sm font-medium flex items-center gap-2">
                     <ShieldCheck size={16} className="text-emerald-500" />
                     Usado por inversores para evitar pagar de más en subastas
                   </p>
@@ -359,29 +318,29 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
           </div>
 
           <div className="relative z-10 grid md:grid-cols-2 gap-8 items-center text-center">
-            <div className="md:col-span-1 md:border-r md:border-white/10">
-              <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-brand-100 rounded-full text-xs font-bold uppercase tracking-wider mb-3 shadow-sm">
+            <div className={`md:col-span-1 md:border-r ${!isPro ? 'md:border-slate-300' : 'md:border-white/10'}`}>
+              <span className={`inline-block px-4 py-1.5 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider mb-3 shadow-sm ${!isPro ? 'bg-slate-200 border border-slate-300 text-slate-700' : 'bg-white/10 border border-white/10 text-brand-100'}`}>
                 Beneficio Neto
               </span>
-              <h2 className="text-3xl md:text-4xl font-serif font-bold mb-1 tracking-tight">
+              <h2 className={`text-3xl md:text-4xl font-serif font-bold mb-1 tracking-tight ${!isPro ? 'text-slate-900 blur-[6px] opacity-60 select-none' : ''}`}>
                 {results.beneficio.toLocaleString('es-ES', {style: 'currency', currency: 'EUR', maximumFractionDigits: 0})}
               </h2>
             </div>
             
             <div className="md:col-span-1 flex flex-col items-center">
-              <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md border border-white/10 text-brand-100 rounded-full text-xs font-bold uppercase tracking-wider mb-3 shadow-sm">
-                ROI Estimado
+              <span className={`inline-block px-4 py-1.5 backdrop-blur-md rounded-full text-xs font-bold uppercase tracking-wider mb-3 shadow-sm ${!isPro ? 'bg-slate-200 border border-slate-300 text-slate-700' : 'bg-white/10 border border-white/10 text-brand-100'}`}>
+                ROI estimado (sin financiación)
               </span>
-              <div className="text-3xl md:text-4xl font-bold mb-1 tracking-tighter drop-shadow-lg flex items-center gap-3">
+              <div className={`text-3xl md:text-4xl font-bold mb-1 tracking-tighter drop-shadow-lg flex items-center gap-3 ${!isPro ? 'text-slate-900 blur-[6px] opacity-60 select-none' : ''}`}>
                 {results.roi.toFixed(1)}<span className="text-xl md:text-2xl opacity-60 font-medium">%</span>
                 <div className={`w-3 h-3 rounded-full ${roiStatus.traffic} shadow-[0_0_8px_rgba(255,255,255,0.5)] animate-pulse`}></div>
               </div>
               <div className="mt-4 flex flex-col items-center gap-1">
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                <p className={`text-[10px] uppercase tracking-widest font-bold ${!isPro ? 'text-slate-600' : 'text-slate-400'}`}>
                   Estimación — el resultado real depende de tu puja y estrategia
                 </p>
                 {!isPro && (
-                  <p className="text-[10px] text-brand-400 uppercase tracking-widest font-bold">
+                  <p className="text-[10px] text-brand-700 uppercase tracking-widest font-bold">
                     Versión PRO muestra el cálculo real con todos los costes
                   </p>
                 )}
@@ -478,6 +437,124 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
                   {Object.keys(ITP_RATES).map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
+            </div>
+
+            {/* Hipoteca */}
+            <div className={`rounded-2xl border p-4 mt-6 transition-all ${
+              useMortgage 
+                ? 'bg-emerald-50 border-emerald-200' 
+                : 'bg-white border-slate-100'
+            }`}>
+              
+              <div className="flex items-center justify-between mb-4">
+                <p className="font-semibold text-slate-900 flex items-center gap-2">
+                  <Home size={18} className="text-slate-600" />
+                  ¿Compras con hipoteca?
+                </p>
+
+                {/* Toggle simple limpio */}
+                <button 
+                  onClick={() => setUseMortgage(!useMortgage)}
+                  className={`w-10 h-6 flex items-center rounded-full p-1 transition ${
+                    useMortgage ? 'bg-emerald-500' : 'bg-slate-300'
+                  }`}
+                >
+                  <div className={`bg-white w-4 h-4 rounded-full shadow transform transition ${
+                    useMortgage ? 'translate-x-4' : ''
+                  }`} />
+                </button>
+              </div>
+
+              {useMortgage && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">Importe (€)</p>
+                      <input 
+                        type="number"
+                        value={mortgageAmount || ''}
+                        onChange={(e) => {
+                          const value = Number(e.target.value);
+                          setMortgageAmount(Math.min(value, adjudicacion));
+                        }}
+                        className="w-full p-2 rounded bg-white border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">Plazo (años)</p>
+                      <input 
+                        type="number"
+                        value={mortgageYears || ''}
+                        onChange={(e) => setMortgageYears(Number(e.target.value))}
+                        className="w-full p-2 rounded bg-white border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1">Interés (%)</p>
+                      <input 
+                        type="number"
+                        value={mortgageRate || ''}
+                        onChange={(e) => setMortgageRate(Number(e.target.value))}
+                        className="w-full p-2 rounded bg-white border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-500 mt-2">
+                    Simula tu cuota mensual si financias la compra
+                  </p>
+
+                  {monthlyPayment > 0 && (
+                    <div className="text-sm text-slate-700 mt-2 font-medium">
+                      Cuota estimada: {monthlyPayment.toFixed(0)} €/mes
+                    </div>
+                  )}
+
+                  <div className="mt-3 text-sm text-slate-700 space-y-1">
+                    <p>
+                      Inversión real: <span className="font-semibold">
+                        {(adjudicacion - mortgageAmount).toLocaleString('es-ES')} €
+                      </span>
+                    </p>
+                    <p>
+                      Financiación: <span className="font-semibold">
+                        {adjudicacion > 0 
+                          ? Math.round((mortgageAmount / adjudicacion) * 100) 
+                          : 0} %
+                      </span>
+                    </p>
+                    {mortgageAmount > adjudicacion * 0.8 && (
+                      <p className="text-xs text-amber-600">
+                        Alto apalancamiento → mayor riesgo
+                      </p>
+                    )}
+                    {adjudicacion > 0 && (
+                      <p>
+                        Rentabilidad sobre tu dinero: <span className="font-semibold">
+                          {mortgageAmount < adjudicacion 
+                            ? ((results.beneficio / (adjudicacion - mortgageAmount)) * 100).toFixed(1)
+                            : 0} %
+                        </span>
+                      </p>
+                    )}
+                    {roiConFinanciacion !== null && (
+                      <p>
+                        ROI con financiación:{" "}
+                        <span className="font-semibold">
+                          {roiConFinanciacion.toFixed(1)} %
+                        </span>
+                      </p>
+                    )}
+                    {mortgageAmount > adjudicacion * 0.9 && (
+                      <p className="text-xs text-red-500 mt-1">
+                        Financiación poco realista en subastas
+                      </p>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Simulador de Puja */}
@@ -664,69 +741,6 @@ const AuctionCalculator: React.FC<AuctionCalculatorProps> = ({
             )}
           </div>
 
-          {/* EMAIL CAPTURE */}
-          {hasData && (
-            <div className="bg-slate-900 p-8 rounded-3xl border border-slate-800 shadow-xl mt-8 text-white">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="bg-brand-500/20 p-3 rounded-2xl">
-                  <Mail className="text-brand-400" size={24} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold mb-1">¿No tienes claro si es buena oportunidad?</h3>
-                  <p className="text-slate-400 text-sm">Te explicamos cómo interpretar este resultado antes de pujar</p>
-                </div>
-              </div>
-              
-              {isSubscribed ? (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4 flex items-center gap-3 text-emerald-400">
-                  <CheckCircle size={20} />
-                  <span className="font-medium">¡Análisis enviado correctamente! Revisa tu bandeja de entrada.</span>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <form 
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      if (!email) return;
-                      setIsSubmitting(true);
-                      
-                      // Save email to localStorage for PRO unlock later
-                      localStorage.setItem('aom_user_email', email);
-                      
-                      trackConversion(comunidad, 'calculator', 'email_submit', { 
-                        roi: results.roi.toFixed(1), 
-                        precio: adjudicacion, 
-                        tipo_subasta: 'Judicial' 
-                      });
-                      
-                      setIsSubmitting(false);
-                      setIsSubscribed(true);
-                    }}
-                    className="flex flex-col sm:flex-row gap-3"
-                  >
-                    <input 
-                      type="email" 
-                      placeholder="Tu mejor email..." 
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-500"
-                    />
-                    <button 
-                      type="submit" 
-                      disabled={isSubmitting}
-                      className="bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 px-6 rounded-xl transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {isSubmitting ? 'Enviando...' : 'Recibir recomendaciones'}
-                    </button>
-                  </form>
-                  <p className="text-[10px] text-slate-500 text-center sm:text-left px-1">
-                    Sin spam · solo contenido útil para tomar decisiones
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>

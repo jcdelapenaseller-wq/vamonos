@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { DISCOVER_REPORTS } from '../data/discoverReports';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { ShieldCheck, ArrowRight } from 'lucide-react';
 
 export const DiscoverReportsBlock: React.FC = () => {

@@ -4,7 +4,7 @@ import { requestAndSaveFCMToken } from '../lib/messaging';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, setDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 enum OperationType {
   CREATE = 'create',
@@ -68,7 +68,6 @@ interface UserContextType {
   isProUser: () => boolean;
   updatePlan: (newPlan: 'free' | 'basic' | 'pro', targetUserId?: string) => Promise<void>;
   requireLogin: () => void;
-  incrementAnalysisCount: () => Promise<boolean>;
   trackAuctionView: (auctionId: string, auctionTitle: string) => Promise<void>;
 }
 
@@ -82,9 +81,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isDev = import.meta.env.DEV || (typeof process !== 'undefined' && process.env.NODE_ENV === 'development');
 
   const checkMonthlyReset = async (userData: UserProfile) => {
-    if (!db || userData.plan !== 'basic') return userData;
+    if (!db) return userData;
     
-    const lastReset = userData.lastAnalysisReset?.toDate ? userData.lastAnalysisReset.toDate() : new Date(userData.lastAnalysisReset);
+    const lastReset = userData.lastAnalysisReset?.toDate ? userData.lastAnalysisReset.toDate() : new Date(userData.lastAnalysisReset || 0);
     const now = new Date();
     
     // If more than 30 days or different month
@@ -123,6 +122,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (userSnap.exists()) {
             console.log("[AUTH_DEBUG] 3. Profile found in Firestore");
             let userData = userSnap.data() as UserProfile;
+            userData.id = firebaseUser.uid;
             userData = await checkMonthlyReset(userData);
             console.log("[AUTH_DEBUG] 4. Calling setUser(userData)");
             setUser(userData);
@@ -191,40 +191,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (error) {
       console.error("Error logging in:", error);
       throw error;
-    }
-  };
-
-  const incrementAnalysisCount = async (): Promise<boolean> => {
-    if (!user?.id) return false;
-    
-    const currentPlan = user.plan.toLowerCase() as 'free' | 'basic' | 'pro';
-    const used = user.analysisUsed || 0;
-    
-    // Check limits
-    if (currentPlan === 'free' && used >= 1) return false;
-    if (currentPlan === 'basic' && used >= 3) return false;
-    if (currentPlan === 'pro' && used >= 5) return false;
-
-    const newCount = used + 1;
-
-    if (!auth || !db) {
-      if (user.id === 'mock-user') {
-        const updatedUser = { ...user, analysisUsed: newCount };
-        localStorage.setItem('mockUser', JSON.stringify(updatedUser));
-        setUser(updatedUser);
-        return true;
-      }
-      return false;
-    }
-
-    try {
-      const userRef = doc(db, 'users', user.id);
-      await setDoc(userRef, { analysisUsed: newCount }, { merge: true });
-      setUser(prev => prev ? { ...prev, analysisUsed: newCount } : null);
-      return true;
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, `users/${user.id}`);
-      return false;
     }
   };
 
@@ -310,7 +276,6 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     isProUser,
     updatePlan,
     requireLogin,
-    incrementAnalysisCount,
     trackAuctionView
   };
 

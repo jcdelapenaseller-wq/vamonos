@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Calendar, Clock, ChevronRight, BookOpen, Gavel, Search, ShieldAlert, FileText, ArrowRight, Layers, GraduationCap, Scale, Eye } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 const AuctionGuideIndex: React.FC = () => {
   
@@ -24,6 +24,23 @@ const AuctionGuideIndex: React.FC = () => {
     const schemaData = {
       "@context": "https://schema.org",
       "@graph": [
+{
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+                    {
+                              "@type": "ListItem",
+                              "position": 1,
+                              "name": "Inicio",
+                              "item": "https://activosoffmarket.es/"
+                    },
+                    {
+                              "@type": "ListItem",
+                              "position": 2,
+                              "name": "Guías",
+                              "item": "https://activosoffmarket.es/guia-subastas-judiciales-boe/"
+                    }
+          ]
+},
         {
           "@type": "CollectionPage",
           "headline": "Guía Completa de Subastas Judiciales en España",
@@ -66,6 +83,28 @@ const AuctionGuideIndex: React.FC = () => {
       ]
     };
 
+    
+    const canonicalUrl = 'https://activosoffmarket.es' + ROUTES.GUIDE_PILLAR;
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+        canonical = document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', canonicalUrl);
+    
+    const setTwitter = (name: string, val: string) => {
+        let element = document.head.querySelector(`meta[name="${name}"]`);
+        if (!element) {
+            element = document.createElement('meta');
+            element.setAttribute('name', name);
+            document.head.appendChild(element);
+        }
+        element.setAttribute('content', val);
+    };
+    setTwitter('twitter:card', 'summary_large_image');
+    setTwitter('twitter:title', document.title);
+            
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.text = JSON.stringify(schemaData);
@@ -119,7 +158,7 @@ const AuctionGuideIndex: React.FC = () => {
         
         {/* MAIN CONTENT */}
         <main className="lg:col-span-8">
-            <div className="prose prose-lg prose-slate max-w-none prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900">
+            <div className="prose prose-lg prose-slate prose-headings:font-serif prose-headings:font-bold prose-headings:text-slate-900 text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
                 
                 <figure className="mb-12 -mt-6">
                     <img 
@@ -312,23 +351,17 @@ const AuctionGuideIndex: React.FC = () => {
           <div className="sticky top-24 space-y-10 max-h-[calc(100vh-120px)] overflow-auto pr-2 custom-scrollbar">
             
             <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-2xl border border-slate-800">
-                <span className="text-brand-300 text-xs font-bold uppercase tracking-widest mb-4 block flex items-center gap-2">
-                    <Gavel size={14} /> Canal Premium
-                </span>
-                <h3 className="font-serif text-2xl font-bold mb-4 leading-tight">
-                    ¿Demasiada teoría?
-                </h3>
+                <span className="text-brand-300 text-xs font-bold uppercase tracking-widest mb-4 block">Herramientas Pro</span>
+                <h3 className="font-serif text-2xl font-bold mb-4">Analiza sin Riesgo</h3>
                 <p className="text-slate-300 mb-8 text-sm leading-relaxed">
-                    Si prefieres ver cómo aplico todo esto en casos reales cada semana, únete al canal. Ahorra tiempo de estudio.
+                    ¿Dudas con una puja? Nuestro algoritmo analiza cargas, ITP y valor real en segundos. Evita sorpresas y puja con seguridad matemática.
                 </p>
-                <a 
-                    href="https://t.me/activosoffmarket" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="block w-full bg-white text-slate-900 font-bold py-4 px-4 rounded-xl text-center hover:bg-brand-50 transition-all transform hover:-translate-y-1 shadow-lg flex items-center justify-center gap-2 group"
+                <Link 
+                    to={ROUTES.PRO}
+                    className="block w-full bg-brand-500 text-white font-bold py-4 px-4 rounded-xl text-center hover:bg-brand-600 transition-all flex items-center justify-center gap-2"
                 >
-                    Ver Análisis Reales <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform"/>
-                </a>
+                    Ver Planes y Precios <ArrowRight size={16}/>
+                </Link>
             </div>
 
             <div className="bg-white border border-slate-200 p-8 rounded-3xl shadow-sm">

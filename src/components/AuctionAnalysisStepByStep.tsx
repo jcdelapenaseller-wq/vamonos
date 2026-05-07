@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Calendar, Clock, ChevronRight, BookOpen, ArrowRight, 
-  AlertTriangle, CheckCircle, XCircle, Search, FileText, 
+  AlertTriangle, XCircle, Search, FileText, 
   Home, Calculator, Scale, Eye, AlertOctagon, FileWarning 
 } from 'lucide-react';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 const AuctionAnalysisStepByStep: React.FC = () => {
   

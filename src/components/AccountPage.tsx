@@ -13,18 +13,21 @@ import {
   Star,
   Bell,
   MapPin,
-  AlertCircle
+  AlertCircle,
+  Trash
 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { motion } from 'motion/react';
 import { db, auth } from '../lib/firebase';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { alertService, AlertData } from '../services/alertService';
 import { toast } from 'sonner';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 const AccountPage: React.FC = () => {
   const { user, isLogged, plan, isLoading } = useUser();
+  const { favoritesCount } = useFavorites();
   const navigate = useNavigate();
   const [history, setHistory] = React.useState<any[]>([]);
   const [alerts, setAlerts] = React.useState<AlertData[]>([]);
@@ -61,7 +64,8 @@ const AccountPage: React.FC = () => {
         setHistory(historySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
 
         // Fetch Alerts via Service
-        const userAlerts = await alertService.getUserAlerts();
+        let userAlerts = await alertService.getUserAlerts();
+        userAlerts = userAlerts.filter(a => a.active === true);
         // Sort alerts by createdAt descending
         userAlerts.sort((a, b) => {
           const timeA = a.createdAt?.toMillis ? a.createdAt.toMillis() : 0;
@@ -127,7 +131,7 @@ const AccountPage: React.FC = () => {
   }
 
   const usage = user.analysisUsed || 0;
-  const planLimit = plan === 'free' ? 1 : plan === 'basic' ? 3 : 10;
+  const planLimit = plan === 'free' ? 1 : plan === 'basic' ? 3 : 5;
   const remaining = Math.max(0, planLimit - usage);
   
   const lastReset = user.lastAnalysisReset?.toDate ? user.lastAnalysisReset.toDate() : new Date(user.lastAnalysisReset || Date.now());
@@ -137,11 +141,11 @@ const AccountPage: React.FC = () => {
   const getPlanFeatures = () => {
     if (plan === 'pro') {
       return [
-        'Análisis cargas IA ilimitado',
+        '5 análisis de cargas al mes',
         'Dossier PDF inversión',
         'Scoring oportunidad',
         'Riesgo jurídico ampliado',
-        'Alertas avanzadas',
+        '5 alertas personalizadas',
         '20% descuento asesorías',
         'Prioridad nuevas oportunidades'
       ];
@@ -149,9 +153,9 @@ const AccountPage: React.FC = () => {
     if (plan === 'basic') {
       return [
         'Favoritos ilimitados',
-        'Alertas personalizadas',
+        '3 alertas personalizadas',
         'Calculadora avanzada',
-        '5 análisis cargas / mes',
+        '3 análisis cargas / mes',
         'Notas personales',
         'Botón "Ir a BOE oficial"',
         'Datos Catastro básicos'
@@ -159,7 +163,7 @@ const AccountPage: React.FC = () => {
     }
     return [
       'Acceso fichas subastas',
-      '5 favoritos',
+      '3 favoritos',
       '1 alerta básica',
       '1 análisis cargas gratis',
       'Checklist inversor'
@@ -177,7 +181,7 @@ const AccountPage: React.FC = () => {
           <div>
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Consumo del plan</p>
             <p className="text-sm font-bold text-slate-900">
-              {plan === 'pro' ? 'Ilimitado' : `${usage}/${planLimit} análisis`}
+              {usage}/{planLimit} análisis
             </p>
           </div>
         </div>
@@ -186,7 +190,9 @@ const AccountPage: React.FC = () => {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Uso del plan {plan.toUpperCase()}</span>
             <span className="text-[10px] font-bold text-brand-600 uppercase tracking-wider">
-              {plan === 'pro' ? '100%' : (
+              {plan === 'pro' ? (
+                <span>{Math.min(100, Math.round((usage / planLimit) * 100))}%</span>
+              ) : (
                 <Link to="/pro" className="hover:underline flex items-center gap-1">
                   {Math.min(100, Math.round((usage / planLimit) * 100))}% <ArrowRight size={10} />
                 </Link>
@@ -196,7 +202,7 @@ const AccountPage: React.FC = () => {
           <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <motion.div 
               initial={{ width: 0 }}
-              animate={{ width: plan === 'pro' ? '100%' : `${Math.min(100, (usage / planLimit) * 100)}%` }}
+              animate={{ width: `${Math.min(100, (usage / planLimit) * 100)}%` }}
               className={`h-full rounded-full ${usage >= planLimit && plan !== 'pro' ? 'bg-amber-500' : 'bg-brand-600'}`}
             />
           </div>
@@ -227,56 +233,55 @@ const AccountPage: React.FC = () => {
             </div>
 
             {/* Consumption Block */}
-            {plan !== 'pro' && (
-              <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp size={18} className="text-brand-600" />
-                    <h3 className="font-bold text-slate-900">Tus análisis este mes</h3>
-                  </div>
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    plan === 'basic' ? 'bg-amber-100 text-amber-700' : 
-                    'bg-slate-200 text-slate-600'
-                  }`}>
-                    Plan {plan.toUpperCase()}
-                  </span>
+            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2">
+                  <TrendingUp size={18} className="text-brand-600" />
+                  <h3 className="font-bold text-slate-900">Tus análisis este mes</h3>
                 </div>
+                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                  plan === 'pro' ? 'bg-brand-100 text-brand-700' :
+                  plan === 'basic' ? 'bg-amber-100 text-amber-700' : 
+                  'bg-slate-200 text-slate-600'
+                }`}>
+                  Plan {plan.toUpperCase()}
+                </span>
+              </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                  <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Usados</p>
-                    <p className="text-2xl font-bold text-slate-900">{usage} de {planLimit}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Restantes</p>
-                    <p className="text-2xl font-bold text-brand-600">{remaining}</p>
-                  </div>
-                  <div className="col-span-2 md:col-span-1">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Próximo reset</p>
-                    <div className="flex items-center gap-1.5 text-slate-700 font-medium">
-                      <Calendar size={14} className="text-slate-400" />
-                      <span>{nextReset.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
-                    </div>
-                  </div>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Usados</p>
+                  <p className="text-2xl font-bold text-slate-900">{usage} de {planLimit}</p>
                 </div>
-
-                <div className="mt-6">
-                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${Math.min(100, (usage / planLimit) * 100)}%` }}
-                      className={`h-full rounded-full ${usage >= planLimit ? 'bg-amber-500' : 'bg-brand-600'}`}
-                    />
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Restantes</p>
+                  <p className="text-2xl font-bold text-brand-600">{remaining}</p>
+                </div>
+                <div className="col-span-2 md:col-span-1">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Próximo reset</p>
+                  <div className="flex items-center gap-1.5 text-slate-700 font-medium">
+                    <Calendar size={14} className="text-slate-400" />
+                    <span>{nextReset.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}</span>
                   </div>
-                  <p className="text-[10px] text-slate-500 mt-2 text-right">
-                    {usage} de {planLimit} análisis utilizados este mes
-                  </p>
                 </div>
               </div>
-            )}
+
+              <div className="mt-6">
+                <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, (usage / planLimit) * 100)}%` }}
+                    className={`h-full rounded-full ${usage >= planLimit ? 'bg-amber-500' : 'bg-brand-600'}`}
+                  />
+                </div>
+                <p className="text-[10px] text-slate-500 mt-2 text-right">
+                  {usage} de {planLimit} análisis utilizados este mes
+                </p>
+              </div>
+            </div>
 
             {/* No credits card */}
-            {plan !== 'pro' && usage >= planLimit && (
+            {usage >= planLimit && (
               <div className="mt-6 bg-amber-50 border border-amber-100 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
@@ -284,18 +289,62 @@ const AccountPage: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900">No te quedan análisis este mes</h4>
-                    <p className="text-xs text-slate-500">Mejora tu plan para obtener más análisis</p>
+                    <p className="text-xs text-slate-500">
+                      {plan === 'pro' ? 'Tu límite se reiniciará el mes que viene' : 'Mejora tu plan para obtener más análisis'}
+                    </p>
                   </div>
                 </div>
-                <Link 
-                  to="/pro"
-                  className="px-6 py-2.5 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-colors whitespace-nowrap"
-                >
-                  Ver planes
-                </Link>
+                {plan !== 'pro' && (
+                  <Link 
+                    to="/pro"
+                    className="px-6 py-2.5 bg-slate-900 text-white font-bold text-xs rounded-xl hover:bg-slate-800 transition-colors whitespace-nowrap"
+                  >
+                    Ver planes
+                  </Link>
+                )}
               </div>
             )}
           </div>
+
+          {/* Favorites Usage Block (FREE only) */}
+          {plan === 'free' && (
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                <div className="flex items-center gap-2">
+                  <Star size={20} className="text-amber-500" />
+                  <h3 className="font-bold text-slate-900 text-lg">Mis favoritos</h3>
+                </div>
+                
+                <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Uso de favoritos</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {favoritesCount} de 3 usados
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden mb-2">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(100, (favoritesCount / 3) * 100)}%` }}
+                  className={`h-full rounded-full ${favoritesCount >= 3 ? 'bg-amber-500' : 'bg-amber-400'}`}
+                />
+              </div>
+              
+              {favoritesCount >= 3 && (
+                <p className="text-[10px] font-bold text-amber-600 mt-2">Has alcanzado el límite de 3 favoritos en el plan gratuito.</p>
+              )}
+              
+              <div className="mt-4 pt-4 border-t border-slate-50">
+                <Link 
+                  to="/mis-guardados"
+                  className="text-xs font-bold text-brand-600 flex items-center gap-1 hover:underline"
+                >
+                  Ir a mis favoritos <ArrowRight size={14} />
+                </Link>
+              </div>
+            </div>
+          )}
 
           {/* Alerts Block */}
           <div id="alerts" className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 md:p-8">
@@ -305,14 +354,12 @@ const AccountPage: React.FC = () => {
                 <h3 className="font-bold text-slate-900 text-lg">Mis alertas activas</h3>
               </div>
               
-              {plan !== 'pro' && (
-                <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Uso de alertas</p>
-                  <p className="text-sm font-bold text-slate-900">
-                    {alerts.length} de {plan === 'free' ? 1 : 3} alertas usadas
-                  </p>
-                </div>
-              )}
+              <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Uso de alertas</p>
+                <p className="text-sm font-bold text-slate-900">
+                  {alerts.length} de {plan === 'free' ? 1 : plan === 'basic' ? 3 : 5} alertas usadas
+                </p>
+              </div>
             </div>
 
             <div className="space-y-4">
@@ -345,12 +392,39 @@ const AccountPage: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => alert.id && handleDeleteAlert(alert.id)}
-                        className="text-xs font-bold text-red-500 hover:text-red-600 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50"
-                      >
-                        Eliminar alerta
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={async () => {
+                            if (!alert.id) return;
+                            try {
+                              await alertService.updateAlert(alert.id, { active: !alert.active });
+                              setAlerts(prev =>
+                                prev.map(a =>
+                                  a.id === alert.id ? { ...a, active: !a.active } : a
+                                )
+                              );
+                            } catch (e) {
+                              console.error(e);
+                            }
+                          }}
+                          className={`w-10 h-6 flex items-center rounded-full p-1 transition ${
+                            alert.active !== false ? 'bg-green-500' : 'bg-slate-300'
+                          }`}
+                        >
+                          <div
+                            className={`w-4 h-4 bg-white rounded-full shadow transform transition ${
+                              alert.active !== false ? 'translate-x-4' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+
+                        <button 
+                          onClick={() => alert.id && handleDeleteAlert(alert.id)}
+                          className="flex items-center gap-1 text-xs font-bold text-red-500 hover:text-red-600 hover:bg-red-50 px-3 py-1.5 rounded-lg transition"
+                        >
+                          <Trash size={14} />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -369,15 +443,17 @@ const AccountPage: React.FC = () => {
 
             {/* Alert CTA */}
             <div className="mt-8 pt-8 border-t border-slate-50">
-              {plan !== 'pro' && alerts.length >= (plan === 'free' ? 1 : 3) ? (
+              {alerts.length >= (plan === 'free' ? 1 : plan === 'basic' ? 3 : 5) ? (
                 <div className="bg-amber-50 border border-amber-100 rounded-2xl p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <AlertCircle size={18} className="text-amber-600" />
                     <p className="text-xs font-bold text-slate-900">Límite de alertas alcanzado</p>
                   </div>
-                  <Link to="/pro" className="text-xs font-bold text-brand-600 hover:underline">
-                    Mejorar plan &rarr;
-                  </Link>
+                  {plan !== 'pro' && (
+                    <Link to="/pro" className="text-xs font-bold text-brand-600 hover:underline">
+                      Mejorar plan &rarr;
+                    </Link>
+                  )}
                 </div>
               ) : (
                 <Link 
@@ -453,7 +529,12 @@ const AccountPage: React.FC = () => {
               {getPlanFeatures().map((feature, i) => (
                 <li key={i} className="flex items-start gap-3 text-slate-600">
                   <CheckCircle size={16} className="text-emerald-500 shrink-0 mt-0.5" />
-                  <span className="text-xs font-medium">{feature}</span>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-medium">{feature}</span>
+                    {feature === '3 favoritos' && plan === 'free' && (
+                      <span className="text-[10px] text-slate-400 mt-0.5">Has usado {favoritesCount} de 3 favoritos</span>
+                    )}
+                  </div>
                 </li>
               ))}
             </ul>
@@ -467,6 +548,16 @@ const AccountPage: React.FC = () => {
                 >
                   {isManagingSubscription ? 'Cargando...' : 'Gestionar suscripción'}
                 </button>
+                {user?.unsubscribeToken && (
+                  <p className="text-sm text-slate-400 mt-3 text-center">
+                    <a
+                      href={`/unsubscribe?u=${user.id}&t=${user.unsubscribeToken}`}
+                      className="hover:underline"
+                    >
+                      Darse de baja de emails
+                    </a>
+                  </p>
+                )}
               </div>
             )}
           </div>

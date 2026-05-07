@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, MapPin, Home, Bell, ArrowRight, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { trackConversion } from '../utils/tracking';
 import { useUser } from '../contexts/UserContext';
 import { alertService } from '../services/alertService';
 import { toast } from 'sonner';
+import SoftGateModal from './SoftGateModal';
 
 const PROVINCIAS = [
   "Álava", "Albacete", "Alicante", "Almería", "Asturias", "Ávila", "Badajoz", "Baleares", "Barcelona", "Burgos", 
@@ -27,7 +28,9 @@ const AlertForm: React.FC = () => {
   const [municipality, setMunicipality] = useState('');
   const [propertyType, setPropertyType] = useState('Todos');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<React.ReactNode | null>(null);
+  const [showSoftGate, setShowSoftGate] = useState(false);
+  const [softGateOrigin, setSoftGateOrigin] = useState<'limit_alert' | null>(null);
 
   useEffect(() => {
     trackConversion('espana', 'alert_creation', 'email_submit', { step: 'arrival' });
@@ -39,22 +42,107 @@ const AlertForm: React.FC = () => {
     }
   }, [user]);
 
+  const [redirectMessage, setRedirectMessage] = React.useState(false);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !province) return;
+    if (!province) return;
 
     if (!isLogged || !user) {
-      navigate(ROUTES.LOGIN);
+      setRedirectMessage(true);
+      setTimeout(() => {
+        navigate(ROUTES.LOGIN, { state: { returnTo: window.location.pathname } });
+      }, 1000);
       return;
     }
+
+    const currentEmail = user.email;
+    if (!currentEmail) return;
 
     setStatus('loading');
     setErrorMessage(null);
     
     try {
+      const userAlerts = await alertService.getUserAlerts();
+
+      const isDuplicate = userAlerts.some(a => 
+        a.province === province &&
+        (a.municipality || '') === municipality &&
+        a.propertyType === propertyType &&
+        a.active !== false
+      );
+
+      if (isDuplicate) {
+        setStatus('idle');
+        setErrorMessage('Ya tienes esta alerta creada');
+        return;
+      }
+
+      const planLimit = plan === 'free' ? 1 : plan === 'basic' ? 3 : 5;
+
+      if (userAlerts.length >= planLimit) {
+        setStatus('idle');
+        if (plan === 'pro') {
+          setErrorMessage('Has alcanzado el límite máximo de 5 alertas de tu plan PRO.');
+        } else {
+          setSoftGateOrigin('limit_alert');
+          setShowSoftGate(true);
+        }
+        return;
+      }
+
+      const { collection, query, where, getCountFromServer } = await import('firebase/firestore');
+      const { db } = await import('../lib/firebase');
+      
+      const userPlan = (user.plan || 'free').toLowerCase();
+      const maxAlerts = userPlan === 'pro' ? 5 : userPlan === 'basic' ? 3 : 1;
+
+      const q = query(
+        collection(db, 'alerts'),
+        where('userId', '==', user.id),
+        where('active', '==', true)
+      );
+      
+      const snapshot = await getCountFromServer(q);
+      const currentAlerts = snapshot.data().count;
+
+      if (currentAlerts >= maxAlerts) {
+        if (userPlan === 'free') {
+          setErrorMessage(
+            <div className="flex flex-col items-center gap-3">
+              <span>Has alcanzado el límite de 1 alerta. Activa BASIC para crear más.</span>
+              <button 
+                type="button" 
+                onClick={() => navigate('/pro')} 
+                className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors w-fit"
+              >
+                Ver planes
+              </button>
+            </div>
+          );
+        } else if (userPlan === 'basic') {
+          setErrorMessage(
+            <div className="flex flex-col items-center gap-3">
+              <span>Has alcanzado el límite de tu plan. Activa PRO para seguir creando alertas.</span>
+              <button 
+                type="button" 
+                onClick={() => navigate('/pro')} 
+                className="bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors w-fit"
+              >
+                Ver planes
+              </button>
+            </div>
+          );
+        } else {
+          setErrorMessage('Has alcanzado el límite de alertas de tu plan.');
+        }
+        setStatus('error');
+        return;
+      }
+
       // 1. Save to Firestore via Service
       await alertService.createAlert({
-        email,
+        email: currentEmail,
         province,
         municipality,
         propertyType,
@@ -64,7 +152,7 @@ const AlertForm: React.FC = () => {
       // 3. Success (Firestore succeeded)
       trackConversion(province.toLowerCase(), 'alert_creation', 'listado');
       setStatus('success');
-      navigate(`${ROUTES.ALERTA_CONFIRMADA}?email=${encodeURIComponent(email)}`);
+      navigate(`${ROUTES.ALERTA_CONFIRMADA}?email=${encodeURIComponent(currentEmail)}`);
     } catch (error: any) {
       console.error("Error creating alert:", error);
       setStatus('error');
@@ -131,24 +219,14 @@ const AlertForm: React.FC = () => {
           />
         </div>
 
-        {/* Email */}
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-slate-700 flex items-center gap-2">
-            <Mail size={16} className="text-brand-500" /> Tu Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="ejemplo@email.com"
-            required
-            className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 px-4 outline-none focus:ring-2 focus:ring-brand-500 transition-all"
-          />
-        </div>
-
+        {redirectMessage && (
+          <div className="mb-4 p-3 bg-brand-50 text-brand-900 rounded-lg text-center text-sm font-medium border border-brand-200">
+            Guarda tu alerta y recibe avisos en tiempo real
+          </div>
+        )}
         <button
           type="submit"
-          disabled={status === 'loading'}
+          disabled={status === 'loading' || redirectMessage}
           className="w-full bg-brand-600 text-white font-bold py-4 rounded-xl text-lg hover:bg-brand-700 transition-all flex items-center justify-center gap-2 shadow-md disabled:opacity-50"
         >
           {status === 'loading' ? 'Procesando...' : (
@@ -175,13 +253,21 @@ const AlertForm: React.FC = () => {
         </div>
 
         {status === 'error' && (
-          <div className="p-4 bg-red-50 border border-red-100 rounded-xl">
-            <p className="text-red-600 text-sm text-center font-medium">
+          <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <div className="text-slate-800 text-sm text-center font-medium">
               {errorMessage}
-            </p>
+            </div>
           </div>
         )}
       </form>
+
+      {showSoftGate && softGateOrigin && (
+        <SoftGateModal
+          isOpen={showSoftGate}
+          onClose={() => setShowSoftGate(false)}
+          origin={softGateOrigin}
+        />
+      )}
     </div>
   );
 };

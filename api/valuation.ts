@@ -2,6 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import admin from 'firebase-admin';
 import axios from 'axios';
 import fs from 'fs';
+import firebaseConfig from '../firebase-applet-config.json';
 
 const LOG_FILE = './catastro_diagnostic.log';
 
@@ -17,13 +18,19 @@ const logDiagnostic = (message: string) => {
 };
 
 // Initialize Firebase Admin
-const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || firebaseConfig.projectId;
 
-if (!admin.apps.length && projectId) {
+if (!admin.apps.length) {
   try {
-    admin.initializeApp({
-      projectId: projectId,
-    });
+    if (projectId) {
+      admin.initializeApp({
+        projectId: projectId,
+      });
+      logDiagnostic(`Firebase Admin initialized with projectId: ${projectId}`);
+    } else {
+      admin.initializeApp();
+      logDiagnostic("Firebase Admin initialized with default credentials");
+    }
   } catch (e) {
     console.error('Firebase Admin Init Error:', e);
   }
@@ -76,6 +83,11 @@ const fetchCatastroData = async (refCat: string): Promise<{ surface: number | nu
     console.log("CATASTRO XML RAW END");
 
     if (typeof xml === 'string') {
+      const lowerXml = xml.toLowerCase();
+      if (lowerXml.includes('sistema no disponible') || lowerXml.includes('lblerror') || lowerXml.includes('inténtelo más tarde')) {
+        logDiagnostic("Catastro service unavailable (error pattern found)");
+        throw new Error('El servicio del Catastro no está disponible temporalmente. Inténtelo más tarde.');
+      }
       const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
       const yearMatch =
         xml.match(/<ant>(\d{4})<\/ant>/i) ||
@@ -132,6 +144,10 @@ const fetchCatastroDataByAddress = async (province: string, city: string, addres
     console.log("CATASTRO XML BY ADDRESS RAW END");
 
     if (typeof xml === 'string') {
+      const lowerXml = xml.toLowerCase();
+      if (lowerXml.includes('sistema no disponible') || lowerXml.includes('lblerror') || lowerXml.includes('inténtelo más tarde')) {
+        return { surface: null, yearBuilt: null, floor: null };
+      }
       const surfaceMatch = xml.match(/<sfc>([\d.,]+)<\/sfc>/i);
       const yearMatch =
         xml.match(/<ant>(\d{4})<\/ant>/i) ||
@@ -181,9 +197,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const valuationSnap = await valuationRef.get();
         if (valuationSnap.exists) {
           const data = valuationSnap.data();
+          logDiagnostic(`Cache hit for ${boeId}`);
           return res.status(200).json({ ...data, metadata: { ...data?.metadata, cached: true } });
         }
-      } catch (e) {
+      } catch (e: any) {
+        logDiagnostic(`Firestore cache read failed: ${e.message} (Code: ${e.code})`);
         console.warn("Firestore cache read failed:", e);
       }
     }
@@ -268,11 +286,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     };
 
+    console.log("[DIAGNOSTIC] Final Valuation Metadata:", result.metadata);
+
     // 3. Save to Cache (Optional - Don't block if permissions fail)
     if (db) {
       try {
         await db.collection('auctions').doc(boeId).collection('valuations').doc('latest').set(result);
-      } catch (e) {
+        logDiagnostic(`Cache updated for ${boeId}`);
+      } catch (e: any) {
+        logDiagnostic(`Firestore cache write failed: ${e.message} (Code: ${e.code})`);
         console.warn("Firestore cache write failed (Permission Denied?):", e);
       }
     }

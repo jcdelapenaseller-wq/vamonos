@@ -5,7 +5,7 @@ import { AUCTIONS } from '../data/auctions';
 import { getFilteredAuctions } from '../utils/auctionHelpers';
 import { normalizePropertyType, normalizeCity, normalizeLocationLabel } from '../utils/auctionNormalizer';
 import { sortAuctions, isAuctionFinished } from '../utils/auctionHelpers';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 const RecentAuctionsHome: React.FC = () => {
   // Get the 3 most relevant recent auctions (prioritizing active)

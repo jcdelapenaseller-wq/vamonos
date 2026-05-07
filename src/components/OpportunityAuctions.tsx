@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { AUCTIONS } from '../data/auctions';
 import { getFilteredAuctions } from '../utils/auctionHelpers';
 import { ChevronRight, MapPin, DollarSign, TrendingUp, ArrowLeft, Percent } from 'lucide-react';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { isAuctionActive, isAuctionFinished, sortActiveFirst } from '../utils/auctionHelpers';
 import { normalizePropertyType, normalizeProvince, normalizeLocationLabel } from '../utils/auctionNormalizer';
 

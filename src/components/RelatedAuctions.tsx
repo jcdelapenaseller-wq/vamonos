@@ -2,9 +2,9 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { AuctionData } from '../data/auctions';
 import { AUCTIONS } from '../data/auctions';
-import { getFilteredAuctions } from '../utils/auctionHelpers';
-import { MapPin } from 'lucide-react';
-import { isAuctionFinished, sortAuctions } from '../utils/auctionHelpers';
+import { MapPin, ArrowUpRight } from 'lucide-react';
+import { isAuctionFinished, calculateDiscount } from '../utils/auctionHelpers';
+import { normalizeCity, normalizeProvince } from '../utils/auctionNormalizer';
 
 interface RelatedAuctionsProps {
   currentAuctionSlug: string;
@@ -13,31 +13,56 @@ interface RelatedAuctionsProps {
 
 const RelatedAuctions: React.FC<RelatedAuctionsProps> = ({ currentAuctionSlug, currentAuctionData }) => {
   const relatedAuctions = useMemo(() => {
-    const seenSlugs = new Set([currentAuctionSlug]);
-    const matches: [string, AuctionData][] = [];
-
-    // 1. Try to find same city
-    Object.entries(AUCTIONS).forEach(([slug, data]) => {
-      if (!seenSlugs.has(slug) && data.city === currentAuctionData.city) {
-        matches.push([slug, data]);
-        seenSlugs.add(slug);
-      }
-    });
-
-    // 2. If not enough, try same property type in same province
-    if (matches.length < 4) {
-      Object.entries(AUCTIONS).forEach(([slug, data]) => {
-        if (!seenSlugs.has(slug) && 
-            data.propertyType === currentAuctionData.propertyType && 
-            data.province === currentAuctionData.province) {
-          matches.push([slug, data]);
-          seenSlugs.add(slug);
-        }
-      });
-    }
-
-    const sorted = sortAuctions(matches);
-    return sorted.slice(0, 4);
+    const currentCity = normalizeCity(currentAuctionData) || '';
+    const currentProvince = normalizeProvince(currentAuctionData.province || currentAuctionData.city) || '';
+    const currentType = (currentAuctionData.propertyType || '').toLowerCase();
+    
+    const scored = Object.entries(AUCTIONS)
+      .filter(([slug, data]) => {
+        // Exclude current auction and non-inmuebles
+        return slug !== currentAuctionSlug && data.assetCategory !== 'vehiculo';
+      })
+      .map(([slug, data]) => {
+        const itemCity = normalizeCity(data) || '';
+        const itemProvince = normalizeProvince(data.province || data.city) || '';
+        const itemType = (data.propertyType || '').toLowerCase();
+        const isActive = !isAuctionFinished(data.auctionDate);
+        
+        const isSameCity = currentCity !== 'España' && itemCity === currentCity;
+        const isSameProvince = currentProvince !== 'España' && itemProvince === currentProvince;
+        const isSameType = itemType === currentType;
+        
+        /**
+         * SCORING LOGIC
+         * - Active is highly weighted to ensure users see things they can bid on
+         * - Geography is the secondary filter (City > Province)
+         * - Property type is the tertiary filter
+         */
+        let score = 0;
+        
+        // Availability priority (Primary)
+        if (isActive) score += 5000;
+        
+        // Geographic priority (Secondary)
+        if (isSameCity) score += 3000;
+        else if (isSameProvince) score += 1000;
+        
+        // Relevance priority (Tertiary)
+        if (isSameType) score += 500;
+        
+        // Small tie-breaker for discount to show best opportunities first
+        const discount = calculateDiscount(data.valorTasacion, data.valorSubasta, data.claimedDebt) || 0;
+        score += (discount / 100);
+        
+        return { slug, data, score };
+      })
+      // Only keep related stuff (must be at least same province)
+      .filter(item => item.score >= 1000) 
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(item => [item.slug, item.data] as [string, AuctionData]);
+      
+    return scored;
   }, [currentAuctionSlug, currentAuctionData]);
 
   if (relatedAuctions.length === 0) return null;
@@ -69,11 +94,15 @@ const RelatedAuctions: React.FC<RelatedAuctionsProps> = ({ currentAuctionSlug, c
             <div className="flex justify-between items-start mb-6 gap-4">
               <div className="flex flex-col gap-1.5">
                 <h3 className={`text-xl md:text-2xl font-bold transition-colors leading-tight ${isFinished ? 'text-slate-500 group-hover:text-slate-600' : 'text-slate-900 group-hover:text-brand-600'}`}>
-                  {data.propertyType} en {data.zone || data.city}
+                  {data.propertyType} en subasta · {data.city}
                 </h3>
                 <div className="flex items-center gap-1.5 text-slate-500 text-base">
                   <MapPin size={18} />
-                  <span>{data.city}</span>
+                  <span>{(() => {
+                    const itemProvince = normalizeProvince(data.province || data.city);
+                    const itemCity = normalizeCity(data);
+                    return itemProvince && itemProvince !== itemCity ? itemProvince : itemCity;
+                  })()}</span>
                 </div>
               </div>
               

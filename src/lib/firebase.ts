@@ -26,6 +26,7 @@ export interface UserProfile {
   stripeStatus?: string;
   fcmToken?: string;
   lastActiveAt?: any;
+  unsubscribeToken?: string;
 }
 
 export const updateLastActiveAt = async (userId: string) => {
@@ -56,7 +57,8 @@ export const loginWithGoogle = async (): Promise<UserProfile> => {
       createdAt: serverTimestamp(),
       analysisUsed: 0,
       lastAnalysisReset: serverTimestamp(),
-      lastActiveAt: serverTimestamp()
+      lastActiveAt: serverTimestamp(),
+      unsubscribeToken: crypto.randomUUID()
     };
     await setDoc(userRef, newUser);
     return newUser;

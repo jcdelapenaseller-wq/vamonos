@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { BarChart3, Trash2, MapPin, MousePointer2, Globe, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 interface TrackingEvent {
   timestamp: string;

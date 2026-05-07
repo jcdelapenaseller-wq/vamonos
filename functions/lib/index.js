@@ -1,352 +1,294 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onNotificationQueueCreate = exports.onAuctionCreate = exports.onAuctionCreateEmailAlert = void 0;
-const functions = require("firebase-functions");
+exports.onNotificationQueueCreate = exports.onboardingScheduler = exports.onUserCreate = exports.onAuctionCreate = void 0;
 const admin = require("firebase-admin");
+const firestore_1 = require("firebase-functions/v2/firestore");
+const scheduler_1 = require("firebase-functions/v2/scheduler");
 const mailersend_1 = require("mailersend");
 admin.initializeApp();
 const db = admin.firestore();
-exports.onAuctionCreateEmailAlert = functions
-    .region('europe-west1')
-    .runWith({
-    timeoutSeconds: 60,
-    memory: '256MB'
-})
-    .firestore
-    .document('auctions/{auctionId}')
-    .onCreate(async (snap, context) => {
-    const auctionData = snap.data();
-    const province = auctionData.province;
-    const municipality = auctionData.municipality;
-    const propertyType = auctionData.propertyType;
-    const valorSubasta = auctionData.valorSubasta;
-    const slug = auctionData.slug;
-    // Buscar alerts
-    const alertsSnapshot = await db.collection('alerts')
-        .where('province', '==', province)
-        .where('active', '==', true)
-        .get();
-    functions.logger.info(`[INFO] auction detected: ${context.params.auctionId}`);
-    functions.logger.info(`[INFO] alerts matched count: ${alertsSnapshot.size}`);
-    let emailSentCount = 0;
-    const mailerSendApiKey = process.env.MAILERSEND_API_KEY || functions.config().mailersend?.key;
-    const fromEmailAddress = process.env.FROM_EMAIL || 'alerts@activosoffmarket.es';
-    if (!mailerSendApiKey) {
-        functions.logger.error('[ERROR] MAILERSEND_API_KEY is not set.');
-        return null;
-    }
-    const mailerSend = new mailersend_1.MailerSend({
-        apiKey: mailerSendApiKey,
-    });
-    const sentFrom = new mailersend_1.Sender(fromEmailAddress, "Alertas Off-Market");
-    for (const doc of alertsSnapshot.docs) {
-        const alertData = doc.data();
-        const email = alertData.email;
-        if (!email)
-            continue;
-        const recipients = [new mailersend_1.Recipient(email)];
-        const emailParams = new mailersend_1.EmailParams()
-            .setFrom(sentFrom)
-            .setTo(recipients)
-            .setSubject(`Nueva subasta en ${province}`)
-            .setText(`Nueva subasta detectada
-
-Tipo: ${propertyType}
-Municipio: ${municipality}
-Precio: ${valorSubasta}€
-
-━━━━━━━━━━━━━━━━━━
-VER SUBASTAS RECIENTES
-https://activosoffmarket.es/subasta/${slug}
-━━━━━━━━━━━━━━━━━━
+/* =========================================
+   EMAIL HELPER
+========================================= */
+async function sendEmail(to, subject, text, userId, unsubscribeToken) {
+    const apiKey = process.env.MAILERSEND_API_KEY;
+    if (!apiKey)
+        return;
+    const footer = `
 
 —
 Activos OffMarket
-Preferencias:
-https://activosoffmarket.es/unsubscribe?email=${email}`);
-        try {
-            await mailerSend.email.send(emailParams);
-            emailSentCount++;
-        }
-        catch (error) {
-            functions.logger.error(`[ERROR] Failed to send email to ${email}:`, error);
-        }
-    }
-    functions.logger.info(`[INFO] emails sent count: ${emailSentCount}`);
-    return null;
-});
-exports.onAuctionCreate = functions
-    .region('europe-west1')
-    .runWith({
-    timeoutSeconds: 60,
-    memory: '256MB'
-})
-    .firestore
-    .document('auctions/{auctionId}')
-    .onCreate(async (snap, context) => {
-    const auctionId = context.params.auctionId;
-    const auctionData = snap.data();
-    functions.logger.info(`[INICIO] Procesando nueva subasta: ${auctionId}`);
-    // 5. Control concurrencia: comprobar que auction.isNew === true
-    if (auctionData.isNew !== true) {
-        functions.logger.info(`[SKIP] Subasta ${auctionId} no es nueva (isNew: ${auctionData.isNew}). Saltando.`);
-        return null;
-    }
-    try {
-        const auctionProvince = auctionData.province || '';
-        const auctionType = (auctionData.propertyType || '').toLowerCase();
-        const auctionCity = (auctionData.city || '').toLowerCase();
-        const auctionZone = (auctionData.zone || '').toLowerCase();
-        const auctionPrice = auctionData.appraisalValue || 0;
-        // 3. Optimizar: NO leer todas las alertas
-        // En el nuevo schema, usamos la colección raíz 'alerts'
-        const alertsSnapshot = await db.collection('alerts')
-            .where('active', '==', true)
-            .where('province', '==', auctionProvince)
-            .get();
-        functions.logger.info(`[INFO] Alertas encontradas para provincia '${auctionProvince}': ${alertsSnapshot.size}`);
-        if (alertsSnapshot.empty) {
-            functions.logger.info(`[FIN] No hay alertas activas para la provincia ${auctionProvince}.`);
-            // Actualizar subasta aunque no haya matches
-            await snap.ref.update({
-                isNew: false,
-                matchedAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-            return null;
-        }
-        let matchCount = 0;
-        let skipCount = 0;
-        // 4. Limitar batch writes (máx 500 operaciones)
-        let batch = db.batch();
-        let batchCount = 0;
-        for (const doc of alertsSnapshot.docs) {
-            const alertData = doc.data();
-            const alertId = doc.id;
-            const userId = alertData.userId;
-            if (!userId)
-                continue;
-            // propertyType (si existe y no es 'Todos')
-            const alertType = (alertData.propertyType || '').toLowerCase();
-            if (alertType && alertType !== 'todos' && alertType !== auctionType) {
-                continue;
-            }
-            // municipality (si existe en la alerta)
-            const alertMunicipality = (alertData.municipality || '').toLowerCase();
-            if (alertMunicipality) {
-                // Comprobar si coincide con el municipio (city) o la zona de la subasta
-                if (auctionCity !== alertMunicipality && auctionZone !== alertMunicipality) {
-                    continue;
-                }
-            }
-            // minPrice/maxPrice
-            const minPrice = alertData.minPrice || 0;
-            const maxPrice = alertData.maxPrice || 100000000;
-            if (auctionPrice < minPrice || auctionPrice > maxPrice) {
-                continue;
-            }
-            // 6. Mantener dedupeKey
-            const dedupeKey = `${userId}_${auctionId}`;
-            // Evitar duplicados: verificar si ya existe en la cola
-            const queueRef = db.collection('notifications_queue').doc(dedupeKey);
-            const queueDoc = await queueRef.get();
-            if (queueDoc.exists) {
-                skipCount++;
-                continue;
-            }
-            // Añadir al batch
-            batch.set(queueRef, {
-                userId,
-                alertId,
-                auctionId,
-                status: 'pending',
-                createdAt: admin.firestore.FieldValue.serverTimestamp(),
-                dedupeKey
-            });
-            matchCount++;
-            batchCount++;
-            // Si supera el límite, dividir batches (usamos 499 por seguridad)
-            if (batchCount === 499) {
-                await batch.commit();
-                batch = db.batch(); // Iniciar un nuevo batch
-                batchCount = 0;
-            }
-        }
-        // Ejecutar el resto del batch
-        if (batchCount > 0) {
-            await batch.commit();
-        }
-        // 5. Control concurrencia: update auction después de procesar
-        await snap.ref.update({
-            isNew: false,
-            matchedAt: admin.firestore.FieldValue.serverTimestamp()
+
+Dejar de recibir emails:
+https://activosoffmarket.es/unsubscribe?u=${encodeURIComponent(userId)}&t=${encodeURIComponent(unsubscribeToken)}
+`;
+    const mailerSend = new mailersend_1.MailerSend({ apiKey });
+    const sentFrom = new mailersend_1.Sender("alerts@activosoffmarket.es", "Activos OffMarket");
+    const recipients = [new mailersend_1.Recipient(to)];
+    const emailParams = new mailersend_1.EmailParams()
+        .setFrom(sentFrom)
+        .setTo(recipients)
+        .setSubject(subject)
+        .setText(text + footer);
+    await mailerSend.email.send(emailParams);
+}
+/* =========================================
+   ALERTS -> CREATE NOTIFICATION QUEUE
+========================================= */
+exports.onAuctionCreate = (0, firestore_1.onDocumentCreated)("auctions/{auctionId}", async (event) => {
+    const auction = event.data?.data();
+    if (!auction)
+        return;
+    const alertsSnap = await db.collectionGroup("alerts").get();
+    const usersNotified = new Set();
+    for (const doc of alertsSnap.docs) {
+        const alert = doc.data();
+        if (!alert.userId)
+            continue;
+        const keyword = alert.keyword?.toLowerCase?.();
+        const title = auction.title?.toLowerCase?.() || "";
+        if (keyword && !title.includes(keyword))
+            continue;
+        if (usersNotified.has(alert.userId))
+            continue;
+        usersNotified.add(alert.userId);
+        await db.collection("notifications_queue").add({
+            userId: alert.userId,
+            auctionId: event.params.auctionId,
+            type: "alert",
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            sent: false
         });
-        // 7. Logs finales
-        functions.logger.info(`[FIN] Proceso completado para ${auctionId}. Creadas: ${matchCount}. Duplicadas (saltadas): ${skipCount}.`);
-        return null;
-    }
-    catch (error) {
-        functions.logger.error(`[ERROR] Procesando alertas para la subasta ${auctionId}:`, error);
-        return null;
     }
 });
-exports.onNotificationQueueCreate = functions
-    .region('europe-west1')
-    .runWith({
-    timeoutSeconds: 30,
-    memory: '256MB'
-})
-    .firestore
-    .document('notifications_queue/{id}')
-    .onCreate(async (snap, context) => {
-    const notificationId = context.params.id;
-    const notificationData = snap.data();
-    functions.logger.info(`[INICIO] Procesando notificación en cola: ${notificationId}`);
-    // 1. Lock optimista antes de enviar
-    if (notificationData.status !== 'pending') {
-        functions.logger.info(`[SKIP] Notificación ${notificationId} no está pendiente (status: ${notificationData.status}).`);
-        return null;
-    }
-    try {
-        await snap.ref.update({
-            status: 'processing',
-            processingAt: admin.firestore.FieldValue.serverTimestamp()
+/* =========================================
+   ON USER CREATE -> INIT ONBOARDING
+========================================= */
+exports.onUserCreate = (0, firestore_1.onDocumentCreated)("users/{userId}", async (event) => {
+    await db.collection("users").doc(event.params.userId).update({
+        onboardingStep: 0,
+        onboardingCreatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        emailNotifications: true
+    });
+});
+/* =========================================
+   ONBOARDING SCHEDULER
+========================================= */
+exports.onboardingScheduler = (0, scheduler_1.onSchedule)("every 60 minutes", async () => {
+    const now = Date.now();
+    const users = await db
+        .collection("users")
+        .where("onboardingStep", "<", 5)
+        .get();
+    for (const doc of users.docs) {
+        const user = doc.data();
+        if (!user.email)
+            continue;
+        if (user.emailNotifications === false)
+            continue;
+        if (user.plan && user.plan !== "free")
+            continue;
+        if (!user.onboardingCreatedAt)
+            continue;
+        const created = user.onboardingCreatedAt.toDate().getTime();
+        const diff = now - created;
+        let send = false;
+        if (user.onboardingStep === 0 && diff > 5 * 60 * 1000)
+            send = true;
+        if (user.onboardingStep === 1 && diff > 1 * 86400000)
+            send = true;
+        if (user.onboardingStep === 2 && diff > 3 * 86400000)
+            send = true;
+        if (user.onboardingStep === 3 && diff > 5 * 86400000)
+            send = true;
+        if (user.onboardingStep === 4 && diff > 8 * 86400000)
+            send = true;
+        if (!send)
+            continue;
+        await db.collection("notifications_queue").add({
+            userId: doc.id,
+            type: "onboarding",
+            step: user.onboardingStep,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            sent: false
         });
-        functions.logger.info(`[LOCK] Notificación ${notificationId} marcada como processing.`);
-        const { userId, auctionId } = notificationData;
-        // 3. Leer subasta (opcional para promos)
-        let auction = {};
-        if (auctionId) {
-            const auctionDoc = await db.collection('auctions').doc(auctionId).get();
-            if (auctionDoc.exists) {
-                auction = auctionDoc.data();
-            }
-            else if (!notificationData.type || notificationData.type === 'alert') {
-                throw new Error(`Subasta ${auctionId} no encontrada.`);
-            }
+        await doc.ref.update({
+            onboardingStep: user.onboardingStep + 1
+        });
+    }
+});
+/* =========================================
+   EMAIL SENDER
+========================================= */
+exports.onNotificationQueueCreate = (0, firestore_1.onDocumentCreated)({
+    document: "notifications_queue/{id}",
+    secrets: ["MAILERSEND_API_KEY"]
+}, async (event) => {
+    const data = event.data?.data();
+    if (!data)
+        return;
+    const userDoc = await db.collection("users").doc(data.userId).get();
+    const user = userDoc.data();
+    if (!user?.email)
+        return;
+    if (user.emailNotifications === false)
+        return;
+    let subject = "";
+    let text = "";
+    /* =========================
+       ONBOARDING
+    ========================= */
+    if (data.type === "onboarding") {
+        if (data.step === 0) {
+            const name = user.displayName ? user.displayName.split(" ")[0] : "inversor";
+            subject = "Empieza bien en subastas (evita este error)";
+            text = `Hola, ${name}. Bienvenido a Activos OffMarket.
+
+El error más común en subastas es pujar sin analizar las cargas del activo. Para invertir con seguridad, la información técnica es clave.
+
+Tu cuenta gratuita ya está activa y cuenta con:
+• Acceso a subastas analizadas
+• Hasta 3 activos favoritos
+• 1 alerta personalizada
+
+Empieza a explorar oportunidades reales.
+
+👉 Ver subastas activas:
+https://activosoffmarket.es/subastas-recientes`;
         }
-        // 4. Leer usuario
-        const userDoc = await db.collection('users').doc(userId).get();
-        if (!userDoc.exists) {
-            throw new Error(`Usuario ${userId} no encontrado.`);
+        if (data.step === 1) {
+            const name = user.displayName ? user.displayName.split(" ")[0] : "inversor";
+            subject = "Llega antes a las oportunidades de inversión";
+            text = `Hola, ${name}.
+
+En subastas, acceder a la información antes que el resto es clave para asegurar una buena inversión. Analizamos el BOE a diario para darte esta ventaja.
+
+Activa una alerta para recibir notificaciones automáticas solo con los activos que encajen en tus criterios. Tu cuenta gratuita incluye 1 alerta.
+
+👉 Crear tu primera alerta ahora:
+https://activosoffmarket.es/alertas-subastas`;
         }
-        const user = userDoc.data();
-        // 1. Soporte para flags opcionales (push por defecto true, email por defecto false)
-        const shouldPush = notificationData.push !== false;
-        const shouldEmail = notificationData.email === true;
-        // 2. Lógica Push Actualizada
-        const isAlert = !notificationData.type || notificationData.type === 'alert';
-        if ((shouldPush && isAlert) || notificationData.push === true) {
-            let isActive = false;
-            if (user.lastActiveAt) {
-                const lastActiveDate = user.lastActiveAt.toDate ? user.lastActiveAt.toDate() : new Date(user.lastActiveAt);
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                if (lastActiveDate > thirtyDaysAgo) {
-                    isActive = true;
-                }
-            }
-            if (!isActive) {
-                functions.logger.info(`[PUSH] skipped inactive user ${userId}`);
-            }
-            else if (user.fcmToken) {
-                try {
-                    const pushTitle = notificationData.title || `Nueva subasta en ${auction.province || 'tu zona'}`;
-                    const pushBody = notificationData.body || `${auction.propertyType || 'Inmueble'} detectado — revisa antes que otros`;
-                    const targetUrl = notificationData.url || `https://activosoffmarket.es/subasta/${auction.slug || auctionId}`;
-                    await admin.messaging().send({
-                        token: user.fcmToken,
-                        notification: {
-                            title: pushTitle,
-                            body: pushBody,
-                        },
-                        data: {
-                            url: targetUrl
-                        }
-                    });
-                    functions.logger.info(`[PUSH] push sent to ${userId}`);
-                }
-                catch (pushError) {
-                    if (pushError.code === 'messaging/invalid-registration-token' || pushError.code === 'messaging/registration-token-not-registered') {
-                        functions.logger.warn(`[PUSH] push invalid token for user ${userId}`);
-                    }
-                    else {
-                        functions.logger.error(`[PUSH] push error for user ${userId}:`, pushError);
-                    }
-                }
+        if (data.step === 2) {
+            const name = user.displayName ? user.displayName.split(" ")[0] : "inversor";
+            subject = "El riesgo oculto de las subastas (y cómo evitarlo)";
+            text = `Hola, ${name}.
+
+Un error muy frecuente al invertir en subastas es pujar sin entender las cargas del inmueble. Debes saber que, como adjudicatario, asumes las cargas anteriores; esto significa que un activo puede esconder miles de euros en deudas.
+
+Es un riesgo económico real que puede convertir una gran oportunidad en una pérdida patrimonial. Para proteger tu capital, la revisión técnica del expediente no es opcional.
+
+👉 Ver checklist antes de pujar:
+https://www.activosoffmarket.es/checklist-subastas`;
+        }
+        if (data.step === 3) {
+            const name = user.displayName ? user.displayName.split(" ")[0] : "inversor";
+            subject = "Cómo analizar subastas sin ser experto jurídico";
+            text = `Hola, ${name}.
+
+Ya conoces el riesgo de pujar a ciegas. Ahora llega la solución: analizar a fondo el expediente antes de invertir.
+
+No necesitas ser un experto legal para participar con seguridad. Nuestra plataforma simplifica la revisión técnica, analizando las cargas automáticamente y ofreciéndote claridad para que puedas decidir si el activo vale la pena.
+
+👉 Analizar una subasta ahora:
+https://activosoffmarket.es/subastas-recientes`;
+        }
+        if (data.step === 4) {
+            const name = user.displayName ? user.displayName.split(" ")[0] : "inversor";
+            if (!user.plan || user.plan === "free") {
+                subject = "Da el siguiente paso en tus inversiones";
+                text = `Hola, ${name}.
+
+Ya estás usando la plataforma. Para invertir con ventaja real frente a otros inversores, necesitas acceso completo.
+
+Con los planes superiores podrás:
+- Crear más alertas
+- Analizar más subastas
+- Tomar decisiones con mayor seguridad
+
+👉 Ver planes disponibles:
+https://activosoffmarket.es/pro`;
             }
             else {
-                functions.logger.info(`[PUSH] push skipped no token for user ${userId}`);
+                subject = "Aprovecha al máximo la plataforma";
+                text = `Hola, ${name}.
+
+Ya tienes acceso a herramientas avanzadas. La clave ahora es utilizarlas con constancia para detectar oportunidades antes que el resto.
+
+Revisa nuevas subastas y aplica análisis antes de tomar decisiones.
+
+👉 Ver subastas activas:
+https://activosoffmarket.es/subastas-recientes`;
             }
         }
-        // 3. Lógica Email (Placeholder + MailerLite actual)
-        if (shouldEmail) {
-            functions.logger.info(`EMAIL_PENDING ${notificationData.type || 'alert'} ${userId}`);
-            const userEmail = user.email;
-            if (!userEmail) {
-                throw new Error(`Usuario ${userId} no tiene email configurado.`);
-            }
-            /*
-            const mailerliteApiKey = process.env.MAILERLITE_API_KEY || functions.config().mailerlite?.key;
-            if (!mailerliteApiKey) {
-              throw new Error('MAILERLITE_API_KEY no configurada en el entorno.');
-            }
-            */
-            const checkDoc = await snap.ref.get();
-            if (checkDoc.data()?.status !== 'processing') {
-                functions.logger.warn(`[ABORT] Notificación ${notificationId} cambió de estado antes de enviar (status: ${checkDoc.data()?.status}).`);
-                return null;
-            }
-            const ENABLE = functions.config().alerts?.enabled === "true";
-            if (!ENABLE) {
-                functions.logger.info("[SKIP] alerts disabled via config");
-                await snap.ref.update({
-                    status: 'skipped_test',
-                    skippedAt: admin.firestore.FieldValue.serverTimestamp()
-                });
-                return null;
-            }
-            /*
-            const response = await fetch('https://connect.mailerlite.com/api/emails/transactional', {
-              method: 'POST',
-              headers: {
-                'Authorization': `Bearer ${mailerliteApiKey}`,
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-              },
-              body: JSON.stringify(emailPayload),
-            });
-    
-            if (!response.ok) {
-              const errorData = await response.text();
-              throw new Error(`Error MailerLite (${response.status}): ${errorData}`);
-            }
-            */
-            functions.logger.info(`[SIMULATED] Email would be sent to ${userEmail} (MailerLite disabled)`);
-        }
-        // 2. Después enviar OK
-        await snap.ref.update({
-            status: 'sent',
-            sent: true,
-            sentAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-        // 5. Logs: enviado
-        functions.logger.info(`[SENT] Notificación procesada con éxito para usuario ${userId} y subasta ${auctionId}`);
-        return null;
     }
-    catch (error) {
-        // 3. Si error
-        const currentRetryCount = notificationData.retryCount || 0;
-        const newRetryCount = currentRetryCount + 1;
-        const newStatus = newRetryCount >= 3 ? 'dead' : 'failed';
-        // 5. Logs: error
-        functions.logger.error(`[${newStatus.toUpperCase()}] Fallo al enviar notificación ${notificationId}:`, error);
-        await snap.ref.update({
-            status: newStatus,
-            error: error.message || 'Error desconocido',
-            retryCount: newRetryCount,
-            failedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
-        return null;
+    /* =========================
+       PLAN ACTIVATED
+    ========================= */
+    if (data.type === "plan_activated") {
+        const name = user.displayName ? user.displayName.split(" ")[0] : "inversor";
+        const planName = data.plan === "pro" ? "PRO" : "BASIC";
+        subject = `Plan ${planName} activado correctamente`;
+        text = `Hola, ${name}.
+
+Tu plan ${planName} ya está activo.
+
+Ya puedes:
+- Crear más alertas
+- Analizar más subastas
+- Acceder a herramientas avanzadas
+
+👉 Ir a tu cuenta:
+https://activosoffmarket.es/mi-cuenta`;
+    }
+    /* =========================
+       PLAN CANCELED
+    ========================= */
+    if (data.type === "plan_canceled") {
+        const name = user.displayName ? user.displayName.split(" ")[0] : "inversor";
+        subject = "Tu suscripción ha sido cancelada";
+        text = `Hola, ${name}.
+
+Hemos confirmado la cancelación de tu suscripción.
+
+Seguirás teniendo acceso hasta el final del periodo ya pagado.
+
+Si en el futuro quieres volver, tu cuenta seguirá disponible.
+
+👉 Ver tu cuenta:
+https://activosoffmarket.es/mi-cuenta`;
+    }
+    /* =========================
+       ALERT EMAIL
+    ========================= */
+    if (data.type === "alert") {
+        let auction = null;
+        if (data.auctionId) {
+            const auctionDoc = await db
+                .collection("auctions")
+                .doc(data.auctionId)
+                .get();
+            auction = auctionDoc.data();
+        }
+        const title = auction?.title || "Nueva subasta";
+        const price = auction?.price || "";
+        const city = auction?.city || "";
+        subject = `Nueva subasta: ${title}`;
+        text = `${title}
+
+${price ? "Precio: " + price : ""}
+${city ? "Ubicación: " + city : ""}
+
+https://activosoffmarket.es/subasta/${data.auctionId}`;
+    }
+    try {
+        await sendEmail(user.email, subject, text, data.userId, user.unsubscribeToken || "");
+        await db
+            .collection("notifications_queue")
+            .doc(event.params.id)
+            .update({ sent: true });
+    }
+    catch (e) {
+        console.error("email error", e);
     }
 });
 //# sourceMappingURL=index.js.map

@@ -20,9 +20,14 @@ export const config = {
 // Lazy initialization of Firebase Admin
 const initAdmin = () => {
   if (admin.apps.length === 0) {
-    admin.initializeApp({
-      projectId: process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID
-    });
+    const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+    if (projectId) {
+      admin.initializeApp({
+        projectId: projectId
+      });
+    } else {
+      admin.initializeApp();
+    }
   }
   return admin.firestore();
 };
@@ -63,18 +68,29 @@ export default async function handler(req: any, res: any) {
         const customerId = session.customer as string;
         const subscriptionId = session.subscription as string;
         const email = session.customer_details?.email;
+        const userId = session.client_reference_id || session.metadata?.userId;
 
-        if (email) {
-          const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
-          const priceId = lineItems.data[0].price?.id;
-          
-          if (session.mode === 'subscription') {
-            const plan = priceId ? PRICE_TO_PLAN[priceId] : undefined;
-            await syncStripeData(email, customerId, subscriptionId, 'active', plan);
-          } else if (session.mode === 'payment') {
-            // Handle one-time payment fulfillment here if needed in the future
-            console.log(`One-time payment completed for price: ${priceId}`);
+        const lineItems = await stripe.checkout.sessions.listLineItems(session.id);
+        const priceId = lineItems.data[0]?.price?.id;
+        
+        if (session.mode === 'subscription') {
+          const plan = priceId ? PRICE_TO_PLAN[priceId] : undefined;
+          const resolvedUserId = await syncStripeData(userId, email, customerId, subscriptionId, 'active', plan);
+
+          if (resolvedUserId && plan) {
+            const notifId = `plan_activated_${session.id}`;
+            const db = initAdmin();
+            await db.collection('notifications_queue').doc(notifId).set({
+              userId: resolvedUserId,
+              type: 'plan_activated',
+              plan: plan,
+              createdAt: admin.firestore.FieldValue.serverTimestamp(),
+              sent: false
+            });
           }
+        } else if (session.mode === 'payment') {
+          // Handle one-time payment fulfillment here if needed in the future
+          console.log(`One-time payment completed for price: ${priceId}`);
         }
         break;
       }
@@ -87,8 +103,17 @@ export default async function handler(req: any, res: any) {
 
         // Get customer email from Stripe
         const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
-        if (customer.email) {
-          await syncStripeData(customer.email, customerId, subscriptionId, status);
+        const resolvedUserId = await syncStripeData(null, customer.email, customerId, subscriptionId, status);
+
+        if (resolvedUserId && event.type === 'customer.subscription.updated' && subscription.cancel_at_period_end === true) {
+          const notifId = `plan_canceled_${event.id}`;
+          const db = initAdmin();
+          await db.collection('notifications_queue').doc(notifId).set({
+            userId: resolvedUserId,
+            type: 'plan_canceled',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            sent: false
+          });
         }
         break;
       }
@@ -97,8 +122,17 @@ export default async function handler(req: any, res: any) {
         const customerId = subscription.customer as string;
         
         const customer = await stripe.customers.retrieve(customerId) as Stripe.Customer;
-        if (customer.email) {
-          await syncStripeData(customer.email, customerId, subscription.id, 'canceled');
+        const resolvedUserId = await syncStripeData(null, customer.email, customerId, subscription.id, 'canceled');
+
+        if (resolvedUserId) {
+          const notifId = `plan_canceled_${event.id}`;
+          const db = initAdmin();
+          await db.collection('notifications_queue').doc(notifId).set({
+            userId: resolvedUserId,
+            type: 'plan_canceled',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            sent: false
+          });
         }
         break;
       }
@@ -111,14 +145,36 @@ export default async function handler(req: any, res: any) {
   }
 }
 
-async function syncStripeData(email: string, customerId: string, subscriptionId: string, status: string, plan?: string) {
+async function syncStripeData(userId: string | null | undefined, email: string | null | undefined, customerId: string, subscriptionId: string, status: string, plan?: string) {
   const db = initAdmin();
 
   const usersRef = db.collection('users');
-  const querySnapshot = await usersRef.where('email', '==', email).get();
+  let userDoc: any;
 
-  if (!querySnapshot.empty) {
-    const userDoc = querySnapshot.docs[0];
+  if (userId) {
+    const doc = await usersRef.doc(userId).get();
+    if (doc.exists) {
+      userDoc = doc;
+    } else {
+      console.warn(`User ID ${userId} from Stripe session not found in Firestore.`);
+    }
+  }
+
+  if (!userDoc && customerId) {
+    const querySnapshot = await usersRef.where('stripeCustomerId', '==', customerId).get();
+    if (!querySnapshot.empty) {
+      userDoc = querySnapshot.docs[0];
+    }
+  }
+
+  if (!userDoc && email) {
+    const querySnapshot = await usersRef.where('email', '==', email).get();
+    if (!querySnapshot.empty) {
+      userDoc = querySnapshot.docs[0];
+    }
+  }
+
+  if (userDoc) {
     const userRef = userDoc.ref;
     
     const updateData: any = {
@@ -133,9 +189,11 @@ async function syncStripeData(email: string, customerId: string, subscriptionId:
     
     await userRef.update(updateData);
     
-    console.log(`Synced Stripe data for user: ${email}`);
+    console.log(`Synced Stripe data for user: ${userDoc.id} (email: ${email}, status: ${status}, plan: ${plan || 'untouched'})`);
+    return userDoc.id;
   } else {
-    console.warn(`No user found in Firestore with email: ${email}`);
+    console.warn(`Could not sync Stripe data. No user found with userId: ${userId}, customerId: ${customerId}, or email: ${email}`);
+    return null;
   }
 }
 

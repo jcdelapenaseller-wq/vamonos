@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import { MapPin, DollarSign, TrendingUp, ChevronRight, Calculator, ArrowRight, Percent } from 'lucide-react';
 import { AUCTIONS } from '../data/auctions';
 import { getFilteredAuctions } from '../utils/auctionHelpers';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { AuctionCard } from './AuctionCard';
 import { isAuctionActive, isAuctionFinished, sortAuctions } from '../utils/auctionHelpers';
 import { normalizePropertyType, normalizeCity, normalizeLocationLabel } from '../utils/auctionNormalizer';
@@ -11,10 +12,6 @@ import { normalizePropertyType, normalizeCity, normalizeLocationLabel } from '..
 const HighDiscountAuctions: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
-    document.title = "Subastas inmobiliarias con más del 50% de descuento en España | Activos Off-Market";
-    
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) metaDesc.setAttribute('content', "Descubre subastas judiciales y administrativas en España con descuentos superiores al 50% sobre su valor de tasación. Oportunidades de inversión inmobiliaria analizadas.");
   }, []);
 
   const highDiscountAuctions = useMemo(() => {
@@ -34,6 +31,11 @@ const HighDiscountAuctions: React.FC = () => {
 
   return (
     <div className="bg-slate-50 min-h-screen font-sans text-slate-600">
+      <Helmet>
+        <title>Subastas inmobiliarias con más del 50% de descuento en España | Activos Off-Market</title>
+        <meta name="description" content="Descubre subastas judiciales y administrativas en España con descuentos superiores al 50% sobre su valor de tasación. Oportunidades de inversión inmobiliaria analizadas." />
+        <link rel="canonical" href="https://activosoffmarket.es/subastas-descuento-50" />
+      </Helmet>
       <header className="bg-white border-b border-slate-200 pt-12 pb-16">
         <div className="max-w-7xl mx-auto px-6">
           <nav className="flex items-center text-sm text-slate-500 mb-8 font-medium" aria-label="Breadcrumb">

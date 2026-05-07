@@ -33,34 +33,7 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='32' fill='%23212d3b'/%3E%3Cpath d='M32 96 L64 24 L96 96' stroke='white' stroke-width='16' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M44 66 H84' stroke='white' stroke-width='16' stroke-linecap='round'/%3E%3C/svg%3E">
     <link rel="apple-touch-icon" sizes="180x180" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 128 128'%3E%3Crect width='128' height='128' rx='32' fill='%23212d3b'/%3E%3Cpath d='M32 96 L64 24 L96 96' stroke='white' stroke-width='16' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M44 66 H84' stroke='white' stroke-width='16' stroke-linecap='round'/%3E%3C/svg%3E">
     
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-              serif: ['Playfair Display', 'serif']
-            },
-            colors: {
-              brand: {
-                50: '#f4f6f8',
-                100: '#e4e8ed',
-                200: '#c5d0db',
-                300: '#94a9bf',
-                400: '#607f9f',
-                500: '#426385',
-                600: '#324e6b',
-                700: '#293f56',
-                800: '#253547',
-                900: '#212d3b'
-              }
-            }
-          }
-        }
-      };
-    </script>
     <style>
       html { scroll-behavior: smooth; }
       .glass-card {
@@ -82,17 +55,28 @@
         background: #94a3b8;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.3.1",
-    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
-    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?deps=react@18.3.1",
-    "lucide-react": "https://esm.sh/lucide-react@0.344.0?deps=react@18.3.1",
-    "react-dom/": "https://esm.sh/react-dom@18.3.1/",
-    "react/": "https://esm.sh/react@18.3.1/",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.4",
-    "vite": "https://esm.sh/vite@^7.3.1"
+<script>
+// Polyfills for JSDOM prerendering
+if (typeof window !== 'undefined') {
+  window.matchMedia = window.matchMedia || function() {
+    return { matches: false, addListener: function() {}, removeListener: function() {} };
+  };
+  window.IntersectionObserver = window.IntersectionObserver || class {
+    observe() {} unobserve() {} disconnect() {}
+  };
+  window.ResizeObserver = window.ResizeObserver || class {
+    observe() {} unobserve() {} disconnect() {}
+  };
+  window.scrollTo = window.scrollTo || function() {};
+  if (!window.fetch) {
+    window.fetch = function() {
+      return Promise.resolve({
+        json: function() { return Promise.resolve({}); },
+        text: function() { return Promise.resolve(""); },
+        ok: true,
+        status: 200
+      });
+    };
   }
 }
 </script>

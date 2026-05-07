@@ -38,7 +38,6 @@ import Home from './components/Home';
 import About from './components/About';
 import SubastasBOEPage from './components/SubastasBOEPage';
 import GuidePillar from './components/GuidePillar';
-import AuctionGuideIndex from './components/AuctionGuideIndex';
 import AuctionAnalysisGuide from './components/AuctionAnalysisGuide';
 import AuctionGlossary from './components/AuctionGlossary';
 import AuctionComparisonGuide from './components/AuctionComparisonGuide';
@@ -50,6 +49,7 @@ import AuctionVisitGuide from './components/AuctionVisitGuide';
 import AuctionErrorsGuide from './components/AuctionErrorsGuide';
 import AuctionAssignmentGuide from './components/AuctionAssignmentGuide';
 import AuctionCalculator from './components/AuctionCalculator';
+import AuctionCalculatorLanding from './components/AuctionCalculatorLanding';
 import NotFound from './components/NotFound';
 import AuctionEmptyGuide from './components/AuctionEmptyGuide';
 import AuctionWorthItGuide from './components/AuctionWorthItGuide';
@@ -81,6 +81,7 @@ import ErrorBoundary from './components/ErrorBoundary';
 const AuctionPage = React.lazy(() => import('./components/AuctionPage'));
 const AnalysisPage = React.lazy(() => import('./pages/AnalysisPage'));
 import AuctionCalculatorPage from './components/AuctionCalculatorPage';
+import ContactPage from './pages/ContactPage';
 import Legal from './components/Legal';
 import AdminTracking from './components/AdminTracking';
 import ChecklistPage from './components/ChecklistPage';
@@ -96,6 +97,9 @@ import VehicleAuctionsPage from './components/VehicleAuctionsPage';
 const AnalisisCargasPage = React.lazy(() => import('./components/AnalisisCargasPage'));
 const AnalisisInversionPage = React.lazy(() => import('./components/AnalisisInversionPage'));
 const AnalizarSubastaHub = React.lazy(() => import('./components/AnalizarSubastaHub'));
+import AuctionGuidesHub from './components/AuctionGuidesHub';
+const ComoComprarSubastaPage = React.lazy(() => import('./components/ComoComprarSubastaPage'));
+import UnsubscribePage from './pages/UnsubscribePage';
 
 export const routes: RouteObject[] = [
   {
@@ -180,8 +184,8 @@ export const routes: RouteObject[] = [
     element: createElement(HighDiscountAuctions),
   },
   {
-    path: ROUTES.GUIDE_INDEX,
-    element: createElement(AuctionGuideIndex),
+    path: '/indice-guia-subastas',
+    element: createElement(RedirectStatic, { to: ROUTES.GUIDE_HUB }),
   },
   {
     path: ROUTES.GUIDE_PILLAR,
@@ -229,7 +233,7 @@ export const routes: RouteObject[] = [
   },
   {
     path: ROUTES.CALCULATOR,
-    element: createElement(AuctionCalculator),
+    element: createElement(AuctionCalculatorLanding),
   },
   {
     path: ROUTES.PROFITABILITY,
@@ -441,7 +445,7 @@ export const routes: RouteObject[] = [
   },
   {
     path: ROUTES.CONTACT,
-    element: createElement(Legal, { type: 'contacto' }),
+    element: createElement(ContactPage),
   },
   {
     path: ROUTES.ADMIN_TRACKING,
@@ -466,6 +470,18 @@ export const routes: RouteObject[] = [
   {
     path: ROUTES.MI_CUENTA,
     element: createElement(AccountPage),
+  },
+  {
+    path: ROUTES.UNSUBSCRIBE,
+    element: createElement(UnsubscribePage),
+  },
+  {
+    path: ROUTES.GUIDE_HUB,
+    element: createElement(AuctionGuidesHub),
+  },
+  {
+    path: ROUTES.COMO_COMPRAR,
+    element: createElement(ComoComprarSubastaPage),
   },
   {
     path: '*',

@@ -5,23 +5,23 @@ import { Link } from 'react-router-dom';
 const steps = [
   {
     icon: <Filter size={32} />,
-    title: "1. Filtro Rápido",
-    desc: "Descarto el 95% del ruido del BOE: proindivisos, nuda propiedad y precios fuera de mercado."
+    title: "1. Filtrado Inteligente",
+    desc: "Descartamos el 95% del ruido del BOE: proindivisos, nuda propiedad y precios fuera de mercado."
   },
   {
     icon: <Scale size={32} />,
     title: "2. Cargas y Deudas",
-    desc: "Calculo la deuda real. Leo la certificación para asegurar que no heredas hipotecas o embargos ocultos."
+    desc: "Estructuramos la deuda real y analizamos la certificación para descartar embargos ocultos."
   },
   {
     icon: <Home size={32} />,
-    title: "3. Ocupación",
-    desc: "Investigo indicios en el edicto y notificaciones. ¿Viven allí? ¿Tienen contrato? ¿Se irán fácil?"
+    title: "3. Estado de Ocupación",
+    desc: "Investigamos indicios en edictos y notificaciones sobre la situación posesoria del activo."
   },
   {
     icon: <ReceiptEuro size={32} />,
-    title: "4. Números Reales",
-    desc: "Sumo ITP, registro, comunidad y reformas. Te doy el precio máximo de puja para que tengas margen."
+    title: "4. Cálculo de Margen",
+    desc: "Estimamos valores, sumamos impuestos (ITP) y gastos para proyectar tu margen real."
   }
 ];
 
@@ -34,9 +34,9 @@ const Process: React.FC = () => {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <span className="text-brand-600 font-bold text-sm tracking-widest uppercase mb-3 block">Rigor Técnico</span>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-slate-900 mb-6">Mi metodología de verificación</h2>
+          <h2 className="font-serif text-4xl md:text-5xl font-bold text-slate-900 mb-6">Sistema de verificación</h2>
           <p className="text-xl text-slate-600 mb-6">
-             La improvisación sale cara en las subastas. Yo sigo siempre este protocolo estricto.
+             La improvisación sale cara en las subastas. Todos los activos en la plataforma pasan por este protocolo.
           </p>
           <Link 
             to="/subastas-judiciales-espana" className="inline-flex items-center gap-2 text-brand-700 font-medium hover:text-brand-900 hover:underline underline-offset-4"
@@ -60,14 +60,12 @@ const Process: React.FC = () => {
         </div>
 
         <div className="text-center">
-            <a 
-                href="https://t.me/activosoffmarket" 
-                target="_blank"
-                rel="noopener noreferrer"
+            <Link 
+                to="/login"
                 className="inline-flex items-center gap-2 text-brand-700 font-bold text-lg hover:text-brand-900 transition-colors border-b-2 border-brand-200 hover:border-brand-700 pb-1"
             >
-                Ver cómo trabajo en el canal <ArrowRight size={20} />
-            </a>
+                Explorar activos analizados <ArrowRight size={20} />
+            </Link>
         </div>
       </div>
     </section>

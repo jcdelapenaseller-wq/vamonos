@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Calendar, ChevronRight, BookOpen, TrendingUp, ShieldCheck } from 'lucide-react';
 import { DISCOVER_REPORTS } from '../data/discoverReports';
 import TelegramCTA from './TelegramCTA';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 
 const DiscoverReportsIndex: React.FC = () => {
   useEffect(() => {

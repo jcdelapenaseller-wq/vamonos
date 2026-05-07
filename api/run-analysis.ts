@@ -1,72 +1,279 @@
-import { GoogleGenAI, Type } from "@google/genai";
+// import auctions from '../src/data/auctions.json' assert { type: 'json' };
+
 import multer from 'multer';
+import admin from 'firebase-admin';
 
 const upload = multer({ storage: multer.memoryStorage() });
 
-let aiInstance: GoogleGenAI | null = null;
-
-const getAI = () => {
-  if (!aiInstance) {
-    aiInstance = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY as string
+function runMiddleware(req: any, res: any, fn: any) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result: any) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
     });
-  }
-  return aiInstance;
+  });
+}
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
 };
 
+function extractNumber(text: string) {
+  if (!text) return 0;
+
+  const matches = text
+    .replace(/\./g, '')
+    .replace(/,/g, '.')
+    .match(/\d+(\.\d+)?/g);
+
+  if (!matches) return 0;
+
+  return Math.max(...matches.map(n => parseFloat(n)));
+}
+
+function extractJson(text: string) {
+  const start = text.indexOf('{');
+  if (start === -1) throw new Error("No JSON found in AI response");
+
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    if (text[i] === '}') depth--;
+
+    if (depth === 0) {
+      return text.slice(start, i + 1);
+    }
+  }
+
+  throw new Error("No complete JSON found");
+}
+
+function validateAnalysis(data: any) {
+  if (!data || typeof data !== "object") {
+    return {
+      cargas: [],
+      recomendacion: {},
+      resumen_ejecutivo: ""
+    };
+  }
+
+  if (!Array.isArray(data.cargas)) {
+    throw new Error("cargas must be array");
+  }
+
+  data.cargas.forEach((c: any, i: number) => {
+    console.log("VALIDATING CARGA:", c);
+    if (!c.tipo) throw new Error(`carga ${i} missing tipo`);
+    if (c.importe !== null && typeof c.importe !== "number") throw new Error(`carga ${i} importe must be number`);
+    if (!["SUBSISTE", "CANCELA"].includes(c.estado)) {
+      throw new Error(`carga ${i} estado inválido`);
+    }
+  });
+
+  data.recomendacion = data.recomendacion || {};
+  data.resumen_ejecutivo = data.resumen_ejecutivo || "";
+
+  return data;
+}
+
 export default async function handler(req: any, res: any) {
+  console.log("RUN-ANALYSIS START");
+  console.log("HEADERS:", req.headers);
+  console.log("BODY TYPE:", typeof req.body);
+  console.log("FILE:", req.file);
+
+  // Parse multipart/form-data
+  await runMiddleware(req, res, upload.single('files'));
+
+  console.log("START handler");
+
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  upload.array('files')(req, res, async (err: any) => {
-    if (err) {
-      console.error("Multer error:", err);
-      return res.status(400).json({ error: 'Error uploading files' });
+  try {
+    // 1) Auth Validation
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized: No token provided' });
+    }
+    
+    const idToken = authHeader.split('Bearer ')[1];
+    let decodedToken;
+    try {
+      if (admin.apps.length === 0) {
+        const projectId = process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID;
+        if (projectId) {
+          admin.initializeApp({ projectId: projectId });
+        } else {
+          admin.initializeApp();
+        }
+      }
+      decodedToken = await admin.auth().verifyIdToken(idToken);
+    } catch (e) {
+      console.error('[Backend] Auth verification failed', e);
+      return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+    
+    const uid = decodedToken.uid;
+    const db = admin.firestore();
+    const userRef = db.collection('users').doc(uid);
+    const userDoc = await userRef.get();
+    
+    if (!userDoc.exists) {
+      return res.status(403).json({ error: 'User not found' });
+    }
+    
+    const userData = userDoc.data();
+    const plan = (userData?.plan || 'free').toLowerCase();
+    const analysisUsed = userData?.analysisUsed || 0;
+    
+    let limit = 1;
+    if (plan === 'basic') limit = 3;
+    if (plan === 'pro') limit = 5;
+    
+    if (analysisUsed >= limit) {
+      console.log(`[Backend] User ${uid} reached analysis limit (${analysisUsed}/${limit})`);
+      return res.status(403).json({ error: 'Analysis limit reached', limit, used: analysisUsed });
     }
 
+    const type = req.body?.type;
+    const auctionId = req.body?.auctionId;
+    const pdfUrl = req.body?.pdfUrl || null;
+    
+    const file = req.file;
+    const files = file ? [file] : [];
+    console.log("FILES RECEIVED:", files);
+    console.log("FILE NAME:", files?.[0]?.originalname);
+    console.log("FILE SIZE:", files?.[0]?.size);
+
+    console.log("pdfUrl received:", pdfUrl);
+    console.log("analysis type:", type);
+    console.log("auctionId:", auctionId);
+
+    let base64 = "";
+
+    if (pdfUrl) {
+      // Descargar PDF
+      console.log("[Backend] Intentando descargar PDF desde URL:", pdfUrl);
+      const responseFile = await fetch(pdfUrl);
+      
+      console.log("[Backend] Cloudinary Response Status:", responseFile.status);
+      console.log("[Backend] Cloudinary Response StatusText:", responseFile.statusText);
+      
+      if (!responseFile.ok) {
+        const errorText = await responseFile.text();
+        console.error("[Backend] Error body from Cloudinary:", errorText);
+        throw new Error(`Error al descargar el PDF (${responseFile.status}): ${errorText || responseFile.statusText}`);
+      }
+      const fileBuffer = await responseFile.arrayBuffer();
+      base64 = Buffer.from(fileBuffer).toString("base64");
+    } else if (file) {
+      // Fallback a req.file si no hay pdfUrl
+      base64 = file.buffer.toString("base64");
+    } else {
+      return res.status(400).json({ error: "No pdfUrl or files provided" });
+    }
+
+    // Obtener datos de la subasta si existen
+    const auction: any = null;
+    const claimedDebt = auction?.claimedDebt;
+
+    let auctionContext = "";
+    if (auction) {
+      auctionContext = `
+DATOS DE LA SUBASTA (fuente BOE):
+- Valor de subasta: ${auction.valorSubasta ?? 'No especificado'}
+- Puja mínima: ${auction.minBid ?? 'No especificado'}
+- Ciudad: ${auction.city ?? 'No especificada'}
+- Tipo de activo: ${auction.propertyType ?? 'No especificado'}
+
+Instrucciones para la IA:
+- Prioriza estos datos sobre el PDF si hay conflicto
+- NO decir "no se especifica" si el dato existe arriba
+- Integrar estos datos de forma natural en el análisis
+`;
+    }
+
+    let claimedDebtContext = "";
+    if (claimedDebt) {
+      claimedDebtContext = `
+DATO OFICIAL DEL BOE (PRIORITARIO):
+La cantidad reclamada (deuda del procedimiento) es de ${claimedDebt.toLocaleString('es-ES')} EUR.
+DEBES usar este valor exacto en el bloque "### 💰 Deuda del procedimiento" y mencionarlo en el resumen.
+`;
+    } else {
+      claimedDebtContext = `
+Si no detectas la cantidad reclamada en los documentos, indica: "No se especifica en la documentación analizada".
+`;
+    }
+
+    let analysisMode = "cargas";
+    if (type === "completo") {
+      analysisMode = "completo";
+    }
+
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    const pdfParts = files.map((file) => ({
+      inlineData: {
+        data: file.buffer.toString("base64"),
+        mimeType: "application/pdf"
+      }
+    }));
+
+    console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI ---`);
+    console.log("CONTENT SENT TO AI (Base64 sample):", pdfParts[0]?.inlineData.data.slice(0, 500));
+
+    // Diagnóstico de modelos disponibles
     try {
-      const files = req.files as Express.Multer.File[];
-      const { type, auctionId } = req.body;
-      console.log("analysis type:", type);
-      console.log("auctionId:", auctionId);
+      const modelsResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`);
+      const modelsData = await modelsResponse.json();
+      console.log("MODELOS DISPONIBLES:", JSON.stringify(modelsData, null, 2));
+    } catch (err) {
+      console.error("Error al listar modelos:", err);
+    }
 
-      let analysisMode = "cargas";
-      if (type === "completo") {
-        analysisMode = "completo";
-      }
+    const prompt = `
+Analiza EXCLUSIVAMENTE el contenido del documento PDF proporcionado. No respondas si no detectas texto claro del documento.
 
-      if (!files || files.length === 0) {
-        return res.status(400).json({ error: "No se han proporcionado archivos para analizar." });
-      }
+${auctionContext}
 
-      const ai = getAI();
-      const currentDate = new Date().toISOString().split('T')[0];
-
-      const pdfParts = files.map((file) => {
-        const base64EncodeString = file.buffer.toString('base64');
-        console.log(`[Backend] Preparando archivo: ${file.originalname} (${file.size} bytes)`);
-        return {
-          inlineData: {
-            data: base64EncodeString,
-            mimeType: "application/pdf"
-          }
-        };
-      });
-
-      console.log(`[Backend] --- INICIANDO ANÁLISIS CON GEMINI (${files.length} archivos) ---`);
-
-      const prompt = `
-Actúa como un experto en derecho hipotecario español, ejecuciones judiciales y análisis de subastas inmobiliarias.
+Actúa como jurista especialista en subastas judiciales inmobiliarias en España.
 FECHA ACTUAL DEL SISTEMA: ${currentDate} (Usa esta fecha para calcular la antigüedad de los documentos).
 
-Tu función es analizar documentos registrales (nota simple, certificación de cargas o edicto BOE) y determinar con precisión jurídica el impacto real de las cargas para un inversor.
+IMPORTANTE:
+Tu objetivo no es solo analizar que ya haces muy bien, sino EXPLICAR de forma clara para un inversor o comprador no experto.
+
+Debes diferenciar SIEMPRE:
+1. Deuda del procedimiento (cantidad reclamada)
+2. Cargas registrales (hipotecas, embargos, etc.)
+3. Qué cargas se cancelan en subasta
+4. Qué cargas subsisten (si existen)
+5. Qué paga realmente el comprador
+
+REGLAS CLAVE:
+- Nunca digas solo "no hay cargas" sin explicar contexto
+- Si una hipoteca es la ejecutada: explica que se cancela con la subasta
+- Si hay deuda: explica que NO la paga el comprador directamente
+- Usa lenguaje claro, frases cortas
+
+PROHIBIDO:
+- lenguaje excesivamente técnico
+- frases largas tipo BOE
+- usar solo términos como "se purga" sin explicación
+
+El resultado debe ser comprensible por un usuario no experto.
 
 ${analysisMode === 'cargas' ? `
 ENFOQUE DEL ANÁLISIS (MODO CARGAS):
-- Solo análisis jurídico de cargas.
-- Identificación de riesgos.
-- Resumen de la situación registral.
+- Análisis jurídico detallado y pedagógico.
+- Identificación clara de riesgos y situación registral.
+- Recomendación orientada a entender qué cargas subsisten y sus implicaciones legales.
 ` : `
 ENFOQUE DEL ANÁLISIS (MODO COMPLETO):
 - Análisis jurídico detallado.
@@ -78,293 +285,290 @@ Debes aplicar estrictamente la Ley de Enjuiciamiento Civil (especialmente art. 6
 
 ---
 
-ARQUITECTURA MULTI-DOCUMENTO Y PRIORIDAD JURÍDICA (NUEVO):
+ESTRUCTURA OBLIGATORIA PARA EL CAMPO "recomendacion" (DEBE INCLUIR ESTAS 3 SECCIONES EXACTAMENTE):
 
-Has recibido uno o varios documentos PDF. Debes analizarlos en conjunto aplicando estas reglas:
+### 🧠 Resumen claro
+Explica en 4-5 líneas:
+- qué deuda hay
+- si el inmueble queda limpio o no
+- qué riesgo real tiene el comprador
 
-1. CLASIFICACIÓN DE DOCUMENTOS Y FECHAS OBLIGATORIAS:
-- Identifica qué tipos de documentos has recibido ("Edicto", "Nota Simple", "Certificación de Cargas"). Guárdalos en "documentos_detectados".
-- Detecta la fecha de emisión de cada documento.
-- En el campo "fuente_documento", incluye el tipo y la fecha obligatoriamente con este formato: "Certificación (12/05/2023) + Edicto (15/02/2026)".
-- Si no detectas fecha en alguno, añade al string: "Fecha no identificada en el documento. Nivel de fiabilidad reducido."
+### 💰 Deuda del procedimiento
+- importe reclamado (Si el dato oficial es ${claimedDebt ? claimedDebt.toLocaleString('es-ES') + ' EUR' : 'desconocido'}, úsalo).
+- explicación clara de qué significa.
+- AÑADE SIEMPRE ESTA FRASE EXACTA: "Este importe corresponde a la deuda del procedimiento y no es asumido directamente por el comprador, ya que se cancela con la adjudicación del inmueble."
 
-2. PRIORIDAD JURÍDICA PRUDENTE (CRÍTICO):
-Si hay discrepancias entre documentos, aplica este orden de prevalencia:
-- 1º Certificación de Cargas: FUENTE PRIORITARIA. Mayor presunción de veracidad registral a su fecha de emisión, sujeta a actualización de intereses, costas y posibles asientos posteriores.
-- 2º Nota Simple: FUENTE SECUNDARIA. Informativa y de validación complementaria.
-- 3º Edicto: FUENTE CONTEXTUAL. Solo para identificar procedimiento, ejecutante y datos del expediente.
-ELIMINA cualquier asunción de "verdad absoluta", "certeza total" o "importe garantizado".
-
-3. TRAZABILIDAD OBLIGATORIA POR DATO:
-- En el campo "fuente_textual" de CADA carga detectada, DEBES empezar indicando el documento origen y su fecha.
-- Ejemplo: "[Certificación 12/05/2023] Anotación letra A..." o "[Nota Simple 01/02/2026] Inscripción 4ª...". Esto evita mezclas entre PDFs.
-
-4. REGLAS DE PRUDENCIA TEMPORAL (NUEVO):
-- Si los documentos tienen fechas distintas con más de 90 días de diferencia, añade esta alerta en el array "alertas": "Conviene revisar las fechas de los documentos aportados, ya que difieren entre sí."
-- Calcula la antigüedad aproximada de cada documento respecto a la FECHA ACTUAL DEL SISTEMA (${currentDate}).
-- Si algún documento tiene > 6 meses de antigüedad, añade a "alertas": "El documento principal tiene cierta antigüedad. Es recomendable tener en cuenta posibles variaciones."
-- Si algún documento tiene > 12 meses de antigüedad, añade a "alertas": "Documento con antigüedad superior a un año. Se sugiere solicitar certificación actualizada."
-
-5. ANÁLISIS MULTI-DOCUMENTO (FUSIÓN):
-- Fusiona la información de todos los documentos. Elimina duplicados priorizando la fuente de mayor rango.
-- Identifica la carga ejecutante desde el Edicto (si está disponible).
-- Identifica las cargas subsistentes desde la Certificación o Nota Simple.
-
-6. SCORE DE FIABILIDAD:
-Calcula el campo "nivel_confianza_global" estrictamente según esta tabla:
-- "MUY ALTA": Certificación reciente + Edicto.
-- "ALTA": Solo Certificación reciente.
-- "MEDIA": Nota Simple + Edicto.
-- "BAJA": Solo Nota Simple.
-- "MUY BAJA": Solo Edicto.
-REGLA DE REDUCCIÓN: Si el documento principal tiene > 6 meses de antigüedad, reduce el nivel de confianza un escalón automáticamente (ej. de MUY ALTA a ALTA).
-
-7. AVISOS OBLIGATORIOS Y TONO PRUDENTE:
-- Mantén siempre un tono neutral, profesional y no alarmista. Evita palabras como "crítico", "grave", "muy peligroso". Siempre acompaña una advertencia con una posible solución.
-- Si el nivel de confianza es "MUY BAJA" (solo Edicto), el campo "recomendacion" DEBE empezar obligatoriamente por: "Análisis basado únicamente en el Edicto. Al carecer de información registral completa, se recomienda extremar la prudencia al evaluar cargas."
-- Si NO hay Certificación de Cargas, añade a "alertas": "Para una confirmación exacta, suele ser recomendable solicitar la Certificación de Cargas al juzgado."
-- DISCLAIMER JURÍDICO FINAL OBLIGATORIO: Al final del texto del campo "recomendacion", añade siempre esta frase exacta: "El análisis se basa exclusivamente en los documentos aportados y puede no reflejar modificaciones registrales posteriores."
+### ⚖️ Qué paga el comprador
+- explicar claramente:
+  - paga su puja
+  - no paga la deuda ejecutada
+  - si hay cargas adicionales o no
 
 ---
 
-ARQUITECTURA DE EXTRACCIÓN DETERMINISTA (REGLA CRÍTICA Y FUENTE ÚNICA DE VERDAD):
+### 📊 RESUMEN EJECUTIVO (OBLIGATORIO)
 
-Para garantizar cero invenciones y cero omisiones, debes operar en dos fases estrictas:
+Debes generar un resumen claro de entre 7 y 10 líneas orientado a un inversor.
 
-FASE 1: ÍNDICE REGEX SIMULADO (PASO 0)
-- Escanea el documento y extrae ÚNICAMENTE los identificadores literales de las cargas (ej. "Inscripción 2ª", "Anotación Letra A", "Anotación Letra C").
-- Guarda esta lista exacta de strings en el array "cargas_detectadas_regex".
-- ESTE ARRAY ES TU ÚNICA FUENTE DE VERDAD.
-- PROHIBIDO inventar letras o números. PROHIBIDO asumir continuidad alfabética.
+Debe incluir:
+- tipo de subasta (judicial o administrativa)
+- ubicación del inmueble
+- valor de subasta y deuda reclamada
+- si existe o no puja mínima
+- cargas relevantes detectadas
+- si alguna carga subsiste (clave)
+- coherencia o incoherencia entre valor de subasta y valor de mercado
+- principal riesgo de la operación
 
-FASE 2: MAPEO ESTRICTO 1:1 POR ID
-- Para CADA elemento en "cargas_detectadas_regex", debe existir EXACTAMENTE UN objeto en el array "cargas_detectadas".
-- El campo "identificador_registral" de cada carga DEBE coincidir exactamente con un string de "cargas_detectadas_regex".
-- REGLA DE ELIMINACIÓN: Si generas una carga en "cargas_detectadas" que NO está en "cargas_detectadas_regex", ELIMÍNALA AUTOMÁTICAMENTE.
-- VALIDACIÓN OBLIGATORIA ANTES DE DEVOLVER JSON: Compara los IDs de ambos arrays. Si hay alguna diferencia (falta una o sobra una) -> ERROR -> REGENERA TU RESPUESTA internamente antes de emitir el JSON final.
+IMPORTANTE:
+- lenguaje claro, no técnico
+- no repetir el bloque recomendacion
+- no usar listas ni bullets
+- redactar en párrafos fluidos
+- evitar frases genéricas
 
----
+Si falta algún dato:
+→ usar la mejor inferencia posible del documento
 
-REGLAS JURÍDICAS OBLIGATORIAS Y PROHIBICIONES ESTRICTAS:
+Formato obligatorio:
 
-1. EXTRACCIÓN DE IMPORTES (CERO ESTIMACIONES):
-- Para extraer el importe de una carga, utiliza EXCLUSIVAMENTE los conceptos literales "IMPORTE A EMBARGAR" (en embargos) o "RESPONSABILIDAD TOTAL" (en hipotecas).
-- NUNCA estimes ni calcules intereses o costas por tu cuenta. Si el documento dice "para responder de X principal, Y intereses, Z costas", usa esos valores exactos. Si solo da un total, ponlo en principal y el resto a 0.
-- Cada carga detectada DEBE incluir el fragmento literal exacto del texto de donde se ha extraído (campo "fuente_textual").
-
-2. HIPOTECAS NOVADAS / AMPLIADAS / MODIFICADAS (REGLA CRÍTICA):
-- Si una inscripción indica que es "NOVADA", "AMPLIADA" o "MODIFICADA" respecto a una hipoteca de una inscripción anterior, la hipoteca anterior queda REEMPLAZADA a efectos de cálculo.
-- NO debes sumar ambas. La inscripción anterior debe marcarse con resultado "REEMPLAZADA" y NO debe incluirse en el cálculo del peor escenario.
-- La carga que subsiste y rige es la novada con su nueva responsabilidad total.
-
-3. IDENTIFICACIÓN DE LA CARGA EJECUTANTE (CRÍTICO):
-- La carga ejecutante (la que ordena la certificación de cargas y origina la subasta) NO SIEMPRE es la última cronológicamente.
-- Debes detectarla buscando EXCLUSIVAMENTE menciones literales como: "EXPEDICIÓN DE CERTIFICACIÓN DE CARGAS", "procedimiento de apremio", "ejecución", o "subasta" asociadas a una anotación o inscripción específica.
-- La carga ejecutante es el pivote absoluto que determina qué subsiste y qué se purga.
-- Si NO puedes identificar con absoluta certeza cuál es la carga ejecutante basándote en estos términos, el resultado de TODAS las cargas detectadas DEBE ser "DESCONOCIDO".
-
-4. INFERENCIA DE SUBSISTENCIA (REGLA DE ORO):
-- NO asumas subsistencia automática en embargos ni hipotecas.
-- Solo si has identificado con certeza la carga ejecutante (según la regla 3):
-  - Cargas anteriores a la ejecutante -> SUBSISTE
-  - La propia carga ejecutante -> SE PURGA
-  - Cargas posteriores a la ejecutante -> SE PURGA
-- Si hay la más mínima duda jurídica sobre el rango o la prioridad de una carga frente a la ejecutante, el resultado de esa carga DEBE ser "DESCONOCIDO".
-
-5. CÁLCULO DEL PEOR ESCENARIO (WORST CASE) Y VALIDACIÓN NUMÉRICA:
-- El peor escenario SOLO debe sumar los importes de las cargas cuyo resultado sea estrictamente "SUBSISTE".
-- Si hay cargas con resultado "DESCONOCIDO" o "REEMPLAZADA", NO las sumes al peor escenario.
-- VALIDACIÓN OBLIGATORIA: Debes sumar matemáticamente el total de las cargas "SUBSISTE" y asegurarte de que coincide exactamente con el "peor_escenario". Si no coincide, debes recalcular.
-
----
-
-8. CASOS JURÍDICOS LÍMITE (NUEVAS REGLAS CRÍTICAS):
-
-A) MÚLTIPLES FINCAS REGISTRALES (CRÍTICO):
-- Si el documento contiene varias fincas (ej. vivienda, garaje, trastero, o varios CRU/IDUFIR), debes detectar cada finca y asociar las cargas a su finca correspondiente.
-- Prioriza SIEMPRE la finca principal (vivienda) para extraer las cargas. NO mezcles cargas de diferentes fincas.
-- Si no puedes determinar con seguridad cuál es la vivienda principal, añade a "alertas": "El documento incluye varias fincas registrales. Conviene verificar a qué finca corresponde cada carga."
-
-B) CARGAS CANCELADAS O CADUCADAS:
-- Detecta términos como: "cancelada", "cancelación", "cancelado por caducidad", "caducada", "sin efecto", "levantado embargo", "cancelación registral", "anotación cancelada".
-- Si una carga está cancelada:
-  - Su "resultado" DEBE ser "CANCELADA" y el campo "vigente" debe ser false.
-  - NO la incluyas en el cálculo del peor escenario.
-  - En el campo "fuente_textual", incluye el texto: "Carga cancelada según documento registral".
-
-C) PRIORIDAD DE RESPONSABILIDAD HIPOTECARIA:
-- Es común que se indique un "préstamo total" y una "responsabilidad hipotecaria de la finca".
-- Para los cálculos (principal, intereses, costas, total), debes usar SIEMPRE la "responsabilidad hipotecaria finca".
-- Orden de prioridad para extraer importes: 1º Responsabilidad hipotecaria de la finca, 2º Cantidad reclamada en el procedimiento, 3º Principal del préstamo (este último solo informativo).
-
-D) SUBASTA PARCIAL (MUY IMPORTANTE):
-- Detecta expresiones como: "50% pleno dominio", "1/2 indiviso", "1/3 indiviso", "participación indivisa", "nuda propiedad", "usufructo", "pleno dominio parcial".
-- Si detectas que no se subasta el 100% del pleno dominio, añade OBLIGATORIAMENTE a "alertas": "La subasta no comprende el 100% del pleno dominio. Factor a considerar en la valoración económica."
-
----
-
-9. CONTROLES JURÍDICOS AVANZADOS (NUEVO):
-
-A) ESTADO DE LA CARGA (estado_carga):
-- Clasifica cada carga en uno de estos estados: CANCELADA_REGISTRAL, SE_CANCELA_EN_SUBASTA, SUBSISTE, DESCONOCIDO.
-- Reglas de clasificación (Ley Hipotecaria Española):
-  - Hipoteca ejecutada -> SE_CANCELA_EN_SUBASTA
-  - Cargas ANTERIORES a la ejecutante -> SUBSISTE
-  - Cargas POSTERIORES a la ejecutante -> SE_CANCELA_EN_SUBASTA
-  - Embargos POSTERIORES -> SE_CANCELA_EN_SUBASTA
-  - Afecciones fiscales (con preferencia) -> SUBSISTE
-- Si no puedes determinar el orden o qué cargas subsisten, añade OBLIGATORIAMENTE a "alertas": "Existen cargas que podrían mantenerse tras la adjudicación. Conviene tenerlas en cuenta en el cálculo económico de la operación."
-
-B) RANGO REGISTRAL (ORDEN DE CARGAS):
-- Busca explícitamente términos que definan el rango: "inscripción anterior / posterior", "anotación letra A,B,C", "rango registral", "prioridad", "fecha inscripción", "posterior a la hipoteca".
-- Si no puedes determinar el rango registral de las cargas, añade OBLIGATORIAMENTE a "alertas": "No se ha podido determinar con total precisión el orden registral de todas las cargas. Se recomienda considerar un margen de prudencia en el análisis."
-
-C) OCUPACIÓN DEL INMUEBLE:
-- Busca indicios de ocupación: "ocupado", "ocupantes", "sin posesión", "no consta posesión", "arrendado", "contrato alquiler", "tercer poseedor", "precario".
-- Si detectas alguno de estos términos, añade OBLIGATORIAMENTE a "alertas": "Ocupación no descartada según la documentación. En estos casos puede ser necesario gestionar la posesión tras la adjudicación, algo habitual en subastas y que dispone de vías legales de resolución."
-- Rellena los campos globales 'ocupacion_detectada' (true/false) y 'nivel_riesgo_ocupacion' (ALTO, MEDIO o BAJO).
-
----
-
-10. EXTRACCIÓN DE DATOS DE MERCADO (OPCIONAL):
-- Busca y extrae los siguientes datos si aparecen explícitamente en el Edicto o la Nota Simple:
-  - 'refCat': Referencia catastral de 20 caracteres (ej. 6530802VK286380056RL).
-  - 'ciudad': Nombre de la localidad donde se ubica el inmueble.
-  - 'codigo_postal': Código postal de 5 dígitos.
-  - 'superficie_m2': Superficie construida o útil en metros cuadrados (solo el número).
-  - 'valor_subasta': El valor por el que sale a subasta el bien.
-  - 'valor_tasacion': El valor de tasación a efectos de subasta (si difiere del valor de subasta).
-  - 'tipo_inmueble': Clasifica como 'vivienda' o 'piso' si se indica expresamente.
-  - 'yearBuilt': Año de construcción (ej. 1995).
-  - 'floor': Planta o piso (ej. '1º B', 'Bajo').
-- REGLA DE ORO: Si alguno de estos datos NO aparece de forma literal y clara, ponlo como null. NO los inventes ni los calcules.
+{
+  "cargas": [ ... ],
+  "recomendacion": "...",
+  "resumen_ejecutivo": "texto largo aquí",
+  "informacion_general": { ... }
+}
 
 ---
 
 INSTRUCCIONES DE ANÁLISIS (CHAIN OF THOUGHT):
 Antes de generar el JSON final, debes realizar un razonamiento jurídico interno (campo "razonamiento_juridico").
 En este razonamiento debes documentar explícitamente los siguientes pasos:
-1. FASE 1 (REGEX): Listar literalmente todas las letras de anotaciones y números de inscripciones encontradas en el texto.
-2. FASE 2 (MAPEO): Confirmar que vas a procesar exactamente esa lista, ni una más, ni una menos.
-3. EJECUTANTE: Identificar explícitamente cuál es la carga que se ejecuta citando el texto que lo demuestra ("EXPEDICIÓN DE CERTIFICACIÓN DE CARGAS", etc.). Si no se encuentra, declarar que todas las cargas son DESCONOCIDO.
-4. PURGA: Aplicar la regla de purga (art. 674 LEC) basándote en la carga ejecutante identificada.
-5. VALIDACIÓN DE COBERTURA: Confirmar que el número de cargas listadas en la Fase 1 es igual al número de cargas clasificadas en el JSON.
-6. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
+1. IDENTIFICACIÓN: Listar las cargas encontradas en el texto.
+2. EJECUTANTE: Identificar explícitamente cuál es la carga que se ejecuta citando el texto que lo demuestra ("EXPEDICIÓN DE CERTIFICACIÓN DE CARGAS", etc.). Si no se encuentra, declarar que todas las cargas son DESCONOCIDO.
+3. PURGA: Aplicar la regla de purga (art. 674 LEC) basándote en la carga ejecutante identificada.
+4. VALIDACIÓN NUMÉRICA: Suma explícita de las cargas que subsisten para confirmar el peor escenario.
+
+IMPORTANTE (OBLIGATORIO):
+
+Debes devolver SIEMPRE el campo "cargas" como un array estructurado.
+
+Si detectas cargas en el texto:
+→ debes incluirlas en "cargas"
+
+Formato obligatorio:
+
+{
+  "cargas": [
+    {
+      "tipo": "HIPOTECA | EMBARGO | SERVIDUMBRE",
+      "descripcion": "texto claro",
+      "importe": número (sin texto),
+      "estado": "SUBSISTE | CANCELA"
+    }
+  ],
+  "informacion_general": {
+    "superficie": "number | null (en m² si aparece)",
+    "habitaciones": "number | null (número)",
+    "banos": "number | null (número)",
+    "ano_construccion": "number | null (año si aparece)",
+    "ascensor": "boolean | null (true/false si se puede inferir)"
+  }
+}
+
+Devuelve también un objeto adicional llamado "informacion_general" con los campos extraídos del documento si están disponibles.
+Si no se encuentra un dato, devolver null. No inventar valores.
+
+PROHIBIDO:
+- devolver cargas vacío si existen cargas en el texto
+- esconder cargas dentro de "analisis"
+
+Si no cumples esto, la respuesta es inválida.
+
+Responde ÚNICAMENTE con el objeto JSON solicitado, sin texto adicional.
 `;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-3.1-pro-preview",
-        contents: {
-          parts: [
-            ...pdfParts,
-            {
-              text: prompt
-            }
-          ]
-        },
-        config: {
-          responseMimeType: "application/json",
-          responseSchema: {
-            type: Type.OBJECT,
-            properties: {
-              razonamiento_juridico: { type: Type.STRING, description: "Explicación paso a paso de la enumeración, extracción, identificación de ejecutante, purga y validaciones (cobertura y numérica)." },
-              documentos_detectados: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "Tipos de documentos detectados (ej. 'Edicto', 'Nota Simple', 'Certificación de Cargas')"
-              },
-              cargas_detectadas_regex: { 
-                type: Type.ARRAY, 
-                items: { type: Type.STRING },
-                description: "Índice determinista de identificadores extraídos literalmente del texto (Fase 1)."
-              },
-              fuente_documento: { type: Type.STRING, description: "Resumen de las fuentes (ej. 'Certificación + Edicto', 'Solo Nota Simple')" },
-              nivel_confianza_global: { type: Type.STRING, description: "MUY ALTA, ALTA, MEDIA, BAJA, MUY BAJA (según reglas de documentos presentes)" },
-              riesgo_global: { type: Type.STRING, description: "Riesgo global de la operación (BAJO, MEDIO, ALTO)" },
-              cargas_detectadas: {
-                type: Type.ARRAY,
-                items: {
-                  type: Type.OBJECT,
-                  properties: {
-                    identificador_registral: { type: Type.STRING, description: "Ej: 'Inscripción 2ª' o 'Anotación Letra A'" },
-                    tipo: { type: Type.STRING },
-                    fuente_textual: { type: Type.STRING, description: "Fragmento literal exacto del documento de donde se extrae esta carga." },
-                    desglose: {
-                      type: Type.OBJECT,
-                      properties: {
-                        principal: { type: Type.NUMBER },
-                        intereses: { type: Type.NUMBER },
-                        costas: { type: Type.NUMBER },
-                        total: { type: Type.NUMBER }
-                      },
-                      required: ["principal", "intereses", "costas", "total"]
-                    },
-                    titular: { type: Type.STRING },
-                    rango: { type: Type.STRING },
-                    resultado: { type: Type.STRING, description: "SUBSISTE, SE PURGA, DESCONOCIDO, REEMPLAZADA o CANCELADA" },
-                    estado_carga: { type: Type.STRING, description: "CANCELADA_REGISTRAL, SE_CANCELA_EN_SUBASTA, SUBSISTE o DESCONOCIDO" },
-                    vigente: { type: Type.BOOLEAN, description: "false si la carga está cancelada o caducada, true en caso contrario" },
-                    confianza: { type: Type.STRING, description: "ALTA, MEDIA o BAJA" }
-                  },
-                  required: ["identificador_registral", "tipo", "fuente_textual", "desglose", "titular", "rango", "resultado", "estado_carga", "vigente", "confianza"]
-                }
-              },
-              incoherencias_detectadas: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING },
-                description: "Discrepancias entre BOE y Registro, importes contradictorios, etc."
-              },
-              ocupacion_detectada: { type: Type.BOOLEAN, description: "true si hay indicios de ocupación, false en caso contrario" },
-              nivel_riesgo_ocupacion: { type: Type.STRING, description: "ALTO, MEDIO o BAJO" },
-              peor_escenario: {
-                type: Type.OBJECT,
-                properties: {
-                  principal: { type: Type.NUMBER },
-                  intereses: { type: Type.NUMBER },
-                  costas: { type: Type.NUMBER },
-                  total: { type: Type.NUMBER }
-                },
-                required: ["principal", "intereses", "costas", "total"],
-                description: "Suma SOLO de las cargas que SUBSISTEN"
-              },
-              impacto_economico: {
-                type: Type.OBJECT,
-                properties: {
-                  coste_estimado: { type: Type.NUMBER },
-                  nivel: { type: Type.STRING }
-                },
-                required: ["coste_estimado", "nivel"]
-              },
-              alertas: {
-                type: Type.ARRAY,
-                items: { type: Type.STRING }
-              },
-              recomendacion: { type: Type.STRING, description: "Recomendación accionable sobre cómo ajustar la puja" },
-              // Datos de mercado opcionales
-              refCat: { type: Type.STRING, description: "Referencia catastral de 20 caracteres o null si no consta" },
-              ciudad: { type: Type.STRING, description: "Localidad del inmueble o null si no consta" },
-              codigo_postal: { type: Type.STRING, description: "Código postal o null si no consta" },
-              superficie_m2: { type: Type.NUMBER, description: "Superficie en m2 o null si no consta" },
-              valor_subasta: { type: Type.NUMBER, description: "Valor de subasta o null si no consta" },
-              valor_tasacion: { type: Type.NUMBER, description: "Valor de tasación o null si no consta" },
-              tipo_inmueble: { type: Type.STRING, description: "Tipo de inmueble (vivienda/piso) o null si no consta" },
-              yearBuilt: { type: Type.NUMBER, description: "Año de construcción o null si no consta" },
-              floor: { type: Type.STRING, description: "Planta/piso o null si no consta" }
-            },
-            required: ["razonamiento_juridico", "documentos_detectados", "cargas_detectadas_regex", "fuente_documento", "nivel_confianza_global", "riesgo_global", "cargas_detectadas", "incoherencias_detectadas", "ocupacion_detectada", "nivel_riesgo_ocupacion", "peor_escenario", "impacto_economico", "alertas", "recomendacion"]
-          }
-        }
-      });
+      console.log("TEXTO BRUTO ENVIADO AL MODELO:", prompt);
 
-      if (response.text) {
-        const result = JSON.parse(response.text);
-        console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
-        return res.status(200).json(result);
+      const modelName = "gemini-2.5-flash";
+      console.log("Model used:", modelName);
+      console.log("MODEL OK:", modelName);
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1/models/${modelName}:generateContent?key=${process.env.GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                role: "user",
+                parts: [
+                  ...pdfParts,
+                  { text: prompt }
+                ]
+              }
+            ]
+          })
+        }
+      );
+
+      console.log("STATUS:", response.status);
+      console.log("HEADERS:", Object.fromEntries(response.headers.entries()));
+      const rawText = await response.text();
+      console.log("RAW TEXT:", rawText);
+
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (e) {
+        console.error("Failed to parse raw text as JSON", e);
       }
-      throw new Error("No se recibió respuesta de la IA.");
+
+      if (data && data.error) {
+        console.error("GEMINI ERROR:", data.error);
+        return res.status(500).json({ error: data.error.message });
+      }
+
+      console.log("DATA COMPLETO GEMINI (ANTES MAPPING):", JSON.stringify(data, null, 2));
+
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!text) {
+        throw new Error("No response from Gemini");
+      }
+
+      console.log("=== GEMINI RAW START ===");
+      console.log(text);
+      console.log("=== GEMINI RAW END ===");
+      
+      console.log("¿CONTIENE CARGAS EN TEXTO BRUTO?:", 
+        (text || "").includes("cargas") || (text || "").includes("CARGAS") || (text || "").includes("cargas_registrales")
+      );
+
+      let clean = text
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
+
+      try {
+        clean = extractJson(clean);
+      } catch (err: any) {
+        throw new Error(err.message || "Failed to extract JSON");
+      }
+
+      console.log("CLEAN JSON FINAL:", clean);
+
+      let result;
+      try {
+        const parsedJson = JSON.parse(clean);
+        const cleanJson = parsedJson?.informe_subasta_inmueble || parsedJson;
+        console.log("JSON BEFORE VALIDATION:", cleanJson);
+        const data = validateAnalysis(cleanJson);
+        
+        console.log("GEMINI CARGAS RAW:", data.cargas);
+        
+        result = data;
+
+        console.log("DATA ROOT:", data);
+        
+        let cargas =
+          (data?.cargas_detectadas && data.cargas_detectadas.length > 0)
+          ? data.cargas_detectadas
+          : (data?.cargas && data.cargas.length > 0)
+          ? data.cargas
+          : (data?.cargas_registrales && data.cargas_registrales.length > 0)
+          ? data.cargas_registrales
+          : (data?.razonamiento_juridico?.["1_identificacion_cargas"]?.length > 0)
+          ? data.razonamiento_juridico["1_identificacion_cargas"]
+          : (data?.cargas_subsistentes && data.cargas_subsistentes.length > 0)
+          ? data.cargas_subsistentes
+          : [];
+
+        const normalizarEstado = (c: any) => {
+          const tipo = (c.tipo || "").toUpperCase();
+
+          // 🔴 REGLA JURÍDICA CLAVE
+          if (tipo.includes("SERVIDUMBRE")) {
+            return "SUBSISTE";
+          }
+
+          return c.estado || "DESCONOCIDO";
+        };
+
+        const cargasFinales =
+          Array.isArray(cargas) && cargas.length > 0
+            ? cargas.map((c: any) => ({
+                ...c,
+                estado: normalizarEstado(c),
+                estado_carga: normalizarEstado(c)
+              }))
+            : [];
+        console.log("CARGAS EXTRAIDAS FIX:", cargasFinales);
+
+        console.log("RESULT COMPLETO:", JSON.stringify(result, null, 2));
+        console.log("ANALISIS JURIDICO:", JSON.stringify(result?.razonamiento_juridico, null, 2));
+        
+        console.log("CARGAS EXTRAIDAS:", JSON.stringify(cargasFinales, null, 2));
+        console.log("BACKEND CARGAS FINAL:", cargasFinales);
+        console.log("CARGAS MAP:", cargasFinales);
+
+        const mappedResult = {
+          cargas: cargasFinales,
+          analisis: result.razonamiento_juridico || {},
+          peor_escenario: {
+            total: result?.razonamiento_juridico?.["4_validacion_numerica_peor_escenario"]?.total_estimado_cargas_dinerarias_subsistentes || 0,
+            principal: 0,
+            intereses: 0,
+            costas: 0
+          },
+          alertas: result.valoracion_general?.riesgo_juridico || "",
+          recomendacion: result.recomendacion || {},
+          resumen_ejecutivo: result.resumen_ejecutivo || "",
+          informacion_general: result.informacion_general || {},
+          resumen_juridico: result.razonamiento_juridico || {},
+          razonamiento_juridico: result.razonamiento_juridico || {},
+          valoracion: result.valoracion_general || {},
+          raw: result
+        };
+
+        console.log("FINAL RESPONSE CARGAS:", mappedResult.cargas);
+
+        console.log("[Backend] --- ANÁLISIS COMPLETADO ---");
+        
+        // Incrementar analysisUsed
+        await userRef.update({
+          analysisUsed: admin.firestore.FieldValue.increment(1)
+        });
+        console.log(`[Backend] Incremented analysisUsed for user ${uid}`);
+
+        return res.status(200).json(mappedResult);
+      } catch (e) {
+        console.error("VALIDATION ERROR EXACT:", e);
+        console.error("FALLBACK CAUSE:", e);
+        return res.status(200).json({
+          cargas: [],
+          recomendacion: {
+            "### 🧠 Resumen claro": "No se ha podido analizar correctamente el documento.",
+            "### 💰 Deuda del procedimiento": "Información no disponible.",
+            "### ⚖️ Qué paga el comprador": "Se recomienda revisión manual del documento."
+          },
+          resumen_ejecutivo: "No se ha podido generar el resumen automático.",
+          error: true
+        });
+      }
     } catch (error: any) {
       console.error("[Backend] Error calling Gemini API:", error);
-      return res.status(500).json({ error: error.message || "Error desconocido en el servicio de IA." });
+      return res.status(200).json({
+        cargas: [],
+        recomendacion: {
+          "### 🧠 Resumen claro": "No se ha podido analizar correctamente el documento.",
+          "### 💰 Deuda del procedimiento": "Información no disponible.",
+          "### ⚖️ Qué paga el comprador": "Se recomienda revisión manual del documento."
+        },
+        error: true
+      });
     }
-  });
 }

@@ -1,67 +1,62 @@
 import React, { useEffect } from 'react';
-import { ShieldCheck, Search, X, Calculator, BookOpen, ArrowRight, Activity, LineChart, Linkedin, Star, User, Send } from 'lucide-react';
+import { ShieldCheck, Search, X, Calculator, BookOpen, ArrowRight, Activity, LineChart, Linkedin, Star, User, Send, FileText, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ROUTES } from '../constants/routes';
 
 const About: React.FC = () => {
 
   useEffect(() => {
     // SEO: E-E-A-T Optimization
-    document.title = "Equipo de Expertos en Subastas Judiciales | Activos Off-Market";
+    document.title = "Activos Off-Market | Análisis de subastas BOE";
     
     const metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) {
-        metaDesc.setAttribute('content', "Conoce al equipo jurídico y técnico de Activos Off-Market. Especialistas en análisis de subastas judiciales del BOE en España. Inversión inmobiliaria segura y rentable.");
+        metaDesc.setAttribute('content', "Conoce al analista detrás de Activos Off-Market. Auditoría jurídica de subastas BOE, análisis de cargas y selección de oportunidades.");
+    }
+    
+    // Attempt canonical (for client side hydration/routing context)
+    let canonical = document.querySelector('link[rel="canonical"]');
+    if (canonical) {
+      canonical.setAttribute('href', "https://activosoffmarket.es/equipo");
+    } else {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      canonical.setAttribute('href', "https://activosoffmarket.es/equipo");
+      document.head.appendChild(canonical);
     }
 
-    // Schema.org Data (Organization + Person)
+    // Schema.org Data (AboutPage + Person)
     const schemaData = {
       "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "Organization",
-          "@id": "https://activosoffmarket.es/#organization",
-          "name": "Activos Off-Market",
-          "url": "https://activosoffmarket.es",
-          "logo": "https://activosoffmarket.es/logo.png",
-          "description": "Plataforma líder en análisis técnico y jurídico de subastas judiciales en España.",
-          "address": {
-            "@type": "PostalAddress",
-            "addressCountry": "ES"
-          }
-        },
-        {
-          "@type": "Person",
-          "@id": "https://activosoffmarket.es/#founder",
-          "name": "José Carlos de la Peña",
-          "jobTitle": "Director de Análisis y Jurista",
-          "url": "https://activosoffmarket.es/equipo",
-          "image": "https://activosoffmarket.es/jose-de-la-pena-subastas-boe.jpg",
-          "sameAs": [
-            "https://www.linkedin.com/in/josecarlosdelapena/"
-          ],
-          "worksFor": { "@id": "https://activosoffmarket.es/#organization" }
-        },
-        {
-          "@type": "WebPage",
-          "@id": "https://activosoffmarket.es/equipo/#webpage",
-          "url": "https://activosoffmarket.es/equipo",
-          "name": "Equipo de Expertos en Subastas Judiciales | Activos Off-Market",
-          "isPartOf": { "@id": "https://activosoffmarket.es/#website" },
-          "about": { "@id": "https://activosoffmarket.es/#organization" },
-          "description": "Conoce al equipo jurídico y técnico de Activos Off-Market. Especialistas en análisis de subastas judiciales del BOE en España."
-        }
-      ]
+      "@type": "AboutPage",
+      "name": "Activos Off-Market | Análisis de subastas BOE",
+      "url": "https://activosoffmarket.es/equipo",
+      "description": "Conoce al analista detrás de Activos Off-Market. Auditoría jurídica de subastas BOE, análisis de cargas y selección de oportunidades.",
+      "mainEntity": {
+        "@type": "Person",
+        "name": "José Carlos de la Peña",
+        "jobTitle": "Analista y Jurista Especializado en Subastas BOE",
+        "knowsAbout": ["Subastas BOE", "Auditoría Jurídica", "Derecho Inmobiliario", "Ejecuciones Hipotecarias", "Análisis de Cargas Registrales"],
+        "url": "https://activosoffmarket.es/equipo",
+        "image": "https://activosoffmarket.es/jose-de-la-pena-subastas-boe.jpg",
+        "sameAs": [
+          "https://www.linkedin.com/in/josecarlosdelapena/"
+        ]
+      }
     };
 
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.text = JSON.stringify(schemaData);
+    script.id = 'equipo-schema';
     document.head.appendChild(script);
 
     window.scrollTo(0, 0);
 
     return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
+      const existingScript = document.getElementById('equipo-schema');
+      if (existingScript) {
+        existingScript.remove();
       }
     };
   }, []);
@@ -123,20 +118,20 @@ const About: React.FC = () => {
               <div className="aspect-[4/5] w-full relative rounded-2xl overflow-hidden bg-slate-100">
                 <img
                   src="/jose-de-la-pena-subastas-boe.jpg"
-                  alt="José Carlos de la Peña - Director de Análisis"
+                  alt="José Carlos de la Peña - Analista subastas BOE"
                   className="object-cover w-full h-full"
                   loading="lazy"
                 />
               </div>
             </div>
             <div className="w-full md:w-7/12">
-              <h2 className="font-serif text-3xl font-bold mb-6 tracking-tight">Quién hay detrás.</h2>
+              <h2 className="font-serif text-3xl font-bold mb-6 tracking-tight">Análisis y criterio jurídico.</h2>
               <p className="text-slate-500 text-lg leading-relaxed mb-8">
-                Fundada por José Carlos de la Peña, jurista especializado. Activos Off-Market nace para aportar claridad al proceso mediante un estudio exhaustivo y rigor artesanal.
+                Fundada y operada por José Carlos de la Peña, jurista especialista en subastas judiciales. Con más de 12 años de trayectoria auditando y participando en expedientes de ejecución hipotecaria y embargos.
               </p>
               <blockquote className="border-l-2 border-slate-300 pl-6">
                 <p className="font-serif text-xl text-slate-700 leading-snug italic">
-                  "Nuestro objetivo es que nunca pierdas dinero por falta de diligencia debida."
+                  "El análisis de cargas ocultas y la viabilidad posesoria separan una rentabilidad real de un concurso de acreedores."
                 </p>
               </blockquote>
             </div>
@@ -146,22 +141,23 @@ const About: React.FC = () => {
             <div className="flex-1">
               <h2 className="text-xs font-bold text-slate-400 tracking-widest uppercase mb-2">Dirección de Análisis</h2>
               <h3 className="font-serif text-2xl font-bold text-slate-900 mb-1">José Carlos de la Peña</h3>
-              <p className="text-brand-700 text-sm font-medium mb-1">Jurista especializado en subastas BOE · CEO Activos Off-Market</p>
-              <p className="text-slate-400 text-xs font-medium mb-4 italic">Especializado exclusivamente en subastas judiciales</p>
+              <p className="text-brand-700 text-sm font-medium mb-1">Analista de subastas BOE · Experto en viabilidad jurídica</p>
+              <p className="text-slate-400 text-xs font-medium mb-4 italic">Especialización exclusiva en Derecho Procesal e Inversión Inmobiliaria</p>
               
-              <p className="text-slate-500 text-sm leading-relaxed mb-6 max-w-xl">
-                Mi enfoque es estrictamente analítico, basado en el estudio de cargas registrales y la evaluación de riesgos posesorios.
-              </p>
+              <div className="text-slate-500 text-sm leading-relaxed mb-6 max-w-xl">
+                <p className="mb-3">Expedientes analizados sistemáticamente, detectando cargas encubiertas, discrepancias registrales y bloqueos posesorios antes del remate.</p>
+                <p>Auditoría jurídica sobre bases de la Ley de Enjuiciamiento Civil enfocada a fondos patrimoniales e inversores privados, asegurando el control sobre edictos, valoraciones e incidencias previas al juzgado.</p>
+              </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <a 
-                  href="https://linkedin.com" 
+                  href="https://linkedin.com/in/josecarlosdelapena/" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition-colors"
                 >
                   <Linkedin size={16} />
-                  <span>LinkedIn</span>
+                  <span>Perfil Profesional</span>
                 </a>
                 <a 
                   href="https://calendly.com/activosoffmarket" 
@@ -176,7 +172,9 @@ const About: React.FC = () => {
             </div>
 
             <div className="w-full md:w-auto flex flex-col items-center md:items-end md:pl-8 md:border-l border-slate-100">
-              <div className="flex items-center gap-3 mb-2">
+              <span className="font-bold text-slate-900 text-lg text-center md:text-right uppercase tracking-wider mb-4 pt-2">Expedientes<br/>analizados</span>
+              
+              <div className="flex items-center gap-3 mb-2 pt-4 border-t border-slate-100">
                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                   <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
@@ -194,6 +192,37 @@ const About: React.FC = () => {
               <span className="text-2xl font-bold text-slate-900 mb-1">4.9/5</span>
               <span className="text-[10px] text-slate-400 text-center md:text-right uppercase tracking-wider font-bold">Google Reviews</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3.1. ENLAZADO DE AUTORIDAD (EEAT & SEO Link Building) */}
+      <section className="pb-20 bg-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Link to="/analisis" className="flex items-center p-6 bg-slate-50 border border-slate-100 rounded-2xl hover:bg-slate-100 hover:border-slate-200 transition-colors group">
+              <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 mr-5 group-hover:scale-105 transition-transform">
+                <FileText className="text-brand-600" size={24} />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                  Informes de Análisis <ArrowRight size={16} className="text-brand-600 opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
+                </h4>
+                <p className="text-xs text-slate-500 mt-1">Casos de estudio y valoración de activos reales.</p>
+              </div>
+            </Link>
+            
+            <a href="/noticias-subastas/provincia/madrid" className="flex items-center p-6 bg-slate-50 border border-slate-100 rounded-2xl hover:bg-slate-100 hover:border-slate-200 transition-colors group">
+              <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 mr-5 group-hover:scale-105 transition-transform">
+                <MapPin className="text-brand-600" size={24} />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 flex items-center gap-2">
+                  Subastas en Madrid <ArrowRight size={16} className="text-brand-600 opacity-0 -ml-2 group-hover:opacity-100 group-hover:ml-0 transition-all"/>
+                </h4>
+                <p className="text-xs text-slate-500 mt-1">Nuestras alertas sobre mercado de alto impacto.</p>
+              </div>
+            </a>
           </div>
         </div>
       </section>

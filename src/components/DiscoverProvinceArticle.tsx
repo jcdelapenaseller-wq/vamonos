@@ -1,13 +1,16 @@
 import React, { useEffect, useMemo } from 'react';
 import { Link, useParams, Navigate } from 'react-router-dom';
 import { AUCTIONS } from '../data/auctions';
+import { DISCOVER_REPORTS } from '../data/discoverReports';
 import { getFilteredAuctions } from '../utils/auctionHelpers';
 import { Calendar, ChevronRight, TrendingUp, MapPin, ArrowRight, Star, Zap } from 'lucide-react';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { isAuctionFinished, sortActiveFirst } from '../utils/auctionHelpers';
 import { normalizeProvince, normalizePropertyType, normalizeLocationLabel } from '../utils/auctionNormalizer';
 import { trackConversion } from '../utils/tracking';
 import { AuctionCard } from './AuctionCard';
+import DiscoverSingleAuctionArticle from './DiscoverSingleAuctionArticle';
+import { generateEditorialArticle, shouldGenerateDiscoverArticle } from '../utils/editorialGenerator';
 import PremiumValueBlock from './PremiumValueBlock';
 import { ShareButtons } from './ShareButtons';
 import { getImageForPropertyType } from '../constants/auctionImages';
@@ -234,12 +237,17 @@ const DiscoverProvinceArticle: React.FC = () => {
     ];
 
     const leadVariants = {
-      'RISKS': `¿Es realmente seguro comprar una vivienda en subasta judicial en ${provinceName}? Muchos creen que es un terreno minado, pero la realidad es que el sistema del BOE es hoy más transparente que nunca. Sin embargo, existen ${total} activos que esconden detalles que solo un ojo experto detecta. No se trata de suerte, sino de saber leer lo que el edicto no dice a simple vista.`,
-      'FAMILIES': `¿Sabías que el ahorro medio en las subastas de ${provinceName} permite a muchas familias saltarse la hipoteca de por vida? Con los precios del mercado libre por las nubes, el BOE se ha convertido en el "outlet" inmobiliario secreto de la provincia. Actualmente hay ${total} oportunidades que podrían cambiar el futuro financiero de quienes se atrevan a mirar más allá de lo convencional.`,
-      'LOCAL_MARKET': `La demanda de vivienda en ${provinceName} está rompiendo récords, pero hay un mercado paralelo que pocos están mirando. Mientras la mayoría compite por las mismas sobras en portales inmobiliarios, en los juzgados de ${provinceName} se están gestionando ${total} activos con precios de otra época. La pregunta no es si hay chollos, sino por qué nadie está pujando por ellos.`,
-      'NO_BID': `¿Por qué un porcentaje tan alto de las subastas en ${provinceName} terminan sin una sola puja? No es por falta de calidad de los inmuebles, sino por un miedo irracional al proceso judicial. Esta parálisis del comprador medio es la mayor oportunidad para el inversor inteligente. Hoy analizamos por qué ${total} activos en la provincia están pasando desapercibidos bajo el radar comercial.`,
-      'MYTHS': `Olvídate de lo que has oído sobre los "subasteros" de antaño en ${provinceName}. Ese mundo ya no existe. El portal del BOE ha democratizado el acceso a la propiedad, permitiendo que cualquier persona con un certificado digital compita por los ${total} activos disponibles. El mayor mito hoy no es la mafia, sino creer que necesitas millones para empezar a invertir aquí.`,
-      'OPPORTUNITY': `Nuestro radar acaba de detectar una anomalía en el mercado de ${provinceName}: descuentos que superan el ${maxDesc}%. No es un error tipográfico, es la cruda realidad de las ejecuciones hipotecarias actuales. Con ${total} entradas nuevas en el sistema, estamos ante una ventana de oportunidad que rara vez se repite con esta intensidad en la provincia.`
+      'RISKS': `El mercado inmobiliario en ${provinceName} atraviesa una etapa de reajuste donde las oportunidades más rentables ya no se encuentran en los canales tradicionales de compraventa. En este contexto, las ejecuciones judiciales se han consolidado como una vía alternativa de inversión patrimonial. ¿Es realmente seguro adquirir una vivienda o un activo comercial mediante el sistema de subastas del Estado? Aunque históricamente ha existido un halo de opacidad en torno a este sector, el actual portal del BOE ofrece un marco de transparencia operativa sin precedentes. Sin embargo, el verdadero reto no está en pujar, sino en la fase previa de due diligence. Actualmente, nuestro radar técnico monitoriza un total de ${total} subastas activas en la región, abarcando diversas tipologías como ${bestType}s, locales comerciales y suelo urbano. Estas oportunidades esconden márgenes de seguridad que pueden llegar hasta un ${maxDesc}% de descuento frente al mercado libre, pero exigen una lectura meticulosa de los edictos. Las diferencias entre el valor de tasación oficial, a menudo desfasado, y la deuda real reclamada son el terreno donde el inversor cualificado extrae toda su rentabilidad. En este análisis profundo, vamos a desgranar cómo el perfil técnico permite filtrar activos con cargas ocultas y centrarse únicamente en aquellos expedientes de ${provinceName} que ofrecen una ecuación riesgo-beneficio verdaderamente favorable. La clave del éxito en la compra de un inmueble judicial reside en identificar, antes que nadie, la situación posesoria real y la estructura de cargas preferentes que no se liquidan con el remate.`,
+      
+      'FAMILIES': `Encontrar rentabilidad en el mercado libre de ${provinceName} se ha convertido en una tarea compleja debido la estabilización de precios y la contracción de la oferta de calidad. Es aquí donde las subastas públicas y extrajudiciales irrumpen como un canal primario de prospección para el inversor y el ahorrador exigente. ¿Sabías que el ahorro técnico conseguido en adjudicaciones recientes permite a muchas familias y patrimonialistas saltarse la dependencia del crédito bancario tradicional? Con los precios de los distritos demandados tocando su techo cíclico, el BOE actúa como un mecanismo de ajuste de liquidez. A día de hoy, hemos identificado un volumen operativo de ${total} activos en proceso de licitación pública en toda la provincia. Dentro de esta cartera destacan inmuebles catalogados como ${bestType}, que históricamente han demostrado ser un valor seguro contra la inflación y la volatilidad económica. El descuento latente detectado en los expedientes más interesantes de ${provinceName} roza un diferencial del ${maxDesc}%. Este margen de seguridad no es fruto del azar, sino de la dinámica de los juzgados y de los procesos de ejecución que finalizan. Para acceder a estos retornos es imperativo comprender que no se está comprando un inmueble de forma convencional, sino derechos sobre un activo condicionado a una liquidación. La ventaja competitiva real la obtienen aquellos perfiles que dedican recursos a investigar el estado físico del bien, sus posibles afecciones fiscales locales y las vías para obtener la posesión efectiva en plazos razonables tras el decreto de adjudicación.`,
+      
+      'LOCAL_MARKET': `El ecosistema inmobiliario local en la provincia de ${provinceName} sigue demostrando una fuerte demanda subyacente frente a una oferta constreñida. Mientras la mayoría del capital retail compite por las mismas oportunidades en plataformas inmobiliarias de uso público, existe un mercado secundario paralelo que aporta descuentos estratégicos fuera del radar general. Nos referimos a las adjudicaciones de bienes procedentes de ejecuciones judiciales y administrativas. En los juzgados y dependencias de recaudación de ${provinceName} se está gestionando en este preciso momento la venta de ${total} activos inmobiliarios, cada uno con un expediente singular. La distribución provincial abarca desde plazas de garaje hasta tipologías de mayor valor refugio como el ${bestType}. La pregunta fundamental para cualquier analista de mercado no es si estos activos son rentables (nuestro seguimiento indica descuentos máximos de hasta el ${maxDesc}% respecto a las valoraciones de calle), sino por qué siguen resultando invisibles para el comprador medio. La barrera de entrada principal no es el capital, ya que hay escalones de inversión para múltiples bolsillos. La verdadera barrera es el conocimiento normativo y procesal. Un inversor preparado que analiza correctamente un expediente judicial en ${provinceName} no evalúa las fotografías del bien, sino la calidad jurídica de su inscripción registral. Comprender cómo la Ley de Enjuiciamiento Civil purga las cargas posteriores y qué deudas sobreviven (como ciertas afecciones del IBI o de la comunidad de propietarios) es el paso definitivo para transformar una subasta pública en una adquisición de alto rendimiento.`,
+      
+      'NO_BID': `Resulta paradójico que en un mercado tensionado como el de ${provinceName}, un porcentaje altamente significativo de subastas del BOE termine declarándose desierto o sin la presentación de postores efectivos. Este fenómeno no responde en absoluto a la falta de calidad intrínseca de los inmuebles licitados, sino a la conjunción del desconocimiento generalizado y una paralización preventiva originada por el riesgo percibido. Esta asimetría de información es el entorno natural donde el inversor avispado consolida sus carteras patrimonialistas. El análisis exhaustivo de la situación actual nos arroja un panorama en el que figuran nada menos que ${total} expedientes de subasta activos en la provincia. Entre ellos, el volumen más notorio se agrupa en torno a inmuebles de tipología ${bestType}, especialmente en núcleos de alto tránsito y zonas con demanda de alquiler fuerte. Al revisar los expedientes con óptica analítica, afloran divergencias abismales entre los tipos de subasta exigidos y los valores de adjudicación reales, delineando márgenes operativos que pueden escalar hasta un ${maxDesc}% de ahorro. No obstante, lograr asentar este horizonte de rentabilidad exige una labor técnica previa e ineludible. Validar expedientes en ${provinceName} obliga a interpretar correctamente la certificación de dominio y cargas, a ponderar la viabilidad de un lanzamiento judicial si el activo no se encuentra libre de ocupantes o precaristas, y a tener la certeza matemática de que las cargas preferentes han sido debidamente actualizadas mediante oficios al juzgado. La rentabilidad es simplemente la prima que paga el mercado por aportar liquidez y certeza en un escenario dominado por la duda.`,
+      
+      'MYTHS': `Existe una serie de narrativas y dogmas obsoletos que continúan frenando a miles de pequeños y medianos ahorradores en ${provinceName} a la hora de contemplar las subastas judiciales como mecanismo prioritario de inversión. Se mantiene el imaginario colectivo de la opacidad institucional y los lobbies cerrados. Nada más lejos de la realidad operativa de hoy en día. La digitalización integral del proceso a través de plataformas unificadas ha homogeneizado las reglas del juego. Cualquier particular o entidad, con la debida preparación técnica y su pertinente certificado digital, dispone de acceso concurrente a un inventario vivo de ${total} expedientes en toda la provincia de ${provinceName}. El abanico de activos no incluye solo producto residual, sino inmuebles de rotación rápida como el ${bestType}, que sostienen la estructura residencial del país. En nuestras prospecciones, los mejores ratios de eficiencia logran diferencias en precio que arrojan oportunidades de entrada con un descuento del ${maxDesc}% sobre el mercado. Lejos de la búsqueda del chollo improvisado, el proceso requiere la edificación de una estrategia sólida. Hay que cuantificar riesgos contingentes: el estado de las instalaciones interiores a puerta cerrada, los tributos municipales devengados y no prescritos, o los escenarios procesales de la consignación del resto del precio. Los inversores que hoy están triunfando en ${provinceName} aplican metodologías asimilables a la ingeniería financiera, analizando cada expediente del BOE no como un boleto de lotería, sino como un proyecto de inversión medible en términos de TIR (Tasa Interna de Retorno) y retorno sobre el capital invertido.`,
+      
+      'OPPORTUNITY': `En el actual ciclo de mercado, ${provinceName} se encuentra en una coyuntura donde los precios de salida de activos residenciales y comerciales apenas muestran flexiones significativas a la baja. Sin embargo, nuestro sistema de monitorización algorítmica acaba de certificar la consolidación de una bolsa paralela de activos excepcionales originados a través de ejecuciones hipotecarias, embargos por deudas públicas y disoluciones de proindiviso. En total, hemos contabilizado ${total} lotes activos que operan con reglas presupuestarias drásticamente distintas al mercado de agentes inmobiliarios. De hecho, el descuento parametrizado para estas carteras sitúa la franja superior de oportunidad estructural en niveles de hasta el ${maxDesc}%. Entre estos activos, la preeminencia de inmuebles clasificados como ${bestType} ofrece una lectura clara: se trata de producto apto tanto para estrategias de flip (compra, adecuación y venta rápida) como para consolidación de renta pasiva estable. La verdadera ventana de oportunidad en ${provinceName} no reside simplemente en ganar la puja con el menor importe, sino en el análisis minucioso de la situación posesoria informada en los procesos. Operaciones donde existe un inquilino de renta antigua o un derecho de tanteo y retracto por parte de la administración exigen consideraciones estratégicas únicas. Para sortear el laberinto procesal del juzgado ejecutante, se requiere anticipar los movimientos tras la adjudicación definitiva judicial. Esto implica proyectar un colchón de tesorería para eventuales saneamientos administrativos o tributos afectos, convirtiendo cada operación en un ejercicio impecable de gestión e inteligencia inmobiliaria que el capital masivo sigue ignorando.`
     };
 
     const educationalBlocks = [
@@ -365,7 +373,7 @@ const DiscoverProvinceArticle: React.FC = () => {
     
     return {
       "@context": "https://schema.org",
-      "@type": "NewsArticle",
+      "@type": "CollectionPage",
       "headline": content.title,
       "description": content.meta,
       "image": [content.image],
@@ -411,6 +419,12 @@ const DiscoverProvinceArticle: React.FC = () => {
         ? `Actualizado hace ${diffHours} horas`
         : `Última actualización: ${formattedDate}`;
   }, [topExamples, formattedDate]);
+
+  const topReports = useMemo(() => {
+    return Object.entries(DISCOVER_REPORTS)
+      .slice(0, 3)
+      .map(([slug, report]) => ({ slug, ...report }));
+  }, []);
 
   useEffect(() => {
     if (provinceName) {
@@ -462,7 +476,7 @@ const DiscoverProvinceArticle: React.FC = () => {
     }
     
     return paragraphs.map((p, idx) => {
-      let className = "mb-6 leading-relaxed text-justify ";
+      let className = "mb-6 leading-relaxed text-left ";
       
       if (type === 'intro') {
         className += idx === 0 
@@ -482,6 +496,7 @@ const DiscoverProvinceArticle: React.FC = () => {
 
   return (
     <>
+      <link rel="canonical" href={`https://activosoffmarket.es/noticias-subastas/provincia/${normalizedProvinceParam.replace(/\s+/g, '-')}`} />
       {content && <link rel="preload" as="image" href={content.image} />}
       
       {jsonLd && (
@@ -569,7 +584,7 @@ const DiscoverProvinceArticle: React.FC = () => {
             </div>
           </header>
 
-          <div className="prose prose-lg prose-slate max-w-none">
+          <div className="prose prose-lg prose-slate text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
             <div className="mb-4">
               {renderFormattedText(content.intro, 'intro')}
             </div>
@@ -581,10 +596,19 @@ const DiscoverProvinceArticle: React.FC = () => {
               <div className="mb-6 not-prose">
                 <p className="text-xs mb-1 text-slate-500 font-medium">Oportunidad destacada en esta provincia</p>
                 <div className="max-w-md">
-                  <AuctionCard 
-                    slug={featuredOpportunity[0]} 
-                    data={featuredOpportunity[1]} 
-                  />
+                  {shouldGenerateDiscoverArticle(featuredOpportunity[1]) ? (
+                    <DiscoverSingleAuctionArticle 
+                      auction={featuredOpportunity[1]} 
+                      slug={featuredOpportunity[0]} 
+                      article={generateEditorialArticle(featuredOpportunity[0], featuredOpportunity[1])!}
+                      imageUrl={getImageForPropertyType(featuredOpportunity[1].propertyType, featuredOpportunity[0])}
+                    />
+                  ) : (
+                    <AuctionCard 
+                      slug={featuredOpportunity[0]} 
+                      data={featuredOpportunity[1]} 
+                    />
+                  )}
                 </div>
               </div>
             )}
@@ -652,7 +676,7 @@ const DiscoverProvinceArticle: React.FC = () => {
 
             <div className="border-t border-slate-100 my-3" />
             
-            <div className="space-y-6 text-slate-600 leading-relaxed text-justify">
+            <div className="space-y-6 text-slate-600 leading-relaxed text-left">
               {content.sections.map((section: { id: string; title: string; content: string }, idx: number) => (
                 <div key={section.id} className="animate-fade-in">
                   <h2 className="text-2xl font-serif font-bold text-slate-900 mb-6 flex items-center gap-2">
@@ -747,6 +771,89 @@ const DiscoverProvinceArticle: React.FC = () => {
                 </div>
               </div>
             )}
+
+            {/* Guías y análisis sobre subastas */}
+            {topReports.length > 0 && (
+              <div className="my-10 not-prose bg-slate-50 border border-slate-200 rounded-3xl p-6 md:p-8">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="bg-brand-100 p-2 rounded-lg text-brand-600">
+                    <Zap size={20} className="fill-brand-500 text-brand-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-serif font-bold text-slate-900">Guías y análisis sobre subastas</h3>
+                    <p className="text-xs text-slate-500 font-medium">Descubre cómo invertir con seguridad</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {topReports.map((report) => (
+                    <Link 
+                      key={report.slug} 
+                      to={`/analisis/${report.slug}`}
+                      className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md hover:border-brand-300 transition-all group flex flex-col h-full"
+                    >
+                      <div className="w-full h-24 mb-3 rounded-lg overflow-hidden bg-slate-100 shrink-0">
+                        <img 
+                          src={report.image} 
+                          alt={report.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
+                      <h4 className="text-sm font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors">
+                        {report.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 line-clamp-2 mb-3 flex-grow">
+                        {report.intro}
+                      </p>
+                      <div className="flex items-center gap-1 text-[10px] font-bold text-brand-600 uppercase tracking-widest mt-auto pt-3 border-t border-slate-50">
+                        Leer análisis <ArrowRight size={10} className="group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Casos reales analizados */}
+            {topExamples.length > 0 && (
+              <div className="my-10 not-prose bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="bg-brand-100 p-2 rounded-lg text-brand-600">
+                    <TrendingUp size={20} className="text-brand-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-serif font-bold text-slate-900">Casos reales analizados en {provinceName}</h3>
+                    <p className="text-xs text-slate-500 font-medium">Extraídos del BOE y revisados técnicamente</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {topExamples.filter(example => example.id !== featuredOpportunity?.[0]).map((example) => {
+                    const isNews = shouldGenerateDiscoverArticle(example.data);
+                    if (isNews) {
+                      const articleInfo = generateEditorialArticle(example.id, example.data);
+                      if (articleInfo) {
+                        return (
+                          <div key={example.id} className="h-full">
+                            <DiscoverSingleAuctionArticle 
+                              auction={example.data} 
+                              slug={example.id} 
+                              article={articleInfo}
+                              imageUrl={getImageForPropertyType(example.data.propertyType, example.id)}
+                            />
+                          </div>
+                        );
+                      }
+                    }
+                    return (
+                      <div key={example.id} className="h-full">
+                        <AuctionCard slug={example.id} data={example.data} />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div className="border-t border-slate-100 my-3" />
 
             {/* Resumen técnico para E-E-A-T */}
             <div className="bg-slate-50 rounded-2xl p-6 mb-10 border border-slate-200 not-prose grid grid-cols-2 md:grid-cols-4 gap-6">

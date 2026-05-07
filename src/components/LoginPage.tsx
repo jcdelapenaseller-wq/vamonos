@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useUser } from '../contexts/UserContext';
-import { ROUTES } from '../constants/routes';
-import { Gavel, ArrowLeft, Loader2, CheckCircle, Shield, Zap } from 'lucide-react';
+import { ROUTES } from '@/constants/routes';
+import { CheckCircle,  Gavel, ArrowLeft, Loader2, Shield, Zap  } from 'lucide-react';
 import { motion } from 'motion/react';
 import { auth, googleProvider, db } from '../lib/firebase';
 import { signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from 'firebase/auth';
@@ -52,7 +52,7 @@ const LoginPage: React.FC = () => {
       console.log("[AUTH_DEBUG] LoginPage: User is logged in and not loading, REDIRECTING...");
       const redirectQuery = searchParams.get('redirect');
       const fromQuery = searchParams.get('from');
-      const fromState = (location.state as any)?.from?.pathname;
+      const fromState = (location.state as any)?.from?.pathname || (location.state as any)?.returnTo;
       
       const from = redirectQuery || (fromQuery ? `/${fromQuery}` : (fromState || '/subastas-recientes'));
       console.log("[AUTH_DEBUG] LoginPage: Target path:", from);

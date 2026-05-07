@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Star, CheckCircle, ArrowRight, FileText, Search, Home, Lock, Zap, CalendarX, Unlock, ChevronDown, ChevronUp, ShieldCheck, X } from 'lucide-react';
+import { CheckCircle,  Star, ArrowRight, FileText, Search, Home, Lock, Zap, CalendarX, Unlock, ChevronDown, ChevronUp, ShieldCheck, X  } from 'lucide-react';
 import { trackConversion } from '../utils/tracking';
 import { motion } from 'motion/react';
 import { useUser } from '../contexts/UserContext';
 import { toast } from 'sonner';
 import { startCheckout, BillingCycle as StripeBillingCycle } from '../lib/billing';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { PRICING } from '../lib/pricing';
 
 type BillingCycle = 'mensual' | 'trimestral' | 'anual';
@@ -141,7 +141,7 @@ const ProPage: React.FC = () => {
         </p>
 
         {/* Toggle */}
-        <div className="flex w-full overflow-x-auto items-center p-1 bg-slate-100 rounded-full border border-slate-200 mb-8">
+        <div className="flex w-full overflow-x-auto justify-center items-center p-1 bg-slate-100 rounded-full border border-slate-200 mb-8">
           <button
             onClick={() => setBillingCycle('mensual')}
             className={`px-4 md:px-6 py-2.5 rounded-full text-xs md:text-sm font-semibold transition-all whitespace-nowrap ${
@@ -184,7 +184,10 @@ const ProPage: React.FC = () => {
       {/* Pricing Cards */}
       <div className="grid md:grid-cols-3 gap-4 md:gap-8 max-w-6xl mx-auto mb-12 md:mb-24">
         {/* GRATIS */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8 flex flex-col">
+        <div 
+          className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 md:p-8 flex flex-col cursor-pointer transition-all hover:border-slate-300"
+          onClick={() => navigate(ROUTES.LOGIN)}
+        >
           <div className="flex justify-center mb-3 min-h-[32px]">
           </div>
           <div className="flex flex-col gap-2 min-h-[140px]">
@@ -213,7 +216,10 @@ const ProPage: React.FC = () => {
             ))}
           </ul>
 
-          <button className="w-full py-3.5 px-6 rounded-xl bg-slate-100 text-slate-900 font-bold hover:bg-slate-200 transition-colors">
+          <button 
+            onClick={() => navigate(ROUTES.LOGIN)}
+            className="w-full py-3.5 px-6 rounded-xl bg-slate-100 text-slate-900 font-bold hover:bg-slate-200 transition-colors"
+          >
             Explorar gratis
           </button>
           <div className="h-4"></div>
@@ -222,7 +228,7 @@ const ProPage: React.FC = () => {
         {/* BASIC */}
         <div 
           className={`bg-white rounded-3xl border shadow-sm p-6 md:p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'basic' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-200'}`}
-          onClick={() => setSelectedPlan('basic')}
+          onClick={() => handleActivate('basic')}
         >
           <div className="flex justify-center mt-1 mb-3">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-amber-50 text-amber-700 border-amber-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-amber-100">
@@ -273,7 +279,7 @@ const ProPage: React.FC = () => {
 
           <div className="mt-auto">
             <button 
-              onClick={(e) => { e.stopPropagation(); handleActivate('basic'); }}
+              onClick={() => handleActivate('basic')}
               disabled={currentPlan === 'basic'}
               className={`w-full py-3.5 px-6 rounded-xl font-bold transition-colors ${
                 currentPlan === 'basic' 
@@ -292,7 +298,7 @@ const ProPage: React.FC = () => {
         {/* PRO */}
         <div 
           className={`bg-slate-900 rounded-3xl border shadow-xl p-6 md:p-8 flex flex-col cursor-pointer transition-all ${selectedPlan === 'pro' ? 'border-amber-500 ring-2 ring-amber-500/20' : 'border-slate-800'} transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-amber-500/10`}
-          onClick={() => setSelectedPlan('pro')}
+          onClick={() => handleActivate('pro')}
         >
           <div className="flex justify-center mt-1 mb-3">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border backdrop-blur-sm bg-amber-50 text-amber-700 border-amber-200 transition-all duration-200 hover:scale-105 hover:-translate-y-[1px] hover:bg-amber-100">
@@ -337,7 +343,7 @@ const ProPage: React.FC = () => {
 
           <div className="mt-auto">
             <button 
-              onClick={(e) => { e.stopPropagation(); handleActivate('pro'); }}
+              onClick={() => handleActivate('pro')}
               disabled={currentPlan === 'pro'}
               className={`w-full py-3.5 px-6 rounded-xl font-bold transition-colors shadow-lg ${
                 currentPlan === 'pro'
@@ -521,7 +527,7 @@ const ProPage: React.FC = () => {
       </div>
 
       {/* Sticky CTA Mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-8px_15px_-3px_rgba(0,0,0,0.1)] z-50">
+      <div className="md:hidden md:pointer-events-none fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 p-4 shadow-[0_-8px_15px_-3px_rgba(0,0,0,0.1)] z-50">
         <button 
           onClick={() => handleActivate(selectedPlan)}
           disabled={currentPlan === selectedPlan}

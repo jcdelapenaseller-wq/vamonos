@@ -2,13 +2,14 @@ import React, { useEffect, useMemo } from 'react';
 import { Link, useParams, Navigate, useLocation } from 'react-router-dom';
 import { AUCTIONS } from '../data/auctions';
 import { ChevronRight, ArrowRight, ShieldCheck, Zap, Building2, MapPin, Euro, AlertCircle, TrendingDown, Clock, ShieldAlert, Star, ExternalLink } from 'lucide-react';
-import { ROUTES } from '../constants/routes';
+import { ROUTES } from '@/constants/routes';
 import { getImageForPropertyType } from '../constants/auctionImages';
 import { generateEditorialArticle, shouldGenerateDiscoverArticle } from '../utils/editorialGenerator';
 import { normalizeProvince, normalizeCity, normalizePropertyType } from '../utils/auctionNormalizer';
 import { calculateDiscount } from '../utils/auctionHelpers';
 import { ShareButtons } from './ShareButtons';
 import { AuctionCard } from './AuctionCard';
+import { Helmet } from 'react-helmet';
 
 const DiscoverAuctionArticle: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -228,6 +229,9 @@ const DiscoverAuctionArticle: React.FC = () => {
 
   return (
     <>
+      <Helmet>
+        {!isResultPage && <meta name="robots" content="max-image-preview:large" />}
+      </Helmet>
       <link rel="preload" as="image" href={imageUrl} />
       <link rel="canonical" href={canonicalUrl} />
       {isResultPage && <meta name="robots" content="noindex, follow" />}
@@ -320,7 +324,7 @@ const DiscoverAuctionArticle: React.FC = () => {
             </div>
           </header>
 
-          <div className="prose prose-lg prose-slate max-w-none">
+          <div className="prose prose-lg prose-slate text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
             <p className="lead text-xl text-slate-700 font-medium mb-8 leading-relaxed">
               {article.excerpt}
             </p>
@@ -499,13 +503,29 @@ const DiscoverAuctionArticle: React.FC = () => {
                 to={`/subasta/${slug}`}
                 className="flex-1 inline-flex items-center justify-center gap-2 bg-brand-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-brand-700 transition-colors shadow-sm text-center"
               >
-                Ver análisis técnico <ArrowRight size={18} />
+                Ver ficha oficial <ArrowRight size={18} />
               </Link>
               <Link 
-                to={`/subastas/${normalizeProvince(auction.province || auction.city).toLowerCase().replace(/\s+/g, '-')}`}
+                to={`/noticias-subastas/provincia/${normalizeProvince(auction.province || auction.city).toLowerCase().replace(/\s+/g, '-')}`}
                 className="flex-1 inline-flex items-center justify-center gap-2 bg-slate-100 text-slate-700 font-bold px-8 py-4 rounded-xl hover:bg-slate-200 transition-colors text-center"
               >
-                Más subastas en {normalizeProvince(auction.province || auction.city)}
+                Radar subastas {normalizeProvince(auction.province || auction.city)}
+              </Link>
+            </div>
+            
+            <div className="mt-8 bg-brand-50 rounded-2xl p-6 border border-brand-100">
+              <h3 className="text-lg font-bold text-brand-900 mb-3 flex items-center gap-2">
+                <ShieldCheck size={20} className="text-brand-600" />
+                Guía recomendada para inversores
+              </h3>
+              <p className="text-sm text-slate-700 mb-4">
+                Entiende cómo analizar las cargas y los márgenes de seguridad antes de participar en esta subasta. No pujes a ciegas.
+              </p>
+              <Link 
+                to="/analisis/trampas-legales-subastas-boe-cargas-ocultas"
+                className="inline-flex items-center gap-2 text-brand-700 font-bold hover:underline"
+              >
+                Leer análisis completo: Trampas legales y cargas ocultas <ArrowRight size={16} />
               </Link>
             </div>
           </div>
