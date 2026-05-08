@@ -275,6 +275,31 @@ export default defineConfig({
           modifiedHtml = modifiedHtml.replace('<title>Activos Off-Market | Inversión en Subastas Públicas</title>', `<title>${title}</title>`);
           modifiedHtml = modifiedHtml.replace('content="Oportunidades verificadas en subastas BOE y AEAT. Análisis de cargas y consultoría estratégica para inversores. Sin falsas promesas."', `content="${meta}"`);
           modifiedHtml = modifiedHtml.replace('<link rel="canonical" href="https://activosoffmarket.es/">', `<link rel="canonical" href="https://activosoffmarket.es/equipo">`);
+        } else if (renderedRoute.route === '/subastas-recientes') {
+          const title = "Subastas BOE recientes en España | Activos Off-Market";
+          const meta = "Listado de las subastas BOE más recientes en España. Oportunidades de inversión en inmuebles y otros activos.";
+          
+          const recentLinks = activeAuctionRoutes.slice(0, 20).map(route => {
+             const slug = route.replace('/subasta/', '');
+             return `<li><a href="${route}">Subasta BOE: ${slug}</a></li>`;
+          }).join('\n                    ');
+
+          const contentHtml = `
+            <div id="root">
+              <main style="padding: 2rem; max-width: 1000px; margin: 0 auto; font-family: sans-serif;">
+                <h1>Subastas BOE recientes en España</h1>
+                <p>Descubre las últimas oportunidades de inversión en subastas públicas judiciales y administrativas en España. Analizamos diariamente los activos publicados en el BOE para identificar los expedientes más interesantes.</p>
+                <h2>Últimas subastas activas</h2>
+                <ul>
+                    ${recentLinks}
+                </ul>
+              </main>
+            </div>`;
+
+          modifiedHtml = modifiedHtml.replace('<title>Activos Off-Market | Inversión en Subastas Públicas</title>', `<title>${title}</title>`);
+          modifiedHtml = modifiedHtml.replace('content="Oportunidades verificadas en subastas BOE y AEAT. Análisis de cargas y consultoría estratégica para inversores. Sin falsas promesas."', `content="${meta}"`);
+          modifiedHtml = modifiedHtml.replace('<link rel="canonical" href="https://activosoffmarket.es/">', `<link rel="canonical" href="https://activosoffmarket.es/subastas-recientes">`);
+          modifiedHtml = modifiedHtml.replace('<div id="root"></div>', contentHtml);
         }
         
         renderedRoute.html = modifiedHtml;
