@@ -103,6 +103,7 @@ const activeAuctionRoutes = Object.entries(auctionsData)
   .slice(0, 150);
 
 const routesToPrerender = [
+  '/',
   ...Object.keys(DISCOVER_REPORTS).map(slug => `/analisis/${slug}`),
   ...provinceRoutes,
   ...activeAuctionRoutes,
@@ -299,6 +300,45 @@ export default defineConfig({
           modifiedHtml = modifiedHtml.replace('<title>Activos Off-Market | Inversión en Subastas Públicas</title>', `<title>${title}</title>`);
           modifiedHtml = modifiedHtml.replace('content="Oportunidades verificadas en subastas BOE y AEAT. Análisis de cargas y consultoría estratégica para inversores. Sin falsas promesas."', `content="${meta}"`);
           modifiedHtml = modifiedHtml.replace('<link rel="canonical" href="https://activosoffmarket.es/">', `<link rel="canonical" href="https://activosoffmarket.es/subastas-recientes">`);
+          modifiedHtml = modifiedHtml.replace('<div id="root"></div>', contentHtml);
+        } else if (renderedRoute.route === '/') {
+          const title = "Inversión en Subastas BOE de España | Activos Off-Market";
+          const meta = "Análisis técnico de subastas judiciales y administrativas en España. Descubre activos inmobiliarios off-market verificados procedentes de embargos y ejecuciones.";
+          
+          const recentLinks = activeAuctionRoutes.slice(0, 5).map(route => {
+             const slug = route.replace('/subasta/', '');
+             return `<li><a href="${route}">Expediente BOE: ${slug}</a></li>`;
+          }).join('\n                    ');
+
+          const someProvinces = Array.from(uniqueProvinceNames).slice(0, 5).map(p => {
+             const slug = p.toLowerCase().replace(/\s+/g, '-');
+             return `<li><a href="/noticias-subastas/provincia/${slug}">Subastas en ${p}</a></li>`;
+          }).join('\n                    ');
+
+          const contentHtml = `
+            <div id="root">
+              <main style="padding: 2rem; max-width: 1000px; margin: 0 auto; font-family: sans-serif;">
+                <h1>Inversión Inmobiliaria en Subastas BOE de España</h1>
+                <p>Activos Off-Market proporciona análisis técnico, jurídico y económico de subastas públicas celebradas en España a través del Portal de Subastas del BOE. Especialistas en oportunidades de inversión en bienes raíces procedentes de ejecuciones hipotecarias, embargos judiciales y administrativos para inversores y fondos de inversión.</p>
+                <h2>Recursos SEO para Inversores</h2>
+                <ul>
+                  <li><a href="/subastas-recientes">Ver subastas recientes activas</a></li>
+                  <li><a href="/guias-subastas">Guías de inversión en subastas</a></li>
+                </ul>
+                <h2>Oportunidades Destacadas (En Vivo)</h2>
+                <ul>
+                  ${recentLinks}
+                </ul>
+                <h2>Análisis por Provincia</h2>
+                <ul>
+                  ${someProvinces}
+                </ul>
+              </main>
+            </div>`;
+
+          modifiedHtml = modifiedHtml.replace(/<title>.*<\/title>/i, `<title>${title}</title>`);
+          modifiedHtml = modifiedHtml.replace(/<meta name="description" content="[^"]*">/i, `<meta name="description" content="${meta}">`);
+          modifiedHtml = modifiedHtml.replace(/<link rel="canonical" href="[^"]*">/i, `<link rel="canonical" href="https://activosoffmarket.es/">`);
           modifiedHtml = modifiedHtml.replace('<div id="root"></div>', contentHtml);
         }
         
