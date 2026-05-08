@@ -532,5 +532,93 @@ export const DISCOVER_REPORTS: Record<string, DiscoverReport> = {
     ],
     conclusion: 'Operar en el opaco mercado de las subastas BOE permite adquirir inmuebles con descuentos inalcanzables en los portales clásicos, pero el BOE no es un supermercado altruista;\n\nCreer que el precio que marcas con tu puja es tu coste total y final es una de las mayores irresponsabilidades financieras de los principiantes. Como hemos desglosado, un piso embargado llega repleto de compromisos anclados al pasado: el IBI acumulado, la comunidad de varios años rezagada, posibles hipotecas preferentes no disueltas y un estado material destructivo que devora la liquidez.\n\nEl éxito reside siempre en la anticipación metódica y en usar las herramientas exactas. Antes de jugar tus ahorros, audita la nota simple y descuenta forzosamente cada impuesto, deuda y coste oculto. Nunca pujes sin realizar una previsión minuciosa en tu cálculo de viabilidad.',
     hidePreAuctionCTA: true
+  },
+  'boom-subastas-costa-refugio-inversores': {
+    id: 'boom-subastas-costa-refugio-inversores',
+    title: 'El refugio silencioso del inversor: 3 franjas de la costa donde pisos de subasta duplican la rentabilidad de Madrid',
+    intro: 'El mercado inmobiliario en grandes capitales como Madrid o Barcelona ha tocado un techo de cristal para el inversor tradicional.\n\nCon rentabilidades brutas comprimidas por debajo del 4% y tickets de entrada prohibitivos, el capital inteligente está buscando nuevas rutas de escape. Y el portal de subastas del Boletín Oficial del Estado (BOE) está señalando el camino de forma silenciosa.\n\nEn los últimos meses hemos detectado un giro radical en los patrones de oportunidad: los fondos de inversión y los patrimonialistas más ágiles han dejado de concentrarse exclusivamente en el Barrio de Salamanca o el Eixample. Ahora, la mirada está puesta en el arco mediterráneo.\n\nMálaga, Alicante y Valencia se han convertido en el nuevo tablero "off-market". Aquí, subastas de ejecuciones hipotecarias y embargos administrativos ofrecen la tormenta perfecta: descuentos superiores al 40% sobre el valor de tasación y una demanda brutal que las revaloriza rápidamente.\n\nAnalizamos esta migración de capital sin precedentes y desglosamos por qué adjudicarse una vivienda embargada a 500 metros del mar es ahora la jugada maestra.',
+    publishDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1547496616-568461f3d64c?auto=format&fit=crop&q=80&w=1200',
+    keyPoints: [
+      "El 'sorpasso' costero: Málaga y Valencia ya superan a Madrid en el volumen de rentabilidad por adjudicación a bajo coste.",
+      "Márgenes del 40%: Las subastas de segundas residencias permiten absorber con facilidad altas deudas comunitarias.",
+      "Rentabilidad híbrida: Mezclar el alquiler mensual en invierno con el alquiler turístico de élite en verano dispara la TIR.",
+      "Oportunidades de la AEAT: Muchas propiedades en zonas vacacionales premium salen limpias del temido 'agujero negro' registral."
+    ],
+    editorialSections: [
+      {
+        subtitle: 'El fin del margen seguro en las grandes urbes',
+        content: 'Pujar por un piso en el centro de Madrid ha degenerado en una guerra financiera que ahoga al postor común. La sobre-exposición de la información ha provocado que, en capitales muy tensionadas, las pujas ganadoras en el portal de subastas del BOE rocen frecuentemente el 80% o 90% del precio de mercado libre.\n\nEl profesional "Value" ya no encuentra ahí la capa de seguridad que justificaba absorber los riesgos que implica una ejecución hipotecaria (ocupación, cargas preferentes o IBI acumulado).\n\nFrente a este estrechamiento de los márgenes, regiones enteras como la Costa Blanca en Alicante o el litoral de Valencia ofrecen un respiradero puro. El ticket medio de compra permite entrar sin tener que sobre-apalancarse en deuda bancaria, pero el encaje hacia un mercado internacional (turistas, expatriados y nómadas digitales) blinda la demanda de manera similar al Eixample barcelonés, esquivando al mismo tiempo muchas limitaciones de precio local.',
+        chartType: 'ranking',
+        chartData: [
+          { label: 'Alicante Costa', value: 8.5, suffix: '%', color: 'bg-brand-600' },
+          { label: 'Málaga (Extrarradio)', value: 7.2, suffix: '%', color: 'bg-brand-500' },
+          { label: 'Valencia Marítimo', value: 6.8, suffix: '%', color: 'bg-brand-400' },
+          { label: 'Rentabilidad Madrid Centro', value: 3.5, suffix: '%', color: 'bg-slate-400' }
+        ]
+      },
+      {
+        subtitle: 'La doble vía de ingresos en zonas turísticas',
+        content: '¿Qué ocurre al adjudicarse una propiedad embargada en la Costa del Sol con un 40% de descuento real? El inversor raramente vuelve a inyectarlo al mercado de compraventa enseguida.\n\nLa estrategia patrimonial ganadora se centra ahora en la <strong class="font-bold text-slate-900">explotación híbrida</strong>. El inmueble se somete a una reforma cosmética rápida y se destina de octubre a mayo a nómadas profesionales o alquiler temporal, logrando saltear los topes agresivos de rentas a largo plazo.\n\nLlegados a verano, se abre a un ecosistema puramente vacacional. En zonas como Estepona o Benahavís, la combinación pulveriza las métricas convencionales de las Socimis. Sin embargo, este mecanismo exige que el importe por el que consigues rematar la subasta sea demoledoramente bajo para compensar los vacíos estructurales que la costa sufre en plena reforma.'
+      }
+    ],
+    auctionDetails: [
+      {
+        slug: 'subasta-sub-ja-2026-259106',
+        subtitle: 'Alicante: El paraíso del \'Buy-to-Let\' a precio rebajado',
+        analysis: 'El litoral alicantino y el eje de Torrevieja siguen arrojando estadísticas muy altas de subastas sin postores, cerrándose con márgenes extraordinarios. Encontrar viviendas con tasaciones judiciales de 180.000€ y una deuda residual por debajo de 90.000€ es moneda común. Este gap es vital. Tras asumir ITP, la reforma y el IBI atrasado en el Registro de la Propiedad, el activo resultante cuenta con un fondo de liquidez ilimitado gracias a los jubilados centroeuropeos.',
+        risks: 'Los mayores enemigos en chalés de levante abandonados a su suerte son las reparaciones urgentes por humedades salinas (que descuadran tu CAPEX). Es obligatorio verificar muy bien posibles modificaciones en la Ley de Propiedad Horizontal dentro del bloque que busquen prohibir tu licencia vacacional posterior.',
+        investorProfile: 'Perfil Activo. Quienes dispongan de confianza remota para gestionar reformas en una de las provincias más prósperas en revalorización del país.'
+      },
+      {
+        slug: 'subasta-sub-at-2026-26r4186002001',
+        subtitle: 'El hervidero de Málaga y la Costa del Sol',
+        analysis: 'El potente sector tecnológico asentado asegura inquilinos premium constantes. Ganar un expediente puro en Málaga exige un cañón financiero serio, puesto que los fondos internacionales barren el piso. Sin embargo, embargos puramente administrativos de la AEAT permiten lograr joyas limpias registralmente por un tercio de su valor. En el nicho prime, reventar el precio de un inmueble embargado de 600.000€ hasta los 350.000€ es donde los family offices amasan fortunas.',
+        risks: 'Asumir mediante la "Afección Real" los impagos de comunidad en urbanizaciones blindadas suele implicar desembolsos brutales de cinco cifras nada más tomar posesión.',
+        investorProfile: 'Institucional o Retail cualificado. Capital enfocado a refugiar valor real para luchar contra inflaciones estancadas esquivando activos convencionales frágiles.'
+      },
+      {
+        slug: 'subasta-sub-ja-2026-259191',
+        subtitle: 'Periferias de Valencia capital: Conexión máxima',
+        analysis: 'Para el particular medio que se espanta de Málaga, las áreas como Oliva o Gandía en Valencia siguen siendo asequibles. El fenómeno radica en adjudicarse apartamentos al precio histórico de pueblos de la España vaciada, pero manteniendo una presión habitacional propia de metrópoli mediterránea conectada a la capital del Turia.',
+        risks: 'Ocupaciones conflictivas o precario vacacional enquistado. El Juzgado tarda lo mismo en firmar el desalojo forzoso si fallas la investigación de preexistentes (con contratos previos ficticios) lo cual detendrá tus llaves en pleno verano.',
+        investorProfile: 'Particular conservador en fase de creación paulatina de riqueza. Ideal rentas que se autoliquidan evitando hipotecas cruzadas.'
+      }
+    ],
+    sources: [
+      { name: "Consejo General del Poder Judicial - Estadística Hipotecaria y BOE", url: "https://www.poderjudicial.es/" },
+      { name: "INE - Indicadores Hoteleros y de Vivienda Turística", url: "https://www.ine.es/" }
+    ],
+    conclusion: 'Este éxodo silente hacia el litoral para recoger los frutos caídos del BOE y la AEAT no responde a una especulación estacional, sino a una reasignación financiera puramente matemática donde el dinero viaja buscando seguridad y retornos sin techo regulatorio.\n\nAdjudicarse una subasta en la Comunidad Valenciana o en la Costa del Sol exige lidiar con escollos. No pujas contra tu cuñado, pujas contra especialistas armados de Certificaciones de Cargas. La recompensa es un patrimonio que generará alquileres altos mientras duermes. La penalización si firmas sin calcular es la insolvencia. Usa nuestra calculadora de viabilidad, valora los costes extrajudiciales y blinda siempre tu límite seguro antes de lanzarte a participar.',
+    hidePreAuctionCTA: false
+  },
+  'cargas-ocultas-subastas-boe-peligros': {
+    id: 'cargas-ocultas-subastas-boe-peligros',
+    title: 'El peligro invisible del BOE: 3 cargas ocultas que arruinan al inversor novato',
+    intro: 'El portal de subastas del BOE proyecta una ilusión seductora: adjudicarte pisos con grandes descuentos sobre el mercado.\n\nSin embargo, la realidad de las ejecuciones hipotecarias y embargos es compleja. Detrás de ese valor de remate aparentemente imbatible, frecuentemente se camufla un ecosistema de compromisos financieros heredados que el postor debe asumir íntegramente.\n\nEn un momento de euforia inversora, la falta de diligencia a la hora de investigar cargas pre-existentes está provocando estragos patrimoniales.\n\nDesgranamos los tres "agujeros negros" financieros y jurídicos más letales que no figuran explícitamente en el BOE y que destruyen la rentabilidad si no se detectan a tiempo.',
+    publishDate: new Date().toISOString().split('T')[0],
+    image: 'https://images.unsplash.com/photo-1628151015610-d02bcbd0a22a?auto=format&fit=crop&q=80&w=1200',
+    keyPoints: [
+      "La afección real de la Comunidad de Propietarios te obliga a pagar deudas de años anteriores.",
+      "Ayuntamientos y el IBI: la administración goza de preferencia de cobro que hereda el nuevo titular.",
+      "Arrendamientos fraudulentos: ocupaciones camufladas bajo contratos falsos que bloquean la vivienda años.",
+      "Rentabilidad versus riesgo: el estudio previo es el único escudo real en el mercado off-market."
+    ],
+    editorialSections: [
+      {
+        subtitle: '1. Afección Real y derramas no pagadas',
+        content: 'El error principal de quien comienza es creer que, al adjudicarse la propiedad judicialmente, esta se entrega limpia. Nada más lejos de la realidad.\n\nLa Ley de Propiedad Horizontal impone la <strong class="font-bold text-slate-900">afección real</strong>. Quien compra la vivienda asume forzosamente el pago de las cuotas impagadas del año en curso y de los tres años naturales anteriores. En comunidades con cuotas altas o derramas pendientes graves, esto puede suponer vaciar la liquidez del inversor en las primeras semanas.'
+      },
+      {
+        subtitle: '2. IBI y fiscalidad encubierta',
+        content: 'De forma idéntica, las deudas tributarias locales despliegan su propia trampa legal.\n\nLógicamente, el Ayuntamiento tiene derecho de preferencia sobre el inmueble para cobrar el <a href="/guias-subastas" class="text-brand-600 underline font-medium">Impuesto sobre Bienes Inmuebles (IBI)</a> impagado. Descuidar este estudio en las arcas municipales y no descontar esta potencial deuda de tu margen de viabilidad es un error letal para las rentabilidades proyectadas.'
+      },
+      {
+        subtitle: '3. Inquilinos fantasma y precario blindado',
+        content: 'El mayor peligro no siempre es directo sobre tu caja, sino sobre los tiempos. Nos referimos a las cargas humanas.\n\nUn escenario de riesgo es que el deudor original, antes de perder el inmueble, articule un contrato de alquiler ficticio para un familiar por décadas con una renta mínima. Hasta que desmontes jurídicamente ese engaño ante los tribunales civiles, podrías quedar inhabilitado de usar, vender o rentabilizar tu propiedad adquirida.'
+      }
+    ],
+    conclusion: 'Participar en este mercado es altamente lucrativo para encontrar activos refugio, pero exige pericia.\n\nLa rentabilidad se diseña al leer los Edictos y el Registro, y se ejecuta en la puja. Acudir sin calcular el impacto íntegro de las posibles deudas ocultas es temerario. Estudia en profundidad y apóyate en <a href="/subastas-recientes" class="text-brand-600 underline font-medium">subastas recientes</a> analizadas antes de comprometer tu capital.',
+    hidePreAuctionCTA: true
   }
 };

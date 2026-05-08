@@ -8,7 +8,6 @@ import { generateEditorialArticle, shouldGenerateDiscoverArticle } from '../util
 import { normalizeProvince, normalizeCity, normalizePropertyType } from '../utils/auctionNormalizer';
 import { calculateDiscount } from '../utils/auctionHelpers';
 import { ShareButtons } from './ShareButtons';
-import { AuctionCard } from './AuctionCard';
 import { Helmet } from 'react-helmet';
 
 const DiscoverAuctionArticle: React.FC = () => {
@@ -67,13 +66,6 @@ const DiscoverAuctionArticle: React.FC = () => {
   }, [auction, article, slug]);
 
   useEffect(() => {
-    if (article) {
-      document.title = `${article.title} | Activos Off-Market`;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', article.excerpt);
-      }
-    }
     window.scrollTo(0, 0);
   }, [article]);
 
@@ -167,9 +159,11 @@ const DiscoverAuctionArticle: React.FC = () => {
       const cardTitle = cardTitles[slug ? slug.length % cardTitles.length : 0];
 
       return (
-        <div className="my-10 not-prose">
-          <p className="text-xs font-medium text-slate-500 mb-1 text-center">{cardTitle}</p>
-          <AuctionCard slug={slug || ''} data={auction} />
+        <div className="my-10 not-prose border-y border-slate-100 py-6 text-center">
+          <p className="text-xs font-medium text-slate-500 mb-2">{cardTitle}</p>
+          <Link to={`/subasta/${slug}`} className="text-brand-600 font-bold hover:underline text-lg">
+            Ver expediente oficial: {auction.propertyType} en {auction.city || auction.province} 
+          </Link>
         </div>
       );
     }
@@ -230,11 +224,23 @@ const DiscoverAuctionArticle: React.FC = () => {
   return (
     <>
       <Helmet>
-        {!isResultPage && <meta name="robots" content="max-image-preview:large" />}
+        <title>{article.title} | Activos Off-Market</title>
+        <meta name="description" content={article.excerpt} />
+        {!isResultPage && <meta name="robots" content="index, follow, max-image-preview:large" />}
+        {isResultPage && <meta name="robots" content="noindex, follow" />}
+        <link rel="canonical" href={canonicalUrl} />
+        <meta property="og:title" content={article.title} />
+        <meta property="og:description" content={article.excerpt} />
+        <meta property="og:image" content={imageUrl} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={article.title} />
+        <meta name="twitter:description" content={article.excerpt} />
+        <meta name="twitter:image" content={imageUrl} />
       </Helmet>
+      
       <link rel="preload" as="image" href={imageUrl} />
-      <link rel="canonical" href={canonicalUrl} />
-      {isResultPage && <meta name="robots" content="noindex, follow" />}
       
       {jsonLd && (
         <script type="application/ld+json">

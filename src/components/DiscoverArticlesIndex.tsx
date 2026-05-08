@@ -12,17 +12,12 @@ import DiscoverSingleAuctionArticle from './DiscoverSingleAuctionArticle';
 import { DISCOVER_REPORTS } from '../data/discoverReports';
 import { ROUTES } from '@/constants/routes';
 import { BookOpen } from 'lucide-react';
+import { Helmet } from 'react-helmet';
 
 import { getAllowedProvincesForToday } from '../utils/discoverLimits';
 
 const DiscoverArticlesIndex: React.FC = () => {
-  useEffect(() => {
-    document.title = "Últimas noticias y análisis de subastas en España | Activos Off-Market";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', 'Análisis de mercado, oportunidades de inversión y últimas horas sobre subastas judiciales y administrativas por provincia en España.');
-    }
-  }, []);
+  // Document title handled by Helmet below
 
   const { allArticles } = useMemo(() => {
     // 1. Get allowed provinces for today
@@ -140,7 +135,20 @@ const DiscoverArticlesIndex: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20 px-6 pt-10">
+    <>
+      <Helmet>
+        <title>Últimas noticias y análisis de subastas en España | Activos Off-Market</title>
+        <meta name="description" content="Análisis de mercado, oportunidades de inversión y últimas horas sobre subastas judiciales y administrativas por provincia en España." />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <link rel="canonical" href="https://activosoffmarket.es/noticias-subastas" />
+        <meta property="og:title" content="Últimas noticias y análisis de subastas en España | Activos Off-Market" />
+        <meta property="og:description" content="Análisis de mercado, oportunidades de inversión y últimas horas sobre subastas judiciales y administrativas por provincia en España." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Últimas noticias y análisis de subastas en España | Activos Off-Market" />
+        <meta name="twitter:description" content="Análisis de mercado, oportunidades de inversión y últimas horas sobre subastas judiciales y administrativas por provincia en España." />
+      </Helmet>
+      <div className="bg-slate-50 min-h-screen pb-20 px-6 pt-10">
       {allArticles.length > 0 && (
         <link rel="preload" as="image" href={allArticles[0].imageUrl} />
       )}
@@ -271,6 +279,7 @@ const DiscoverArticlesIndex: React.FC = () => {
         <TelegramCTA variant="banner" />
       </div>
     </div>
+    </>
   );
 };
 

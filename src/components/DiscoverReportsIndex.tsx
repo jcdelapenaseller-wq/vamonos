@@ -1,18 +1,13 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, ChevronRight, BookOpen, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Helmet } from 'react-helmet';
 import { DISCOVER_REPORTS } from '../data/discoverReports';
 import TelegramCTA from './TelegramCTA';
 import { ROUTES } from '@/constants/routes';
 
 const DiscoverReportsIndex: React.FC = () => {
-  useEffect(() => {
-    document.title = "Reportajes y Análisis de Subastas en Profundidad | Activos Off-Market";
-    const metaDesc = document.querySelector('meta[name="description"]');
-    if (metaDesc) {
-      metaDesc.setAttribute('content', 'Investigaciones exclusivas, análisis de rentabilidad y guías avanzadas sobre el mercado de subastas judiciales y administrativas en España.');
-    }
-  }, []);
+  // Document title handled by Helmet below
 
   const sortedReports = Object.entries(DISCOVER_REPORTS).map(([slug, report]) => ({
     ...report,
@@ -25,7 +20,20 @@ const DiscoverReportsIndex: React.FC = () => {
   const gridReports = sortedReports.slice(1);
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-20 px-6 pt-10">
+    <>
+      <Helmet>
+        <title>Reportajes y Análisis de Subastas en Profundidad | Activos Off-Market</title>
+        <meta name="description" content="Investigaciones exclusivas, análisis de rentabilidad y guías avanzadas sobre el mercado de subastas judiciales y administrativas en España." />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <link rel="canonical" href="https://activosoffmarket.es/noticias-subastas/reportajes" />
+        <meta property="og:title" content="Reportajes y Análisis de Subastas en Profundidad | Activos Off-Market" />
+        <meta property="og:description" content="Investigaciones exclusivas, análisis de rentabilidad y guías avanzadas sobre el mercado de subastas judiciales y administrativas en España." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Reportajes y Análisis de Subastas en Profundidad | Activos Off-Market" />
+        <meta name="twitter:description" content="Investigaciones exclusivas, análisis de rentabilidad y guías avanzadas sobre el mercado de subastas judiciales y administrativas en España." />
+      </Helmet>
+      <div className="bg-slate-50 min-h-screen pb-20 px-6 pt-10">
       {featuredReport && (
         <link rel="preload" as="image" href={featuredReport.image} />
       )}
@@ -151,6 +159,7 @@ const DiscoverReportsIndex: React.FC = () => {
         <TelegramCTA variant="banner" />
       </div>
     </div>
+    </>
   );
 };
 

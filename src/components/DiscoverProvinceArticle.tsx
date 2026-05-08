@@ -8,12 +8,11 @@ import { ROUTES } from '@/constants/routes';
 import { isAuctionFinished, sortActiveFirst } from '../utils/auctionHelpers';
 import { normalizeProvince, normalizePropertyType, normalizeLocationLabel } from '../utils/auctionNormalizer';
 import { trackConversion } from '../utils/tracking';
-import { AuctionCard } from './AuctionCard';
-import DiscoverSingleAuctionArticle from './DiscoverSingleAuctionArticle';
 import { generateEditorialArticle, shouldGenerateDiscoverArticle } from '../utils/editorialGenerator';
 import PremiumValueBlock from './PremiumValueBlock';
 import { ShareButtons } from './ShareButtons';
 import { getImageForPropertyType } from '../constants/auctionImages';
+import { Helmet } from 'react-helmet';
 
 import { getAllowedProvincesForToday, isProvinceEligible, isHighQualityProvinceArticle } from '../utils/discoverLimits';
 
@@ -427,29 +426,8 @@ const DiscoverProvinceArticle: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (provinceName) {
-      document.title = `${content.title} | Activos Off-Market`;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) {
-        metaDesc.setAttribute('content', content.meta);
-      }
-      
-      // SEO Quality Control
-      let robotsMeta = document.querySelector('meta[name="robots"]');
-      if (!robotsMeta) {
-        robotsMeta = document.createElement('meta');
-        robotsMeta.setAttribute('name', 'robots');
-        document.head.appendChild(robotsMeta);
-      }
-      
-      if (!isHighQuality) {
-        robotsMeta.setAttribute('content', 'noindex, follow');
-      } else {
-        robotsMeta.setAttribute('content', 'index, follow');
-      }
-    }
     window.scrollTo(0, 0);
-  }, [provinceName, content, isHighQuality]);
+  }, [provinceName]);
 
   const renderFormattedText = (text: string, type: 'intro' | 'body' | 'conclusion' = 'body') => {
     if (!text) return null;
@@ -496,7 +474,25 @@ const DiscoverProvinceArticle: React.FC = () => {
 
   return (
     <>
-      <link rel="canonical" href={`https://activosoffmarket.es/noticias-subastas/provincia/${normalizedProvinceParam.replace(/\s+/g, '-')}`} />
+      <Helmet>
+        <title>{content.title} | Activos Off-Market</title>
+        <meta name="description" content={content.meta} />
+        <link rel="canonical" href={`https://activosoffmarket.es/noticias-subastas/provincia/${normalizedProvinceParam.replace(/\s+/g, '-')}`} />
+        {isHighQuality ? (
+          <meta name="robots" content="index, follow, max-image-preview:large" />
+        ) : (
+          <meta name="robots" content="noindex, follow" />
+        )}
+        <meta property="og:title" content={content.title} />
+        <meta property="og:description" content={content.meta} />
+        <meta property="og:image" content={content.image} />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={content.title} />
+        <meta name="twitter:description" content={content.meta} />
+        <meta name="twitter:image" content={content.image} />
+      </Helmet>
+      
       {content && <link rel="preload" as="image" href={content.image} />}
       
       {jsonLd && (
@@ -588,30 +584,6 @@ const DiscoverProvinceArticle: React.FC = () => {
             <div className="mb-4">
               {renderFormattedText(content.intro, 'intro')}
             </div>
-
-            <div className="border-t border-slate-100 my-3" />
-
-            {/* Tarjeta destacada arriba */}
-            {featuredOpportunity && (
-              <div className="mb-6 not-prose">
-                <p className="text-xs mb-1 text-slate-500 font-medium">Oportunidad destacada en esta provincia</p>
-                <div className="max-w-md">
-                  {shouldGenerateDiscoverArticle(featuredOpportunity[1]) ? (
-                    <DiscoverSingleAuctionArticle 
-                      auction={featuredOpportunity[1]} 
-                      slug={featuredOpportunity[0]} 
-                      article={generateEditorialArticle(featuredOpportunity[0], featuredOpportunity[1])!}
-                      imageUrl={getImageForPropertyType(featuredOpportunity[1].propertyType, featuredOpportunity[0])}
-                    />
-                  ) : (
-                    <AuctionCard 
-                      slug={featuredOpportunity[0]} 
-                      data={featuredOpportunity[1]} 
-                    />
-                  )}
-                </div>
-              </div>
-            )}
 
             <div className="border-t border-slate-100 my-3" />
 
@@ -741,34 +713,21 @@ const DiscoverProvinceArticle: React.FC = () => {
 
             {/* Últimas subastas adjudicadas */}
             {recentlyAdjudicated.length > 0 && (
-              <div className="my-10 not-prose bg-emerald-50/30 border border-emerald-100 rounded-3xl p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="bg-emerald-100 p-2 rounded-lg text-emerald-600">
-                    <Star size={20} className="fill-emerald-500" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-emerald-900">Últimas subastas adjudicadas</h3>
-                    <p className="text-xs text-emerald-700 font-medium">Resultados reales detectados en {provinceName}</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="my-10 not-prose border-t border-slate-100 pt-8">
+                <h3 className="text-xl font-serif font-bold text-slate-900 mb-4">Últimas subastas adjudicadas en {provinceName}</h3>
+                <ul className="list-disc pl-6 space-y-2">
                   {recentlyAdjudicated.map(([id, data]) => (
-                    <Link 
-                      key={id} 
-                      to={ROUTES.NOTICIAS_SUBASTAS_RESULT.replace(':slug', id)}
-                      className="bg-white border border-emerald-100 rounded-xl p-4 hover:shadow-md transition-all group"
-                    >
-                      <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">Adjudicada</p>
-                      <h4 className="text-sm font-bold text-slate-900 mb-2 line-clamp-2 group-hover:text-brand-600 transition-colors">
-                        {normalizePropertyType(data.propertyType)} en {data.city || data.province}
-                      </h4>
-                      <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50">
-                        <span className="text-xs font-bold text-emerald-700">{data.finalPrice?.toLocaleString('es-ES')} €</span>
-                        <ArrowRight size={12} className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </Link>
+                    <li key={id}>
+                      <Link 
+                        to={ROUTES.NOTICIAS_SUBASTAS_RESULT.replace(':slug', id)}
+                        className="text-brand-600 hover:underline"
+                      >
+                        {normalizePropertyType(data.propertyType)} en {data.city || data.province} 
+                        {data.finalPrice && ` adjudicada por ${data.finalPrice.toLocaleString('es-ES')} €`}
+                      </Link>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             )}
 
@@ -815,41 +774,23 @@ const DiscoverProvinceArticle: React.FC = () => {
 
             {/* Casos reales analizados */}
             {topExamples.length > 0 && (
-              <div className="my-10 not-prose bg-white border border-slate-200 rounded-3xl p-6 md:p-8 shadow-sm">
-                <div className="flex items-center gap-2 mb-6">
-                  <div className="bg-brand-100 p-2 rounded-lg text-brand-600">
-                    <TrendingUp size={20} className="text-brand-600" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-slate-900">Casos reales analizados en {provinceName}</h3>
-                    <p className="text-xs text-slate-500 font-medium">Extraídos del BOE y revisados técnicamente</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {topExamples.filter(example => example.id !== featuredOpportunity?.[0]).map((example) => {
+              <div className="my-10 not-prose border-t border-slate-100 pt-8">
+                <h3 className="text-xl font-serif font-bold text-slate-900 mb-4">Análisis técnicos elaborados</h3>
+                <ul className="list-disc pl-6 space-y-2">
+                  {topExamples.map((example) => {
                     const isNews = shouldGenerateDiscoverArticle(example.data);
-                    if (isNews) {
-                      const articleInfo = generateEditorialArticle(example.id, example.data);
-                      if (articleInfo) {
-                        return (
-                          <div key={example.id} className="h-full">
-                            <DiscoverSingleAuctionArticle 
-                              auction={example.data} 
-                              slug={example.id} 
-                              article={articleInfo}
-                              imageUrl={getImageForPropertyType(example.data.propertyType, example.id)}
-                            />
-                          </div>
-                        );
-                      }
-                    }
+                    const linkUrl = isNews 
+                      ? ROUTES.NOTICIAS_SUBASTAS_ANALYSIS.replace(':slug', example.id)
+                      : `/subasta/${example.id}`;
                     return (
-                      <div key={example.id} className="h-full">
-                        <AuctionCard slug={example.id} data={example.data} />
-                      </div>
+                      <li key={example.id}>
+                         <Link to={linkUrl} className="text-brand-600 hover:underline">
+                           Expediente: {normalizePropertyType(example.data.propertyType)} en {example.data.city || example.data.province}
+                         </Link>
+                      </li>
                     );
                   })}
-                </div>
+                </ul>
               </div>
             )}
 

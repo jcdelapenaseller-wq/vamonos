@@ -70,12 +70,26 @@ const LoginPage: React.FC = () => {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
       
-      // Ensure user document exists
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        plan: "free",
-        createdAt: serverTimestamp()
-      }, { merge: true });
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          id: user.uid,
+          email: user.email || '',
+          name: user.displayName || '',
+          plan: 'free',
+          analysisUsed: 0,
+          favorites: [],
+          createdAt: serverTimestamp(),
+          lastAnalysisReset: serverTimestamp(),
+          provider: 'google'
+        });
+      } else {
+        await setDoc(userRef, {
+          lastActiveAt: serverTimestamp()
+        }, { merge: true });
+      }
     } catch (e) {
       console.error('Error logging in with popup:', e);
       if (isMounted.current) setIsAuthenticating(false);
@@ -92,12 +106,26 @@ const LoginPage: React.FC = () => {
       const result = await signInWithEmailAndPassword(auth, email, password);
       const user = result.user;
 
-      // Ensure user document exists
-      await setDoc(doc(db, "users", user.uid), {
-        email: user.email,
-        plan: "free",
-        createdAt: serverTimestamp()
-      }, { merge: true });
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      
+      if (!userSnap.exists()) {
+        await setDoc(userRef, {
+          id: user.uid,
+          email: user.email || '',
+          name: user.email?.split('@')[0] || '',
+          plan: 'free',
+          analysisUsed: 0,
+          favorites: [],
+          createdAt: serverTimestamp(),
+          lastAnalysisReset: serverTimestamp(),
+          provider: 'email'
+        });
+      } else {
+        await setDoc(userRef, {
+          lastActiveAt: serverTimestamp()
+        }, { merge: true });
+      }
     } catch (error: any) {
       console.error('Error logging in with email:', error.code, error.message);
       if (!isMounted.current) return;

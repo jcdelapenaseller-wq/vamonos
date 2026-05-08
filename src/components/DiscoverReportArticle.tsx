@@ -4,12 +4,12 @@ import { AUCTIONS } from '../data/auctions';
 import { DISCOVER_REPORTS } from '../data/discoverReports';
 import { ROUTES } from '@/constants/routes';
 import { ChevronRight, ShieldCheck, Calculator, ArrowRight, MapPin, Building2 } from 'lucide-react';
-import { AuctionCard } from './AuctionCard';
 import { ShareButtons } from './ShareButtons';
 import Header from './Header';
 import Footer from './Footer';
 import TelegramCTA from './TelegramCTA';
 import { normalizeCity, normalizePropertyType, normalizeProvince } from '../utils/auctionNormalizer';
+import { Helmet } from 'react-helmet';
 
 const getRelativeTime = (dateString: string) => {
   const date = new Date(dateString);
@@ -130,20 +130,30 @@ const DiscoverReportArticle: React.FC = () => {
   }, [report, reportAuctions, cleanDescription]);
 
   useEffect(() => {
-    if (report) {
-      document.title = `${report.title} | Activos Off-Market`;
-      const metaDesc = document.querySelector('meta[name="description"]');
-      if (metaDesc) metaDesc.setAttribute('content', cleanDescription);
-      window.scrollTo(0, 0);
-    }
-  }, [report, cleanDescription]);
+    window.scrollTo(0, 0);
+  }, [report]);
 
   if (!report) return <Navigate to={ROUTES.HOME} replace />;
 
   return (
     <>
+      <Helmet>
+        <title>{report.title} | Activos Off-Market</title>
+        <meta name="description" content={cleanDescription} />
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <link rel="canonical" href={`${window.location.origin}/analisis/${slug}`} />
+        <meta property="og:title" content={report.title} />
+        <meta property="og:description" content={cleanDescription} />
+        <meta property="og:image" content={report.image} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={`${window.location.origin}/analisis/${slug}`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={report.title} />
+        <meta name="twitter:description" content={cleanDescription} />
+        <meta name="twitter:image" content={report.image} />
+      </Helmet>
+      
       <link rel="preload" as="image" href={report.image} />
-      <link rel="canonical" href={`${window.location.origin}/analisis/${slug}`} />
       
       {jsonLd && (
         <script type="application/ld+json">
@@ -341,12 +351,11 @@ const DiscoverReportArticle: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="mt-12">
-                    <h3 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                      <Building2 className="text-brand-600" size={24} />
-                      Ficha Técnica del Expediente
-                    </h3>
-                    <AuctionCard slug={item.detail.slug} data={item.data} />
+                  <div className="mt-12 not-prose border-y border-slate-100 py-6 text-center">
+                    <p className="text-xs font-medium text-slate-500 mb-2">Consulta la ficha oficial de este activo:</p>
+                    <Link to={`/subasta/${item.detail.slug}`} className="text-brand-600 font-bold hover:underline text-lg">
+                      Ver expediente oficial
+                    </Link>
                   </div>
                 </section>
               );
