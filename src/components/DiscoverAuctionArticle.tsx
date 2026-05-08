@@ -162,7 +162,7 @@ const DiscoverAuctionArticle: React.FC = () => {
         <div className="my-10 not-prose border-y border-slate-100 py-6 text-center">
           <p className="text-xs font-medium text-slate-500 mb-2">{cardTitle}</p>
           <Link to={`/subasta/${slug}`} className="text-brand-600 font-bold hover:underline text-lg">
-            Ver expediente oficial: {auction.propertyType} en {auction.city || auction.province} 
+            Ver expediente oficial: {auction.propertyType} {auction.city && auction.city !== 'No Consta' ? `en ${auction.city}` : (auction.province && auction.province !== 'No Consta' ? `en ${auction.province}` : '')}
           </Link>
         </div>
       );
@@ -288,14 +288,14 @@ const DiscoverAuctionArticle: React.FC = () => {
             <ShareButtons 
               title={article.title} 
               className="mb-8 -mt-2" 
-              province={auction.city || auction.province || 'España'}
+              province={auction.city && auction.city !== 'No Consta' ? auction.city : (auction.province && auction.province !== 'No Consta' ? auction.province : 'España')}
               origin="discover-auction"
             />
 
             <figure className="mb-10 -mx-6 md:-mx-10 relative group">
               <img 
                 src={imageUrl} 
-                alt={`Análisis de subasta en ${auction.city || auction.province}`}
+                alt={`Análisis de subasta en ${auction.city && auction.city !== 'No Consta' ? auction.city : (auction.province && auction.province !== 'No Consta' ? auction.province : 'España')}`}
                 className="w-full h-[300px] md:h-[450px] object-cover md:rounded-none"
                 referrerPolicy="no-referrer"
                 width="1200"
@@ -306,7 +306,7 @@ const DiscoverAuctionArticle: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-40"></div>
               <figcaption className="absolute bottom-6 left-6 md:left-10 text-white">
                 <p className="text-[10px] uppercase tracking-[0.2em] font-bold mb-1 opacity-80">Ficha Técnica de Inversión</p>
-                <p className="text-lg md:text-xl font-serif italic">{auction.propertyType} en {auction.city || auction.province}</p>
+                <p className="text-lg md:text-xl font-serif italic">{auction.propertyType} {auction.city && auction.city !== 'No Consta' ? `en ${auction.city}` : (auction.province && auction.province !== 'No Consta' ? `en ${auction.province}` : '')}</p>
               </figcaption>
             </figure>
             
@@ -398,7 +398,7 @@ const DiscoverAuctionArticle: React.FC = () => {
                     <MapPin className="text-slate-400 mt-1 shrink-0" size={18} />
                     <div>
                       <p className="text-sm text-slate-500 font-medium">Ubicación</p>
-                      <p className="font-bold text-slate-900">{auction.city || auction.province}</p>
+                      <p className="font-bold text-slate-900">{auction.city && auction.city !== 'No Consta' ? auction.city : (auction.province && auction.province !== 'No Consta' ? auction.province : 'España')}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -487,7 +487,7 @@ const DiscoverAuctionArticle: React.FC = () => {
                       ¿Quieres recibir alertas similares?
                     </h3>
                     <p className="text-[11px] text-slate-500 font-medium">
-                      Te avisamos por WhatsApp cuando detectamos oportunidades en {auction.city || auction.province}.
+                      Te avisamos por WhatsApp cuando detectamos oportunidades {auction.city && auction.city !== 'No Consta' ? `en ${auction.city}` : (auction.province && auction.province !== 'No Consta' ? `en ${auction.province}` : '')}.
                     </p>
                   </div>
 

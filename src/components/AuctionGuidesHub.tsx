@@ -72,83 +72,75 @@ const guideSections = [
 
 const AuctionGuidesHub: React.FC = () => {
   useEffect(() => {
-    const faqSchema = {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "¿Qué significa que una subasta sea judicial?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Es un proceso de venta forzosa ordenado por un juzgado para pagar una deuda. A diferencia de las subastas de la AEAT, las judiciales suelen tener plazos más largos pero ofrecen mayores garantías procesales si cuentas con un buen análisis previo."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Se puede visitar un piso de subasta?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Legalmente no hay obligación de permitir visitas, ya que el inmueble suele estar en manos del deudor. Sin embargo, existen protocolos y estrategias para evaluar el estado real del activo y en algunos casos contactar con la posesión para facilitar una salida negociada."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Qué cargas se heredan al adjudicarse una subasta?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Como regla general, el adjudicatario hereda las cargas anteriores a la que motiva la subasta y las deudas preferentes (Comunidad de Propietarios e IBI de los años correspondientes). Las cargas posteriores suelen cancelarse mediante el mandamiento de cancelación de cargas."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "¿Cuánto tiempo tarda la toma de posesión?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "El plazo varía según el juzgado y la situación de la vivienda (vacía u ocupada). Puede oscilar entre 4 meses y más de un año. Es fundamental incluir este tiempo en tu cálculo de rentabilidad financiera."
-          }
-        }
-      ]
-    };
+    document.title = "Guías de Subastas Judiciales en España | Activos Off-Market";
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', "Aprende paso a paso cómo invertir en subastas judiciales y de la AEAT. Estrategias, riesgos, y funcionamiento técnico del BOE, sin humo.");
+    }
 
-    const itemListSchema = {
+    const canonicalUrl = 'https://activosoffmarket.es/guias-subastas';
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonical);
+    }
+    canonical.setAttribute('href', canonicalUrl);
+
+    const schemaData = {
       "@context": "https://schema.org",
-      "@type": "ItemList",
-      "itemListElement": [
+      "@graph": [
         {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Cómo ganar tu primera subasta",
-          "url": `https://activosoffmarket.es${ROUTES.COMO_COMPRAR}`
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Inicio",
+              "item": "https://activosoffmarket.es/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Guías",
+              "item": canonicalUrl
+            }
+          ]
         },
         {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Guía de Análisis Experto",
-          "url": `https://activosoffmarket.es${ROUTES.ANALIZAR_SUBASTA}`
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": "Subastas en Madrid",
-          "url": `https://activosoffmarket.es${ROUTES.MADRID}`
-        },
-        {
-          "@type": "ListItem",
-          "position": 4,
-          "name": "Subastas en Barcelona",
-          "url": `https://activosoffmarket.es${ROUTES.BARCELONA}`
+          "@type": "CollectionPage",
+          "headline": "Guías de Subastas Judiciales en España",
+          "description": "Aprende paso a paso cómo invertir en subastas judiciales y de la AEAT.",
+          "mainEntity": {
+            "@type": "ItemList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "url": `https://activosoffmarket.es${ROUTES.COMO_COMPRAR}`,
+                "name": "Cómo ganar tu primera subasta"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "url": `https://activosoffmarket.es${ROUTES.ANALIZAR_SUBASTA}`,
+                "name": "Guía de Análisis Experto"
+              }
+            ]
+          }
         }
       ]
     };
 
     const script = document.createElement('script');
     script.type = 'application/ld+json';
-    script.innerHTML = JSON.stringify([faqSchema, itemListSchema]);
+    script.text = JSON.stringify(schemaData);
     document.head.appendChild(script);
 
     return () => {
-      document.head.removeChild(script);
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
     };
   }, []);
 
@@ -173,62 +165,32 @@ const AuctionGuidesHub: React.FC = () => {
               desde el análisis de cargas hasta la estrategia de puja máxima.
             </p>
 
-            {/* Expanded SEO Intro Section */}
-            <div className="max-w-4xl mx-auto text-left py-10 px-8 bg-white rounded-3xl border border-slate-100 shadow-sm mb-12">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 rounded-lg bg-brand-50">
-                  <ShieldCheck className="w-6 h-6 text-brand-600" />
+              {/* Expanded SEO Intro Section */}
+              <div className="max-w-4xl mx-auto text-left py-10 px-8 bg-white rounded-3xl border border-slate-100 shadow-sm mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 rounded-lg bg-brand-50">
+                    <ShieldCheck className="w-6 h-6 text-brand-600" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    Cómo invertir en subastas con seguridad
+                  </h2>
                 </div>
-                <h2 className="text-2xl font-bold text-slate-900">
-                  Guía Maestra de Subastas BOE y Judiciales en España
-                </h2>
-              </div>
-              
-              <div className="prose prose-slate text-slate-600 space-y-4 text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
-                <p>
-                  El acceso a <strong>activos off-market</strong> a través de las subastas del Boletín Oficial del Estado (BOE) se ha consolidado como la vía más rentable para adquirir vivienda en España por debajo de su valor real de mercado. Sin embargo, lo que para muchos es una gran oportunidad de inversión, para el desconocedor puede convertirse en un laberinto legal y financiero.
-                </p>
-                <p>
-                  Nuestra plataforma nace con un objetivo claro: democratizar el acceso a la información técnica y proporcionar <strong>seguridad jurídica</strong> en cada fase de la adjudicación. Participar en una subasta judicial o de la Agencia Tributaria (AEAT) no es simplemente ofrecer la puja más alta; es realizar una auditoría exhaustiva de la certificación de cargas, entender la diferencia entre el valor de subasta y el valor real, y dominar los tiempos procesales que van desde el cierre del portal de subastas hasta la toma de posesión efectiva del inmueble.
-                </p>
-                <p>
-                  En este centro de aprendizaje, hemos estructurado décadas de experiencia en el sector inmobiliario y jurídico para ofrecerte guías paso a paso. Desde cómo gestionar tu primer depósito (consignación del 5%) hasta estrategias avanzadas de rentabilidad y fiscalidad (ITP vs IVA). Aquí aprenderás a detectar "trampas" comunes, como deudas preferentes con la comunidad de propietarios, derechos de retracto o la problemática de las viviendas ocupadas sin título.
-                </p>
                 
-                <div className="mt-8 p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                  <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <ArrowRight className="w-4 h-4 text-brand-600" />
-                    En estas guías aprenderás a:
-                  </h3>
-                  <ul className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-6 text-sm">
-                    <li className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                      <span>Calcular la <strong>puja máxima viable</strong> para asegurar margen real.</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                      <span>Interpretar la certificación de cargas para detectar deudas.</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                      <span>Gestionar depósitos y recuperaciones de capital (consignaciones).</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                      <span>Diferenciar entre subastas hipotecarias, sociales o civiles.</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                      <span>Analizar el impacto de la fiscalidad en el coste total.</span>
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-400" />
-                      <span>Entender el proceso de lanzamiento (toma de posesión).</span>
-                    </li>
-                  </ul>
+                <div className="prose prose-slate text-slate-600 space-y-4 text-left max-w-5xl space-y-6 leading-relaxed prose-p:max-w-3xl prose-headings:max-w-3xl prose-li:max-w-3xl">
+                  <p>
+                    Las <strong>subastas públicas</strong> (judiciales, Seguridad Social o AEAT) son el mecanismo legal donde se liquidan bienes embargados para pagar deudas. Para el inversor particular, supone una entrada directa al mercado de activos <em>off-market</em> con descuentos significativos frente al precio de mercado tradicional.
+                  </p>
+                  <p>
+                    Sin embargo, el potencial de rentabilidad siempre va atado a <strong>riesgos técnicos</strong>. ¿El principal? Las cargas registrales. Al adjudicarte un inmueble, no lo compras "limpio" por defecto. En muchos casos, heredas deudas anteriores (como hipotecas impagadas) o deudas preferentes encubiertas (IBI o cuotas de la comunidad de propietarios). Una lectura superficial de la <a href="/cargas-subasta-judicial" className="text-brand-600 font-medium hover:underline">certificación de cargas</a> puede destruir todo tu margen de beneficio.
+                  </p>
+                  <p>
+                    Además, debes prever el estado físico y jurídico del bien. Muchas de estas viviendas se subastan <strong>ocupadas sin título</strong> o con precaristas, lo que significa que la toma de posesión requerirá un procedimiento de lanzamiento adicional que alargará la maduración de tu inversión entre 6 y 12 meses.
+                  </p>
+                  <p>
+                    <strong>Nuestro enfoque es prudente y matemático.</strong> Antes de consignar el 5% de depósito obligatorio en el Portal del BOE, exige números fríos. Domina el <em>valor de tasación</em>, prevé el pago del Impuesto de Transmisiones Patrimoniales (ITP) correspondiente a tu comunidad, y nunca te dejes llevar por la urgencia. La rentabilidad en subastas no se gana el día de la puja, sino en el análisis previo del expediente.
+                  </p>
                 </div>
               </div>
-            </div>
           </motion.div>
         </div>
       </section>

@@ -722,7 +722,7 @@ const DiscoverProvinceArticle: React.FC = () => {
                         to={ROUTES.NOTICIAS_SUBASTAS_RESULT.replace(':slug', id)}
                         className="text-brand-600 hover:underline"
                       >
-                        {normalizePropertyType(data.propertyType)} en {data.city || data.province} 
+                        {normalizePropertyType(data.propertyType)} {data.city && data.city !== 'No Consta' ? `en ${data.city}` : (data.province && data.province !== 'No Consta' ? `en ${data.province}` : '')}
                         {data.finalPrice && ` adjudicada por ${data.finalPrice.toLocaleString('es-ES')} €`}
                       </Link>
                     </li>
@@ -785,7 +785,7 @@ const DiscoverProvinceArticle: React.FC = () => {
                     return (
                       <li key={example.id}>
                          <Link to={linkUrl} className="text-brand-600 hover:underline">
-                           Expediente: {normalizePropertyType(example.data.propertyType)} en {example.data.city || example.data.province}
+                           Expediente: {normalizePropertyType(example.data.propertyType)} {example.data.city && example.data.city !== 'No Consta' ? `en ${example.data.city}` : (example.data.province && example.data.province !== 'No Consta' ? `en ${example.data.province}` : '')}
                          </Link>
                       </li>
                     );
