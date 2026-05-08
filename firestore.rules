@@ -73,17 +73,25 @@ service cloud.firestore {
     // ===============================================================
 
     function isValidUser(data) {
-      return data.keys().hasAll(['id', 'email', 'name', 'plan', 'createdAt']) &&
-             data.keys().hasOnly(['id', 'email', 'name', 'plan', 'createdAt', 'analysisUsed', 'lastAnalysisReset', 'role', 'provider', 'favorites']) &&
-             data.id == request.auth.uid &&
+      return data.keys().hasAll(['email', 'plan', 'createdAt']) &&
+             data.keys().hasOnly(['id', 'email', 'name', 'plan', 'createdAt', 'analysisUsed', 'lastAnalysisReset', 'role', 'provider', 'favorites', 'lastActiveAt', 'unsubscribeToken', 'stripeCustomerId', 'stripeSubscriptionId', 'stripeStatus', 'stripePriceId', 'cancelAtPeriodEnd', 'fcmToken']) &&
+             (!('id' in data) || data.id == request.auth.uid) &&
              data.email is string && isValidEmail(data.email) &&
-             data.name is string && data.name.size() <= 100 &&
+             (!('name' in data) || (data.name is string && data.name.size() <= 100)) &&
              isValidPlan(data.plan) &&
              data.createdAt is timestamp &&
              (!('analysisUsed' in data) || data.analysisUsed is int) &&
              (!('lastAnalysisReset' in data) || data.lastAnalysisReset is timestamp) &&
              (!('provider' in data) || data.provider is string) &&
-             (!('favorites' in data) || data.favorites is list);
+             (!('favorites' in data) || data.favorites is list) &&
+             (!('lastActiveAt' in data) || data.lastActiveAt is timestamp) &&
+             (!('unsubscribeToken' in data) || data.unsubscribeToken is string) &&
+             (!('stripeCustomerId' in data) || data.stripeCustomerId is string) &&
+             (!('stripeSubscriptionId' in data) || data.stripeSubscriptionId is string) &&
+             (!('stripeStatus' in data) || data.stripeStatus is string) &&
+             (!('stripePriceId' in data) || data.stripePriceId is string) &&
+             (!('cancelAtPeriodEnd' in data) || data.cancelAtPeriodEnd is bool) &&
+             (!('fcmToken' in data) || data.fcmToken is string);
     }
 
     function isValidAlert(data) {
